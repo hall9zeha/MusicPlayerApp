@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.view.adapters.PageCollectionAdapter
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,5 +18,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+    private fun setUpViewPager(){
+        //val viewPagerAdapter= PageCollectionAdapter(this, listOf("HomePlayer", "listPlayer"))
     }
 }
