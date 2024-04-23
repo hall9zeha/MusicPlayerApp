@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "KTMusicPlayer"
 include(":app")
+include(":core")
