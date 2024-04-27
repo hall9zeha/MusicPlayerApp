@@ -8,4 +8,5 @@ package com.barryzeha.ktmusicplayer.view.adapters
  **/
 
 class MusicListAdapter {
+
 }
