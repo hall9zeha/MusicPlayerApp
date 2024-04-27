@@ -44,6 +44,8 @@ class MainPlayerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
         bind.tvSongDescription.setSelected(true)
+        bind.tvSongArtist.setSelected(true)
+        bind.tvSongAlbum.setSelected(true)
     }
     companion object {
         @JvmStatic
