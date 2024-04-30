@@ -12,6 +12,7 @@ activity = "1.8.0"
 constraintlayout = "2.1.4"
 dagger-hilt-version = "2.44"
 room_version = "2.6.1"
+jetbrainsKotlinJvm = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,5 +34,6 @@ dagger-hilt-plugin = {id= "com.google.dagger.hilt.android", version.ref = "dagge
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = {id = "com.google.devtools.ksp", version.ref = "ksp-version"}
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 
 
