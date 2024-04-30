@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.dagger.hilt.plugin)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -25,7 +27,14 @@ android {
     }
 }
 dependencies{
+    // Room
+    ksp(libs.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    // Dagger hilt
+    ksp(libs.dagger.hilt.compiler)
 
+    implementation(libs.dagger.hilt)
     // Modules
     implementation(project(":core"))
     implementation(project(":data"))

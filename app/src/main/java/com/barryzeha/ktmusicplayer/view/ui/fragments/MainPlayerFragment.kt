@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
+@AndroidEntryPoint
 class MainPlayerFragment : Fragment() {
 
     private var param1: String? = null

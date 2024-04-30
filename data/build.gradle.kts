@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.dagger.hilt.plugin)
     alias(libs.plugins.ksp)
 
 }
@@ -11,6 +12,12 @@ android {
     defaultConfig {
         minSdk = 24
 
+    }
+    packaging{
+        resources {
+            excludes += "META-INF/gradle/incremental.annotation.processors"
+
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -23,6 +30,13 @@ android {
 
 dependencies{
 
+    // Room
+    ksp(libs.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    // Dagger hilt
+    ksp(libs.dagger.hilt.compiler)
+    implementation(libs.dagger.hilt)
     // Modules
     implementation(project(":core"))
 }

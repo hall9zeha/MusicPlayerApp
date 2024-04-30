@@ -2,7 +2,11 @@ package com.barryzeha.di
 
 import android.app.Application
 import androidx.room.Room
+
 import com.barryzeha.data.database.SongDatabase
+import com.barryzeha.data.repository.MainRepository
+import com.barryzeha.data.repository.MainRepositoryImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,7 +20,7 @@ import javax.inject.Singleton
  * Copyright (c)  All rights reserved.
  **/
 
-private const val DATABASE_NAME = "MusicDatabase"
+private const val DATABASE_NAME = "SongDatabase"
 @Module
 @InstallIn(SingletonComponent::class)
 class MainModule {
@@ -28,4 +32,10 @@ class MainModule {
         .fallbackToDestructiveMigration()
         .build()
 
+}
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule{
+    @Binds
+    abstract fun mainRepositoryProvides (repository: MainRepositoryImpl):MainRepository
 }

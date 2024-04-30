@@ -8,7 +8,9 @@ import androidx.core.view.WindowInsetsCompat
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var bind:ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {

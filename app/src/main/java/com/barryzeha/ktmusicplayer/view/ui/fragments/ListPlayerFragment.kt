@@ -5,17 +5,23 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.viewModels
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
+import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
+@AndroidEntryPoint
 class ListPlayerFragment : Fragment() {
 
     private var param1: String? = null
     private var param2: String? = null
     private var _bind:FragmentListPlayerBinding? = null
+    private val mainViewModel:MainViewModel by viewModels()
     private val bind:FragmentListPlayerBinding get() = _bind!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +45,15 @@ class ListPlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setUpObservers()
+    }
+    private fun setUpObservers(){
+        mainViewModel.fetchAllSong()
+        mainViewModel.allSongs.observe(viewLifecycleOwner){
+            if(it.isEmpty()){
+                Toast.makeText(context, "No hay ninguna canción", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
     companion object {
 

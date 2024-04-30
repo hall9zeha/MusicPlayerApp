@@ -1,7 +1,14 @@
 package com.barryzeha.ktmusicplayer.view.viewmodel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.barryzeha.core.entities.SongEntity
+import com.barryzeha.data.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 /**
@@ -11,5 +18,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
  **/
 
 @HiltViewModel
-class MainViewModel:ViewModel() {
+class MainViewModel @Inject constructor(private val repository:MainRepository):ViewModel() {
+
+    private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
+    val allSongs:LiveData<List<SongEntity>> = _allSongs
+
+    fun fetchAllSong(){
+        viewModelScope.launch {
+            _allSongs.value = repository.fetchAllSongs()
+        }
+    }
+
 }

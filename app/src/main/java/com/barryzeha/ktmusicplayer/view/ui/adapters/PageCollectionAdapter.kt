@@ -7,6 +7,7 @@ import com.barryzeha.ktmusicplayer.common.MAIN_FRAGMENT
 import com.barryzeha.ktmusicplayer.common.SONG_LIST_FRAGMENT
 import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
+import dagger.hilt.android.AndroidEntryPoint
 
 
 /**
@@ -14,6 +15,7 @@ import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
  * Created by Barry Zea H. on 23/4/24.
  * Copyright (c)  All rights reserved.
  **/
+
 
 class PageCollectionAdapter(fragment:FragmentActivity, private val listOfTitles:List<String>):FragmentStateAdapter(fragment) {
     override fun getItemCount(): Int = listOfTitles.size

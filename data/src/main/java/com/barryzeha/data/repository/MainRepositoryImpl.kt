@@ -1,6 +1,8 @@
 package com.barryzeha.data.repository
 
 import com.barryzeha.core.entities.SongEntity
+import com.barryzeha.data.database.SongDatabase
+import javax.inject.Inject
 
 
 /**
@@ -9,20 +11,21 @@ import com.barryzeha.core.entities.SongEntity
  * Copyright (c)  All rights reserved.
  **/
 
-class RepositoryImpl:Repository {
+class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
+    private val dao = db.getSongDao()
     override suspend fun fetchAllSongs(): List<SongEntity> {
-        TODO("Not yet implemented")
+        return dao.fetchAllSongs()
     }
 
     override suspend fun fetchSongById(idSong: Long): SongEntity {
-        TODO("Not yet implemented")
+        return dao.fetchSongById(idSong)
     }
 
     override suspend fun saveNewSong(song: SongEntity): Long {
-        TODO("Not yet implemented")
+        return dao.saveNewSong(song)
     }
 
     override suspend fun deleteSong(idSong: Long): Int {
-        TODO("Not yet implemented")
+        return dao.deleteSong(idSong)
     }
 }

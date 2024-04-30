@@ -9,7 +9,7 @@ import com.barryzeha.core.entities.SongEntity
  * Copyright (c)  All rights reserved.
  **/
 
-interface Repository {
+interface MainRepository {
     suspend fun fetchAllSongs():List<SongEntity>
     suspend fun fetchSongById(idSong:Long):SongEntity
     suspend fun saveNewSong(song:SongEntity):Long
