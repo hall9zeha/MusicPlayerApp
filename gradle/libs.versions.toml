@@ -4,11 +4,14 @@ kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
+ksp-version = "1.8.10-1.0.9"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
 material = "1.11.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
+dagger-hilt-version = "2.44"
+room_version = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -19,9 +22,16 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+dagger-hilt = {group = "com.google.dagger", name = "hilt-android", version.ref = "dagger-hilt-version"}
+dagger-hilt-annotation = {group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "dagger-hilt-version"}
+room-database = {group = "androidx.room", name = "room-runtime", version.ref = "room_version"}
+room-annotation = {group = "androidx.room", name = "room-ktx", version.ref = "room_version"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
+dagger-hilt-plugin = {id= "com.google.dagger.hilt.android", version.ref = "dagger-hilt-version"}
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = {id = "com.google.devtools.ksp", version.ref = "ksp-version"}
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+
 
