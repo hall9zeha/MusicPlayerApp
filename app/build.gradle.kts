@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     // En gradle kts no requiere  agregar apply false a los plugins
     alias(libs.plugins.ksp)
-    alias(libs.plugins.dagger.hilt.plugin)
+
 }
 
 android {
@@ -51,12 +51,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    // Dagger hilt
-    implementation(libs.dagger.hilt.annotation)
-    implementation(libs.dagger.hilt)
-    // Room
-    implementation(libs.room.database)
-    implementation(libs.room.annotation)
+
     // Modules
     implementation(project(":core"))
 }

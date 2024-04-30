@@ -1,12 +1,12 @@
-package com.barryzeha.ktmusicplayer.view.adapters
+package com.barryzeha.ktmusicplayer.view.ui.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.barryzeha.ktmusicplayer.common.MAIN_FRAGMENT
 import com.barryzeha.ktmusicplayer.common.SONG_LIST_FRAGMENT
-import com.barryzeha.ktmusicplayer.view.fragments.ListPlayerFragment
-import com.barryzeha.ktmusicplayer.view.fragments.MainPlayerFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 
 
 /**
@@ -20,9 +20,9 @@ class PageCollectionAdapter(fragment:FragmentActivity, private val listOfTitles:
 
     override fun createFragment(position: Int): Fragment {
         return when(position){
-            MAIN_FRAGMENT->MainPlayerFragment()
-            SONG_LIST_FRAGMENT->ListPlayerFragment()
-            else->MainPlayerFragment()
+            MAIN_FRAGMENT-> MainPlayerFragment()
+            SONG_LIST_FRAGMENT-> ListPlayerFragment()
+            else-> MainPlayerFragment()
         }
 
     }

@@ -1,4 +1,4 @@
-package com.barryzeha.ktmusicplayer.view.activities
+package com.barryzeha.ktmusicplayer.view.ui.activities
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -7,7 +7,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
-import com.barryzeha.ktmusicplayer.view.adapters.PageCollectionAdapter
+import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind:ActivityMainBinding

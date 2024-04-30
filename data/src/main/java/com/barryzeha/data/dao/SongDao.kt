@@ -3,7 +3,7 @@ package com.barryzeha.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.barryzeha.data.entities.SongEntity
+import com.barryzeha.core.entities.SongEntity
 
 
 /**

@@ -1,4 +1,4 @@
-package com.barryzeha.ktmusicplayer.view.adapters
+package com.barryzeha.ktmusicplayer.view.ui.adapters
 
 
 /**

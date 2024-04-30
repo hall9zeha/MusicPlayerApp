@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.activities.MainActivity">
+    tools:context=".view.ui.activities.MainActivity">
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/mViewPager"
         android:layout_width="match_parent"

@@ -16,7 +16,7 @@
         android:theme="@style/Theme.KTMusicPlayer"
         tools:targetApi="31">
         <activity
-            android:name=".view.activities.MainActivity"
+            android:name=".view.ui.activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

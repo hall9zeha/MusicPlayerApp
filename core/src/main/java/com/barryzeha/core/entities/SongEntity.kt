@@ -1,4 +1,4 @@
-package com.barryzeha.data.entities
+package com.barryzeha.core.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -10,9 +10,8 @@ import androidx.room.PrimaryKey
  * Created by Barry Zea H. on 30/4/24.
  * Copyright (c)  All rights reserved.
  **/
-
 @Entity
-data class SongEntity (
+data class SongEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("id")
     val id:Long,
     val description:String?,

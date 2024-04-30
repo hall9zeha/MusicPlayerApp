@@ -23,7 +23,6 @@ android {
 
 dependencies{
 
-    // Room
-    implementation(libs.room.annotation)
-    implementation(libs.room.database)
+    // Modules
+    implementation(project(":core"))
 }

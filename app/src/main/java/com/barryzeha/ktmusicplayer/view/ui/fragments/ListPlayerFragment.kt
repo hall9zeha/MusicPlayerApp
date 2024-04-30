@@ -1,4 +1,4 @@
-package com.barryzeha.ktmusicplayer.view.fragments
+package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
