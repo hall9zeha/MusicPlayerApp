@@ -23,3 +23,4 @@ rootProject.name = "KTMusicPlayer"
 include(":app")
 include(":core")
 include(":data")
+include(":di")

@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     // En gradle kts no requiere  agregar apply false a los plugins
-    alias(libs.plugins.ksp)
+   // alias(libs.plugins.ksp)
 
 }
 
@@ -27,6 +27,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+    packaging{
+        resources {
+            excludes += "META-INF/gradle/incremental.annotation.processors"
+
         }
     }
     compileOptions {
@@ -54,4 +60,5 @@ dependencies {
 
     // Modules
     implementation(project(":core"))
+    implementation(project(":di"))
 }
