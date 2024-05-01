@@ -1,21 +1,19 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    alias(libs.plugins.dagger.hilt.plugin)
     alias(libs.plugins.ksp)
+    //alias(libs.plugins.dagger.hilt.plugin)
 
 }
 
 android {
     namespace = "com.barryzeha.core"
     compileSdk = 34
-
     defaultConfig {
         minSdk = 24
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
     }
+/*
     packaging{
         resources {
             excludes += "META-INF/DEPENDENCIES"
@@ -31,6 +29,8 @@ android {
 
         }
     }
+*/
+*/
 
 
     buildTypes {
@@ -67,6 +67,6 @@ dependencies {
     api(libs.room.ktx)
 
     // Dagger hilt
-    ksp(libs.dagger.hilt.compiler)
-    api(libs.dagger.hilt)
+    /*ksp(libs.dagger.hilt.compiler)
+    implementation(libs.dagger.hilt)*/
 }

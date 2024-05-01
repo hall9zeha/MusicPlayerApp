@@ -30,12 +30,12 @@ android {
             )
         }
     }
-    packaging{
+  /*  packaging{
         resources {
             excludes += "META-INF/gradle/incremental.annotation.processors"
 
         }
-    }
+    }*/
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -63,12 +63,12 @@ dependencies {
 
     // Lifecycle
     implementation(libs.lifecycle.viewmodel)
-    // Modules
-    implementation(project(":core"))
-    implementation(project(":di"))
-    implementation(project(":data"))
-
     // Dagger hilt
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.dagger.hilt)
+    // Modules
+    implementation(project(":core"))
+    implementation(project(":data"))
+    implementation(project(":di"))
+
 }
