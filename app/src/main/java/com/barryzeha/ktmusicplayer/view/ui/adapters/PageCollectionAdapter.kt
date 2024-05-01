@@ -3,8 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.barryzeha.ktmusicplayer.common.MAIN_FRAGMENT
-import com.barryzeha.ktmusicplayer.common.SONG_LIST_FRAGMENT
+import com.barryzeha.core.common.*
 import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import dagger.hilt.android.AndroidEntryPoint
