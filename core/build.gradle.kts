@@ -63,10 +63,10 @@ dependencies {
 
     // Room
     ksp(libs.room.compiler)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
+    api(libs.room.runtime)
+    api(libs.room.ktx)
 
     // Dagger hilt
     ksp(libs.dagger.hilt.compiler)
-    implementation(libs.dagger.hilt)
+    api(libs.dagger.hilt)
 }
