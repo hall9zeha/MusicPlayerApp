@@ -4,7 +4,6 @@ plugins {
     // En gradle kts no requiere  agregar apply false a los plugins
     alias(libs.plugins.ksp)
     alias(libs.plugins.dagger.hilt.plugin)
-
 }
 
 android {

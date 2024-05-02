@@ -92,6 +92,8 @@ class ListPlayerFragment : Fragment() {
             }
         }
     }
+
+
     private fun setUpListeners()= with(bind){
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply{
             type = "audio/*"
@@ -110,6 +112,7 @@ class ListPlayerFragment : Fragment() {
             activity?.showSnackBar(it, "Seleccione un archivo de la lista primero")
         }
     }
+
     companion object {
 
         @JvmStatic

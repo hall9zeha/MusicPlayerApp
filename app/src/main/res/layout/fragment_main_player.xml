@@ -66,6 +66,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvSongDescription"
         android:layout_marginTop="8dp"/>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongAlbum"
         android:layout_width="wrap_content"

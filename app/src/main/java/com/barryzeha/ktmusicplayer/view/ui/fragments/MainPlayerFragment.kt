@@ -48,6 +48,7 @@ class MainPlayerFragment : Fragment() {
         bind.tvSongDescription.setSelected(true)
         bind.tvSongArtist.setSelected(true)
         bind.tvSongAlbum.setSelected(true)
+
     }
     companion object {
         @JvmStatic
