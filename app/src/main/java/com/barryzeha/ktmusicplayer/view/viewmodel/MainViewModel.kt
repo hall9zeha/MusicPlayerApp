@@ -23,10 +23,20 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
 
+    private var _registerRowInserted:MutableLiveData<Long> = MutableLiveData()
+    val registerRowInserted:LiveData<Long> = _registerRowInserted
+
     fun fetchAllSong(){
         viewModelScope.launch {
             _allSongs.value = repository.fetchAllSongs()
         }
     }
+    fun saveNewSong(songEntity: SongEntity){
+        viewModelScope.launch {
+            _registerRowInserted.value = repository.saveNewSong(songEntity)
+        }
+    }
+
+
 
 }

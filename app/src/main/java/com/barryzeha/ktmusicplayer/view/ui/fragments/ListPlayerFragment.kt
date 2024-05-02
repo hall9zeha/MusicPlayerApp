@@ -16,10 +16,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
+import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,6 +36,7 @@ class ListPlayerFragment : Fragment() {
     private var _bind:FragmentListPlayerBinding? = null
     private val mainViewModel:MainViewModel by viewModels()
     private var uri:Uri?=null
+    private lateinit var adapter:MusicListAdapter
 
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
@@ -62,6 +65,7 @@ class ListPlayerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         activityResultFile()
         activityResultForPermission()
+        setUpAdapter()
         setUpListeners()
         setUpObservers()
     }
@@ -84,11 +88,21 @@ class ListPlayerFragment : Fragment() {
             }
         }
     }
+    private fun setUpAdapter(){
+        adapter = MusicListAdapter()
+        bind.rvSongs.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@ListPlayerFragment.adapter
+        }
+    }
     private fun setUpObservers(){
         mainViewModel.fetchAllSong()
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if(it.isEmpty()){
                 Toast.makeText(context, "No hay ninguna canción", Toast.LENGTH_SHORT).show()
+            }else{
+                adapter.addAll(it)
             }
         }
     }
