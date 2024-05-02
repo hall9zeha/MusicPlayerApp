@@ -13,13 +13,13 @@ import androidx.room.PrimaryKey
 @Entity
 data class SongEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("id")
-    val id:Long,
-    val description:String?,
-    val pathLocation:String?,
-    val timestamp:Long,
-    val duration:Long,
-    val bitrate:String?,
-    val format:String
+    val id:Long=0,
+    val description:String?="",
+    val pathLocation:String?="",
+    val timestamp:Long=0,
+    val duration:Long=0,
+    val bitrate:String?="",
+    val format:String?=""
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

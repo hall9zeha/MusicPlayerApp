@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.ui.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +16,7 @@ import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
+class MusicListAdapter(private val onItemClick:(SongEntity)->Unit ): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
 
     private var songList:MutableList<SongEntity> = arrayListOf()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
@@ -32,6 +33,7 @@ class MusicListAdapter(): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
     fun addAll(songs:List<SongEntity>){
         songs.forEach {
            add(it)
+           Log.e("Song", it.pathLocation.toString() )
         }
     }
     fun add(song:SongEntity){
@@ -48,6 +50,7 @@ class MusicListAdapter(): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
         private val bind = ItemSongBinding.bind(itemView)
         fun onBind(song:SongEntity) = with(bind){
            tvSongDesc.text=song.pathLocation
+            root.setOnClickListener { onItemClick(song) }
         }
     }
 

@@ -2,28 +2,36 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.res.AssetFileDescriptor
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.showSnackBar
-import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.core.entities.SongEntity
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.util.Date
+
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -37,7 +45,7 @@ class ListPlayerFragment : Fragment() {
     private val mainViewModel:MainViewModel by viewModels()
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
-
+    private lateinit var mediaPlayer:MediaPlayer
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private val bind:FragmentListPlayerBinding get() = _bind!!
@@ -66,6 +74,7 @@ class ListPlayerFragment : Fragment() {
         activityResultFile()
         activityResultForPermission()
         setUpAdapter()
+        setUpMediaPlayer()
         setUpListeners()
         setUpObservers()
     }
@@ -74,8 +83,18 @@ class ListPlayerFragment : Fragment() {
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
             if(result.resultCode == Activity.RESULT_OK){
                 uri = result.data?.data
+
+                mainViewModel.saveNewSong(SongEntity(
+                    pathLocation = uri.toString(),
+                    timestamp = Date().time
+                ))
                 Log.e("URI_CONTENT", uri.toString())
             }
+        }
+    }
+    private fun setUpMediaPlayer(){
+        activity?.let {
+            mediaPlayer = MediaPlayer()
         }
     }
     private fun activityResultForPermission(){
@@ -89,7 +108,7 @@ class ListPlayerFragment : Fragment() {
         }
     }
     private fun setUpAdapter(){
-        adapter = MusicListAdapter()
+        adapter = MusicListAdapter(::onItemClick)
         bind.rvSongs.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
@@ -103,6 +122,11 @@ class ListPlayerFragment : Fragment() {
                 Toast.makeText(context, "No hay ninguna canción", Toast.LENGTH_SHORT).show()
             }else{
                 adapter.addAll(it)
+            }
+        }
+        mainViewModel.songById.observe(viewLifecycleOwner){song->
+            song?.let{
+                adapter.add(song)
             }
         }
     }
@@ -124,6 +148,49 @@ class ListPlayerFragment : Fragment() {
         }
         btnLess.setOnClickListener {
             activity?.showSnackBar(it, "Seleccione un archivo de la lista primero")
+        }
+    }
+    private fun onItemClick(song:SongEntity){
+        Log.e("URI", Uri.parse(song.pathLocation).toString() )
+        Log.e("URI", song.pathLocation.toString() )
+        activity?.let {context->
+            try {
+                checkPermissions(context,Manifest.permission.RECORD_AUDIO){
+                    if(it){
+                        //val mediaPlayer = MediaPlayer()
+
+                      /*  mediaPlayer.setDataSource(context, Uri.parse(song.pathLocation))
+                        mediaPlayer.prepare()
+                        mediaPlayer.start()*/
+                        val songUri = Uri.parse(song.pathLocation)
+                        val contentResolver = context.contentResolver
+                        val fileDescriptor: AssetFileDescriptor? = try {
+                            contentResolver.openAssetFileDescriptor(songUri, "r")
+                        } catch (e: FileNotFoundException) {
+                            e.printStackTrace()
+                            null
+                        }
+                        if (fileDescriptor != null) {
+                            val fileDescriptor = fileDescriptor.fileDescriptor
+                            val mediaPlayer = MediaPlayer()
+                            try {
+                                mediaPlayer.setDataSource(fileDescriptor)
+                                mediaPlayer.prepare()
+                                mediaPlayer.start()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                        }
+
+                    }else{
+                        launcherPermission.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                }
+
+            }catch (e:Exception){
+                Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
+                Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.barryzeha.core.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _registerRowInserted:MutableLiveData<Long> = MutableLiveData()
     val registerRowInserted:LiveData<Long> = _registerRowInserted
 
+    private var _songById:MutableLiveData<SongEntity> = MutableLiveData()
+    val songById:LiveData<SongEntity> = _songById
+
     fun fetchAllSong(){
         viewModelScope.launch {
             _allSongs.value = repository.fetchAllSongs()
@@ -33,7 +37,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     }
     fun saveNewSong(songEntity: SongEntity){
         viewModelScope.launch {
-            _registerRowInserted.value = repository.saveNewSong(songEntity)
+            val idInserted=repository.saveNewSong(songEntity)
+            getSongById(idInserted)
+        }
+    }
+    fun getSongById(idSong:Long){
+        viewModelScope.launch {
+            _songById.value = repository.fetchSongById(idSong)
         }
     }
 
