@@ -50,6 +50,7 @@ class MainPlayerFragment : Fragment() {
         bind.tvSongAlbum.setSelected(true)
 
     }
+
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =

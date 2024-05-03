@@ -2,14 +2,15 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -28,8 +29,11 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.util.Date
 
 
@@ -83,15 +87,18 @@ class ListPlayerFragment : Fragment() {
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
             if(result.resultCode == Activity.RESULT_OK){
                 uri = result.data?.data
-
+                val probe = getRealPathFromURI(uri!!, requireContext())
                 mainViewModel.saveNewSong(SongEntity(
                     pathLocation = uri.toString(),
                     timestamp = Date().time
                 ))
+
                 Log.e("URI_CONTENT", uri.toString())
+                Log.e("URI_PROBE", probe.toString())
             }
         }
     }
+
     private fun setUpMediaPlayer(){
         activity?.let {
             mediaPlayer = MediaPlayer()
@@ -150,12 +157,13 @@ class ListPlayerFragment : Fragment() {
             activity?.showSnackBar(it, "Seleccione un archivo de la lista primero")
         }
     }
+
     private fun onItemClick(song:SongEntity){
         Log.e("URI", Uri.parse(song.pathLocation).toString() )
         Log.e("URI", song.pathLocation.toString() )
         activity?.let {context->
-            try {
-                checkPermissions(context,Manifest.permission.RECORD_AUDIO){
+            //try {
+                checkPermissions(context,Manifest.permission.READ_EXTERNAL_STORAGE){
                     if(it){
                         //val mediaPlayer = MediaPlayer()
 
@@ -183,15 +191,49 @@ class ListPlayerFragment : Fragment() {
                         }
 
                     }else{
-                        launcherPermission.launch(Manifest.permission.RECORD_AUDIO)
+                        launcherPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                     }
                 }
 
-            }catch (e:Exception){
+            /*}catch (e:Exception){
                 Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
                 Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()
-            }
+            }*/
         }
+    }
+    fun getRealPathFromURI(uri: Uri, context: Context): String? {
+        val returnCursor = context.contentResolver.query(uri, null, null, null, null)
+        val nameIndex =  returnCursor!!.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE)
+        returnCursor.moveToFirst()
+        val name = returnCursor.getString(nameIndex)
+        val size = returnCursor.getLong(sizeIndex).toString()
+        val file = File(context.filesDir, name)
+        try {
+            val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+            val outputStream = FileOutputStream(file)
+            var read = 0
+            val maxBufferSize = 1 * 1024 * 1024
+            val bytesAvailable: Int = inputStream?.available() ?: 0
+            //int bufferSize = 1024;
+            val bufferSize = Math.min(bytesAvailable, maxBufferSize)
+            val buffers = ByteArray(bufferSize)
+            while (inputStream?.read(buffers).also {
+                    if (it != null) {
+                        read = it
+                    }
+                } != -1) {
+                outputStream.write(buffers, 0, read)
+            }
+            Log.e("File Size", "Size " + file.length())
+            inputStream?.close()
+            outputStream.close()
+            Log.e("File Path", "Path " + file.path)
+
+        } catch (e: java.lang.Exception) {
+            Log.e("Exception", e.message!!)
+        }
+        return file.path
     }
 
     companion object {
