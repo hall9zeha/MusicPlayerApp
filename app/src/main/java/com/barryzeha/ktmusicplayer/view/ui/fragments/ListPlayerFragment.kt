@@ -89,12 +89,10 @@ class ListPlayerFragment : Fragment() {
                 uri = result.data?.data
                 val probe = getRealPathFromURI(uri!!, requireContext())
                 mainViewModel.saveNewSong(SongEntity(
-                    pathLocation = uri.toString(),
+                    pathLocation = probe,
                     timestamp = Date().time
                 ))
 
-                Log.e("URI_CONTENT", uri.toString())
-                Log.e("URI_PROBE", probe.toString())
             }
         }
     }
@@ -167,28 +165,10 @@ class ListPlayerFragment : Fragment() {
                     if(it){
                         //val mediaPlayer = MediaPlayer()
 
-                      /*  mediaPlayer.setDataSource(context, Uri.parse(song.pathLocation))
+                        mediaPlayer.setDataSource(song.pathLocation)
                         mediaPlayer.prepare()
-                        mediaPlayer.start()*/
-                        val songUri = Uri.parse(song.pathLocation)
-                        val contentResolver = context.contentResolver
-                        val fileDescriptor: AssetFileDescriptor? = try {
-                            contentResolver.openAssetFileDescriptor(songUri, "r")
-                        } catch (e: FileNotFoundException) {
-                            e.printStackTrace()
-                            null
-                        }
-                        if (fileDescriptor != null) {
-                            val fileDescriptor = fileDescriptor.fileDescriptor
-                            val mediaPlayer = MediaPlayer()
-                            try {
-                                mediaPlayer.setDataSource(fileDescriptor)
-                                mediaPlayer.prepare()
-                                mediaPlayer.start()
-                            } catch (e: IOException) {
-                                e.printStackTrace()
-                            }
-                        }
+                        mediaPlayer.start()
+
 
                     }else{
                         launcherPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
