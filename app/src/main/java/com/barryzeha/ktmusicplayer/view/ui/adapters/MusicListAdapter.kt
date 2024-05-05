@@ -1,10 +1,12 @@
 package com.barryzeha.ktmusicplayer.view.ui.adapters
 
+import android.media.MediaPlayer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.barryzeha.core.common.getTimeOfSong
 import com.barryzeha.core.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
@@ -48,8 +50,13 @@ class MusicListAdapter(private val onItemClick:(SongEntity)->Unit ): RecyclerVie
     }
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         private val bind = ItemSongBinding.bind(itemView)
+
         fun onBind(song:SongEntity) = with(bind){
-           tvSongDesc.text=song.pathLocation
+            val mediaPlayer = MediaPlayer()
+            mediaPlayer.setDataSource(song.pathLocation)
+            mediaPlayer.prepare()
+            tvDuration.text= getTimeOfSong( (mediaPlayer.duration).toLong())
+            tvSongDesc.text=song.pathLocation
             root.setOnClickListener { onItemClick(song) }
         }
     }
