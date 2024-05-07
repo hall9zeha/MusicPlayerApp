@@ -63,9 +63,9 @@ class MusicListAdapter(private val onItemClick:(SongEntity)->Unit ): RecyclerVie
                     tvBitrate.text=String.format("%s::kbps",getBitrate(song.pathLocation!!).toString())
 
             }
+            Log.e("TAG", song.pathLocation.toString() )
 
-
-            tvSongDesc.text=song.pathLocation
+            tvSongDesc.text=song.pathLocation?.substringAfterLast("/","No named")
             tvDuration.text= getTimeOfSong( (mediaPlayer.duration).toLong())
             //tvFileFormat.text = String.format("::%s",song.pathLocation?.substring(song.pathLocation?.lastIndexOf(".")!! +1))
             tvFileFormat.text = String.format("::%s",song.pathLocation?.substringAfterLast(".","NA"))
