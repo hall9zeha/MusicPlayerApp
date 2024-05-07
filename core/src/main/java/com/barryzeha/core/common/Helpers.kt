@@ -2,6 +2,7 @@ package com.barryzeha.core.common
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
@@ -67,4 +68,11 @@ fun getRealPathFromURI(uri: Uri, context: Context): String? {
         Log.e("Exception", e.message!!)
     }
     return file.path
+}
+fun getBitrate(pathFile: String): Int? {
+    val retriever = MediaMetadataRetriever()
+    retriever.setDataSource(pathFile)
+    val bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toInt()
+    retriever.release()
+    return bitrate?.div(1000)
 }

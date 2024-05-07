@@ -24,11 +24,7 @@
             app:layout_constraintEnd_toStartOf="@id/ivOptions"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            app:layout_goneMarginBottom="8dp"
+            android:layout_margin="16dp"
             />
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvDuration"
@@ -41,6 +37,33 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/tvSongDesc"
             android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvFileFormat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textSize="12sp"
+            tools:text="mp3"
+            app:layout_constraintStart_toStartOf="@id/tvSongDesc"
+            app:layout_constraintTop_toBottomOf="@id/tvSongDesc"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvBitrate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textSize="12sp"
+            tools:text="320"
+            app:layout_constraintStart_toEndOf="@id/tvFileFormat"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
             />
         <ImageButton
             android:id="@+id/ivOptions"
