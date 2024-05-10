@@ -7,6 +7,7 @@
     app:cardCornerRadius="0dp"
     android:focusable="true"
     android:clickable="true"
+    app:strokeWidth="0dp"
     android:foreground="?attr/selectableItemBackground"
     >
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -75,6 +76,13 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/tvSongDesc"/>
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
