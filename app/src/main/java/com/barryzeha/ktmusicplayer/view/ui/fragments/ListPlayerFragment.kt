@@ -2,15 +2,10 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
 import android.app.Activity
-import android.content.ContentResolver
-import android.content.Context
 import android.content.Intent
-import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.showSnackBar
@@ -30,11 +26,6 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
 import java.util.Date
 
 
@@ -82,6 +73,7 @@ class ListPlayerFragment : Fragment() {
         setUpMediaPlayer()
         setUpListeners()
         setUpObservers()
+        initCheckPermission()
     }
 
     private fun activityResultFile(){
@@ -107,9 +99,11 @@ class ListPlayerFragment : Fragment() {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply{
             type = "audio/*"
         }
+        intent.putExtra("read_storage", READ_STORAGE_REQ_CODE)
        launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
             if(it){
-                launcher.launch(intent)
+                initCheckPermission()
+                //launcher.launch(intent)
             }
         }
     }
@@ -139,16 +133,24 @@ class ListPlayerFragment : Fragment() {
 
 
     private fun setUpListeners()= with(bind){
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply{
+        val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
             type = "audio/*"
         }
         btnAdd.setOnClickListener {
-            checkPermissions(bind.root.context,Manifest.permission.READ_EXTERNAL_STORAGE){isGranted->
+            checkPermissions(bind.root.context,
+                listOf( Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO)
+            ){ isGranted, permissionsList->
                 if(isGranted){
-                    launcher.launch(intent)
+                    launcher.launch(chooseFileIntent)
                 }
                 else{
-                    launcherPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    permissionsList.forEach {permission->
+                        if(!permission.second) {
+                            launcherPermission.launch(permission.first)
+
+                        }
+                    }
                 }
             }
         }
@@ -156,31 +158,49 @@ class ListPlayerFragment : Fragment() {
             activity?.showSnackBar(it, "Seleccione un archivo de la lista primero")
         }
     }
+    private fun initCheckPermission(){
+        checkPermissions(requireContext(),
+            listOf(Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO)
+        ){isGranted,permissions->
+            if(isGranted) Log.e("GRANTED", "Completed granted" )
+            else{
+                permissions.forEach {permission->
+                    if(!permission.second){
+                        launcherPermission.launch(permission.first)
+                    }
+                }
 
+            }
+        }
+    }
     private fun onItemClick(song:SongEntity){
         Log.e("URI", Uri.parse(song.pathLocation).toString() )
         Log.e("URI", song.pathLocation.toString() )
         activity?.let {context->
-            //try {
-                checkPermissions(context,Manifest.permission.READ_EXTERNAL_STORAGE){
-                    if(it){
-                        //val mediaPlayer = MediaPlayer()
-
-                        mediaPlayer.setDataSource(song.pathLocation)
-                        mediaPlayer.prepare()
-                        mediaPlayer.start()
-
-
-
-                    }else{
-                        launcherPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            try {
+                checkPermissions(context,
+                    listOf(Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO)
+                ){isGranted,permissionsList->
+                    if(isGranted){
+                            mediaPlayer.setDataSource(song.pathLocation)
+                            mediaPlayer.prepare()
+                            mediaPlayer.start()
+                        }else{
+                            permissionsList.forEach {permission->
+                                if(!permission.second) {
+                                    launcherPermission.launch(permission.first)
+                                }
+                            }
+                        }
                     }
-                }
 
-            /*}catch (e:Exception){
+
+            }catch (e:Exception){
                 Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
                 Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()
-            }*/
+            }
         }
     }
 

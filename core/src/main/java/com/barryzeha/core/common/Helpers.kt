@@ -21,12 +21,23 @@ import java.util.concurrent.TimeUnit
  **/
 
 
-fun checkPermissions(context: Context, permission:String, isGranted:(Boolean) ->Unit){
-    if(ContextCompat.checkSelfPermission(context,permission)==PackageManager.PERMISSION_GRANTED){
-        isGranted(true)
-    }else{
-        isGranted(false)
-    }
+fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Boolean, List<Pair<String,Boolean>>) ->Unit){
+    val permissionsGranted:MutableList<Pair<String,Boolean>> = mutableListOf()
+    var grantedCount=0
+    permissions.forEach {permission->
+        if(ContextCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED){
+            permissionsGranted.add(Pair(permission,true))
+            grantedCount++
+        }else{
+            permissionsGranted.add(Pair(permission,false))
+
+        }
+   }
+    isGranted((grantedCount == permissions.size),permissionsGranted)
+
 }
 fun getTimeOfSong(duration:Long):String{
     return String.format(
