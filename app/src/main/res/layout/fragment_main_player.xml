@@ -94,6 +94,7 @@
         app:layout_constraintStart_toStartOf="@id/pbLinear"
         app:layout_constraintTop_toBottomOf="@id/pbLinear"
         android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
         />
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongTimeCompleted"
@@ -103,6 +104,7 @@
         app:layout_constraintEnd_toEndOf="@id/pbLinear"
         app:layout_constraintTop_toBottomOf="@id/pbLinear"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         />
     <SeekBar
         android:id="@+id/pbLinear"
@@ -112,8 +114,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvSongAlbum"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="24dp"/>
 
     <com.google.android.material.button.MaterialButton
