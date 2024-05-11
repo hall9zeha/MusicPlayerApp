@@ -1,6 +1,8 @@
 package com.barryzeha.data.repository
 
+import android.media.MediaPlayer
 import com.barryzeha.core.entities.SongEntity
+import kotlinx.coroutines.flow.Flow
 
 
 /**
@@ -10,9 +12,12 @@ import com.barryzeha.core.entities.SongEntity
  **/
 
 interface MainRepository {
+    // Room Database
     suspend fun fetchAllSongs():List<SongEntity>
     suspend fun fetchSongById(idSong:Long):SongEntity
     suspend fun saveNewSong(song:SongEntity):Long
     suspend fun deleteSong(idSong:Long):Int
 
+    // UI Flows
+    suspend fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer): Flow<String>
 }

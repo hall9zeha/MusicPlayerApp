@@ -1,5 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.viewmodel
 
+import android.media.MediaPlayer
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,6 +10,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.barryzeha.core.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +34,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _songById:MutableLiveData<SongEntity> = MutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
+    private var _currentTimeOfSong:MutableLiveData<String> = MutableLiveData()
+    val currentTimeOfSong:LiveData<String> = _currentTimeOfSong
     fun fetchAllSong(){
         viewModelScope.launch {
             _allSongs.value = repository.fetchAllSongs()
@@ -44,6 +50,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     fun getSongById(idSong:Long){
         viewModelScope.launch {
             _songById.value = repository.fetchSongById(idSong)
+        }
+    }
+    fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer){
+        viewModelScope.launch {
+            repository.fetchCurrentTimeOfSong(mediaPlayer)
+                .catch { Log.e("ERROR_FLOW",it.message.toString() ) }
+                .collect{_currentTimeOfSong.value = it}
         }
     }
 

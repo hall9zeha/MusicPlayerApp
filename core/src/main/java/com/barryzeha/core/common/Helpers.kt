@@ -25,26 +25,21 @@ fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Bool
     val permissionsGranted:MutableList<Pair<String,Boolean>> = mutableListOf()
     var grantedCount=0
     permissions.forEach {permission->
-        if(ContextCompat.checkSelfPermission(
-                context,
-                permission
-            ) == PackageManager.PERMISSION_GRANTED){
+        if(ContextCompat.checkSelfPermission(context,permission) == PackageManager.PERMISSION_GRANTED){
             permissionsGranted.add(Pair(permission,true))
             grantedCount++
         }else{
             permissionsGranted.add(Pair(permission,false))
-
         }
    }
     isGranted((grantedCount == permissions.size),permissionsGranted)
-
 }
 fun getTimeOfSong(duration:Long):String{
     return String.format(
         Locale.ROOT,"::%02d:%02d",
-        TimeUnit.MILLISECONDS.toMinutes(duration.toLong()),
-        TimeUnit.MILLISECONDS.toSeconds(duration.toLong()) -
-        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration.toLong())))
+        TimeUnit.MILLISECONDS.toMinutes(duration),
+        TimeUnit.MILLISECONDS.toSeconds(duration) -
+        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)))
 }
 fun getRealPathFromURI(uri: Uri, context: Context): String? {
     val returnCursor = context.contentResolver.query(uri, null, null, null, null)
@@ -87,3 +82,15 @@ fun getBitrate(pathFile: String): Int? {
     retriever.release()
     return bitrate?.div(1000)
 }
+fun createTime(duration: Int): String {
+    var time = ""
+    val min = duration / 1000 / 60
+    val sec = duration / 1000 % 60
+    time += "$min:"
+    if (sec < 10) {
+        time += "0"
+    }
+    time += sec
+    return time
+}
+

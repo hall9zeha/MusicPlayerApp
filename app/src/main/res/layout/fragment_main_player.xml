@@ -119,7 +119,7 @@
         android:layout_marginTop="24dp"/>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/ivPlay"
+        android:id="@+id/btnMainPlay"
         android:layout_width="56dp"
         android:layout_height="56dp"
         app:icon="@drawable/ic_play"
@@ -152,9 +152,9 @@
         android:insetRight="0dp"
         android:insetTop="0dp"
         style="@style/Widget.Material3.Button.IconButton"
-        app:layout_constraintEnd_toStartOf="@id/ivPlay"
-        app:layout_constraintTop_toTopOf="@id/ivPlay"
-        app:layout_constraintBottom_toBottomOf="@id/ivPlay"
+        app:layout_constraintEnd_toStartOf="@id/btnMainPlay"
+        app:layout_constraintTop_toTopOf="@id/btnMainPlay"
+        app:layout_constraintBottom_toBottomOf="@id/btnMainPlay"
         android:layout_marginEnd="48dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ivNext"
@@ -172,8 +172,8 @@
         android:insetRight="0dp"
         android:insetTop="0dp"
         style="@style/Widget.Material3.Button.IconButton"
-        app:layout_constraintStart_toEndOf="@id/ivPlay"
-        app:layout_constraintTop_toTopOf="@id/ivPlay"
-        app:layout_constraintBottom_toBottomOf="@id/ivPlay"
+        app:layout_constraintStart_toEndOf="@id/btnMainPlay"
+        app:layout_constraintTop_toTopOf="@id/btnMainPlay"
+        app:layout_constraintBottom_toBottomOf="@id/btnMainPlay"
         android:layout_marginStart="48dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
