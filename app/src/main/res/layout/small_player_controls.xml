@@ -8,7 +8,7 @@
         android:id="@+id/loadSeekBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:progress="50"
+        tools:progress="50"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"

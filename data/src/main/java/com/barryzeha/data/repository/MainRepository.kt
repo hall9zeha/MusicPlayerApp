@@ -19,5 +19,5 @@ interface MainRepository {
     suspend fun deleteSong(idSong:Long):Int
 
     // UI Flows
-    suspend fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer): Flow<String>
+    suspend fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer): Flow<Triple<Int,Int,String>>
 }

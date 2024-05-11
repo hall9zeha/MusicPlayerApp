@@ -38,7 +38,7 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
     }
 
     // UI Flows
-    override suspend fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer): Flow<String> {
+    override suspend fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer): Flow<Triple<Int,Int,String>> {
         return flow{
                 while(true) {
                     if(mediaPlayer.isPlaying) {

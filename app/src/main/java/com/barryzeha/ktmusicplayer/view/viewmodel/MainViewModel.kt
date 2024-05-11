@@ -34,8 +34,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _songById:MutableLiveData<SongEntity> = MutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
-    private var _currentTimeOfSong:MutableLiveData<String> = MutableLiveData()
-    val currentTimeOfSong:LiveData<String> = _currentTimeOfSong
+    private var _currentTimeOfSong:MutableLiveData<Triple<Int,Int,String>> = MutableLiveData()
+    val currentTimeOfSong:LiveData<Triple<Int,Int,String>> = _currentTimeOfSong
     fun fetchAllSong(){
         viewModelScope.launch {
             _allSongs.value = repository.fetchAllSongs()

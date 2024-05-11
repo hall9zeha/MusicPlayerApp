@@ -21,15 +21,14 @@ import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
-import com.barryzeha.core.common.getTimeOfSong
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.entities.SongEntity
-import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
+import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -46,6 +45,7 @@ class ListPlayerFragment : Fragment() {
     private lateinit var mediaPlayer:MediaPlayer
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
+
     private val bind:FragmentListPlayerBinding get() = _bind!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +69,7 @@ class ListPlayerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         activityResultFile()
         activityResultForPermission()
+        setUpViews()
         setUpAdapter()
         setUpMediaPlayer()
         setUpListeners()
@@ -130,11 +131,14 @@ class ListPlayerFragment : Fragment() {
         }
         mainViewModel.currentTimeOfSong.observe(viewLifecycleOwner){currentTime->
             currentTime?.let{
-                bind.bottomPlayerControls.tvInitTime.text = currentTime
+                bind.bottomPlayerControls.tvInitTime.text = currentTime.third
+                bind.bottomPlayerControls.loadSeekBar.progress = mediaPlayer.currentPosition
             }
         }
     }
+    private fun setUpViews()=with(bind){
 
+    }
     private fun setUpListeners()= with(bind){
         val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
             type = "audio/*"
@@ -163,6 +167,9 @@ class ListPlayerFragment : Fragment() {
         bottomPlayerControls.btnPlay.setOnClickListener{
             if(mediaPlayer.isPlaying){ mediaPlayer.pause(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)}
             else {mediaPlayer.start(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)}
+        }
+        mediaPlayer.setOnCompletionListener {
+            bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
         }
     }
     private fun initCheckPermission(){
@@ -196,7 +203,8 @@ class ListPlayerFragment : Fragment() {
                             mediaPlayer.start()
                             mainViewModel.fetchCurrentTimeOfSong(mediaPlayer)
                             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-                            bind.bottomPlayerControls.tvEndTime.text= createTime(mediaPlayer.duration)
+                            bind.bottomPlayerControls.tvEndTime.text= createTime(mediaPlayer.duration).third
+                            bind.bottomPlayerControls.loadSeekBar.max=mediaPlayer.duration
                         }else{
                             permissionsList.forEach {permission->
                                 if(!permission.second) {

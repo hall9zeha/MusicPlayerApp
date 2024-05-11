@@ -82,15 +82,16 @@ fun getBitrate(pathFile: String): Int? {
     retriever.release()
     return bitrate?.div(1000)
 }
-fun createTime(duration: Int): String {
-    var time = ""
+fun createTime(duration: Int): Triple<Int,Int,String> {
+    var stringTime = ""
     val min = duration / 1000 / 60
     val sec = duration / 1000 % 60
-    time += "$min:"
+    stringTime += "$min:"
     if (sec < 10) {
-        time += "0"
+        stringTime += "0"
     }
-    time += sec
-    return time
+    stringTime += sec
+    return Triple(min,sec,stringTime)
 }
+
 
