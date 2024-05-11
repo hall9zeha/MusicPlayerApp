@@ -20,7 +20,7 @@ import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(SongEntity)->Unit ): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
+class MusicListAdapter(private val onItemClick:(Int,SongEntity)->Unit ): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
 
     private var songList:MutableList<SongEntity> = arrayListOf()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
@@ -29,7 +29,7 @@ class MusicListAdapter(private val onItemClick:(SongEntity)->Unit ): RecyclerVie
     }
 
     override fun onBindViewHolder(holder: MViewHolder, position: Int) {
-        holder.onBind(songList[position])
+        holder.onBind(position,songList[position])
     }
 
     override fun getItemCount() = songList.size
@@ -50,10 +50,17 @@ class MusicListAdapter(private val onItemClick:(SongEntity)->Unit ): RecyclerVie
             notifyItemChanged(position)
         }
     }
+    fun getSongByPosition(position: Int):SongEntity?{
+        return if(songList.isNotEmpty()){
+            songList[position]
+        }else{
+            null
+        }
+    }
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         private val bind = ItemSongBinding.bind(itemView)
 
-        fun onBind(song:SongEntity) = with(bind){
+        fun onBind(position:Int,song:SongEntity) = with(bind){
             val mediaPlayer = MediaPlayer()
             mediaPlayer.setDataSource(song.pathLocation)
             mediaPlayer.prepare()
@@ -69,7 +76,7 @@ class MusicListAdapter(private val onItemClick:(SongEntity)->Unit ): RecyclerVie
             tvDuration.text= getTimeOfSong( (mediaPlayer.duration).toLong())
             //tvFileFormat.text = String.format("::%s",song.pathLocation?.substring(song.pathLocation?.lastIndexOf(".")!! +1))
             tvFileFormat.text = String.format("::%s",song.pathLocation?.substringAfterLast(".","NA"))
-            root.setOnClickListener { onItemClick(song) }
+            root.setOnClickListener { onItemClick(position,song) }
         }
 
     }

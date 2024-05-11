@@ -45,8 +45,10 @@ class ListPlayerFragment : Fragment() {
     private lateinit var mediaPlayer:MediaPlayer
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
+    private var isPlaying = false
 
     private val bind:FragmentListPlayerBinding get() = _bind!!
+    private  var currentSelectedPosition:Int =0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,6 +137,9 @@ class ListPlayerFragment : Fragment() {
                 bind.bottomPlayerControls.loadSeekBar.progress = mediaPlayer.currentPosition
             }
         }
+        mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
+            currentSelectedPosition = positionSelected
+        }
     }
     private fun setUpViews()=with(bind){
 
@@ -165,12 +170,41 @@ class ListPlayerFragment : Fragment() {
             activity?.showSnackBar(it, "Seleccione un archivo de la lista primero")
         }
         bottomPlayerControls.btnPlay.setOnClickListener{
-            if(mediaPlayer.isPlaying){ mediaPlayer.pause(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)}
-            else {mediaPlayer.start(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)}
+            if(adapter.itemCount>0) {
+                if(!isPlaying)getSongOfAdapter(currentSelectedPosition)?.let{song->startSongPlayer(song)}
+                else {
+                    if (mediaPlayer.isPlaying) {
+                        mediaPlayer.pause(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                    } else {
+                        mediaPlayer.start(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+                    }
+                }
+            }
+            isPlaying=true
         }
         mediaPlayer.setOnCompletionListener {
-            bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+            if(currentSelectedPosition < adapter.itemCount){
+                bind.bottomPlayerControls.btnNext.performClick()
+            }else {
+                bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+            }
         }
+        bottomPlayerControls.btnPrevious.setOnClickListener{
+             if (currentSelectedPosition > 0) {
+                getSongOfAdapter(currentSelectedPosition - 1)?.let{song->startSongPlayer(song)}
+             }
+
+        }
+        bottomPlayerControls.btnNext.setOnClickListener {
+           if(currentSelectedPosition<adapter.itemCount-1){
+               getSongOfAdapter(currentSelectedPosition +1)?.let{song->startSongPlayer(song)}
+           }
+        }
+    }
+    private fun getSongOfAdapter(position:Int):SongEntity?{
+        mainViewModel.setCurrentPosition(position)
+        val song = adapter.getSongByPosition(currentSelectedPosition)
+        return song
     }
     private fun initCheckPermission(){
         checkPermissions(requireContext(),
@@ -188,9 +222,12 @@ class ListPlayerFragment : Fragment() {
             }
         }
     }
-    private fun onItemClick(song:SongEntity){
-        Log.e("URI", Uri.parse(song.pathLocation).toString() )
-        Log.e("URI", song.pathLocation.toString() )
+    private fun onItemClick(position:Int,song:SongEntity){
+        isPlaying=true
+        mainViewModel.setCurrentPosition(position)
+        startSongPlayer(song)
+    }
+    private fun startSongPlayer(song: SongEntity){
         activity?.let {context->
             try {
                 checkPermissions(context,
@@ -198,22 +235,21 @@ class ListPlayerFragment : Fragment() {
                         Manifest.permission.RECORD_AUDIO)
                 ){isGranted,permissionsList->
                     if(isGranted){
-                            mediaPlayer.setDataSource(song.pathLocation)
-                            mediaPlayer.prepare()
-                            mediaPlayer.start()
-                            mainViewModel.fetchCurrentTimeOfSong(mediaPlayer)
-                            bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-                            bind.bottomPlayerControls.tvEndTime.text= createTime(mediaPlayer.duration).third
-                            bind.bottomPlayerControls.loadSeekBar.max=mediaPlayer.duration
-                        }else{
-                            permissionsList.forEach {permission->
-                                if(!permission.second) {
-                                    launcherPermission.launch(permission.first)
-                                }
+                        mediaPlayer.setDataSource(song.pathLocation)
+                        mediaPlayer.prepare()
+                        mediaPlayer.start()
+                        mainViewModel.fetchCurrentTimeOfSong(mediaPlayer)
+                        bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+                        bind.bottomPlayerControls.tvEndTime.text= createTime(mediaPlayer.duration).third
+                        bind.bottomPlayerControls.loadSeekBar.max=mediaPlayer.duration
+                    }else{
+                        permissionsList.forEach {permission->
+                            if(!permission.second) {
+                                launcherPermission.launch(permission.first)
                             }
                         }
                     }
-
+                }
             }catch (e:Exception){
                 Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
                 Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()

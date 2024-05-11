@@ -36,6 +36,10 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
 
     private var _currentTimeOfSong:MutableLiveData<Triple<Int,Int,String>> = MutableLiveData()
     val currentTimeOfSong:LiveData<Triple<Int,Int,String>> = _currentTimeOfSong
+
+    private var _currentSongListPosition:MutableLiveData<Int> = MutableLiveData()
+    val currentSongListPosition:LiveData<Int> = _currentSongListPosition
+
     fun fetchAllSong(){
         viewModelScope.launch {
             _allSongs.value = repository.fetchAllSongs()
@@ -57,6 +61,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
             repository.fetchCurrentTimeOfSong(mediaPlayer)
                 .catch { Log.e("ERROR_FLOW",it.message.toString() ) }
                 .collect{_currentTimeOfSong.value = it}
+        }
+    }
+    fun setCurrentPosition(position:Int){
+        viewModelScope.launch {
+            _currentSongListPosition.value = position
         }
     }
 
