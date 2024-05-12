@@ -235,6 +235,11 @@ class ListPlayerFragment : Fragment() {
                         Manifest.permission.RECORD_AUDIO)
                 ){isGranted,permissionsList->
                     if(isGranted){
+                        if(mediaPlayer.isPlaying){
+                            mediaPlayer.stop()
+                            mediaPlayer= MediaPlayer()
+                            bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                        }
                         mediaPlayer.setDataSource(song.pathLocation)
                         mediaPlayer.prepare()
                         mediaPlayer.start()
