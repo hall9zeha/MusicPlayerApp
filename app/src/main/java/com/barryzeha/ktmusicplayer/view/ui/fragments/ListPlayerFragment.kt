@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -215,10 +216,13 @@ class ListPlayerFragment : Fragment() {
         return song
     }
     private fun initCheckPermission(){
-        checkPermissions(requireContext(),
-            listOf(Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.RECORD_AUDIO)
-        ){isGranted,permissions->
+        val permissionList:MutableList<String> = mutableListOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            permissionList.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        checkPermissions(requireContext(),permissionList){isGranted,permissions->
             if(isGranted) Log.e("GRANTED", "Completed granted" )
             else{
                 permissions.forEach {permission->
