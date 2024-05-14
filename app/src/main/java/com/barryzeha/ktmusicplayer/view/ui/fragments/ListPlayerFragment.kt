@@ -133,8 +133,8 @@ class ListPlayerFragment : Fragment() {
         }
         mainViewModel.currentTimeOfSong.observe(viewLifecycleOwner){currentTime->
             currentTime?.let{
-                bind.bottomPlayerControls.tvInitTime.text = currentTime.third
-                bind.bottomPlayerControls.loadSeekBar.progress = mediaPlayer.currentPosition
+                bind.seekbarControl.tvInitTime.text = currentTime.third
+                bind.seekbarControl.loadSeekBar.progress = mediaPlayer.currentPosition
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
@@ -245,8 +245,8 @@ class ListPlayerFragment : Fragment() {
                         mediaPlayer.start()
                         mainViewModel.fetchCurrentTimeOfSong(mediaPlayer)
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-                        bind.bottomPlayerControls.tvEndTime.text= createTime(mediaPlayer.duration).third
-                        bind.bottomPlayerControls.loadSeekBar.max=mediaPlayer.duration
+                        bind.seekbarControl.tvEndTime.text= createTime(mediaPlayer.duration).third
+                        bind.seekbarControl.loadSeekBar.max=mediaPlayer.duration
                     }else{
                         permissionsList.forEach {permission->
                             if(!permission.second) {
