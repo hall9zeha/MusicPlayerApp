@@ -1,6 +1,5 @@
 package com.barryzeha.core.common
 
-import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -24,7 +23,6 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import kotlin.reflect.KClass
 
 
 /**
@@ -128,10 +126,8 @@ fun sendNotification(
     val notificationManager = getSystemService(context, NotificationManager::class.java) as NotificationManager
     createNotificationChannel(notificationManager)
     val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_play)
-        .setContentIntent(pendingIntent)
-        .setAutoCancel(true)
-    builder.setCustomNotification(context,title,"")
+
+    builder.setCustomNotification(context,title,"", pendingIntent)
     notificationManager.notify(NOTIFICATION_ID,builder.build())
 }
 fun cancelNotification(context:Context,idNotify:Int){
@@ -150,17 +146,20 @@ fun createNotificationChannel(notificationManager:NotificationManager){
     }
 }
 fun NotificationCompat.Builder.setCustomNotification(
-    context:Context,
-    title:String,
-    content:String
+    context: Context,
+    title: String,
+    content: String,
+    pendingIntent: PendingIntent
 ):NotificationCompat.Builder{
-    val intent = Intent()
-    val pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID.toInt(), intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
     val remoteViews = RemoteViews(context.packageName, R.layout.notify_controls_layout)
     remoteViews.setTextViewText(R.id.tvTitle,title)
     remoteViews.setOnClickPendingIntent(R.id.btnPlay,pendingIntent)
-    setCustomContentView(remoteViews)
+    setSmallIcon(R.drawable.ic_play)
+    setContentIntent(pendingIntent)
+    setAutoCancel(true)
+    setCustomBigContentView(remoteViews)
+
+
     return this
 }
