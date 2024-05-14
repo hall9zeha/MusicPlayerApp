@@ -1,17 +1,30 @@
 package com.barryzeha.core.common
 
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.provider.OpenableColumns
 import android.util.Log
+import android.widget.RemoteViews
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
+import com.barryzeha.core.R
+
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.reflect.KClass
 
 
 /**
@@ -20,7 +33,9 @@ import java.util.concurrent.TimeUnit
  * Copyright (c)  All rights reserved.
  **/
 
-
+private const val CHANNEL_ID = "KtMusic_Notify_Id"
+private const val CHANNEL_NAME = "KtMusic_Channel"
+private const val NOTIFICATION_ID = 202405
 fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Boolean, List<Pair<String,Boolean>>) ->Unit){
     val permissionsGranted:MutableList<Pair<String,Boolean>> = mutableListOf()
     var grantedCount=0
@@ -94,4 +109,58 @@ fun createTime(duration: Int): Triple<Int,Int,String> {
     return Triple(min,sec,stringTime)
 }
 
+// Notifications
 
+fun sendNotification(
+    context: Context,
+    title: String, /*notifyId:Int,*/ launchActivity:AppCompatActivity
+     ){
+    cancelNotification(context, NOTIFICATION_ID)
+    val mainIntent = Intent(context,launchActivity::class.java)
+    mainIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+
+    val pendingIntent = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+        PendingIntent.getActivity(context,NOTIFICATION_ID,mainIntent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }else{
+        PendingIntent.getActivity(context, NOTIFICATION_ID.toInt(), mainIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+    val notificationManager = getSystemService(context, NotificationManager::class.java) as NotificationManager
+    createNotificationChannel(notificationManager)
+    val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_play)
+        .setContentIntent(pendingIntent)
+        .setAutoCancel(true)
+    builder.setCustomNotification(context,title,"")
+    notificationManager.notify(NOTIFICATION_ID,builder.build())
+}
+fun cancelNotification(context:Context,idNotify:Int){
+    val notificationManager = getSystemService(context,NotificationManager::class.java) as NotificationManager?
+    notificationManager!!.cancel(idNotify)
+}
+fun createNotificationChannel(notificationManager:NotificationManager){
+    if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O){
+        val notificationChannel = NotificationChannel(
+            CHANNEL_ID, CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply{
+            enableLights(true)
+        }
+        notificationManager.createNotificationChannel(notificationChannel)
+    }
+}
+fun NotificationCompat.Builder.setCustomNotification(
+    context:Context,
+    title:String,
+    content:String
+):NotificationCompat.Builder{
+    val intent = Intent()
+    val pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID.toInt(), intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+    val remoteViews = RemoteViews(context.packageName, R.layout.notify_controls_layout)
+    remoteViews.setTextViewText(R.id.tvTitle,title)
+    remoteViews.setOnClickPendingIntent(R.id.btnPlay,pendingIntent)
+    setCustomContentView(remoteViews)
+    return this
+}

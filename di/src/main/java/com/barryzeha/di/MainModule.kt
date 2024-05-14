@@ -1,6 +1,7 @@
 package com.barryzeha.di
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
 
 import com.barryzeha.data.database.SongDatabase
@@ -24,6 +25,10 @@ private const val DATABASE_NAME = "SongDatabase"
 @Module
 @InstallIn(SingletonComponent::class)
 class MainModule {
+    @Provides
+    @Singleton
+    fun contextProvides(app:Application):Context = app.applicationContext
+
     @Provides
     @Singleton
     fun databaseProvides(app:Application) = Room.databaseBuilder(app.applicationContext,

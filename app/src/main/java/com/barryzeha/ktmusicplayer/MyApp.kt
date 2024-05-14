@@ -1,6 +1,8 @@
 package com.barryzeha.ktmusicplayer
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
 
 
@@ -12,7 +14,15 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class MyApp:Application() {
+    companion object{
+        @SuppressLint("StaticFieldLeak")
+        private var _context: Context?=null
+        val context  get() = _context!!
+    }
     override fun onCreate() {
+        if(_context==null){
+            _context = this
+        }
         super.onCreate()
     }
 }

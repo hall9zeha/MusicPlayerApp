@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,9 +24,11 @@ import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
+import com.barryzeha.core.common.sendNotification
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.entities.SongEntity
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
+import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -259,6 +262,7 @@ class ListPlayerFragment : Fragment() {
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
                         bind.seekbarControl.tvEndTime.text= createTime(mediaPlayer.duration).third
                         bind.seekbarControl.loadSeekBar.max=mediaPlayer.duration
+                        sendNotification(context,song.pathLocation!!.substringAfterLast("/","No named"),activity as AppCompatActivity)
                     }else{
                         permissionsList.forEach {permission->
                             if(!permission.second) {
