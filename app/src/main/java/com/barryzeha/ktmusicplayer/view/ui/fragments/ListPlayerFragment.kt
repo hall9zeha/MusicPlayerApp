@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -200,6 +201,13 @@ class ListPlayerFragment : Fragment() {
                getSongOfAdapter(currentSelectedPosition +1)?.let{song->startSongPlayer(song)}
            }
         }
+        bind.seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                mediaPlayer.seekTo(bind.seekbarControl.loadSeekBar.progress)
+            }
+        })
     }
     private fun getSongOfAdapter(position:Int):SongEntity?{
         mainViewModel.setCurrentPosition(position)
