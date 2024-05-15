@@ -1,5 +1,9 @@
 package com.barryzeha.core.common
 
+
+
+import android.app.Notification
+import android.app.Notification.MediaStyle
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -7,22 +11,27 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaMetadataRetriever
+import android.media.MediaSession2
+import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.util.Log
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.barryzeha.core.R
+import com.barryzeha.core.br.MusicPlayerBroadcast
 
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+
 
 
 /**
@@ -109,6 +118,7 @@ fun createTime(duration: Int): Triple<Int,Int,String> {
 
 // Notifications
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun sendNotification(
     context: Context,
     title: String, /*notifyId:Int,*/ launchActivity:AppCompatActivity
@@ -125,7 +135,7 @@ fun sendNotification(
     }
     val notificationManager = getSystemService(context, NotificationManager::class.java) as NotificationManager
     createNotificationChannel(notificationManager)
-    val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+    val builder = Notification.Builder(context, CHANNEL_ID)
 
     builder.setCustomNotification(context,title,"", pendingIntent)
     notificationManager.notify(NOTIFICATION_ID,builder.build())
@@ -145,20 +155,38 @@ fun createNotificationChannel(notificationManager:NotificationManager){
         notificationManager.createNotificationChannel(notificationChannel)
     }
 }
-fun NotificationCompat.Builder.setCustomNotification(
+fun Notification.Builder.setCustomNotification(
     context: Context,
     title: String,
     content: String,
     pendingIntent: PendingIntent
-):NotificationCompat.Builder{
+):Notification.Builder{
 
+    val toastIntent = Intent(context, MusicPlayerBroadcast::class.java)
+    toastIntent.setAction("com.barryzeha.ktmusicplayer.ACTION_TOAST")
+    val toastPendingIntent = PendingIntent.getBroadcast(context, 0, toastIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+
+
+    val mediaSession = MediaSession(context, "etiqueta de la sesión de medios")
+    val mediaStyle = MediaStyle()
+        .setMediaSession(mediaSession.sessionToken)
     val remoteViews = RemoteViews(context.packageName, R.layout.notify_controls_layout)
     remoteViews.setTextViewText(R.id.tvTitle,title)
-    remoteViews.setOnClickPendingIntent(R.id.btnPlay,pendingIntent)
+    remoteViews.setOnClickPendingIntent(R.id.btnPlay,toastPendingIntent)
     setSmallIcon(R.drawable.ic_play)
     setContentIntent(pendingIntent)
+    setPriority(Notification.PRIORITY_MAX)
+    setContentTitle(title)
     setAutoCancel(true)
-    setCustomBigContentView(remoteViews)
+    setOnlyAlertOnce(true)
+    setOngoing(true)
+    setStyle(mediaStyle)
+    addAction(R.drawable.ic_back,"prev",toastPendingIntent)
+    addAction(R.drawable.ic_play,"play",toastPendingIntent)
+    addAction(R.drawable.ic_next,"next",toastPendingIntent)
+
+    // setCustomBigContentView(remoteViews)
+    setVisibility(Notification.VISIBILITY_PUBLIC)
 
 
     return this

@@ -19,54 +19,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        >
 
-        <Button
+        <ImageButton
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btnPrevious"
-            app:icon="@drawable/ic_back"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            app:iconGravity="textStart"
-            app:iconSize="36dp"
-            app:iconTint="@color/controls_colors"
-            style="@style/Widget.Material3.Button.IconButton"
+            android:src="@drawable/ic_back"
 
+            style="@style/Widget.Material3.Button.IconButton"
             android:layout_marginEnd="24dp"
             />
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btnPlay"
-            app:icon="@drawable/ic_play"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            app:iconGravity="textStart"
-            app:iconSize="48dp"
-            app:iconTint="@color/controls_colors"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_play"
             style="@style/Widget.Material3.Button.IconButton"
-
             />
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btnNext"
-            app:icon="@drawable/ic_next"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            app:iconGravity="textStart"
-            app:iconSize="36dp"
-            app:iconTint="@color/controls_colors"
-            style="@style/Widget.Material3.Button.IconButton"
+            android:src="@drawable/ic_next"
 
+            style="@style/Widget.Material3.Button.IconButton"
             android:layout_marginStart="24dp"
             />
     </LinearLayout>

@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.barryzeha.core.br.MusicPlayerBroadcast
 import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
@@ -74,6 +76,7 @@ class ListPlayerFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //startService()
         activityResultFile()
         activityResultForPermission()
         setUpViews()
@@ -244,7 +247,7 @@ class ListPlayerFragment : Fragment() {
     }
     private fun startSongPlayer(song: SongEntity){
         activity?.let {context->
-            try {
+           // try {
                 checkPermissions(context,
                     listOf(Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.RECORD_AUDIO)
@@ -270,12 +273,16 @@ class ListPlayerFragment : Fragment() {
                             }
                         }
                     }
-                }
-            }catch (e:Exception){
-                Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
-                Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()
-            }
+              }
+            /*   }catch (e:Exception){
+                 Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
+                 Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()
+             }*/
         }
+    }
+    private fun startService(){
+        val intentFilter = IntentFilter("com.barryzeha.ktmusicplayer.ACTION_TOAST")
+        activity?.registerReceiver(MusicPlayerBroadcast(),intentFilter)
     }
 
     companion object {

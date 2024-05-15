@@ -58,7 +58,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
+    implementation(libs.media.style)
+    implementation(libs.media2.style)
 
     // Lifecycle
     implementation(libs.lifecycle.viewmodel)

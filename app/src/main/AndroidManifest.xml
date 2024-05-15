@@ -29,6 +29,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name="com.barryzeha.core.br.MusicPlayerBroadcast"
+            android:exported="false"
+            >
+           <!-- <intent-filter>
+                <action android:name="com.barryzeha.ktmusicplayer.ACTION_TOAST"/>
+            </intent-filter>-->
+        </receiver>
     </application>
 
 </manifest>
