@@ -3,6 +3,9 @@ package com.barryzeha.ktmusicplayer
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.os.Build
+import com.barryzeha.ktmusicplayer.common.createNotificationChannel
+
 import dagger.hilt.android.HiltAndroidApp
 
 
@@ -24,5 +27,8 @@ class MyApp:Application() {
             _context = this
         }
         super.onCreate()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(this)
+        }
     }
 }

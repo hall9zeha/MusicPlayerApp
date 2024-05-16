@@ -1,4 +1,4 @@
-package com.barryzeha.core.service
+package com.barryzeha.ktmusicplayer.service
 
 import android.annotation.SuppressLint
 import android.app.Notification
@@ -13,15 +13,20 @@ import android.media.session.PlaybackState
 import android.os.Binder
 import android.os.IBinder
 import android.provider.SyncStateContract.Helpers
+import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 
-import com.barryzeha.core.common.notificationMediaPlayer
+
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.ktmusicplayer.common.foregroundNotification
+
+import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
+import kotlin.math.log
 import kotlin.system.exitProcess
 
 
@@ -65,7 +70,9 @@ class MusicPlayerService : Service() {
                 return true
             }
         })
-
+        startForeground(1, foregroundNotification(this)).also {
+            isForegroundService=true
+        }
 
     }
 
@@ -81,6 +88,7 @@ class MusicPlayerService : Service() {
         val musicState = intent?.getParcelableExtra<MusicState>("musicState")
 
         musicState?.let { newState ->
+            Log.e("MUSIC-ENTITY", newState.toString() )
             if (isForegroundService) {
                 mediaSession.setPlaybackState(
                     PlaybackState.Builder()
@@ -103,6 +111,7 @@ class MusicPlayerService : Service() {
                         .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                         .build()
                 )
+
 
                 // Update notification
                 notificationManager.notify(

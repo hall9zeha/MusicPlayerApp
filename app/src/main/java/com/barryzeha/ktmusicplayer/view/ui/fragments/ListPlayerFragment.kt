@@ -2,12 +2,17 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
+import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +23,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startForegroundService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,10 +32,16 @@ import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
+import com.barryzeha.core.common.getTimeOfSong
 import com.barryzeha.core.common.sendNotification
 import com.barryzeha.core.common.showSnackBar
+import com.barryzeha.core.model.SongController
+import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
+import com.barryzeha.ktmusicplayer.service.MusicPlayerService
+
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
@@ -41,7 +53,7 @@ private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
-class ListPlayerFragment : Fragment() {
+class ListPlayerFragment : Fragment(), ServiceConnection {
 
     private var param1: String? = null
     private var param2: String? = null
@@ -50,6 +62,7 @@ class ListPlayerFragment : Fragment() {
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
     private lateinit var mediaPlayer:MediaPlayer
+    //private lateinit var exoPlayer:ExoPlayer
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private var isPlaying = false
@@ -57,12 +70,38 @@ class ListPlayerFragment : Fragment() {
     private val bind:FragmentListPlayerBinding get() = _bind!!
     private  var currentSelectedPosition:Int =0
 
+    private var currentMusicState = MusicState()
+    private var musicPlayerService: MusicPlayerService?=null
+
+    private val songController = object:SongController{
+        override fun play() {
+            mediaPlayer.start()
+        }
+
+        override fun pause() {
+            mediaPlayer.pause()
+        }
+
+        override fun next() {
+            //
+        }
+
+        override fun previous() {
+
+        }
+
+        override fun stop() {
+            mediaPlayer.stop()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,7 +115,7 @@ class ListPlayerFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //startService()
+
         activityResultFile()
         activityResultForPermission()
         setUpViews()
@@ -85,6 +124,11 @@ class ListPlayerFragment : Fragment() {
         setUpListeners()
         setUpObservers()
         initCheckPermission()
+        activity?.bindService(
+            startOrUpdateService(),
+            this,
+            BIND_AUTO_CREATE
+        )
     }
 
     private fun activityResultFile(){
@@ -145,6 +189,13 @@ class ListPlayerFragment : Fragment() {
             currentTime?.let{
                 bind.seekbarControl.tvInitTime.text = currentTime.third
                 bind.seekbarControl.loadSeekBar.progress = mediaPlayer.currentPosition
+                // update media player notify info
+                currentMusicState = currentMusicState.copy(
+                    isPlaying = mediaPlayer.isPlaying,
+                    currentDuration = mediaPlayer.currentPosition.toLong(),
+                    duration = mediaPlayer.duration.toLong()
+                )
+               startOrUpdateService()
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
@@ -267,7 +318,15 @@ class ListPlayerFragment : Fragment() {
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
                         bind.seekbarControl.tvEndTime.text= createTime(mediaPlayer.duration).third
                         bind.seekbarControl.loadSeekBar.max=mediaPlayer.duration
-                        sendNotification(context,song.pathLocation!!.substringAfterLast("/","No named"),activity as AppCompatActivity)
+                        // Set info currentSongEntity
+                        currentMusicState = MusicState(
+                            isPlaying=mediaPlayer.isPlaying,
+                            title = song.pathLocation?.substringAfterLast("/","No named")!!,
+                            artist = "Unknow still",
+                            album = "Any album",
+                            duration =(mediaPlayer.duration).toLong()
+                        )
+
                     }else{
                         permissionsList.forEach {permission->
                             if(!permission.second) {
@@ -282,9 +341,46 @@ class ListPlayerFragment : Fragment() {
              }*/
         }
     }
-    private fun startService(){
-        val intentFilter = IntentFilter("com.barryzeha.ktmusicplayer.ACTION_TOAST")
-        activity?.registerReceiver(MusicPlayerBroadcast(),intentFilter)
+    private fun startOrUpdateService():Intent{
+        val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
+            putExtra("musicState", currentMusicState)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(requireContext(),serviceIntent)
+        } else activity?.startService(serviceIntent)
+
+        return serviceIntent
+    }
+
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
+        musicPlayerService = binder.getService()
+        //musicPlayerService!!.setActivity(context as AppCompatActivity)
+        musicPlayerService!!.setSongController(songController)
+
+    }
+
+    override fun onServiceDisconnected(name: ComponentName?) {
+        musicPlayerService = null
+    }
+/*
+    override fun onStart() {
+        super.onStart()
+        if(!requireContext().isServiceRunning(MyBackgroundService::class.java)) {
+            requireContext().bindService(Intent(requireContext(), MyBackgroundService::class.java),
+                this,
+                Context.BIND_AUTO_CREATE
+            )
+            myService?.registerOnPomodoroListener(callBackTimer)
+        }
+    }*/
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            activity?.unbindService(this)
+        } catch (e: IllegalArgumentException) {
+            Log.e("STOP_SERVICE", "Service not registered")
+        }
     }
 
     companion object {
