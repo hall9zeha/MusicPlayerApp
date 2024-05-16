@@ -16,7 +16,6 @@ room_version = "2.6.1"
 jetbrainsKotlinJvm = "1.9.0"
 lifecycle-version = "2.7.0"
 media-version="1.7.0"
-media2-version="1.0.0-alpha04"
 core-version="1.13.1"
 
 
@@ -36,7 +35,6 @@ dagger-hilt-compiler = {group = "com.google.dagger", name = "hilt-android-compil
 androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-version" }
 lifecycle-viewmodel = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-version"}
 media-style = {group="androidx.media", name = "media", version.ref="media-version"}
-media2-style = {group="androidx.media2", name = "media2", version.ref="media2-version"}
 room-runtime = {group = "androidx.room", name = "room-runtime", version.ref = "room_version"}
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room_version" }
 
@@ -50,5 +48,6 @@ ksp = {id = "com.google.devtools.ksp", version.ref = "ksp-version"}
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
+parcelize = {id="org.jetbrains.kotlin.plugin.parcelize", version.ref="kotlin"}
 
 

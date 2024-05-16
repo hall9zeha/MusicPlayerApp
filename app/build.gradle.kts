@@ -4,6 +4,7 @@ plugins {
     // En gradle kts no requiere  agregar apply false a los plugins
     alias(libs.plugins.ksp)
     alias(libs.plugins.dagger.hilt.plugin)
+    alias(libs.plugins.parcelize)
 }
 
 android {
@@ -59,7 +60,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.media.style)
-    implementation(libs.media2.style)
+
 
     // Lifecycle
     implementation(libs.lifecycle.viewmodel)

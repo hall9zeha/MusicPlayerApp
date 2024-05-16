@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
     //alias(libs.plugins.dagger.hilt.plugin)
+    alias(libs.plugins.parcelize)
 
 }
 

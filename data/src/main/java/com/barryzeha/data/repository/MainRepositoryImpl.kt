@@ -2,7 +2,7 @@ package com.barryzeha.data.repository
 
 import android.media.MediaPlayer
 import com.barryzeha.core.common.createTime
-import com.barryzeha.core.entities.SongEntity
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.database.SongDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

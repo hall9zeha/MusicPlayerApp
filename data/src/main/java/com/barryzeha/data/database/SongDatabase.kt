@@ -2,7 +2,7 @@ package com.barryzeha.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.barryzeha.core.entities.SongEntity
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.dao.SongDao
 
 

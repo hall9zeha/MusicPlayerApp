@@ -1,4 +1,4 @@
-package com.barryzeha.core.entities
+package com.barryzeha.core.model.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

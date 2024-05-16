@@ -28,7 +28,7 @@ import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.sendNotification
 import com.barryzeha.core.common.showSnackBar
-import com.barryzeha.core.entities.SongEntity
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
@@ -92,10 +92,12 @@ class ListPlayerFragment : Fragment() {
             if(result.resultCode == Activity.RESULT_OK){
                 uri = result.data?.data
                 val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
-                mainViewModel.saveNewSong(SongEntity(
+                mainViewModel.saveNewSong(
+                    SongEntity(
                     pathLocation = realPathFromFile,
                     timestamp = Date().time
-                ))
+                )
+                )
             }
         }
     }
@@ -216,7 +218,7 @@ class ListPlayerFragment : Fragment() {
             }
         })
     }
-    private fun getSongOfAdapter(position:Int):SongEntity?{
+    private fun getSongOfAdapter(position:Int): SongEntity?{
         mainViewModel.setCurrentPosition(position)
         val song = adapter.getSongByPosition(currentSelectedPosition)
         return song
@@ -240,7 +242,7 @@ class ListPlayerFragment : Fragment() {
             }
         }
     }
-    private fun onItemClick(position:Int,song:SongEntity){
+    private fun onItemClick(position:Int,song: SongEntity){
         isPlaying=true
         mainViewModel.setCurrentPosition(position)
         startSongPlayer(song)

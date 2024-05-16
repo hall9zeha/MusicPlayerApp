@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.common.getBitrate
 import com.barryzeha.core.common.getTimeOfSong
-import com.barryzeha.core.entities.SongEntity
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
 
@@ -20,7 +20,7 @@ import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int,SongEntity)->Unit ): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
 
     private var songList:MutableList<SongEntity> = arrayListOf()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
@@ -40,7 +40,7 @@ class MusicListAdapter(private val onItemClick:(Int,SongEntity)->Unit ): Recycle
            Log.e("Song", it.pathLocation.toString() )
         }
     }
-    fun add(song:SongEntity){
+    fun add(song: SongEntity){
         if(!songList.contains(song)){
             songList.add(song)
             notifyItemInserted(songList.size -1)
@@ -50,7 +50,7 @@ class MusicListAdapter(private val onItemClick:(Int,SongEntity)->Unit ): Recycle
             notifyItemChanged(position)
         }
     }
-    fun getSongByPosition(position: Int):SongEntity?{
+    fun getSongByPosition(position: Int): SongEntity?{
         return if(songList.isNotEmpty()){
             songList[position]
         }else{
@@ -60,7 +60,7 @@ class MusicListAdapter(private val onItemClick:(Int,SongEntity)->Unit ): Recycle
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         private val bind = ItemSongBinding.bind(itemView)
 
-        fun onBind(position:Int,song:SongEntity) = with(bind){
+        fun onBind(position:Int,song: SongEntity) = with(bind){
             val mediaPlayer = MediaPlayer()
             mediaPlayer.setDataSource(song.pathLocation)
             mediaPlayer.prepare()
