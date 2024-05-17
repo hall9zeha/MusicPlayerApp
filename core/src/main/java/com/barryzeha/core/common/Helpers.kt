@@ -10,6 +10,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
 import android.media.MediaMetadataRetriever
 import android.media.session.MediaSession
@@ -129,5 +131,14 @@ fun createNotificationChannel(notificationManager:NotificationManager){
             setBypassDnd(true)
         }
         notificationManager.createNotificationChannel(notificationChannel)
+    }
+}
+
+fun getSongCover(path: String?): Bitmap? {
+    val mmr = MediaMetadataRetriever()
+    mmr.setDataSource(path)
+
+    return mmr.embeddedPicture?.let {
+        BitmapFactory.decodeByteArray(it, 0, it.size)
     }
 }

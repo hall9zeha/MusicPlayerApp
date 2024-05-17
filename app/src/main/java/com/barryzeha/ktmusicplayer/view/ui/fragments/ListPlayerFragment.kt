@@ -6,6 +6,9 @@ import android.content.ComponentName
 import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -30,6 +33,7 @@ import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
+import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -41,6 +45,8 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 import com.barryzeha.core.R as coreRes
+import com.barryzeha.ktmusicplayer.R as appRes
+
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -70,23 +76,28 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             Toast.makeText(context, "Play", Toast.LENGTH_SHORT).show()
             exoPlayer.play()
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+            updateMediaPlayerNotify()
         }
 
         override fun pause() {
             exoPlayer.pause()
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+            updateMediaPlayerNotify()
         }
 
         override fun next() {
             bind.bottomPlayerControls.btnNext.performClick()
+            updateMediaPlayerNotify()
         }
 
         override fun previous() {
             bind.bottomPlayerControls.btnPrevious.performClick()
+            updateMediaPlayerNotify()
         }
 
         override fun stop() {
             exoPlayer.stop()
+            updateMediaPlayerNotify()
         }
     }
 
@@ -187,14 +198,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 Log.e("TIME",currentTime.third.toString() )
                 bind.seekbarControl.tvInitTime.text = currentTime.third
                 bind.seekbarControl.loadSeekBar.progress = exoPlayer.currentPosition.toInt()
-                // update media player notify info
-                currentMusicState = currentMusicState.copy(
-                    isPlaying = exoPlayer.isPlaying,
-                    currentDuration = exoPlayer.currentPosition.toLong(),
-                    duration = exoPlayer.duration.toLong()
-                )
-               startOrUpdateService()
+                updateMediaPlayerNotify()
             }
+
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
             currentSelectedPosition = positionSelected
@@ -202,6 +208,15 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     private fun setUpViews()=with(bind){
 
+    }
+    private fun updateMediaPlayerNotify(){
+        // update media player notify info
+        currentMusicState = currentMusicState.copy(
+            isPlaying = exoPlayer.isPlaying,
+            currentDuration = exoPlayer.currentPosition.toLong(),
+            duration = exoPlayer.duration.toLong()
+        )
+        startOrUpdateService()
     }
     private fun setUpListeners()= with(bind){
         val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
@@ -239,6 +254,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                     }
                 }
             }
+            updateMediaPlayerNotify()
             isPlaying=true
         }
 
@@ -313,7 +329,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                                     bind.seekbarControl.tvEndTime.text = formattedDuration
                                     bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
                                     bind.seekbarControl.loadSeekBar.max=exoPlayer.duration.toInt()
+                                    val bitmap=getSongCover(song.pathLocation)
+                                    val placeholder = BitmapFactory.decodeStream(activity!!.assets.open("disc_empty_thumb.png"))
                                     // Set info currentSongEntity
+
                                     currentMusicState = MusicState(
                                         //isPlaying=mediaPlayer.isPlaying,
                                         isPlaying=exoPlayer.isPlaying,
@@ -321,8 +340,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                                         artist = "Unknow still",
                                         album = "Any album",
                                         //duration =(mediaPlayer.duration).toLong()
+                                        albumArt = bitmap?:placeholder,
                                         duration =(exoPlayer.duration).toLong()
+
                                     )
+                                    bind.ivCover.setImageBitmap(bitmap?:placeholder)
+
                                     mainViewModel.fetchCurrentTimeOfSong(exoPlayer)
 
                                 }
@@ -335,13 +358,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                                 }
                             }
                         })
+
                         exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation!!))
                         exoPlayer.prepare()
                         exoPlayer.play()
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-
-
-
 
                     }else{
                         permissionsList.forEach {permission->
@@ -358,6 +379,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
 
     }
+
+
     private fun startOrUpdateService():Intent{
         val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
             putExtra("musicState", currentMusicState)

@@ -124,6 +124,8 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         .setStyle(mediaStyle)
         .setSmallIcon(R.drawable.ic_play)
         .setOnlyAlertOnce(true)
+        .setContentTitle(state.title)
+        .setContentText(state.artist)
         .addAction(previousAction)
         .addAction(playPauseAction)
         .addAction(nextAction)

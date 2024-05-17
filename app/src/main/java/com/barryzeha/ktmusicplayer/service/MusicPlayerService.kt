@@ -77,6 +77,7 @@ class MusicPlayerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> songController?.pause()
             SongAction.Resume -> songController?.play()
@@ -100,7 +101,6 @@ class MusicPlayerService : Service() {
                         .setActions(PlaybackState.ACTION_PLAY_PAUSE)
                         .build()
                 )
-
                 // Update state to media session
                 mediaSession.setMetadata(
                     MediaMetadata.Builder()
@@ -111,9 +111,7 @@ class MusicPlayerService : Service() {
                         .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                         .build()
                 )
-
-
-                // Update notification
+           // Update notification
                 notificationManager.notify(
                     0,
                     notificationMediaPlayer(
