@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.common
 
+import com.barryzeha.ktmusicplayer.br.MusicPlayerBroadcast
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,11 +10,7 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import com.barryzeha.core.R
-import com.barryzeha.core.br.MusicPlayerBroadcast
-
-
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 

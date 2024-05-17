@@ -1,6 +1,7 @@
 package com.barryzeha.data.repository
 
 import android.media.MediaPlayer
+import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.model.entities.SongEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -19,5 +20,5 @@ interface MainRepository {
     suspend fun deleteSong(idSong:Long):Int
 
     // UI Flows
-    suspend fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer): Flow<Triple<Int,Int,String>>
+    suspend fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer): Flow<Triple<Int,Int,String>>
 }

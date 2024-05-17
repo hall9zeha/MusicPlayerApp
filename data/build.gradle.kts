@@ -32,6 +32,9 @@ android {
 dependencies{
 
 
+    implementation(libs.media3.explorer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.common)
     // Room
     ksp(libs.room.compiler)
 

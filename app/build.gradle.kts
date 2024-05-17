@@ -60,6 +60,10 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    //media3
+    implementation(libs.media3.explorer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.common)
     // Lifecycle
     implementation(libs.lifecycle.viewmodel)
     // Dagger hilt

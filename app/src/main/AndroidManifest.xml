@@ -38,13 +38,14 @@
                 <action android:name="com.barryzeha.ktmusicplayer.service.MusicPlayerService"/>
             </intent-filter>
         </service>
-        <receiver android:name="MusicPlayerBroadcast"
+        <receiver android:name=".br.MusicPlayerBroadcast"
             android:exported="false"
             >
            <!-- <intent-filter>
                 <action android:name="com.barryzeha.ktmusicplayer.ACTION_TOAST"/>
             </intent-filter>-->
         </receiver>
+
     </application>
 
 </manifest>

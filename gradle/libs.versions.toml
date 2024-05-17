@@ -17,6 +17,7 @@ jetbrainsKotlinJvm = "1.9.0"
 lifecycle-version = "2.7.0"
 media-version="1.7.0"
 core-version="1.13.1"
+media3-version = "1.3.1"
 
 
 [libraries]
@@ -31,7 +32,9 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 dagger-hilt = {group = "com.google.dagger", name = "hilt-android", version.ref = "dagger-hilt-version"}
 dagger-hilt-compiler = {group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "dagger-hilt-version"}
-
+media3-ui={group="androidx.media3", name="media3-ui", version.ref="media3-version"}
+media3-explorer={group="androidx.media3", name="media3-exoplayer", version.ref="media3-version"}
+media3-common={group="androidx.media3", name="media3-common", version.ref="media3-version"}
 androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-version" }
 lifecycle-viewmodel = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle-version"}
 media-style = {group="androidx.media", name = "media", version.ref="media-version"}

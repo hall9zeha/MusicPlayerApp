@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -56,7 +57,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
             _songById.value = repository.fetchSongById(idSong)
         }
     }
-    fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer){
+    fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer){
         viewModelScope.launch {
             repository.fetchCurrentTimeOfSong(mediaPlayer)
                 .catch { Log.e("ERROR_FLOW",it.message.toString() ) }

@@ -1,13 +1,10 @@
-package com.barryzeha.core.br
-
+package com.barryzeha.ktmusicplayer.br
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
-import android.widget.Toast
 import com.barryzeha.core.model.SongAction
-import com.barryzeha.core.service.MusicPlayerService
+import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 
 
 /**
@@ -16,14 +13,15 @@ import com.barryzeha.core.service.MusicPlayerService
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicPlayerBroadcast:BroadcastReceiver() {
+class MusicPlayerBroadcast: BroadcastReceiver() {
  override fun onReceive(context: Context?, intent: Intent?) {
-    val serviceIntent = Intent(context,MusicPlayerService::class.java)
-     val action = SongAction.entries[intent?.action?.toInt()?:SongAction.Nothing.ordinal]
+    val serviceIntent = Intent(context, MusicPlayerService::class.java)
+     val action = SongAction.values()[intent?.action?.toInt()?:SongAction.Nothing.ordinal]
 
      serviceIntent.action = action.ordinal.toString()
      if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
          context?.startForegroundService(serviceIntent)
+
      }else context?.startService(serviceIntent)
  }
 }

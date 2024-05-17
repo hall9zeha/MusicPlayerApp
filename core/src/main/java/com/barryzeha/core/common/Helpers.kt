@@ -12,7 +12,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
 import android.media.MediaMetadataRetriever
-import android.media.MediaSession2
 import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Build
@@ -21,20 +20,17 @@ import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.barryzeha.core.R
-import com.barryzeha.core.br.MusicPlayerBroadcast
+
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
-
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-
 
 
 /**
@@ -107,42 +103,18 @@ fun getBitrate(pathFile: String): Int? {
     retriever.release()
     return bitrate?.div(1000)
 }
-fun createTime(duration: Int): Triple<Int,Int,String> {
-    var stringTime = ""
-    val min = duration / 1000 / 60
-    val sec = duration / 1000 % 60
-    stringTime += "$min:"
-    if (sec < 10) {
-        stringTime += "0"
-    }
-    stringTime += sec
-    return Triple(min,sec,stringTime)
+fun createTime(duration: Long): Triple<Int,Int,String> {
+    Log.e("DURATION", duration.toString() )
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) -
+            TimeUnit.MINUTES.toSeconds(minutes)
+
+
+    // Formatear la duración en un String
+    val formattedDuration = String.format("%02d:%02d", minutes, seconds)
+    return Triple(minutes.toInt(),seconds.toInt(),formattedDuration)
 }
 
-// Notifications
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun sendNotification(
-    context: Context,
-    title: String, /*notifyId:Int,*/ launchActivity:AppCompatActivity
-     ){
-    cancelNotification(context, NOTIFICATION_ID)
-    val mainIntent = Intent(context,launchActivity::class.java)
-    mainIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-
-    val pendingIntent = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-        PendingIntent.getActivity(context,NOTIFICATION_ID,mainIntent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-    }else{
-        PendingIntent.getActivity(context, NOTIFICATION_ID.toInt(), mainIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-    }
-    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    createNotificationChannel(notificationManager)
-    val builder = Notification.Builder(context, CHANNEL_ID)
-
-    builder.setCustomNotification(context,title,"", pendingIntent)
-    notificationManager.notify(NOTIFICATION_ID,builder.build())
-}
 fun cancelNotification(context:Context,idNotify:Int){
     val notificationManager = getSystemService(context,NotificationManager::class.java) as NotificationManager?
     notificationManager!!.cancel(idNotify)
@@ -158,106 +130,4 @@ fun createNotificationChannel(notificationManager:NotificationManager){
         }
         notificationManager.createNotificationChannel(notificationChannel)
     }
-}
-fun Notification.Builder.setCustomNotification(
-    context: Context,
-    title: String,
-    content: String,
-    pendingIntent: PendingIntent
-):Notification.Builder{
-
-    val toastIntent = Intent(context, MusicPlayerBroadcast::class.java)
-    toastIntent.setAction("com.barryzeha.ktmusicplayer.ACTION_TOAST")
-    val toastPendingIntent = PendingIntent.getBroadcast(context, 0, toastIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
-
-
-    val mediaSession = MediaSession(context, "etiqueta de la sesión de medios")
-    val mediaStyle = MediaStyle()
-        .setMediaSession(mediaSession.sessionToken)
-    val remoteViews = RemoteViews(context.packageName, R.layout.notify_controls_layout)
-    remoteViews.setTextViewText(R.id.tvTitle,title)
-    remoteViews.setOnClickPendingIntent(R.id.btnPlay,toastPendingIntent)
-    setSmallIcon(R.drawable.ic_play)
-    setContentIntent(pendingIntent)
-    setPriority(Notification.PRIORITY_MAX)
-    setContentTitle(title)
-    setAutoCancel(true)
-    setOnlyAlertOnce(true)
-    setOngoing(true)
-    setStyle(mediaStyle)
-    addAction(R.drawable.ic_back,"prev",toastPendingIntent)
-    addAction(R.drawable.ic_play,"play",toastPendingIntent)
-    addAction(R.drawable.ic_next,"next",toastPendingIntent)
-
-    // setCustomBigContentView(remoteViews)
-    setVisibility(Notification.VISIBILITY_PUBLIC)
-
-
-    return this
-}
-// Older way
-
-//New way
-
-@Suppress("Deprecation")
-fun notificationMediaPlayer(context:Context,mediaStyle: MediaStyle, state:MusicState):Notification{
-    val builder = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-        Notification.Builder(context, CHANNEL_ID)
-    }else Notification.Builder(context)
-    val playPauseIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(
-            if (state.isPlaying) SongAction.Pause.ordinal.toString() else SongAction.Resume.ordinal.toString()
-        )
-    val playPausePI = PendingIntent.getBroadcast(
-        context,
-        1,
-        playPauseIntent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
-    val playPauseAction = Notification.Action.Builder(
-        Icon.createWithResource(
-            context,
-            if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-        ),
-        "PlayPause",
-        playPausePI
-    ).build()
-
-    val previousIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(SongAction.Previous.ordinal.toString())
-    val previousPI = PendingIntent.getBroadcast(
-        context,
-        2,
-        previousIntent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
-    val previousAction = Notification.Action.Builder(
-        Icon.createWithResource(context, R.drawable.ic_back),
-        "Previous",
-        previousPI
-    ).build()
-
-    val nextIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(SongAction.Next.ordinal.toString())
-    val nextPI = PendingIntent.getBroadcast(
-        context,
-        3,
-        nextIntent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
-    val nextAction = Notification.Action.Builder(
-        Icon.createWithResource(context, R.drawable.ic_next),
-        "Previous",
-        nextPI
-    ).build()
-
-    return builder
-        .setStyle(mediaStyle)
-        .setSmallIcon(R.drawable.ic_play)
-        .setOnlyAlertOnce(true)
-        .addAction(previousAction)
-        .addAction(playPauseAction)
-        .addAction(nextAction)
-        .build()
-
 }

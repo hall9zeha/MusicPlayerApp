@@ -1,6 +1,7 @@
 package com.barryzeha.data.repository
 
 import android.media.MediaPlayer
+import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.database.SongDatabase
@@ -9,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -38,11 +40,13 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
     }
 
     // UI Flows
-    override suspend fun fetchCurrentTimeOfSong(mediaPlayer:MediaPlayer): Flow<Triple<Int,Int,String>> {
+    override suspend fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer): Flow<Triple<Int,Int,String>> {
         return flow{
                 while(true) {
-                    if(mediaPlayer.isPlaying) {
-                        emit(createTime(mediaPlayer.currentPosition))
+                    val isPlaying = withContext(Dispatchers.Main){ mediaPlayer.isPlaying}
+                    if(isPlaying) {
+                        val formattedTime= withContext(Dispatchers.Main){createTime(mediaPlayer.currentPosition)}
+                        emit(formattedTime)
                         delay(1000)
                     }
                 }
