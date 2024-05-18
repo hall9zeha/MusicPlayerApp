@@ -2,6 +2,7 @@ package com.barryzeha.core.common
 
 
 
+import android.app.Activity
 import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.NotificationChannel
@@ -134,11 +135,16 @@ fun createNotificationChannel(notificationManager:NotificationManager){
     }
 }
 
-fun getSongCover(path: String?): Bitmap? {
+fun getSongCover(activity: Activity, path: String?): MusicState? {
     val mmr = MediaMetadataRetriever()
     mmr.setDataSource(path)
-
-    return mmr.embeddedPicture?.let {
+    val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+    val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+    val bitmap= mmr.embeddedPicture?.let {
         BitmapFactory.decodeByteArray(it, 0, it.size)
     }
+    return MusicState(artist = artist?:"Unknown",
+        album = album?:"Album Unknown",
+        albumArt = bitmap?:BitmapFactory.decodeStream(activity.assets.open("disc_empty_thumb.png"))
+        )
 }

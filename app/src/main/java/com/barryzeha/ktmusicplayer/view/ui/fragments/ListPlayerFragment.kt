@@ -329,22 +329,22 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                                     bind.seekbarControl.tvEndTime.text = formattedDuration
                                     bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
                                     bind.seekbarControl.loadSeekBar.max=exoPlayer.duration.toInt()
-                                    val bitmap=getSongCover(song.pathLocation)
-                                    val placeholder = BitmapFactory.decodeStream(activity!!.assets.open("disc_empty_thumb.png"))
+                                    val songMetadata=getSongCover(activity!!,song.pathLocation)
+
                                     // Set info currentSongEntity
 
                                     currentMusicState = MusicState(
                                         //isPlaying=mediaPlayer.isPlaying,
                                         isPlaying=exoPlayer.isPlaying,
                                         title = song.pathLocation?.substringAfterLast("/","No named")!!,
-                                        artist = "Unknow still",
-                                        album = "Any album",
+                                        artist = songMetadata!!.artist,
+                                        album = songMetadata!!.album,
                                         //duration =(mediaPlayer.duration).toLong()
-                                        albumArt = bitmap?:placeholder,
+                                        albumArt = songMetadata!!.albumArt,
                                         duration =(exoPlayer.duration).toLong()
 
                                     )
-                                    bind.ivCover.setImageBitmap(bitmap?:placeholder)
+                                    bind.ivCover.setImageBitmap(songMetadata!!.albumArt)
 
                                     mainViewModel.fetchCurrentTimeOfSong(exoPlayer)
 
