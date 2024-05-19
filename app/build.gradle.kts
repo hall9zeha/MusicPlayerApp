@@ -59,7 +59,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
+    // Glide
+    implementation(libs.glide)
+    ksp(libs.glide.compiler)
     //media3
     implementation(libs.media3.explorer)
     implementation(libs.media3.ui)

@@ -10,6 +10,8 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -66,6 +68,12 @@ class MainPlayerFragment : Fragment() {
         bind.tvSongAlbum.text=musicState.album
         bind.tvSongArtist.text=musicState.artist
         bind.tvSongDescription.text = musicState.title
+        Glide.with(requireContext())
+            .load(musicState.albumArt)
+            .centerCrop()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(bind.ivMusicCover)
+
     }
     companion object {
         @JvmStatic

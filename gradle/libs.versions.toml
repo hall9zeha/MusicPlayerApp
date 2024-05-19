@@ -12,6 +12,8 @@ activity = "1.9.0"
 constraintlayout = "2.1.4"
 dagger-hilt-version = "2.51.1"
 fragment-version = "1.7.0"
+glide-version = "4.16.0"
+glide-compiler-version = "4.16.0"
 room_version = "2.6.1"
 jetbrainsKotlinJvm = "1.9.0"
 lifecycle-version = "2.7.0"
@@ -32,6 +34,8 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 dagger-hilt = {group = "com.google.dagger", name = "hilt-android", version.ref = "dagger-hilt-version"}
 dagger-hilt-compiler = {group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "dagger-hilt-version"}
+glide = {group = "com.github.bumptech.glide", name = "glide", version.ref = "glide-version"}
+glide-compiler = {group ="com.github.bumptech.glide", name = "compiler", version.ref = "glide-compiler-version"}
 media3-ui={group="androidx.media3", name="media3-ui", version.ref="media3-version"}
 media3-explorer={group="androidx.media3", name="media3-exoplayer", version.ref="media3-version"}
 media3-common={group="androidx.media3", name="media3-common", version.ref="media3-version"}
