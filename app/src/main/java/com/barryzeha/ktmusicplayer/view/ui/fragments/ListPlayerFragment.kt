@@ -57,7 +57,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private var param1: String? = null
     private var param2: String? = null
     private var _bind:FragmentListPlayerBinding? = null
-    private val mainViewModel:MainViewModel by viewModels()
+    private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
     private lateinit var exoPlayer: ExoPlayer
@@ -199,6 +199,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 bind.seekbarControl.tvInitTime.text = currentTime.third
                 bind.seekbarControl.loadSeekBar.progress = exoPlayer.currentPosition.toInt()
                 updateMediaPlayerNotify()
+                mainViewModel.setMusicState(currentMusicState)
             }
 
         }
@@ -345,7 +346,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
                                     )
                                     bind.ivCover.setImageBitmap(songMetadata!!.albumArt)
-
+                                    mainViewModel.setMusicState(currentMusicState)
                                     mainViewModel.fetchCurrentTimeOfSong(exoPlayer)
 
                                 }

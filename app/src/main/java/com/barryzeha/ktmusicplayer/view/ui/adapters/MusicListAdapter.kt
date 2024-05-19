@@ -72,7 +72,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): Recycl
             }
             Log.e("TAG", song.pathLocation.toString() )
 
-            tvSongDesc.text=song.pathLocation?.substringAfterLast("/","No named")
+            tvSongDesc.text=String.format("%s. %s",(position+1),song.pathLocation?.substringAfterLast("/","No named"))
             tvDuration.text= getTimeOfSong( (mediaPlayer.duration).toLong())
             //tvFileFormat.text = String.format("::%s",song.pathLocation?.substring(song.pathLocation?.lastIndexOf(".")!! +1))
             tvFileFormat.text = String.format("::%s",song.pathLocation?.substringAfterLast(".","NA"))

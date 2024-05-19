@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.exoplayer.ExoPlayer
+import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,6 +42,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _currentSongListPosition:MutableLiveData<Int> = MutableLiveData()
     val currentSongListPosition:LiveData<Int> = _currentSongListPosition
 
+    private var _musicState:MutableLiveData<MusicState> = MutableLiveData()
+    val musicState:LiveData<MusicState> = _musicState
+
     fun fetchAllSong(){
         viewModelScope.launch {
             _allSongs.value = repository.fetchAllSongs()
@@ -70,6 +74,10 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
         }
     }
 
-
+    fun setMusicState(musicState: MusicState){
+        viewModelScope.launch {
+            _musicState.value = musicState
+        }
+    }
 
 }

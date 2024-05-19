@@ -5,8 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
+import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -20,6 +23,7 @@ class MainPlayerFragment : Fragment() {
     private var param2: String? = null
     private var _bind:FragmentMainPlayerBinding ? = null
     private val bind:FragmentMainPlayerBinding get() = _bind!!
+    private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,12 +49,24 @@ class MainPlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
+        setUpObservers()
         bind.tvSongDescription.setSelected(true)
         bind.tvSongArtist.setSelected(true)
         bind.tvSongAlbum.setSelected(true)
 
     }
-
+    private fun setUpObservers(){
+        mainViewModel.musicState.observe(viewLifecycleOwner){
+            it?.let{musicState->
+                setUpSongInfo(musicState)
+            }
+        }
+    }
+    private fun setUpSongInfo(musicState: MusicState){
+        bind.tvSongAlbum.text=musicState.album
+        bind.tvSongArtist.text=musicState.artist
+        bind.tvSongDescription.text = musicState.title
+    }
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
