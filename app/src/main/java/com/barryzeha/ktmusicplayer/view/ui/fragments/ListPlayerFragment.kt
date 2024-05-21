@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.app.Activity
 import android.content.ComponentName
+import android.content.Context
 import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
 import android.content.ServiceConnection
@@ -34,6 +35,7 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.common.isServiceRunning
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -130,11 +132,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         setUpListeners()
         setUpObservers()
         initCheckPermission()
-        activity?.bindService(
+       /* activity?.bindService(
             startOrUpdateService(),
             this,
             BIND_AUTO_CREATE
-        )
+        )*/
     }
 
     private fun activityResultFile(){
@@ -404,17 +406,16 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onServiceDisconnected(name: ComponentName?) {
         musicPlayerService = null
     }
-/*
     override fun onStart() {
         super.onStart()
-        if(!requireContext().isServiceRunning(MyBackgroundService::class.java)) {
-            requireContext().bindService(Intent(requireContext(), MyBackgroundService::class.java),
+        if(!requireContext().isServiceRunning(MusicPlayerService::class.java)) {
+            requireContext().bindService(startOrUpdateService(),
                 this,
                 Context.BIND_AUTO_CREATE
             )
-            myService?.registerOnPomodoroListener(callBackTimer)
+            musicPlayerService?.setSongController(songController)
         }
-    }*/
+    }
     override fun onDestroy() {
         super.onDestroy()
         try {

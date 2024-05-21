@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import com.barryzeha.core.common.createTime
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
@@ -73,6 +74,11 @@ class MainPlayerFragment : Fragment() {
             .centerCrop()
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(bind.ivMusicCover)
+        bind.pbLinear.max=musicState.duration.toInt()
+        bind.pbLinear.progress=musicState.currentDuration.toInt()
+        bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
+        bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
+
 
     }
     companion object {
