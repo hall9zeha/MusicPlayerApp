@@ -75,16 +75,17 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
     private val songController = object:SongController{
         override fun play() {
-            Toast.makeText(context, "Play", Toast.LENGTH_SHORT).show()
-            exoPlayer.play()
+
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-            updateMediaPlayerNotify()
+            musicPlayerService?.playingExoPlayer()
+            //updateMediaPlayerNotify()
         }
 
         override fun pause() {
-            exoPlayer.pause()
+
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
-            updateMediaPlayerNotify()
+            musicPlayerService?.pauseExoPlayer()
+            //updateMediaPlayerNotify()
         }
 
         override fun next() {
@@ -100,6 +101,19 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         override fun stop() {
             exoPlayer.stop()
             updateMediaPlayerNotify()
+
+        }
+
+        override fun musicState(musicState: MusicState?) {
+            musicState?.let {
+                currentMusicState = musicState
+                startOrUpdateService()
+                if (currentMusicState.isPlaying) {
+                    isPlaying = true
+                    bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+                }
+                setUpViews(musicState)
+            }
         }
     }
 
@@ -126,17 +140,13 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         activityResultFile()
         activityResultForPermission()
-        setUpViews()
+        setUpObservers()
+        //setUpViews(currentMusicState)
         setUpAdapter()
         setUpMediaPlayer()
         setUpListeners()
-        setUpObservers()
         initCheckPermission()
-       /* activity?.bindService(
-            startOrUpdateService(),
-            this,
-            BIND_AUTO_CREATE
-        )*/
+
     }
 
     private fun activityResultFile(){
@@ -153,7 +163,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
     }
-
+    //TODO corregir el conteo de la  posición actual en exoplayer al rotar pantalla
 
     private fun setUpMediaPlayer(){
         activity?.let {
@@ -183,6 +193,14 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     private fun setUpObservers(){
         mainViewModel.fetchAllSong()
+        mainViewModel.musicState.observe(viewLifecycleOwner){savedMusicState->
+            currentMusicState = savedMusicState
+            bind.ivCover.setImageBitmap(savedMusicState.albumArt)
+            val durationInMillis = savedMusicState.duration
+            val formattedDuration = createTime(durationInMillis).third
+            bind.seekbarControl.tvEndTime.text = formattedDuration
+            bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
+        }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if(it.isEmpty()){
                 Toast.makeText(context, "No hay ninguna canción", Toast.LENGTH_SHORT).show()
@@ -195,22 +213,35 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 adapter.add(song)
             }
         }
-        mainViewModel.currentTimeOfSong.observe(viewLifecycleOwner){currentTime->
+      /*  mainViewModel.currentTimeOfSong.observe(viewLifecycleOwner){currentTime->
             currentTime?.let{
-                Log.e("TIME",currentTime.third.toString() )
                 bind.seekbarControl.tvInitTime.text = currentTime.third
                 bind.seekbarControl.loadSeekBar.progress = exoPlayer.currentPosition.toInt()
                 updateMediaPlayerNotify()
                 mainViewModel.setMusicState(currentMusicState)
+
             }
 
-        }
+        }*/
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
             currentSelectedPosition = positionSelected
         }
     }
-    private fun setUpViews()=with(bind){
+    private fun setUpViews(musicState:MusicState)=with(bind){
 
+            val durationInMillis = musicState.duration
+            val formattedDuration = createTime(durationInMillis).third
+            seekbarControl.tvEndTime.text = formattedDuration
+            seekbarControl.loadSeekBar.max = durationInMillis.toInt()
+            seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
+            seekbarControl.loadSeekBar.progress = musicState.currentDuration.toInt()
+        activity?.let {
+            val songMetadata = getSongCover(requireActivity(), musicState.songPath)
+            mainViewModel.setMusicState(musicState)
+            songMetadata?.let {
+                ivCover.setImageBitmap(it.albumArt)
+            }
+        }
     }
     private fun updateMediaPlayerNotify(){
         // update media player notify info
@@ -248,28 +279,35 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         bottomPlayerControls.btnPlay.setOnClickListener{
             if(adapter.itemCount>0) {
-                if(!isPlaying)getSongOfAdapter(currentSelectedPosition)?.let{song->startSongPlayer(song)}
+                if(!currentMusicState.isPlaying)getSongOfAdapter(currentSelectedPosition)?.let{song->
+                    musicPlayerService?.startPlayer(song.pathLocation.toString())
+                }
                 else {
-                    if (exoPlayer.isPlaying) {
-                        exoPlayer.pause(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                    if (isPlaying) {
+                        musicPlayerService?.pauseExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                        isPlaying=false
                     } else {
-                        exoPlayer.play(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+                        musicPlayerService?.playingExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+                        isPlaying=true
                     }
                 }
             }
-            updateMediaPlayerNotify()
-            isPlaying=true
+
         }
 
         bottomPlayerControls.btnPrevious.setOnClickListener{
              if (currentSelectedPosition > 0) {
-                getSongOfAdapter(currentSelectedPosition - 1)?.let{song->startSongPlayer(song)}
-             }
-
+                getSongOfAdapter(currentSelectedPosition - 1)?.let{song->
+                    musicPlayerService?.startPlayer(song.pathLocation.toString())
+                }
+            }
         }
         bottomPlayerControls.btnNext.setOnClickListener {
            if(currentSelectedPosition<adapter.itemCount-1){
-               getSongOfAdapter(currentSelectedPosition +1)?.let{song->startSongPlayer(song)}
+               getSongOfAdapter(currentSelectedPosition +1)?.let{song->
+                   musicPlayerService?.startPlayer(song.pathLocation.toString())
+
+               }
            }
         }
         bind.seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
@@ -305,11 +343,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun onItemClick(position:Int,song: SongEntity){
-        isPlaying=true
+       musicPlayerService?.startPlayer(song.pathLocation.toString())
         mainViewModel.setCurrentPosition(position)
-        startSongPlayer(song)
     }
-    private fun startSongPlayer(song: SongEntity){
+   /* private fun startSongPlayer(song: SongEntity){
         activity?.let {context->
            // try {
                 checkPermissions(context,
@@ -331,24 +368,21 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                                     val formattedDuration = createTime(durationInMillis).third
                                     bind.seekbarControl.tvEndTime.text = formattedDuration
                                     bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
-                                    bind.seekbarControl.loadSeekBar.max=exoPlayer.duration.toInt()
                                     val songMetadata=getSongCover(activity!!,song.pathLocation)
 
                                     // Set info currentSongEntity
 
                                     currentMusicState = MusicState(
-                                        //isPlaying=mediaPlayer.isPlaying,
                                         isPlaying=exoPlayer.isPlaying,
                                         title = song.pathLocation?.substringAfterLast("/","No named")!!,
                                         artist = songMetadata!!.artist,
                                         album = songMetadata!!.album,
-                                        //duration =(mediaPlayer.duration).toLong()
                                         albumArt = songMetadata!!.albumArt,
-                                        duration =(exoPlayer.duration).toLong()
-
+                                        duration =(exoPlayer.duration).toLong(),
+                                        songPath = song.pathLocation.toString()
                                     )
-                                    bind.ivCover.setImageBitmap(songMetadata!!.albumArt)
                                     mainViewModel.setMusicState(currentMusicState)
+                                    bind.ivCover.setImageBitmap(songMetadata!!.albumArt)
                                     mainViewModel.fetchCurrentTimeOfSong(exoPlayer)
 
                                 }
@@ -375,13 +409,13 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         }
                     }
               }
-            /*   }catch (e:Exception){
+            *//*   }catch (e:Exception){
                  Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
                  Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()
-             }*/
+             }*//*
         }
 
-    }
+    }*/
 
 
     private fun startOrUpdateService():Intent{
@@ -398,7 +432,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicPlayerService = binder.getService()
-        //musicPlayerService!!.setActivity(context as AppCompatActivity)
         musicPlayerService!!.setSongController(songController)
 
     }

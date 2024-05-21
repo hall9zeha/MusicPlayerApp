@@ -135,7 +135,7 @@ fun createNotificationChannel(notificationManager:NotificationManager){
     }
 }
 
-fun getSongCover(activity: Activity, path: String?): MusicState? {
+fun getSongCover(activity: Context, path: String?): MusicState? {
     val mmr = MediaMetadataRetriever()
     mmr.setDataSource(path)
     val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
