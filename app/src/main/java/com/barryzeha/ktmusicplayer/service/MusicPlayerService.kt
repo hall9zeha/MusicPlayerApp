@@ -13,6 +13,7 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -85,7 +86,6 @@ class MusicPlayerService : Service() {
                 return true
             }
         })
-
         initExoplayer()
         startForeground(1, foregroundNotification(this)).also {
             isForegroundService=true

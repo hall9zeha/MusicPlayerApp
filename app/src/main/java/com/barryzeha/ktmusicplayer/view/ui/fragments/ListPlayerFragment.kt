@@ -78,14 +78,14 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
             musicPlayerService?.playingExoPlayer()
-            //updateMediaPlayerNotify()
+
         }
 
         override fun pause() {
 
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
             musicPlayerService?.pauseExoPlayer()
-            //updateMediaPlayerNotify()
+
         }
 
         override fun next() {
@@ -228,16 +228,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 adapter.add(song)
             }
         }
-      /*  mainViewModel.currentTimeOfSong.observe(viewLifecycleOwner){currentTime->
-            currentTime?.let{
-                bind.seekbarControl.tvInitTime.text = currentTime.third
-                bind.seekbarControl.loadSeekBar.progress = exoPlayer.currentPosition.toInt()
-                updateMediaPlayerNotify()
-                mainViewModel.setMusicState(currentMusicState)
-
-            }
-
-        }*/
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
             currentSelectedPosition = positionSelected
         }
@@ -386,16 +376,17 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     override fun onStart() {
         super.onStart()
-        if(!requireContext().isServiceRunning(MusicPlayerService::class.java)) {
+        //if(!requireContext().isServiceRunning(MusicPlayerService::class.java)) {
             requireContext().bindService(startOrUpdateService(),
                 this,
                 Context.BIND_AUTO_CREATE
             )
             musicPlayerService?.setSongController(songController)
-        }
+        //}
     }
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _bind=null
         try {
             activity?.unbindService(this)
         } catch (e: IllegalArgumentException) {
