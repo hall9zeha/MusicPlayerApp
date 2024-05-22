@@ -193,9 +193,6 @@ class MusicPlayerService : Service() {
                         songPath = songPath
                     )
                     songController?.currentTrack(currentMusicState)
-                 /*   mainViewModel.setMusicState(currentMusicState)
-                    bind.ivCover.setImageBitmap(songMetadata!!.albumArt)
-                    mainViewModel.fetchCurrentTimeOfSong(exoPlayer)*/
 
                 }
 

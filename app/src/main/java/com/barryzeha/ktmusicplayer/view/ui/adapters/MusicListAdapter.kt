@@ -37,7 +37,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): Recycl
     fun addAll(songs:List<SongEntity>){
         songs.forEach {
            add(it)
-           Log.e("Song", it.pathLocation.toString() )
         }
     }
     fun add(song: SongEntity){
@@ -70,8 +69,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): Recycl
                     tvBitrate.text=String.format("%s::kbps",getBitrate(song.pathLocation!!).toString())
 
             }
-            Log.e("TAG", song.pathLocation.toString() )
-
             tvSongDesc.text=String.format("%s. %s",(position+1),song.pathLocation?.substringAfterLast("/","No named"))
             tvDuration.text= getTimeOfSong( (mediaPlayer.duration).toLong())
             //tvFileFormat.text = String.format("::%s",song.pathLocation?.substring(song.pathLocation?.lastIndexOf(".")!! +1))

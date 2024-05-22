@@ -107,12 +107,9 @@ fun getBitrate(pathFile: String): Int? {
     return bitrate?.div(1000)
 }
 fun createTime(duration: Long): Triple<Int,Int,String> {
-    Log.e("DURATION", duration.toString() )
     val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
     val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) -
             TimeUnit.MINUTES.toSeconds(minutes)
-
-
     // Formatear la duración en un String
     val formattedDuration = String.format("%02d:%02d", minutes, seconds)
     return Triple(minutes.toInt(),seconds.toInt(),formattedDuration)

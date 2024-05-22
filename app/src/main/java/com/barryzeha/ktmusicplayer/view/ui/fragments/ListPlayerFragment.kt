@@ -166,7 +166,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
     }
-    //TODO corregir el conteo de la  posición actual en exoplayer al rotar pantalla
 
     private fun setUpMediaPlayer(){
         activity?.let {
@@ -360,7 +359,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun onItemClick(position:Int,song: SongEntity){
-       musicPlayerService?.startPlayer(song.pathLocation.toString())
+        musicPlayerService?.startPlayer(song.pathLocation.toString())
         mainViewModel.setCurrentPosition(position)
     }
 
@@ -402,6 +401,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         } catch (e: IllegalArgumentException) {
             Log.e("STOP_SERVICE", "Service not registered")
         }
+
     }
 
     companion object {
