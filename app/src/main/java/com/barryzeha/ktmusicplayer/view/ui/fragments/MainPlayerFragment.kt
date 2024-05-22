@@ -82,7 +82,7 @@ class MainPlayerFragment : Fragment() {
         bind.tvSongDescription.text = musicState.title
         Glide.with(requireContext())
             .load(musicState.albumArt)
-            .centerCrop()
+            .fitCenter()
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(bind.ivMusicCover)
         bind.pbLinear.max=musicState.duration.toInt()

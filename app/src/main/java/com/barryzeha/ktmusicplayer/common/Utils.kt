@@ -58,7 +58,7 @@ fun foregroundNotification(context: Context): Notification {
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
+    val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         channel.setAllowBubbles(false)
     }

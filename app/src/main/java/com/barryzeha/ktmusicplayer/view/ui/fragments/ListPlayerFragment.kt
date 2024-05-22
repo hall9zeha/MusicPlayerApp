@@ -75,14 +75,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
     private val songController = object:SongController{
         override fun play() {
-
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
             musicPlayerService?.playingExoPlayer()
 
         }
 
         override fun pause() {
-
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
             musicPlayerService?.pauseExoPlayer()
 
@@ -90,32 +88,41 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         override fun next() {
             bind.bottomPlayerControls.btnNext.performClick()
-            updateMediaPlayerNotify()
+
         }
 
         override fun previous() {
             bind.bottomPlayerControls.btnPrevious.performClick()
-            updateMediaPlayerNotify()
+
         }
 
         override fun stop() {
             exoPlayer.stop()
-            updateMediaPlayerNotify()
+            startOrUpdateService()
 
         }
 
         override fun musicState(musicState: MusicState?) {
             musicState?.let {
-
                 mainViewModel.setMusicState(musicState)
-                //setUpViews(musicState)
+               //setUpViews(musicState)
             }
         }
-
         override fun currentTrack(musicState: MusicState?) {
             musicState?.let{
                 setUpViews(musicState)
-                mainViewModel.saveStatePlaying(true)
+                if(!musicState.isPlaying){
+                    if((adapter.itemCount -1)  == currentSelectedPosition) {
+                        bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                        mainViewModel.saveStatePlaying(false)
+                        mainViewModel.setCurrentPosition(0)
+                    }
+                    else {
+                        mainViewModel.saveStatePlaying(true)
+                        bind.bottomPlayerControls.btnNext.performClick()}
+                }else{
+                    mainViewModel.saveStatePlaying(true)
+                }
             }
         }
     }
@@ -144,7 +151,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         activityResultFile()
         activityResultForPermission()
         setUpObservers()
-        //setUpViews(currentMusicState)
+
         setUpAdapter()
         setUpMediaPlayer()
         setUpListeners()
@@ -166,7 +173,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
     }
-
     private fun setUpMediaPlayer(){
         activity?.let {
              exoPlayer=ExoPlayer.Builder(requireContext())
@@ -201,10 +207,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             val durationInMillis = savedMusicState.duration
             val formattedDuration = createTime(durationInMillis).third
             bind.seekbarControl.tvEndTime.text = formattedDuration
-            bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
+            //bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
             bind.seekbarControl.tvInitTime.text = createTime(savedMusicState.currentDuration).third
             bind.seekbarControl.loadSeekBar.progress = savedMusicState.currentDuration.toInt()
-
             startOrUpdateService()
 
 
@@ -285,7 +290,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         bottomPlayerControls.btnPlay.setOnClickListener{
             if(adapter.itemCount>0) {
-                if(!currentMusicState.isPlaying)getSongOfAdapter(currentSelectedPosition)?.let{song->
+                if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->
                     musicPlayerService?.startPlayer(song.pathLocation.toString())
                 }
                 else {
@@ -300,7 +305,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
 
         }
-
         bottomPlayerControls.btnPrevious.setOnClickListener{
              if (currentSelectedPosition > 0) {
                 getSongOfAdapter(currentSelectedPosition - 1)?.let{song->
@@ -315,12 +319,13 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
                }
            }
+
         }
         bind.seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                exoPlayer.seekTo(bind.seekbarControl.loadSeekBar.progress.toLong())
+                musicPlayerService?.setExoPlayerProgress(seekBar?.progress!!.toLong())
             }
         })
     }

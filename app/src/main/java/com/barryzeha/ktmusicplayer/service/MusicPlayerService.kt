@@ -95,14 +95,29 @@ class MusicPlayerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        val musicState = intent?.getParcelableExtra<MusicState>("musicState")
+        var musicState = intent?.getParcelableExtra<MusicState>("musicState")
 
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
-            SongAction.Pause -> songController?.pause()
-            SongAction.Resume -> {songController?.play()}
-            SongAction.Stop -> songController?.stop()
-            SongAction.Next -> songController?.next()
-            SongAction.Previous -> songController?.previous()
+            SongAction.Pause -> {songController?.pause()
+                /*currentMusicState = currentMusicState.copy(
+                    isPlaying = exoPlayer.isPlaying,
+                    currentDuration = exoPlayer.currentPosition)
+                musicState = currentMusicState*/
+            }
+            SongAction.Resume -> {songController?.play()
+               /* currentMusicState = currentMusicState.copy(
+                    isPlaying = exoPlayer.isPlaying,
+                    currentDuration = exoPlayer.currentPosition)
+                musicState = currentMusicState*/
+            }
+            SongAction.Stop -> {songController?.stop()
+            }
+            SongAction.Next -> {songController?.next()
+                musicState = currentMusicState
+            }
+            SongAction.Previous -> {songController?.previous()
+                musicState = currentMusicState
+            }
             SongAction.Nothing -> {}
         }
 
@@ -151,15 +166,17 @@ class MusicPlayerService : Service() {
             .build()
 
             songRunnable = Runnable {
-                currentMusicState = currentMusicState.copy(
-                    isPlaying = exoPlayer.isPlaying,
-                    currentDuration = exoPlayer.currentPosition,
-                    duration = exoPlayer.duration
+                if(exoPlayer.currentPosition>0) {
+                    currentMusicState = currentMusicState.copy(
+                        isPlaying = exoPlayer.isPlaying,
+                        currentDuration = exoPlayer.currentPosition,
+                        duration = exoPlayer.duration
 
-                )
-                if(exoPlayer.isPlaying) {
-                    songController?.musicState(currentMusicState)
+                    )
                 }
+                //if(exoPlayer.isPlaying) {
+                    songController?.musicState(currentMusicState)
+                //}
                 songHandler.postDelayed(songRunnable, 1000)
             }
             songHandler.post(songRunnable)
@@ -171,6 +188,9 @@ class MusicPlayerService : Service() {
             exoPlayer= ExoPlayer.Builder(applicationContext)
                 .build()
 
+        }else{
+            exoPlayer= ExoPlayer.Builder(applicationContext)
+                .build()
         }
         exoPlayer.addListener(object: Player.Listener{
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -182,7 +202,6 @@ class MusicPlayerService : Service() {
                     val songMetadata= getSongCover(applicationContext!!,songPath)
 
                     // Set info currentSongEntity
-
                     currentMusicState = MusicState(
                         isPlaying=exoPlayer.isPlaying,
                         title = songPath.substringAfterLast("/","No named")!!,
@@ -194,6 +213,12 @@ class MusicPlayerService : Service() {
                     )
                     songController?.currentTrack(currentMusicState)
 
+                }
+                if(playbackState == Player.STATE_ENDED ){
+                    currentMusicState = currentMusicState.copy(
+                        isPlaying = false
+                    )
+                    songController?.currentTrack(currentMusicState)
                 }
 
             }
@@ -221,6 +246,7 @@ class MusicPlayerService : Service() {
     fun pauseExoPlayer(){
         if(exoPlayer.isPlaying){
             exoPlayer.pause()
+
         }
     }
     fun playingExoPlayer(){
@@ -228,7 +254,9 @@ class MusicPlayerService : Service() {
             exoPlayer.play()
         }
     }
-
+    fun setExoPlayerProgress(progress:Long){
+        exoPlayer.seekTo(progress)
+    }
     override fun onDestroy() {
         isForegroundService = false
         songController?.stop()
