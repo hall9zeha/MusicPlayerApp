@@ -16,4 +16,5 @@ interface SongController {
  fun previous()
  fun stop()
  fun musicState(musicState: MusicState?)
+ fun currentTrack(musicState: MusicState?)
 }

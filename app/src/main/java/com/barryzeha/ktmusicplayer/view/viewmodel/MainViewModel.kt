@@ -45,6 +45,12 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _musicState:MutableLiveData<MusicState> = MutableLiveData()
     val musicState:LiveData<MusicState> = _musicState
 
+    private var _currentTrack:MutableLiveData<MusicState> = MutableLiveData()
+    val currentTrack:LiveData<MusicState> = _currentTrack
+
+    private var _isPlaying:MutableLiveData<Boolean> = MutableLiveData()
+    val isPlaying:LiveData<Boolean> = _isPlaying
+
     fun fetchAllSong(){
         viewModelScope.launch {
             _allSongs.value = repository.fetchAllSongs()
@@ -77,6 +83,16 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     fun setMusicState(musicState: MusicState){
         viewModelScope.launch {
             _musicState.value = musicState
+        }
+    }
+    fun setCurrentTrack(musicState: MusicState){
+        viewModelScope.launch {
+            _currentTrack.value = musicState
+        }
+    }
+    fun saveStatePlaying(isPlaying:Boolean){
+        viewModelScope.launch {
+            _isPlaying.value = isPlaying
         }
     }
 

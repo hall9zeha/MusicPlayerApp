@@ -59,13 +59,24 @@ class MainPlayerFragment : Fragment() {
 
     }
     private fun setUpObservers(){
+        mainViewModel.currentTrack.observe(viewLifecycleOwner){
+            it?.let{currentTrack->
+                setUpSongInfo(currentTrack)
+            }
+        }
         mainViewModel.musicState.observe(viewLifecycleOwner){
             it?.let{musicState->
-                setUpSongInfo(musicState)
+                bind.pbLinear.max=musicState.duration.toInt()
+                bind.pbLinear.progress=musicState.currentDuration.toInt()
+                bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
             }
         }
     }
     private fun setUpSongInfo(musicState: MusicState){
+        bind.tvSongDescription.setSelected(true)
+        bind.tvSongArtist.setSelected(true)
+        bind.tvSongAlbum.setSelected(true)
+
         bind.tvSongAlbum.text=musicState.album
         bind.tvSongArtist.text=musicState.artist
         bind.tvSongDescription.text = musicState.title
@@ -78,7 +89,6 @@ class MainPlayerFragment : Fragment() {
         bind.pbLinear.progress=musicState.currentDuration.toInt()
         bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
-
 
     }
     companion object {

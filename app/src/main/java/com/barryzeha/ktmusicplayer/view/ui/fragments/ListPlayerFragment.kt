@@ -106,13 +106,16 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         override fun musicState(musicState: MusicState?) {
             musicState?.let {
-                currentMusicState = musicState
-                startOrUpdateService()
-                if (currentMusicState.isPlaying) {
-                    isPlaying = true
-                    bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-                }
+
+                mainViewModel.setMusicState(musicState)
+                //setUpViews(musicState)
+            }
+        }
+
+        override fun currentTrack(musicState: MusicState?) {
+            musicState?.let{
                 setUpViews(musicState)
+                mainViewModel.saveStatePlaying(true)
             }
         }
     }
@@ -200,6 +203,19 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             val formattedDuration = createTime(durationInMillis).third
             bind.seekbarControl.tvEndTime.text = formattedDuration
             bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
+            bind.seekbarControl.tvInitTime.text = createTime(savedMusicState.currentDuration).third
+            bind.seekbarControl.loadSeekBar.progress = savedMusicState.currentDuration.toInt()
+
+            startOrUpdateService()
+
+
+        }
+        mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
+            isPlaying=statePlay
+            if (statePlay) {
+                isPlaying = true
+                bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+            }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if(it.isEmpty()){
@@ -237,10 +253,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             seekbarControl.loadSeekBar.progress = musicState.currentDuration.toInt()
         activity?.let {
             val songMetadata = getSongCover(requireActivity(), musicState.songPath)
-            mainViewModel.setMusicState(musicState)
+            mainViewModel.setCurrentTrack(musicState)
             songMetadata?.let {
                 ivCover.setImageBitmap(it.albumArt)
             }
+
         }
     }
     private fun updateMediaPlayerNotify(){
@@ -285,10 +302,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 else {
                     if (isPlaying) {
                         musicPlayerService?.pauseExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
-                        isPlaying=false
+                        mainViewModel.saveStatePlaying(false)
                     } else {
                         musicPlayerService?.playingExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-                        isPlaying=true
+                        mainViewModel.saveStatePlaying(true)
                     }
                 }
             }
@@ -346,77 +363,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
        musicPlayerService?.startPlayer(song.pathLocation.toString())
         mainViewModel.setCurrentPosition(position)
     }
-   /* private fun startSongPlayer(song: SongEntity){
-        activity?.let {context->
-           // try {
-                checkPermissions(context,
-                    listOf(Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO)
-                ){isGranted,permissionsList->
-                    if(isGranted){
-                        if(exoPlayer.isPlaying){
-                            exoPlayer.stop()
-                            exoPlayer= ExoPlayer.Builder(requireContext())
-                                .build()
-                            bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
-                        }
-                        exoPlayer.addListener(object: Player.Listener{
-                            override fun onPlaybackStateChanged(playbackState: Int) {
-                                super.onPlaybackStateChanged(playbackState)
-                                if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
-                                    val durationInMillis = exoPlayer.duration
-                                    val formattedDuration = createTime(durationInMillis).third
-                                    bind.seekbarControl.tvEndTime.text = formattedDuration
-                                    bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
-                                    val songMetadata=getSongCover(activity!!,song.pathLocation)
-
-                                    // Set info currentSongEntity
-
-                                    currentMusicState = MusicState(
-                                        isPlaying=exoPlayer.isPlaying,
-                                        title = song.pathLocation?.substringAfterLast("/","No named")!!,
-                                        artist = songMetadata!!.artist,
-                                        album = songMetadata!!.album,
-                                        albumArt = songMetadata!!.albumArt,
-                                        duration =(exoPlayer.duration).toLong(),
-                                        songPath = song.pathLocation.toString()
-                                    )
-                                    mainViewModel.setMusicState(currentMusicState)
-                                    bind.ivCover.setImageBitmap(songMetadata!!.albumArt)
-                                    mainViewModel.fetchCurrentTimeOfSong(exoPlayer)
-
-                                }
-                                if(playbackState == Player.STATE_ENDED){
-                                    if(currentSelectedPosition < adapter.itemCount){
-                                        bind.bottomPlayerControls.btnNext.performClick()
-                                    }else {
-                                        bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
-                                    }
-                                }
-                            }
-                        })
-
-                        exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation!!))
-                        exoPlayer.prepare()
-                        exoPlayer.play()
-                        bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-
-                    }else{
-                        permissionsList.forEach {permission->
-                            if(!permission.second) {
-                                launcherPermission.launch(permission.first)
-                            }
-                        }
-                    }
-              }
-            *//*   }catch (e:Exception){
-                 Log.e("ERROR_MEDIA_PLAYER", e.message.toString() )
-                 Toast.makeText(context, "Error al reproducir", Toast.LENGTH_SHORT).show()
-             }*//*
-        }
-
-    }*/
-
 
     private fun startOrUpdateService():Intent{
         val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {

@@ -192,7 +192,7 @@ class MusicPlayerService : Service() {
                         duration =(exoPlayer.duration).toLong(),
                         songPath = songPath
                     )
-                    songController?.musicState(currentMusicState)
+                    songController?.currentTrack(currentMusicState)
                  /*   mainViewModel.setMusicState(currentMusicState)
                     bind.ivCover.setImageBitmap(songMetadata!!.albumArt)
                     mainViewModel.fetchCurrentTimeOfSong(exoPlayer)*/
