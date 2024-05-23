@@ -154,8 +154,7 @@ class MusicPlayerService : Service() {
                         newState
                     )
                 )
-                // Update musicStateEntity
-                //songController?.musicState(newState)
+
             }
         }
 
@@ -177,7 +176,7 @@ class MusicPlayerService : Service() {
                 //if(exoPlayer.isPlaying) {
                     songController?.musicState(currentMusicState)
                 //}
-                songHandler.postDelayed(songRunnable, 1000)
+                songHandler.postDelayed(songRunnable, 500)
             }
             songHandler.post(songRunnable)
 
@@ -256,6 +255,10 @@ class MusicPlayerService : Service() {
     }
     fun setExoPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
+    }
+    fun stopStartLoop(state:Boolean){
+        if(state)songHandler?.removeCallbacks(songRunnable)
+        else songHandler?.post(songRunnable)
     }
     override fun onDestroy() {
         isForegroundService = false

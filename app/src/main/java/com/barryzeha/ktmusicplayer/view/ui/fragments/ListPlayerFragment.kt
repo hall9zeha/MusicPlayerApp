@@ -66,6 +66,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private var isPlaying = false
+    private var isUserSeeking=false
+    private var userSelectPosition=0
 
     private val bind:FragmentListPlayerBinding get() = _bind!!
     private  var currentSelectedPosition:Int =0
@@ -207,12 +209,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             val durationInMillis = savedMusicState.duration
             val formattedDuration = createTime(durationInMillis).third
             bind.seekbarControl.tvEndTime.text = formattedDuration
-            //bind.seekbarControl.loadSeekBar.max = durationInMillis.toInt()
             bind.seekbarControl.tvInitTime.text = createTime(savedMusicState.currentDuration).third
             bind.seekbarControl.loadSeekBar.progress = savedMusicState.currentDuration.toInt()
             startOrUpdateService()
-
-
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -244,7 +243,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             seekbarControl.tvEndTime.text = formattedDuration
             seekbarControl.loadSeekBar.max = durationInMillis.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
-            seekbarControl.loadSeekBar.progress = musicState.currentDuration.toInt()
+
         activity?.let {
             val songMetadata = getSongCover(requireActivity(), musicState.songPath)
             mainViewModel.setCurrentTrack(musicState)
@@ -322,10 +321,24 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         }
         bind.seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) { }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    musicPlayerService?.setExoPlayerProgress(progress.toLong())
+                    userSelectPosition=progress
+                    seekBar?.progress=progress
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isUserSeeking=true
+                //musicPlayerService?.stopStartLoop(true)
+
+            }
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                musicPlayerService?.setExoPlayerProgress(seekBar?.progress!!.toLong())
+                isUserSeeking=false
+                //musicPlayerService?.stopStartLoop(false)
+                bind.seekbarControl.loadSeekBar.progress=userSelectPosition
+
             }
         })
     }
