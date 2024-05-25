@@ -4,28 +4,28 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.fragment.app.activityViewModels
+import android.widget.SeekBar
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.model.MainSongController
-import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
-import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.math.log
+import com.barryzeha.core.R as coreRes
 
 
 private const val ARG_PARAM1 = "param1"
@@ -37,6 +37,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var param1: String? = null
     private var param2: String? = null
     private var _bind:FragmentMainPlayerBinding ? = null
+    private var isPlaying:Boolean = false
+    private var currentMusicState = MusicState()
+    private var songLists:MutableList<SongEntity> = arrayListOf()
+    private var currentSelectedPosition=0
     private val bind:FragmentMainPlayerBinding get() = _bind!!
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
@@ -62,6 +66,29 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         }
 
+        override fun musicState(musicState: MusicState?) {
+            musicState?.let{
+                mainViewModel.setMusicState(musicState)
+            }
+        }
+
+        override fun currentTrack(musicState: MusicState?) {
+            musicState?.let{
+                setUpSongInfo(musicState)
+                if(!musicState.isPlaying){
+                    if((songLists.size -1)  == currentSelectedPosition) {
+                        bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
+                        mainViewModel.saveStatePlaying(false)
+                        mainViewModel.setCurrentPosition(0)
+                    }
+                    else {
+                        mainViewModel.saveStatePlaying(true)
+                        bind.btnMainNext.performClick()}
+                }else{
+                    mainViewModel.saveStatePlaying(true)
+                }
+            }
+        }
     }
 
 
@@ -97,6 +124,14 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     }
     private fun setUpObservers(){
+        mainViewModel.fetchAllSong()
+        mainViewModel.allSongs.observe(viewLifecycleOwner){songs->
+            if(songs.isNotEmpty()){
+                songs.forEach {
+                    if(!songLists.contains(it))songLists.add(it)
+                }
+            }
+        }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
             it?.let{currentTrack->
                 setUpSongInfo(currentTrack)
@@ -104,17 +139,25 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
             it?.let{musicState->
-                bind.pbLinear.max=musicState.duration.toInt()
-                bind.pbLinear.progress=musicState.currentDuration.toInt()
+                currentMusicState = musicState
+                bind.mainSeekBar.max=musicState.duration.toInt()
+                bind.mainSeekBar.progress=musicState.currentDuration.toInt()
                 bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
+                if(musicState.currentDuration>0)setUpSongInfo(musicState)
             }
+        }
+        mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
+            isPlaying=statePlay
+            if (statePlay) {
+                isPlaying = true
+                bind.btnMainPlay.setIconResource(com.barryzeha.core.R.drawable.ic_pause)
+            }
+        }
+        mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){currentPosition->
+            currentSelectedPosition=currentPosition
         }
     }
     private fun setUpSongInfo(musicState: MusicState){
-        bind.tvSongDescription.setSelected(true)
-        bind.tvSongArtist.setSelected(true)
-        bind.tvSongAlbum.setSelected(true)
-
         bind.tvSongAlbum.text=musicState.album
         bind.tvSongArtist.text=musicState.artist
         bind.tvSongDescription.text = musicState.title
@@ -123,26 +166,82 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             .fitCenter()
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(bind.ivMusicCover)
-        bind.pbLinear.max=musicState.duration.toInt()
-        bind.pbLinear.progress=musicState.currentDuration.toInt()
         bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
 
     }
     private fun setUpListeners()=with(bind){
-        btnMainPlay.setOnClickListener{
-            musicPlayerService?.pauseExoPlayer()
+        btnMainPlay.setOnClickListener {
+            if (songLists.size > 0) {
+                if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
+                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition).pathLocation.toString())
+                    bind.btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
+
+                } else {
+                    if (isPlaying) {
+                        musicPlayerService?.pauseExoPlayer(); btnMainPlay.setIconResource( com.barryzeha.core.R.drawable.ic_play)
+                        mainViewModel.saveStatePlaying(false)
+                    } else {
+                        musicPlayerService?.playingExoPlayer(); btnMainPlay.setIconResource(com.barryzeha.core.R.drawable.ic_pause)
+                        mainViewModel.saveStatePlaying(true)
+                    }
+                }
+            }
         }
+        btnMainPrevious.setOnClickListener{
+            if (currentSelectedPosition > 0) {
+                     musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition -1).pathLocation.toString())
+              }
+        }
+        btnMainNext.setOnClickListener {
+            if(currentSelectedPosition<=songLists.size -1){
+                   musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition +1).pathLocation.toString())
+            }
+        }
+        bind.mainSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            var userSelectPosition=0
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    musicPlayerService?.setExoPlayerProgress(progress.toLong())
+                    userSelectPosition=progress
+                    seekBar?.progress=progress
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                //isUserSeeking=true
+                //musicPlayerService?.stopStartLoop(true)
+
+            }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                //isUserSeeking=false
+                //musicPlayerService?.stopStartLoop(false)
+                bind.mainSeekBar.progress=userSelectPosition
+
+            }
+        })
+    }
+    private fun getSongOfList(position:Int): SongEntity{
+        mainViewModel.setCurrentPosition(position)
+        val song = songLists[currentSelectedPosition]
+        return song
     }
     private fun linkToService(){
-        context?.bindService(Intent (context, MusicPlayerService::class.java),this, Context.BIND_AUTO_CREATE)
+        context?.bindService(startOrUpdateService(),this, Context.BIND_AUTO_CREATE)
+    }
+    private fun startOrUpdateService():Intent{
+        val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
+            putExtra("musicState", currentMusicState)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(requireContext(), serviceIntent)
+        } else activity?.startService(serviceIntent)
+
+        return serviceIntent
     }
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicPlayerService = binder.getService()
         musicPlayerService!!.setMainSongController(songController)
-
-
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {

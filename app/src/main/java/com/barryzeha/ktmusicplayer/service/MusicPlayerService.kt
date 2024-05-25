@@ -181,6 +181,7 @@ class MusicPlayerService : Service() {
                 }
                 //if(exoPlayer.isPlaying) {
                     _songController?.musicState(currentMusicState)
+                    _mainSongController?.musicState(currentMusicState)
                 //}
                 songHandler.postDelayed(songRunnable, 500)
             }
@@ -217,6 +218,7 @@ class MusicPlayerService : Service() {
                         songPath = songPath
                     )
                     _songController?.currentTrack(currentMusicState)
+                    _mainSongController?.currentTrack(currentMusicState)
 
                 }
                 if(playbackState == Player.STATE_ENDED ){

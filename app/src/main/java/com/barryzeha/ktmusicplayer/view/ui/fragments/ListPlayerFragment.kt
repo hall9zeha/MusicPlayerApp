@@ -4,12 +4,8 @@ import android.Manifest
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
-import android.content.Context.BIND_AUTO_CREATE
 import android.content.Intent
 import android.content.ServiceConnection
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -26,8 +22,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat.startForegroundService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
@@ -35,7 +29,6 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongCover
-import com.barryzeha.core.common.isServiceRunning
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -47,7 +40,6 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
 import com.barryzeha.core.R as coreRes
-import com.barryzeha.ktmusicplayer.R as appRes
 
 
 private const val ARG_PARAM1 = "param1"
@@ -210,6 +202,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             bind.ivCover.setImageBitmap(savedMusicState.albumArt)
             val durationInMillis = savedMusicState.duration
             val formattedDuration = createTime(durationInMillis).third
+            bind.seekbarControl.loadSeekBar.max = savedMusicState.duration.toInt()
             bind.seekbarControl.tvEndTime.text = formattedDuration
             bind.seekbarControl.tvInitTime.text = createTime(savedMusicState.currentDuration).third
             bind.seekbarControl.loadSeekBar.progress = savedMusicState.currentDuration.toInt()
@@ -255,15 +248,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         }
     }
-    private fun updateMediaPlayerNotify(){
-        // update media player notify info
-        currentMusicState = currentMusicState.copy(
-            isPlaying = exoPlayer.isPlaying,
-            currentDuration = exoPlayer.currentPosition.toLong(),
-            duration = exoPlayer.duration.toLong()
-        )
-        startOrUpdateService()
-    }
+
     private fun setUpListeners()= with(bind){
         val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
             type = "audio/*"

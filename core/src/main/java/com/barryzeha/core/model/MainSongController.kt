@@ -1,5 +1,7 @@
 package com.barryzeha.core.model
 
+import com.barryzeha.core.model.entities.MusicState
+
 
 /**
  * Project KTMusicPlayer
@@ -13,4 +15,6 @@ interface MainSongController {
  fun next()
  fun previous()
  fun stop()
+ fun musicState(musicState: MusicState?)
+ fun currentTrack(musicState: MusicState?)
 }
