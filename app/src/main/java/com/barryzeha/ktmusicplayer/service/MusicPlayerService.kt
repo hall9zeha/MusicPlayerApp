@@ -13,18 +13,15 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.barryzeha.core.R
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.model.MainSongController
 
 
 import com.barryzeha.core.model.SongAction
@@ -33,9 +30,6 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.common.foregroundNotification
 
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
-import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
-import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
-import dagger.hilt.android.AndroidEntryPoint
 
 import kotlin.system.exitProcess
 
@@ -55,7 +49,9 @@ class MusicPlayerService : Service() {
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
 
-    private var songController: SongController? = null
+    private var _songController: SongController? = null
+    private var _mainSongController: MainSongController? = null
+    val songController: SongController get() = _songController!!
     private var isForegroundService = false
     private var currentMusicState = MusicState()
 
@@ -75,10 +71,10 @@ class MusicPlayerService : Service() {
                     val event = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
                     event?.let{
                         when(it.keyCode){
-                            KeyEvent.KEYCODE_MEDIA_PLAY -> songController?.play()
-                            KeyEvent.KEYCODE_MEDIA_PAUSE -> songController?.pause()
-                            KeyEvent.KEYCODE_MEDIA_NEXT -> songController?.next()
-                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> songController?.previous()
+                            KeyEvent.KEYCODE_MEDIA_PLAY ->{ _songController?.play();_mainSongController?.play()}
+                            KeyEvent.KEYCODE_MEDIA_PAUSE -> {_songController?.pause();_mainSongController?.pause()}
+                            KeyEvent.KEYCODE_MEDIA_NEXT -> {_songController?.next();_mainSongController?.next()}
+                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {_songController?.previous();_mainSongController?.previous()}
                             else -> {}
                         }
                     }
@@ -98,24 +94,34 @@ class MusicPlayerService : Service() {
         var musicState = intent?.getParcelableExtra<MusicState>("musicState")
 
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
-            SongAction.Pause -> {songController?.pause()
+            SongAction.Pause -> {
+                _songController?.pause()
+                _mainSongController?.pause()
                 /*currentMusicState = currentMusicState.copy(
                     isPlaying = exoPlayer.isPlaying,
                     currentDuration = exoPlayer.currentPosition)
                 musicState = currentMusicState*/
             }
-            SongAction.Resume -> {songController?.play()
+            SongAction.Resume -> {
+                _songController?.play()
+                _mainSongController?.play()
                /* currentMusicState = currentMusicState.copy(
                     isPlaying = exoPlayer.isPlaying,
                     currentDuration = exoPlayer.currentPosition)
                 musicState = currentMusicState*/
             }
-            SongAction.Stop -> {songController?.stop()
+            SongAction.Stop -> {
+                _songController?.stop()
+                _mainSongController?.stop()
             }
-            SongAction.Next -> {songController?.next()
+            SongAction.Next -> {
+                _songController?.next()
+                _mainSongController?.next()
                 musicState = currentMusicState
             }
-            SongAction.Previous -> {songController?.previous()
+            SongAction.Previous -> {
+                _songController?.previous()
+                _mainSongController?.previous()
                 musicState = currentMusicState
             }
             SongAction.Nothing -> {}
@@ -174,7 +180,7 @@ class MusicPlayerService : Service() {
                     )
                 }
                 //if(exoPlayer.isPlaying) {
-                    songController?.musicState(currentMusicState)
+                    _songController?.musicState(currentMusicState)
                 //}
                 songHandler.postDelayed(songRunnable, 500)
             }
@@ -210,14 +216,14 @@ class MusicPlayerService : Service() {
                         duration =(exoPlayer.duration).toLong(),
                         songPath = songPath
                     )
-                    songController?.currentTrack(currentMusicState)
+                    _songController?.currentTrack(currentMusicState)
 
                 }
                 if(playbackState == Player.STATE_ENDED ){
                     currentMusicState = currentMusicState.copy(
                         isPlaying = false
                     )
-                    songController?.currentTrack(currentMusicState)
+                    _songController?.currentTrack(currentMusicState)
                 }
 
             }
@@ -235,7 +241,10 @@ class MusicPlayerService : Service() {
         this._activity=activity
     }
     fun setSongController(controller:SongController){
-        songController=controller
+        _songController=controller
+    }
+    fun setMainSongController(controller:MainSongController){
+        _mainSongController=controller
     }
     fun startPlayer(songPath:String){
         songPath?.let {
@@ -262,7 +271,7 @@ class MusicPlayerService : Service() {
     }
     override fun onDestroy() {
         isForegroundService = false
-        songController?.stop()
+        _songController?.stop()
         mediaSession.release()
         stopSelf()
         stopForeground(STOP_FOREGROUND_REMOVE)

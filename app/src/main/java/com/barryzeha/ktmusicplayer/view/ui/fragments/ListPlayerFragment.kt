@@ -79,12 +79,14 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         override fun play() {
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
             musicPlayerService?.playingExoPlayer()
+            mainViewModel.saveStatePlaying(true)
 
         }
 
         override fun pause() {
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
             musicPlayerService?.pauseExoPlayer()
+            mainViewModel.saveStatePlaying(false)
 
         }
 
