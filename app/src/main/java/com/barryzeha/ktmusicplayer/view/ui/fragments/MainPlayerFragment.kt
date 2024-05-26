@@ -140,6 +140,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         mainViewModel.musicState.observe(viewLifecycleOwner){
             it?.let{musicState->
                 setChangeInfoViews(musicState)
+                startOrUpdateService()
             }
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
