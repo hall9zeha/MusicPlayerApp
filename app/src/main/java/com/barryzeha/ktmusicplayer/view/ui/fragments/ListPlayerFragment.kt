@@ -389,6 +389,16 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             musicPlayerService?.setSongController(songController)
         //}
     }
+
+    override fun onResume() {
+        super.onResume()
+        musicPlayerService?.setSongController(songController)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        musicPlayerService?.unregisterController()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _bind=null

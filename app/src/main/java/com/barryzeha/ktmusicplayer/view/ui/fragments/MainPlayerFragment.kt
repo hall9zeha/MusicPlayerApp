@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.createTime
-import com.barryzeha.core.model.MainSongController
+import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
@@ -45,7 +45,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var musicPlayerService: MusicPlayerService?=null
-    private var songController:MainSongController = object:MainSongController{
+    private var songController:SongController = object:SongController{
         override fun play() {
             Log.e("PLAY-INTERFACE", "PLAY" )
         }
@@ -241,7 +241,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicPlayerService = binder.getService()
-        musicPlayerService!!.setMainSongController(songController)
+        musicPlayerService!!.setSongController(songController)
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
@@ -252,6 +252,15 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         linkToService()
     }
 
+    override fun onResume() {
+        super.onResume()
+        musicPlayerService?.setSongController(songController)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        musicPlayerService?.unregisterController()
+    }
     override fun onDestroy() {
         super.onDestroy()
         _bind=null
