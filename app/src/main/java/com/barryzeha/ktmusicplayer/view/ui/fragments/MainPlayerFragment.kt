@@ -74,7 +74,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         override fun currentTrack(musicState: MusicState?) {
             musicState?.let{
-                setUpSongInfo(musicState)
+                mainViewModel.setCurrentTrack(musicState)
                 if(!musicState.isPlaying){
                     if((songLists.size -1)  == currentSelectedPosition) {
                         bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
@@ -133,17 +133,13 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             }
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
-            it?.let{currentTrack->
+           it?.let{currentTrack->
                 setUpSongInfo(currentTrack)
-            }
+           }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
             it?.let{musicState->
-                currentMusicState = musicState
-                bind.mainSeekBar.max=musicState.duration.toInt()
-                bind.mainSeekBar.progress=musicState.currentDuration.toInt()
-                bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
-                if(musicState.currentDuration>0)setUpSongInfo(musicState)
+                setChangeInfoViews(musicState)
             }
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
@@ -156,8 +152,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){currentPosition->
             currentSelectedPosition=currentPosition
         }
+
     }
     private fun setUpSongInfo(musicState: MusicState){
+        currentMusicState=musicState
         bind.tvSongAlbum.text=musicState.album
         bind.tvSongArtist.text=musicState.artist
         bind.tvSongDescription.text = musicState.title
@@ -169,6 +167,13 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
 
+    }
+    private fun setChangeInfoViews(musicState: MusicState){
+        currentMusicState = musicState
+        bind.mainSeekBar.max=musicState.duration.toInt()
+        bind.mainSeekBar.progress=musicState.currentDuration.toInt()
+        bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
+        bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
     }
     private fun setUpListeners()=with(bind){
         btnMainPlay.setOnClickListener {

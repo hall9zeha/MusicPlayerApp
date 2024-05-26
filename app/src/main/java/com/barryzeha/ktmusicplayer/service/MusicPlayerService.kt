@@ -13,13 +13,13 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
-import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
@@ -53,7 +53,7 @@ class MusicPlayerService : Service() {
 
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
-
+    private var executeOnceTime:Boolean=false
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -177,16 +177,13 @@ class MusicPlayerService : Service() {
         }else{
             exoPlayer= ExoPlayer.Builder(applicationContext)
                 .build()
+
         }
         exoPlayer.addListener(object: Player.Listener{
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
                 if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
-                    val durationInMillis = exoPlayer.duration
-                    val formattedDuration = createTime(durationInMillis).third
-
                     val songMetadata= getSongCover(applicationContext!!,songPath)
-
                     // Set info currentSongEntity
                     currentMusicState = MusicState(
                         isPlaying=exoPlayer.isPlaying,
@@ -194,17 +191,18 @@ class MusicPlayerService : Service() {
                         artist = songMetadata!!.artist,
                         album = songMetadata!!.album,
                         albumArt = songMetadata!!.albumArt,
-                        duration =(exoPlayer.duration).toLong(),
+                        duration =(exoPlayer.duration),
                         songPath = songPath
                     )
-                    _songController?.currentTrack(currentMusicState)
+                    if(!executeOnceTime)_songController?.currentTrack(currentMusicState)
+                    executeOnceTime=true
                 }
                 if(playbackState == Player.STATE_ENDED ){
                     currentMusicState = currentMusicState.copy(
                         isPlaying = false
                     )
-                    _songController?.currentTrack(currentMusicState)
-                }
+                   _songController?.currentTrack(currentMusicState)
+               }
 
             }
         })
@@ -225,6 +223,7 @@ class MusicPlayerService : Service() {
     }
     fun startPlayer(songPath:String){
         songPath?.let {
+            executeOnceTime=false
             setUpExoPlayer(songPath)
         }
     }
