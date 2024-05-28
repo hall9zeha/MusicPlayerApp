@@ -40,25 +40,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="16dp"/>
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLess"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:insetTop="0dp"
-            android:insetRight="0dp"
-            android:insetLeft="0dp"
-            android:insetBottom="0dp"
-            app:iconSize="32dp"
-            app:iconTint="@color/controls_colors"
-            style="@style/Widget.Material3.Button.IconButton"
-            app:icon="@drawable/ic_remove"
-            app:iconGravity="textStart"
-            app:layout_constraintStart_toEndOf="@id/btnAdd"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="8dp"
-            />
-        <ImageView
+           <ImageView
             android:layout_width="60dp"
             android:layout_height="0dp"
             android:id="@+id/ivCover"

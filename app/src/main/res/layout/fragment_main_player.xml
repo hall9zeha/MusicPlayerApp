@@ -46,47 +46,59 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"/>
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvSongArtist"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lnTrackDescription"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/artist_placeholder"
-        android:drawableStart="@drawable/ic_person"
-        android:drawablePadding="8dp"
+        android:orientation="vertical"
         android:gravity="center"
-        android:textSize="18sp"
-
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
-        android:singleLine="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvSongDescription"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginTop="8dp"
+        >
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvSongAlbum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/album_placeholder"
-        android:drawableStart="@drawable/ic_disc"
-        android:drawablePadding="8dp"
-        android:gravity="center"
-        android:textSize="18sp"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
-        android:singleLine="true"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSongArtist"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="4dp"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvSongArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/artist_placeholder"
+            android:drawableStart="@drawable/ic_person"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:textSize="18sp"
 
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp"/>
+
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvSongAlbum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/album_placeholder"
+            android:drawableStart="@drawable/ic_disc"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical|center"
+            android:textSize="18sp"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvSongArtist"
+            android:layout_marginTop="4dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongTimeRest"
         android:layout_width="wrap_content"
@@ -114,7 +126,7 @@
         tools:progress="70"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSongAlbum"
+        app:layout_constraintTop_toBottomOf="@id/lnTrackDescription"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="24dp"/>

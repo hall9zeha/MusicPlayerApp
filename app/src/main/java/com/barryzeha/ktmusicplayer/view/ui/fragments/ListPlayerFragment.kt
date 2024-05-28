@@ -271,9 +271,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 }
             }
         }
-        btnLess.setOnClickListener {
-            activity?.showSnackBar(it, "Seleccione un archivo de la lista primero")
-        }
+      
         bottomPlayerControls.btnPlay.setOnClickListener{
             if(adapter.itemCount>0) {
                 if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->
