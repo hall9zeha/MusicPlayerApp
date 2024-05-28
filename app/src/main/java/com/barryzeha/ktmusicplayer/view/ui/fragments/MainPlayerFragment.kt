@@ -16,9 +16,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
@@ -129,6 +131,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     }
     private fun setUpObservers(){
+        bind.ivMusicCover.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSong()
         mainViewModel.allSongs.observe(viewLifecycleOwner){songs->
             if(songs.isNotEmpty()){
@@ -165,11 +168,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         bind.tvSongAlbum.text=musicState.album
         bind.tvSongArtist.text=musicState.artist
         bind.tvSongDescription.text = musicState.title
-        Glide.with(requireContext())
-            .load(musicState.albumArt)
-            .fitCenter()
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .into(bind.ivMusicCover)
+        bind.ivMusicCover.loadImage(musicState.albumArt)
         bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
 

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">KTMusicPlayer</string>
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="sampleString">Anything song playing with long extension for scroll</string>
+    <string name="sampleString">No tracks currently playing No tracks currently playing</string>
+    <string name="artist_placeholder">Artist</string>
+    <string name="album_placeholder">Album</string>
 </resources>

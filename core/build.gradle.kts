@@ -61,6 +61,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // Glide
+    implementation(libs.glide)
+    ksp(libs.glide.compiler)
 
     // Room
     ksp(libs.room.compiler)
