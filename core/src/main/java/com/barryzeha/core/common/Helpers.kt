@@ -13,6 +13,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.drawable.Icon
 import android.media.MediaMetadataRetriever
 import android.media.session.MediaSession
@@ -34,6 +35,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.min
 
 
 /**
@@ -138,10 +140,21 @@ fun getSongCover(activity: Context, path: String?): MusicState? {
     val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
     val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
     val bitmap= mmr.embeddedPicture?.let {
-        BitmapFactory.decodeByteArray(it, 0, it.size)
+        val originalBitmap=BitmapFactory.decodeByteArray(it, 0, it.size)
+        scaleBitmap(originalBitmap,350,350)
     }
     return MusicState(artist = artist?:"Unknown",
         album = album?:"Album Unknown",
         albumArt = bitmap?:BitmapFactory.decodeStream(activity.assets.open("disc_empty_thumb.png"))
         )
+}
+fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+    val originalWidth = bitmap.width
+    val originalHeight = bitmap.height
+    val scaleWidth = maxWidth.toFloat() / originalWidth
+    val scaleHeight = maxHeight.toFloat() / originalHeight
+    val scale = min(scaleWidth, scaleHeight)
+    val matrix = Matrix()
+    matrix.postScale(scale, scale)
+    return Bitmap.createBitmap(bitmap, 0, 0, originalWidth, originalHeight, matrix, true)
 }

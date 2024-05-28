@@ -69,7 +69,6 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
 
         override fun stop() {
-
             startOrUpdateService()
         }
 
@@ -160,6 +159,13 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){currentPosition->
             currentSelectedPosition=currentPosition
+        }
+        mainViewModel.songById.observe(viewLifecycleOwner){song->
+            // Si se agregó una pista nueva desde la lista del segundo fragmento
+            // el observador lo agregará a la lista de este fragmento principal
+            song?.let{
+                if(!songLists.contains(song)) songLists.add(song)
+            }
         }
 
     }

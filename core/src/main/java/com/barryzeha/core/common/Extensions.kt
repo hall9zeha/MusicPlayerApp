@@ -27,13 +27,14 @@ fun <T> Context.isServiceRunning(service:Class<T>):Boolean{
         .getRunningServices(Integer.MAX_VALUE)
         .any{it.service.className == service.name}
 }
+
 fun ImageView.loadImage(bitmap:Bitmap)=
     Glide.with(this.context)
         .load(bitmap)
         .fitCenter()
-        .placeholder(R.drawable.placeholder_cover)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .into(this)
+// El placeholder solo se usa para la carátula del fragmento principal
 fun ImageView.loadImage(resource:Int)=
     Glide.with(this.context)
         .load(resource)

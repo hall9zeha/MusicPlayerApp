@@ -86,7 +86,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     val playPauseAction = Notification.Action.Builder(
         Icon.createWithResource(
             context,
-            if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+            if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow
         ),
         "PlayPause",
         playPausePI
