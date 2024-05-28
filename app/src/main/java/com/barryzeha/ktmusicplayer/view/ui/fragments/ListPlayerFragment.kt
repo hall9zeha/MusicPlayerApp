@@ -311,6 +311,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
+                    bind.seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
                     musicPlayerService?.setExoPlayerProgress(progress.toLong())
                     userSelectPosition=progress
                     seekBar?.progress=progress

@@ -213,20 +213,22 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             var userSelectPosition=0
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
+                    bind.tvSongTimeRest.text = createTime(progress.toLong()).third
                     musicPlayerService?.setExoPlayerProgress(progress.toLong())
                     userSelectPosition=progress
                     seekBar?.progress=progress
+
                 }
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                //isUserSeeking=true
+              //isUserSeeking=true
             }
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 //isUserSeeking=false
-
                 bind.mainSeekBar.progress=userSelectPosition
 
             }
+
         })
     }
     private fun getSongOfList(position:Int): SongEntity{

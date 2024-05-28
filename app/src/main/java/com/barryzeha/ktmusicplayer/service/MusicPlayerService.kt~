@@ -194,9 +194,6 @@ class MusicPlayerService : Service() {
                         duration =(exoPlayer.duration),
                         songPath = songPath
                     )
-                    // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-                    // información que de la pista en reproducción que no requiere cambios constantes
-                    // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
                     if(!executeOnceTime)_songController?.currentTrack(currentMusicState)
                     executeOnceTime=true
                 }
@@ -226,9 +223,6 @@ class MusicPlayerService : Service() {
     }
     fun startPlayer(songPath:String){
         songPath?.let {
-            // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-            // información que de la pista en reproducción que no requiere cambios constantes
-            // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
             setUpExoPlayer(songPath)
         }
