@@ -93,7 +93,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
 
         override fun stop() {
-            exoPlayer.stop()
+
             startOrUpdateService()
 
         }
@@ -318,12 +318,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 isUserSeeking=true
-                //musicPlayerService?.stopStartLoop(true)
-
             }
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 isUserSeeking=false
-                //musicPlayerService?.stopStartLoop(false)
                 bind.seekbarControl.loadSeekBar.progress=userSelectPosition
 
             }

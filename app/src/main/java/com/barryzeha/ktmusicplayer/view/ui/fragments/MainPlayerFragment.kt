@@ -47,23 +47,28 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var musicPlayerService: MusicPlayerService?=null
     private var songController:SongController = object:SongController{
         override fun play() {
-            Log.e("PLAY-INTERFACE", "PLAY" )
+            bind.btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
+            musicPlayerService?.playingExoPlayer()
+            mainViewModel.saveStatePlaying(true)
         }
 
         override fun pause() {
-            Log.e("PAUSE-INTERFACE", "PAUSE" )
+            bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
+            musicPlayerService?.pauseExoPlayer()
+            mainViewModel.saveStatePlaying(false)
         }
 
         override fun next() {
-
+            bind.btnMainNext.performClick()
         }
 
         override fun previous() {
-
+            bind.btnMainPrevious.performClick()
         }
 
         override fun stop() {
 
+            startOrUpdateService()
         }
 
         override fun musicState(musicState: MusicState?) {
@@ -215,12 +220,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 //isUserSeeking=true
-                //musicPlayerService?.stopStartLoop(true)
-
             }
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 //isUserSeeking=false
-                //musicPlayerService?.stopStartLoop(false)
+
                 bind.mainSeekBar.progress=userSelectPosition
 
             }
