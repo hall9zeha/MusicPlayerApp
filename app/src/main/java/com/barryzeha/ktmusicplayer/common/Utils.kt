@@ -123,6 +123,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     return builder
         .setStyle(mediaStyle)
         .setSmallIcon(R.drawable.ic_play)
+        .setLargeIcon(state.albumArt)
         .setOnlyAlertOnce(true)
         .setContentTitle(state.title)
         .setContentText(state.artist)

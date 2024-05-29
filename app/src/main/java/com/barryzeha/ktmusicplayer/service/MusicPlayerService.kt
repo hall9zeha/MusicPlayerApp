@@ -6,6 +6,8 @@ import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.BitmapFactory.*
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -54,12 +56,13 @@ class MusicPlayerService : Service() {
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
+    private var musicState:MusicState?=null
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
-        mediaStyle = Notification.MediaStyle().setMediaSession(mediaSession.sessionToken)
+        mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
 
         mediaSession.setCallback(object : MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -87,15 +90,17 @@ class MusicPlayerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        var musicState = intent?.getParcelableExtra<MusicState>("musicState")
+        musicState = intent?.getParcelableExtra<MusicState>("musicState")
 
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
-                _songController?.pause()
-              }
+               _songController?.pause()
+                exoPlayer.pause()
+            }
             SongAction.Resume -> {
                 _songController?.play()
-             }
+                exoPlayer.play()
+            }
             SongAction.Stop -> {
                 _songController?.stop()
             }
@@ -111,41 +116,46 @@ class MusicPlayerService : Service() {
         musicState?.let { newState ->
 
             if (isForegroundService) {
-
-                mediaSession.setPlaybackState(
-                    PlaybackState.Builder()
-                        .setState(
-                            if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                            newState.currentDuration,
-                            1f
-                        )
-                        .setActions(PlaybackState.ACTION_PLAY_PAUSE)
-                        .build()
-                )
-                // Update state to media session
-                mediaSession.setMetadata(
-                    MediaMetadata.Builder()
-                        .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                        .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                        .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
-                        .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                        .build()
-                )
-           // Update notification
-                notificationManager.notify(
-                    0,
-                    notificationMediaPlayer(
-                        this,
-                        Notification.MediaStyle().setMediaSession(mediaSession.sessionToken),
-                        newState
-                    )
-                )
-
+                //updateNotify()
             }
         }
 
         return START_NOT_STICKY
+    }
+    // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
+    // nos ayuda a controlar el estado de la notificación cuando el móvil esta en modo de bloqueo
+    // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
+    // dentro de la función initExoplayer()
+    private fun updateNotify(){
+        currentMusicState?.let {newState->
+            mediaSession.setPlaybackState(
+                PlaybackState.Builder()
+                    .setState(
+                        if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                        newState.currentDuration,
+                        1f
+                    )
+                    .setActions(PlaybackState.ACTION_PLAY_PAUSE)
+                    .build()
+            )
+            mediaSession.setMetadata(
+                MediaMetadata.Builder()
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                    .build()
+            )
+            notificationManager.notify(
+                0,
+                notificationMediaPlayer(
+                    this,
+                    MediaStyle().setMediaSession(mediaSession.sessionToken),
+                    currentMusicState
+                )
+            )
+        }
     }
     private fun initExoplayer(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
@@ -162,6 +172,7 @@ class MusicPlayerService : Service() {
                 }
                 //if(exoPlayer.isPlaying) {
                     _songController?.musicState(currentMusicState)
+                updateNotify()
                 //}
                 songHandler.postDelayed(songRunnable, 500)
             }

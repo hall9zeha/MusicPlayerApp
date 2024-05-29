@@ -213,6 +213,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             if (statePlay) {
                 isPlaying = true
                 bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+            }else{
+                bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
             }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
@@ -271,7 +273,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 }
             }
         }
-      
+
         bottomPlayerControls.btnPlay.setOnClickListener{
             if(adapter.itemCount>0) {
                 if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->

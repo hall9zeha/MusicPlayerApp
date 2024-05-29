@@ -131,8 +131,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     private fun setUpObservers(){
         bind.ivMusicCover.loadImage(coreRes.drawable.placeholder_cover)
-        mainViewModel.fetchAllSong()
-        mainViewModel.allSongs.observe(viewLifecycleOwner){songs->
+        mainViewModel.fetchAllSongFromMain()
+        mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             if(songs.isNotEmpty()){
                 songs.forEach {
                     if(!songLists.contains(it))songLists.add(it)
@@ -155,6 +155,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             if (statePlay) {
                 isPlaying = true
                 bind.btnMainPlay.setIconResource(com.barryzeha.core.R.drawable.ic_pause)
+            }else{
+                bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){currentPosition->
@@ -185,6 +187,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         bind.mainSeekBar.progress=musicState.currentDuration.toInt()
         bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
+
     }
     private fun setUpListeners()=with(bind){
         btnMainPlay.setOnClickListener {

@@ -48,6 +48,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): Recycl
             songList[position] = song
             notifyItemChanged(position)
         }
+
     }
     fun getSongByPosition(position: Int): SongEntity?{
         return if(songList.isNotEmpty()){
