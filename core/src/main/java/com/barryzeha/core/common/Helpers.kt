@@ -158,3 +158,12 @@ fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     matrix.postScale(scale, scale)
     return Bitmap.createBitmap(bitmap, 0, 0, originalWidth, originalHeight, matrix, true)
 }
+fun mColorList(context:Context)=
+    context.obtainStyledAttributes(intArrayOf(
+        android.R.attr.textColorPrimaryInverseNoDisable,
+        android.R.attr.colorPrimary,
+        com.google.android.material.R.attr.colorAccent,
+        com.google.android.material.R.attr.colorOnPrimary,
+        com.google.android.material.R.attr.colorSurface,
+        android.R.color.transparent
+    ))

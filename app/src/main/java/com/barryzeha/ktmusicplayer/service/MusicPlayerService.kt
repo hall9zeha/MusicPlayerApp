@@ -102,12 +102,15 @@ class MusicPlayerService : Service() {
                 exoPlayer.play()
             }
             SongAction.Stop -> {
+                // TODO implement when the  mobile is locked
                 _songController?.stop()
             }
             SongAction.Next -> {
+                // TODO implement when the  mobile is locked
                 _songController?.next()
             }
             SongAction.Previous -> {
+                // TODO implement when the mobile is locked
                 _songController?.previous()
             }
             SongAction.Nothing -> {}

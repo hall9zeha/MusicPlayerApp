@@ -10,6 +10,7 @@ import com.barryzeha.core.R
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
+import kotlin.math.roundToInt
 
 
 /**
@@ -42,3 +43,8 @@ fun ImageView.loadImage(resource:Int)=
         .placeholder(R.drawable.placeholder_cover)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .into(this)
+fun Int.adjustAlpha(factor: Float): Int =
+    (this.ushr(24) * factor).roundToInt() shl 24 or (0x00FFFFFF and this)
+
+inline val Int.alpha: Int
+    get() = (this shr 24) and 0xFF

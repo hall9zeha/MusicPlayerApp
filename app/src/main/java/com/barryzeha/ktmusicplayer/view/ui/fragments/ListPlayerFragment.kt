@@ -54,13 +54,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
-    private lateinit var exoPlayer: ExoPlayer
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private var isPlaying = false
     private var isUserSeeking=false
     private var userSelectPosition=0
-
     private val bind:FragmentListPlayerBinding get() = _bind!!
     private  var currentSelectedPosition:Int =0
 
@@ -73,31 +71,21 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             musicPlayerService?.playingExoPlayer()
             mainViewModel.saveStatePlaying(true)
 
-        }
-
+       }
         override fun pause() {
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
             musicPlayerService?.pauseExoPlayer()
             mainViewModel.saveStatePlaying(false)
-
         }
-
         override fun next() {
             bind.bottomPlayerControls.btnNext.performClick()
-
         }
-
         override fun previous() {
             bind.bottomPlayerControls.btnPrevious.performClick()
-
         }
-
         override fun stop() {
-
             startOrUpdateService()
-
         }
-
         override fun musicState(musicState: MusicState?) {
             musicState?.let {
                 mainViewModel.setMusicState(musicState)
@@ -122,14 +110,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -146,15 +132,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         activityResultFile()
         activityResultForPermission()
-        setUpObservers()
-
-        setUpAdapter()
-        setUpMediaPlayer()
-        setUpListeners()
         initCheckPermission()
-
+        setUpAdapter()
+        setUpObservers()
+        setUpListeners()
     }
-
     private fun activityResultFile(){
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
             if(result.resultCode == Activity.RESULT_OK){
@@ -167,12 +149,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 )
                 )
             }
-        }
-    }
-    private fun setUpMediaPlayer(){
-        activity?.let {
-             exoPlayer=ExoPlayer.Builder(requireContext())
-                .build()
         }
     }
     private fun activityResultForPermission(){
@@ -250,7 +226,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         }
     }
-
     private fun setUpListeners()= with(bind){
         val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
             type = "audio/*"
@@ -273,8 +248,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 }
             }
         }
-
-        bottomPlayerControls.btnPlay.setOnClickListener{
+       bottomPlayerControls.btnPlay.setOnClickListener{
             if(adapter.itemCount>0) {
                 if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->
                     musicPlayerService?.startPlayer(song.pathLocation.toString())
@@ -289,7 +263,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                     }
                 }
             }
-
         }
         bottomPlayerControls.btnPrevious.setOnClickListener{
              if (currentSelectedPosition > 0) {
@@ -305,10 +278,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
                }
            }
-
         }
         bind.seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
-
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     bind.seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
@@ -323,7 +294,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 isUserSeeking=false
                 bind.seekbarControl.loadSeekBar.progress=userSelectPosition
-
             }
         })
     }
@@ -347,7 +317,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         launcherPermission.launch(permission.first)
                     }
                 }
-
             }
         }
     }
@@ -355,7 +324,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         musicPlayerService?.startPlayer(song.pathLocation.toString())
         mainViewModel.setCurrentPosition(position)
     }
-
     private fun startOrUpdateService():Intent{
         val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
             putExtra("musicState", currentMusicState)
@@ -366,14 +334,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
         return serviceIntent
     }
-
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicPlayerService = binder.getService()
         musicPlayerService!!.setSongController(songController)
-
     }
-
     override fun onServiceDisconnected(name: ComponentName?) {
         musicPlayerService = null
     }
@@ -387,12 +352,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             musicPlayerService?.setSongController(songController)
         //}
     }
-
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
     }
-
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
@@ -405,9 +368,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         } catch (e: IllegalArgumentException) {
             Log.e("STOP_SERVICE", "Service not registered")
         }
-
     }
-
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
