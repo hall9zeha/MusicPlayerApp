@@ -207,6 +207,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
             currentSelectedPosition = positionSelected
+            positionSelected?.let{
+                adapter.changeBackgroundColorSelectedItem(positionSelected)
+            }
         }
     }
     private fun setUpViews(musicState:MusicState)=with(bind){
@@ -252,11 +255,13 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             if(adapter.itemCount>0) {
                 if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->
                     musicPlayerService?.startPlayer(song.pathLocation.toString())
+
                 }
                 else {
                     if (isPlaying) {
                         musicPlayerService?.pauseExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
+
                     } else {
                         musicPlayerService?.playingExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
                         mainViewModel.saveStatePlaying(true)
@@ -268,6 +273,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
              if (currentSelectedPosition > 0) {
                 getSongOfAdapter(currentSelectedPosition - 1)?.let{song->
                     musicPlayerService?.startPlayer(song.pathLocation.toString())
+
                 }
             }
         }

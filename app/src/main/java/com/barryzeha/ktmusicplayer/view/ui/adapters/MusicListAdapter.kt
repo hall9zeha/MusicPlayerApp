@@ -49,6 +49,16 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): Recycl
         }
         holder.onBind(position,songList[position])
     }
+    fun changeBackgroundColorSelectedItem(position: Int){
+        selectedPos = position
+        if(lastSelectedPos == -1){
+            lastSelectedPos = selectedPos
+        }else{
+            notifyItemChanged(lastSelectedPos)
+            lastSelectedPos = selectedPos
+        }
+        notifyItemChanged(selectedPos)
+    }
     override fun getItemCount() = songList.size
 
     fun addAll(songs:List<SongEntity>){
@@ -92,15 +102,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): Recycl
             //tvFileFormat.text = String.format("::%s",song.pathLocation?.substring(song.pathLocation?.lastIndexOf(".")!! +1))
             tvFileFormat.text = String.format("::%s",song.pathLocation?.substringAfterLast(".","NA"))
             root.setOnClickListener {
-                selectedPos = bindingAdapterPosition
-                if(lastSelectedPos == -1){
-                    lastSelectedPos = selectedPos
-                }else{
-                    notifyItemChanged(lastSelectedPos)
-                    lastSelectedPos = selectedPos
-                }
+                changeBackgroundColorSelectedItem(bindingAdapterPosition)
                 onItemClick(position,song)
-                notifyItemChanged(selectedPos)
 
             }
 
