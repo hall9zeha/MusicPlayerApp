@@ -2,33 +2,21 @@ package com.barryzeha.core.common
 
 
 
-import android.app.Activity
-import android.app.Notification
-import android.app.Notification.MediaStyle
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.graphics.drawable.Icon
 import android.media.MediaMetadataRetriever
-import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
 import android.util.Log
-import android.widget.RemoteViews
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
-import com.barryzeha.core.R
 
-import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import java.io.File
 import java.io.FileOutputStream
@@ -134,19 +122,28 @@ fun createNotificationChannel(notificationManager:NotificationManager){
     }
 }
 
-fun getSongCover(activity: Context, path: String?): MusicState? {
-    val mmr = MediaMetadataRetriever()
-    mmr.setDataSource(path)
-    val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-    val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
-    val bitmap= mmr.embeddedPicture?.let {
-        val originalBitmap=BitmapFactory.decodeByteArray(it, 0, it.size)
-        scaleBitmap(originalBitmap,350,350)
-    }
-    return MusicState(artist = artist?:"Unknown",
-        album = album?:"Album Unknown",
-        albumArt = bitmap?:BitmapFactory.decodeStream(activity.assets.open("disc_empty_thumb.png"))
+fun getSongCover(context: Context, path: String?): MusicState? {
+    path?.let {
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(path)
+        val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+        val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+        val bitmap = mmr.embeddedPicture?.let {
+            val originalBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
+            scaleBitmap(originalBitmap, 350, 350)
+        }
+        return MusicState(
+            artist = artist ?: "Unknown",
+            album = album ?: "Album Unknown",
+            albumArt = bitmap
+                ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
         )
+    }
+    return MusicState(
+        artist = "Unknown",
+        album ="Album Unknown",
+        albumArt = BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+    )
 }
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     val originalWidth = bitmap.width

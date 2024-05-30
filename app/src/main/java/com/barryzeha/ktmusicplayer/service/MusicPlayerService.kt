@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.BitmapFactory.*
@@ -29,6 +30,7 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.common.foregroundNotification
 
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
+import dagger.hilt.android.AndroidEntryPoint
 
 import kotlin.system.exitProcess
 
@@ -39,7 +41,7 @@ import kotlin.system.exitProcess
  * Copyright (c)  All rights reserved.
  **/
 
-
+@AndroidEntryPoint
 class MusicPlayerService : Service() {
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
@@ -57,13 +59,14 @@ class MusicPlayerService : Service() {
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
     private var musicState:MusicState?=null
+
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
-
+        currentMusicState = MusicState(albumArt = getSongCover(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(object : MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
                 if(Intent.ACTION_MEDIA_BUTTON == mediaButtonIntent.action){
