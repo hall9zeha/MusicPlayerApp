@@ -154,7 +154,9 @@ class MusicPlayerService : Service() {
                 0,
                 notificationMediaPlayer(
                     this,
-                    MediaStyle().setMediaSession(mediaSession.sessionToken),
+                    MediaStyle()
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowActionsInCompactView(0,1,2),
                     currentMusicState
                 )
             )
