@@ -26,35 +26,6 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 private const val NOTIFICATION_ID = 202405
-@Suppress("deprecation")
-fun foregroundNotification(context: Context): Notification {
-
-    val pIntent = PendingIntent.getActivity(
-        context,
-        123,
-        Intent(context, MainActivity::class.java),
-        PendingIntent.FLAG_IMMUTABLE)
-
-
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        Notification.Builder(context, CHANNEL_ID)
-            .setContentTitle("Music")
-            .setContentText("Music running in the foreground")
-            .setCategory(Notification.CATEGORY_SERVICE)
-            .setContentIntent(pIntent)
-            .setAutoCancel(true)
-            .build()
-    } else {
-        Notification.Builder(context)
-            .setContentTitle("Music")
-            .setContentText("Music running in the foreground")
-            .setContentIntent(pIntent)
-            .setAutoCancel(true)
-            .setCategory(Notification.CATEGORY_SERVICE)
-            .build()
-    }
-
-}
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -70,6 +41,12 @@ fun createNotificationChannel(context: Context){
 
 @Suppress("Deprecation")
 fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyle, state: MusicState): Notification {
+    val pMainIntent = PendingIntent.getActivity(
+        context,
+        123,
+        Intent(context, MainActivity::class.java),
+        PendingIntent.FLAG_IMMUTABLE)
+
     val builder = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
         Notification.Builder(context, CHANNEL_ID)
     }else Notification.Builder(context)
@@ -125,6 +102,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         .setSmallIcon(R.drawable.ic_play)
         .setLargeIcon(state.albumArt)
         .setOnlyAlertOnce(true)
+        .setContentIntent(pMainIntent)
         .setContentTitle(state.title)
         .setContentText(state.artist)
         .addAction(previousAction)

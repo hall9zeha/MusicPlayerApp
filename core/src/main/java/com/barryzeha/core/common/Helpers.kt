@@ -25,7 +25,6 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
-
 /**
  * Project KTMusicPlayer
  * Created by Barry Zea H. on 1/5/24.

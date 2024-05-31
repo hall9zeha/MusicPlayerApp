@@ -85,9 +85,6 @@ class MusicPlayerService : Service() {
             }
         })
         initExoplayer()
-        startForeground(1, foregroundNotification(this)).also {
-            isForegroundService=true
-        }
 
     }
 
@@ -120,7 +117,6 @@ class MusicPlayerService : Service() {
         }
 
         musicState?.let { newState ->
-
             if (isForegroundService) {
                 //updateNotify()
             }
@@ -132,6 +128,7 @@ class MusicPlayerService : Service() {
     // nos ayuda a controlar el estado de la notificación cuando el móvil esta en modo de bloqueo
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
     // dentro de la función initExoplayer()
+    @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
         currentMusicState?.let {newState->
             mediaSession.setPlaybackState(
@@ -153,15 +150,19 @@ class MusicPlayerService : Service() {
                     .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                     .build()
             )
-            notificationManager.notify(
-                0,
-                notificationMediaPlayer(
-                    this,
-                    MediaStyle()
-                        .setMediaSession(mediaSession.sessionToken)
-                        .setShowActionsInCompactView(0,1,2),
-                    currentMusicState
-                )
+            val mediaNotify=  notificationMediaPlayer(
+                this,
+                MediaStyle()
+                    .setMediaSession(mediaSession.sessionToken)
+                    .setShowActionsInCompactView(0,1,2),
+                currentMusicState
+            )
+            startForeground(1,mediaNotify).also{
+                isForegroundService=true
+            }
+          notificationManager.notify(
+                1,
+                 mediaNotify
             )
         }
     }
