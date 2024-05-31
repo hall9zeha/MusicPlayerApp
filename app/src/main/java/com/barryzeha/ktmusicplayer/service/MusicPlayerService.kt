@@ -1,14 +1,10 @@
 package com.barryzeha.ktmusicplayer.service
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.BitmapFactory.*
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -27,11 +23,14 @@ import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
-import com.barryzeha.ktmusicplayer.common.foregroundNotification
-
+import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import dagger.hilt.android.AndroidEntryPoint
-
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.system.exitProcess
 
 
@@ -43,6 +42,10 @@ import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MusicPlayerService : Service() {
+
+    @Inject
+    lateinit var repository: MainRepository
+
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
     private lateinit var notificationManager: NotificationManager
@@ -85,6 +88,7 @@ class MusicPlayerService : Service() {
             }
         })
         initExoplayer()
+        setUpRepository()
 
     }
 
@@ -104,14 +108,19 @@ class MusicPlayerService : Service() {
             SongAction.Stop -> {
                 // TODO implement when the  mobile is locked
                 _songController?.stop()
+
             }
             SongAction.Next -> {
-                // TODO implement when the  mobile is locked
                 _songController?.next()
+                if(_songController==null){
+                    Log.e("NEXT-", "Next track" )
+                }
             }
             SongAction.Previous -> {
-                // TODO implement when the mobile is locked
                 _songController?.previous()
+                if(_songController==null){
+                    Log.e("PREV-", "Prev track" )
+                }
             }
             SongAction.Nothing -> {}
         }
@@ -124,47 +133,55 @@ class MusicPlayerService : Service() {
 
         return START_NOT_STICKY
     }
+
+    private fun setUpRepository(){
+        CoroutineScope(Dispatchers.Main).launch {
+            val songList=repository.fetchAllSongs()
+            Log.e("SONGS-SERVICE", songList.toString() )
+        }
+    }
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
     // nos ayuda a controlar el estado de la notificación cuando el móvil esta en modo de bloqueo
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
-        currentMusicState?.let {newState->
-            mediaSession.setPlaybackState(
-                PlaybackState.Builder()
-                    .setState(
-                        if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                        newState.currentDuration,
-                        1f
-                    )
-                    .setActions(PlaybackState.ACTION_PLAY_PAUSE)
-                    .build()
-            )
-            mediaSession.setMetadata(
-                MediaMetadata.Builder()
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                    .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                    .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
-                    .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                    .build()
-            )
-            val mediaNotify=  notificationMediaPlayer(
-                this,
-                MediaStyle()
-                    .setMediaSession(mediaSession.sessionToken)
-                    .setShowActionsInCompactView(0,1,2),
-                currentMusicState
-            )
-            startForeground(1,mediaNotify).also{
-                isForegroundService=true
+        currentMusicState?.let { newState ->
+                 mediaSession.setPlaybackState(
+                    PlaybackState.Builder()
+                        .setState(
+                            if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                            newState.currentDuration,
+                            1f
+                        )
+                        .setActions(PlaybackState.ACTION_PLAY_PAUSE)
+                        .build()
+                )
+                mediaSession.setMetadata(
+                    MediaMetadata.Builder()
+                        .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                        .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                        .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                        .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                        .build()
+                )
+                val mediaNotify = notificationMediaPlayer(
+                    this,
+                    MediaStyle()
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowActionsInCompactView(0, 1, 2),
+                    currentMusicState
+                )
+                startForeground(1, mediaNotify).also {
+                    isForegroundService = true
+                }
+                notificationManager.notify(
+                    1,
+                    mediaNotify
+                )
             }
-          notificationManager.notify(
-                1,
-                 mediaNotify
-            )
-        }
+
     }
     private fun initExoplayer(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
