@@ -12,8 +12,10 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -164,7 +166,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun setUpAdapter(){
-        adapter = MusicListAdapter(::onItemClick)
+        adapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
         bind.rvSongs.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
@@ -330,6 +332,15 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         musicPlayerService?.startPlayer(song.pathLocation.toString())
         mainViewModel.setCurrentPosition(position)
     }
+    private fun onMenuItemClick(view:View,position: Int, song: SongEntity) {
+        val popupMenu = PopupMenu(activity,view)
+        popupMenu.menuInflater.inflate(coreRes.menu.item_menu,popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener {
+            Toast.makeText(context, position.toString(), Toast.LENGTH_SHORT).show()
+            true
+        }
+        popupMenu.show()
+    }
     private fun startOrUpdateService():Intent{
         val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
             putExtra("musicState", currentMusicState)
@@ -386,3 +397,5 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
     }
 }
+
+

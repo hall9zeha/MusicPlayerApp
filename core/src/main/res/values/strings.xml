@@ -5,4 +5,5 @@
     <string name="sampleString">No tracks currently playing No tracks currently playing</string>
     <string name="artist_placeholder">Artist</string>
     <string name="album_placeholder">Album</string>
+    <string name="delete_title">Eliminar</string>
 </resources>

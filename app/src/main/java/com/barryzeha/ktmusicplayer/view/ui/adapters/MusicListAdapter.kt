@@ -28,7 +28,7 @@ import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
 
     private var songList:MutableList<SongEntity> = arrayListOf()
     var selectedPos = -1
@@ -106,6 +106,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ): Recycl
                 onItemClick(position,song)
 
             }
+            ivOptions.setOnClickListener { onMenuItemClick(it,position,song) }
 
         }
 

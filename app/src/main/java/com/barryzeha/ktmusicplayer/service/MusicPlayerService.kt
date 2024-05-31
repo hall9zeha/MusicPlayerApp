@@ -15,6 +15,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -23,6 +24,7 @@ import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +47,7 @@ class MusicPlayerService : Service() {
 
     @Inject
     lateinit var repository: MainRepository
+    private var songsList: MutableList<SongEntity> = mutableListOf()
 
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
@@ -89,7 +92,6 @@ class MusicPlayerService : Service() {
         })
         initExoplayer()
         setUpRepository()
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -124,20 +126,23 @@ class MusicPlayerService : Service() {
             }
             SongAction.Nothing -> {}
         }
-
         musicState?.let { newState ->
             if (isForegroundService) {
                 //updateNotify()
             }
         }
-
         return START_NOT_STICKY
     }
 
     private fun setUpRepository(){
         CoroutineScope(Dispatchers.Main).launch {
-            val songList=repository.fetchAllSongs()
-            Log.e("SONGS-SERVICE", songList.toString() )
+            val songs=repository.fetchAllSongs()
+            songs.forEach { s->
+                if(!songsList.contains(s)){
+                    songsList.add(s)
+                }
+            }
+            Log.e("SONGS-SERVICE", songsList.toString() )
         }
     }
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
