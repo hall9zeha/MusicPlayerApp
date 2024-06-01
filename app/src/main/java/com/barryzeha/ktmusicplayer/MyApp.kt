@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.ktmusicplayer.common.createNotificationChannel
 
 import dagger.hilt.android.HiltAndroidApp
@@ -21,6 +22,8 @@ class MyApp:Application() {
         @SuppressLint("StaticFieldLeak")
         private var _context: Context?=null
         val context  get() = _context!!
+
+        val mPrefs:MyPreferences by lazy { MyPreferences(context) }
     }
     override fun onCreate() {
         if(_context==null){

@@ -11,6 +11,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
+import com.barryzeha.ktmusicplayer.MyApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -85,6 +86,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     fun setCurrentPosition(position:Int){
         viewModelScope.launch {
             _currentSongListPosition.value = position
+            MyApp.mPrefs.currentPosition=position.toLong()
         }
     }
 

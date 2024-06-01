@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
@@ -35,6 +36,7 @@ import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
@@ -66,14 +68,14 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
     private var currentMusicState = MusicState()
     private var musicPlayerService: MusicPlayerService?=null
+    private lateinit var mPrefs:MyPreferences
 
     private val songController = object:SongController{
         override fun play() {
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
             musicPlayerService?.playingExoPlayer()
             mainViewModel.saveStatePlaying(true)
-
-       }
+    }
         override fun pause() {
             bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
             musicPlayerService?.pauseExoPlayer()
@@ -131,7 +133,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        mPrefs = MyApp.mPrefs
         activityResultFile()
         activityResultForPermission()
         initCheckPermission()
@@ -211,6 +213,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             currentSelectedPosition = positionSelected
             positionSelected?.let{
                 adapter.changeBackgroundColorSelectedItem(positionSelected)
+
             }
         }
     }
@@ -275,7 +278,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
              if (currentSelectedPosition > 0) {
                 getSongOfAdapter(currentSelectedPosition - 1)?.let{song->
                     musicPlayerService?.startPlayer(song.pathLocation.toString())
-
+                    mPrefs.currentPosition = currentSelectedPosition.toLong()
                 }
             }
         }
@@ -283,7 +286,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
            if(currentSelectedPosition<adapter.itemCount-1){
                getSongOfAdapter(currentSelectedPosition +1)?.let{song->
                    musicPlayerService?.startPlayer(song.pathLocation.toString())
-
+                   mPrefs.currentPosition = currentSelectedPosition.toLong()
                }
            }
         }
@@ -331,6 +334,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private fun onItemClick(position:Int,song: SongEntity){
         musicPlayerService?.startPlayer(song.pathLocation.toString())
         mainViewModel.setCurrentPosition(position)
+
     }
     private fun onMenuItemClick(view:View,position: Int, song: SongEntity) {
         val popupMenu = PopupMenu(activity,view)
@@ -372,6 +376,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
+        adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
     }
     override fun onPause() {
         super.onPause()

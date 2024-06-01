@@ -274,6 +274,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
+
     }
 
     override fun onPause() {

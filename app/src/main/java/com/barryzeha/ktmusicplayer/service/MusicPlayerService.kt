@@ -12,23 +12,22 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.MutableLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
+import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,10 +64,13 @@ class MusicPlayerService : Service() {
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
     private var musicState:MusicState?=null
+    private lateinit var mPrefs:MyPreferences
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
+        mPrefs = MyApp.mPrefs
+
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
@@ -114,15 +116,11 @@ class MusicPlayerService : Service() {
             }
             SongAction.Next -> {
                 _songController?.next()
-                if(_songController==null){
-                    Log.e("NEXT-", "Next track" )
-                }
+                nextOrPrevTRack(mPrefs.currentPosition.toInt() +1)
             }
             SongAction.Previous -> {
                 _songController?.previous()
-                if(_songController==null){
-                    Log.e("PREV-", "Prev track" )
-                }
+               nextOrPrevTRack(mPrefs.currentPosition.toInt() -1)
             }
             SongAction.Nothing -> {}
         }
@@ -142,7 +140,15 @@ class MusicPlayerService : Service() {
                     songsList.add(s)
                 }
             }
-            Log.e("SONGS-SERVICE", songsList.toString() )
+
+        }
+    }
+    private fun nextOrPrevTRack(position:Int){
+        if(_songController==null){
+            if(songsList.isNotEmpty()) {
+                startPlayer(songsList[position].pathLocation.toString())
+                mPrefs.currentPosition = position.toLong()
+            }
         }
     }
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
