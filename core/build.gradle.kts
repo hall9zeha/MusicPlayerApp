@@ -64,7 +64,9 @@ dependencies {
     // Glide
     implementation(libs.glide)
     ksp(libs.glide.compiler)
-
+    // Gson
+    implementation(libs.gson)
+    //
     // Room
     ksp(libs.room.compiler)
     api(libs.room.runtime)

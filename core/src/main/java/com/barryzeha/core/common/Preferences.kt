@@ -2,6 +2,7 @@ package com.barryzeha.core.common
 
 import android.content.Context
 import com.barryzeha.core.model.entities.MusicState
+import com.google.gson.Gson
 
 
 /**
@@ -12,16 +13,22 @@ import com.barryzeha.core.model.entities.MusicState
 
 private const val PREFERENCES_FILE = "kTMusicPreferences"
 private const val CURRENT_POSITION = "currentPosition"
+private const val MUSIC_STATE = "musicStateJson"
+private const val PREV_OR_NEXT = "prevOrNext"
 class MyPreferences(private val context: Context){
-    //val gson = Gson()
+    val gson = Gson()
     private var myPreferences = context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
     fun cleanPreferences(){
         myPreferences= context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
         myPreferences.edit().clear().apply()
     }
+    var nextOrPrevFromNotify:Boolean
+        get()= myPreferences.getBoolean(PREV_OR_NEXT,false)
+        set(value)=myPreferences.edit().putBoolean(PREV_OR_NEXT,value).apply()
     var currentPosition:Long
         get()=myPreferences.getLong(CURRENT_POSITION,0)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()
-    /*var musicStateSaved:MusicState
-        get()=myPreferences.*/
+    var musicStateJsonSaved:String?
+        get()=myPreferences.getString(MUSIC_STATE,"")
+        set(value)=myPreferences.edit().putString(MUSIC_STATE,value).apply()
 }

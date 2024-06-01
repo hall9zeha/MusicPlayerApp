@@ -134,6 +134,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPrefs = MyApp.mPrefs
+
         activityResultFile()
         activityResultForPermission()
         initCheckPermission()
@@ -376,7 +377,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
+        currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
+        mPrefs.nextOrPrevFromNotify=false
     }
     override fun onPause() {
         super.onPause()

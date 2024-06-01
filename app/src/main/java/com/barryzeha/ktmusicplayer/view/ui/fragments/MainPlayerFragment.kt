@@ -15,11 +15,15 @@ import android.widget.SeekBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.toObject
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -43,6 +47,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var currentMusicState = MusicState()
     private var songLists:MutableList<SongEntity> = arrayListOf()
     private var currentSelectedPosition=0
+    private lateinit var mPrefs:MyPreferences
     private val bind:FragmentMainPlayerBinding get() = _bind!!
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
@@ -121,6 +126,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        mPrefs = MyApp.mPrefs
+        currentSelectedPosition = mPrefs.currentPosition.toInt()
         // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
         setUpObservers()
         setUpListeners()
@@ -205,6 +212,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                         mainViewModel.saveStatePlaying(true)
                     }
                 }
+
             }
         }
         btnMainPrevious.setOnClickListener{
@@ -274,7 +282,17 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
-
+        if(currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
+            val song=songLists[mPrefs.currentPosition.toInt()]
+            val songMetadata= getSongCover(requireContext(),song.pathLocation)
+            val newState = MusicState(
+                title = song.pathLocation.toString().substringAfterLast("/","No named")!!,
+                artist = songMetadata!!.artist,
+                album = songMetadata!!.album,
+                albumArt = songMetadata!!.albumArt,)
+            setUpSongInfo(newState)
+        }
+        mPrefs.nextOrPrevFromNotify=false
     }
 
     override fun onPause() {

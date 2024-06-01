@@ -20,6 +20,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.common.toJson
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -149,6 +150,7 @@ class MusicPlayerService : Service() {
                 startPlayer(songsList[position].pathLocation.toString())
                 mPrefs.currentPosition = position.toLong()
             }
+            mPrefs.nextOrPrevFromNotify=true
         }
     }
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
@@ -257,7 +259,7 @@ class MusicPlayerService : Service() {
 
             }
         })
-
+        mPrefs.musicStateJsonSaved = currentMusicState.toJson()
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.prepare()
         exoPlayer.play()

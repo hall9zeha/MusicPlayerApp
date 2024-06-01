@@ -71,6 +71,8 @@ dependencies {
     // Dagger hilt
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.dagger.hilt)
+    // Gson
+    implementation(libs.gson)
     // Modules
     implementation(project(":core"))
     implementation(project(":data"))

@@ -7,9 +7,11 @@ import android.graphics.Bitmap
 import android.view.View
 import android.widget.ImageView
 import com.barryzeha.core.R
+import com.barryzeha.core.model.entities.MusicState
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import kotlin.math.roundToInt
 
 
@@ -48,3 +50,16 @@ fun Int.adjustAlpha(factor: Float): Int =
 
 inline val Int.alpha: Int
     get() = (this shr 24) and 0xFF
+
+// Convert MusicState object to JSon
+fun  <T> T.toJson():String{
+    val gson = Gson()
+    return gson.toJson(this)
+}
+
+// convert Json of MusicState to Object
+fun String.toObject():MusicState{
+    val gson = Gson()
+    return gson.fromJson(this,MusicState::class.java)
+}
+

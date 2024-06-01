@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun setUpObservers(){
         //mainViewModel.fetchAllSong()
+
         mainViewModel.musicState.observe(this){
             //Log.e("MAIN-ACTIVITY", it.toString() )
         }
