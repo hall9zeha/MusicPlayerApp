@@ -13,5 +13,6 @@ enum class SongAction {
  Stop,
  Next,
  Previous,
- Nothing
+ Nothing,
+ Close
 }

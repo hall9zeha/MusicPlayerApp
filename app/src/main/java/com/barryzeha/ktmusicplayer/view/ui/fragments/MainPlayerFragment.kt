@@ -92,6 +92,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                         mainViewModel.saveStatePlaying(false)
                         mainViewModel.setCurrentPosition(0)
                     }
+
                     else {
                         mainViewModel.saveStatePlaying(true)
                         bind.btnMainNext.performClick()}
@@ -293,6 +294,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             setUpSongInfo(newState)
         }
         mPrefs.nextOrPrevFromNotify=false
+
+        if(mPrefs.playerIsStop){
+          mainViewModel.saveStatePlaying(mPrefs.musicStateJsonSaved!!.toObject().isPlaying)
+        }
     }
 
     override fun onPause() {

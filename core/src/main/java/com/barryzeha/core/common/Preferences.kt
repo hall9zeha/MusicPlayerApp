@@ -15,6 +15,7 @@ private const val PREFERENCES_FILE = "kTMusicPreferences"
 private const val CURRENT_POSITION = "currentPosition"
 private const val MUSIC_STATE = "musicStateJson"
 private const val PREV_OR_NEXT = "prevOrNext"
+private const val PLAYER_IS_STOP = "playerIsStop"
 class MyPreferences(private val context: Context){
     val gson = Gson()
     private var myPreferences = context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
@@ -25,6 +26,9 @@ class MyPreferences(private val context: Context){
     var nextOrPrevFromNotify:Boolean
         get()= myPreferences.getBoolean(PREV_OR_NEXT,false)
         set(value)=myPreferences.edit().putBoolean(PREV_OR_NEXT,value).apply()
+    var playerIsStop:Boolean
+        get()= myPreferences.getBoolean(PLAYER_IS_STOP,false)
+        set(value)=myPreferences.edit().putBoolean(PLAYER_IS_STOP,value).apply()
     var currentPosition:Long
         get()=myPreferences.getLong(CURRENT_POSITION,0)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()

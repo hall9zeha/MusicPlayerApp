@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -15,6 +16,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -29,10 +31,13 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
+import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.system.exitProcess
@@ -88,7 +93,7 @@ class MusicPlayerService : Service() {
                             KeyEvent.KEYCODE_MEDIA_PAUSE -> {_songController?.pause()}
                             KeyEvent.KEYCODE_MEDIA_NEXT -> {_songController?.next()}
                             KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {_songController?.previous()}
-                            KeyEvent.KEYCODE_MEDIA_CLOSE->{_songController?.stop()}
+
                             else -> {}
                         }
                     }
@@ -115,8 +120,6 @@ class MusicPlayerService : Service() {
             }
             SongAction.Stop -> {
                 _songController?.stop()
-                songHandler.removeCallbacks(songRunnable)
-                notificationManager.cancel(NOTIFICATION_ID)
 
             }
             SongAction.Next -> {
@@ -126,6 +129,22 @@ class MusicPlayerService : Service() {
             SongAction.Previous -> {
                 _songController?.previous()
                nextOrPrevTRack(mPrefs.currentPosition.toInt() -1)
+            }
+            SongAction.Close -> {
+                exoPlayer.stop()
+                songHandler.removeCallbacks(songRunnable)
+                //_songController?.currentTrack(currentMusicState.copy(isPlaying = false))
+                mPrefs.playerIsStop=true
+                if(_songController==null) {
+                    mPrefs.musicStateJsonSaved = currentMusicState.copy(isPlaying = false).toJson()
+                }
+                cancelPersistentNotify(applicationContext)
+                // Remove notification of foreground service process
+                // TODO la aplicación se bloquea al detener las notificaciones desde aquí
+                //stopForeground(STOP_FOREGROUND_REMOVE)
+
+
+
             }
             SongAction.Nothing -> {}
         }
@@ -215,7 +234,7 @@ class MusicPlayerService : Service() {
                 }
                 //if(exoPlayer.isPlaying) {
                     _songController?.musicState(currentMusicState)
-                updateNotify()
+                    updateNotify()
                 //}
                 songHandler.postDelayed(songRunnable, 500)
             }
@@ -263,10 +282,11 @@ class MusicPlayerService : Service() {
 
             }
         })
-        mPrefs.musicStateJsonSaved = currentMusicState.toJson()
+
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.prepare()
         exoPlayer.play()
+        mPrefs.playerIsStop=false
 
     }
     override fun onBind(intent: Intent?): IBinder {
@@ -280,6 +300,7 @@ class MusicPlayerService : Service() {
     }
     fun startPlayer(songPath:String){
         songPath?.let {
+            if(mPrefs.playerIsStop){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información que de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido

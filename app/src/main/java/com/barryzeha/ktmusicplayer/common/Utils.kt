@@ -100,7 +100,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
 
     // Action close notify
     val closeIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(SongAction.Stop.ordinal.toString())
+        .setAction(SongAction.Close.ordinal.toString())
     val closePI = PendingIntent.getBroadcast(
         context,
         4,
@@ -128,5 +128,17 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         .addAction(null)
         .addAction(closeAction)
         .build()
+
+}
+fun cancelPersistentNotify(context:Context){
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val builder = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        Notification.Builder(context, CHANNEL_ID)
+    }else Notification.Builder(context)
+    builder
+        .setSmallIcon(R.drawable.ic_play)
+        .setOngoing(false) // Hacer que la notificación ya no sea persistente
+    notificationManager.notify(NOTIFICATION_ID,builder.build())
+    notificationManager.cancelAll()
 
 }

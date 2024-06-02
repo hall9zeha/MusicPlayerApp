@@ -35,7 +35,7 @@ fun ImageView.loadImage(bitmap:Bitmap)=
     Glide.with(this.context)
         .load(bitmap)
         .fitCenter()
-        .diskCacheStrategy(DiskCacheStrategy.ALL)
+        //.diskCacheStrategy(DiskCacheStrategy.ALL)
         .into(this)
 // El placeholder solo se usa para la carátula del fragmento principal
 fun ImageView.loadImage(resource:Int)=
@@ -47,9 +47,6 @@ fun ImageView.loadImage(resource:Int)=
         .into(this)
 fun Int.adjustAlpha(factor: Float): Int =
     (this.ushr(24) * factor).roundToInt() shl 24 or (0x00FFFFFF and this)
-
-inline val Int.alpha: Int
-    get() = (this shr 24) and 0xFF
 
 // Convert MusicState object to JSon
 fun  <T> T.toJson():String{
