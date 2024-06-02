@@ -12,6 +12,7 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
@@ -27,6 +28,7 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -86,6 +88,7 @@ class MusicPlayerService : Service() {
                             KeyEvent.KEYCODE_MEDIA_PAUSE -> {_songController?.pause()}
                             KeyEvent.KEYCODE_MEDIA_NEXT -> {_songController?.next()}
                             KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {_songController?.previous()}
+                            KeyEvent.KEYCODE_MEDIA_CLOSE->{_songController?.stop()}
                             else -> {}
                         }
                     }
@@ -111,8 +114,9 @@ class MusicPlayerService : Service() {
                 exoPlayer.play()
             }
             SongAction.Stop -> {
-                // TODO implement when the  mobile is locked
                 _songController?.stop()
+                songHandler.removeCallbacks(songRunnable)
+                notificationManager.cancel(NOTIFICATION_ID)
 
             }
             SongAction.Next -> {
@@ -186,11 +190,11 @@ class MusicPlayerService : Service() {
                         .setShowActionsInCompactView(0, 1, 2),
                     currentMusicState
                 )
-                startForeground(1, mediaNotify).also {
+                startForeground(NOTIFICATION_ID, mediaNotify).also {
                     isForegroundService = true
                 }
                 notificationManager.notify(
-                    1,
+                    NOTIFICATION_ID,
                     mediaNotify
                 )
             }

@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.barryzeha.core.R
 import com.barryzeha.core.model.SongAction
@@ -25,7 +26,7 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
-private const val NOTIFICATION_ID = 202405
+const val NOTIFICATION_ID = 202405
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -97,17 +98,35 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         nextPI
     ).build()
 
+    // Action close notify
+    val closeIntent = Intent(context, MusicPlayerBroadcast::class.java)
+        .setAction(SongAction.Stop.ordinal.toString())
+    val closePI = PendingIntent.getBroadcast(
+        context,
+        4,
+        closeIntent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    val closeAction = Notification.Action.Builder(
+        Icon.createWithResource(context,R.drawable.ic_close),
+        "Close",
+        closePI
+    ).build()
+
     return builder
         .setStyle(mediaStyle)
         .setSmallIcon(R.drawable.ic_play)
         .setLargeIcon(state.albumArt)
         .setOnlyAlertOnce(true)
+        .setOngoing(true)
         .setContentIntent(pMainIntent)
         .setContentTitle(state.title)
         .setContentText(state.artist)
         .addAction(previousAction)
         .addAction(playPauseAction)
         .addAction(nextAction)
+        .addAction(null)
+        .addAction(closeAction)
         .build()
 
 }
