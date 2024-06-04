@@ -76,6 +76,13 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             notifyItemChanged(position)
         }
     }
+    fun remove(song:SongEntity){
+        if(songList.contains(song)){
+            val position = songList.indexOf(song)
+            notifyItemRemoved(position)
+            songList.remove(song)
+        }
+    }
     fun getSongByPosition(position: Int): SongEntity?{
         return if(songList.isNotEmpty()){
             songList[position]

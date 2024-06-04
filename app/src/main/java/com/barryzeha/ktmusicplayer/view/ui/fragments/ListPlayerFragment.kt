@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
@@ -24,7 +23,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat.startForegroundService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
@@ -32,7 +30,6 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongCover
-import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -67,6 +64,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private  var currentSelectedPosition:Int =0
 
     private var currentMusicState = MusicState()
+    private var song:SongEntity?=null
     private var musicPlayerService: MusicPlayerService?=null
     private lateinit var mPrefs:MyPreferences
 
@@ -218,6 +216,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
             }
         }
+        mainViewModel.deletedRow.observe(viewLifecycleOwner){deletedRow->
+            if(deletedRow>0) song?.let{song->adapter.remove(song)}
+        }
     }
     private fun setUpViews(musicState:MusicState)=with(bind){
 
@@ -338,11 +339,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         mainViewModel.setCurrentPosition(position)
 
     }
-    private fun onMenuItemClick(view:View,position: Int, song: SongEntity) {
+    private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {
         val popupMenu = PopupMenu(activity,view)
         popupMenu.menuInflater.inflate(coreRes.menu.item_menu,popupMenu.menu)
         popupMenu.setOnMenuItemClickListener {
-            Toast.makeText(context, position.toString(), Toast.LENGTH_SHORT).show()
+            mainViewModel.deleteSong(selectedSong)
+            this.song=selectedSong
             true
         }
         popupMenu.show()

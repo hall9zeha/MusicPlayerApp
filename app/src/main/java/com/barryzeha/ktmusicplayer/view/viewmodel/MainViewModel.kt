@@ -37,6 +37,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _registerRowInserted:MutableLiveData<Long> = MutableLiveData()
     val registerRowInserted:LiveData<Long> = _registerRowInserted
 
+    private var _deletedRow:MutableLiveData<Int> = MutableLiveData()
+    val deletedRow:LiveData<Int> = _deletedRow
+
     private var _songById:MutableLiveData<SongEntity> = MutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
@@ -69,6 +72,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
         viewModelScope.launch {
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
+        }
+    }
+    fun deleteSong(songEntity: SongEntity){
+        viewModelScope.launch {
+            _deletedRow.value = repository.deleteSong(songEntity.id)
         }
     }
     fun getSongById(idSong:Long){

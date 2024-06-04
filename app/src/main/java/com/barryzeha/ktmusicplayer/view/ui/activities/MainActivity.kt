@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.barryzeha.core.common.HOME_PLAYER
+import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
@@ -41,14 +43,13 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         setUpObservers()
     }
     private fun setUpObservers(){
-        //mainViewModel.fetchAllSong()
-
+       //mainViewModel.fetchAllSong()
         mainViewModel.musicState.observe(this){
             //Log.e("MAIN-ACTIVITY", it.toString() )
         }
     }
     private fun setUpViewPager(){
-        val viewPagerAdapter= PageCollectionAdapter(this, listOf("HomePlayer", "listPlayer"))
+        val viewPagerAdapter= PageCollectionAdapter(this, listOf(HOME_PLAYER, LIST_PLAYER))
         bind.mViewPager.adapter=viewPagerAdapter
     }
 

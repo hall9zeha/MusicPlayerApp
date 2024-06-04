@@ -14,3 +14,5 @@ const val READ_STORAGE_REQ_CODE = 123
 const val RECORD_AUDIO_REQ_CODE = 124
 
 const val MUSIC_PLAYER_SESSION = "MusicPlayerSessionService"
+const val HOME_PLAYER = "homePlayer"
+const val LIST_PLAYER = "listPlayer"
