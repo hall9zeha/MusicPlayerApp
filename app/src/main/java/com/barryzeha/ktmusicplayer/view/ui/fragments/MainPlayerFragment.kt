@@ -74,7 +74,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
 
         override fun stop() {
-            startOrUpdateService()
+            activity?.finish()
+
         }
 
         override fun musicState(musicState: MusicState?) {
@@ -295,9 +296,6 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
         mPrefs.nextOrPrevFromNotify=false
 
-        if(mPrefs.playerIsStop){
-          mainViewModel.saveStatePlaying(mPrefs.musicStateJsonSaved!!.toObject().isPlaying)
-        }
     }
 
     override fun onPause() {

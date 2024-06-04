@@ -88,7 +88,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             bind.bottomPlayerControls.btnPrevious.performClick()
         }
         override fun stop() {
-            startOrUpdateService()
+            activity?.finish()
+
         }
         override fun musicState(musicState: MusicState?) {
             musicState?.let {
@@ -366,13 +367,14 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     override fun onStart() {
         super.onStart()
-        //if(!requireContext().isServiceRunning(MusicPlayerService::class.java)) {
+        context?.bindService(startOrUpdateService(),this, Context.BIND_AUTO_CREATE)
+        /*//if(!requireContext().isServiceRunning(MusicPlayerService::class.java)) {
             requireContext().bindService(startOrUpdateService(),
                 this,
                 Context.BIND_AUTO_CREATE
             )
             musicPlayerService?.setSongController(songController)
-        //}
+        //}*/
     }
     override fun onResume() {
         super.onResume()

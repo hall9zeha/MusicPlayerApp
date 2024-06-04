@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.service
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
@@ -59,6 +60,7 @@ class MusicPlayerService : Service() {
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
     private lateinit var notificationManager: NotificationManager
+    private lateinit var mediaPlayerNotify:Notification
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
@@ -132,18 +134,15 @@ class MusicPlayerService : Service() {
             }
             SongAction.Close -> {
                 exoPlayer.stop()
+                exoPlayer.release()
                 songHandler.removeCallbacks(songRunnable)
                 //_songController?.currentTrack(currentMusicState.copy(isPlaying = false))
-                mPrefs.playerIsStop=true
-                if(_songController==null) {
-                    mPrefs.musicStateJsonSaved = currentMusicState.copy(isPlaying = false).toJson()
-                }
-                cancelPersistentNotify(applicationContext)
                 // Remove notification of foreground service process
-                // TODO la aplicación se bloquea al detener las notificaciones desde aquí
-                //stopForeground(STOP_FOREGROUND_REMOVE)
-
-
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
+                _songController?.stop()
+                // Close application
+                _activity?.finish()
 
             }
             SongAction.Nothing -> {}
@@ -202,19 +201,19 @@ class MusicPlayerService : Service() {
                         .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                         .build()
                 )
-                val mediaNotify = notificationMediaPlayer(
+                mediaPlayerNotify = notificationMediaPlayer(
                     this,
                     MediaStyle()
                         .setMediaSession(mediaSession.sessionToken)
                         .setShowActionsInCompactView(0, 1, 2),
                     currentMusicState
                 )
-                startForeground(NOTIFICATION_ID, mediaNotify).also {
+                startForeground(NOTIFICATION_ID, mediaPlayerNotify).also {
                     isForegroundService = true
                 }
                 notificationManager.notify(
                     NOTIFICATION_ID,
-                    mediaNotify
+                    mediaPlayerNotify
                 )
             }
 
@@ -286,8 +285,6 @@ class MusicPlayerService : Service() {
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.prepare()
         exoPlayer.play()
-        mPrefs.playerIsStop=false
-
     }
     override fun onBind(intent: Intent?): IBinder {
         return binder
@@ -326,6 +323,7 @@ class MusicPlayerService : Service() {
         if(state)songHandler?.removeCallbacks(songRunnable)
         else songHandler?.post(songRunnable)
     }
+
     fun unregisterController(){
         _songController=null
     }

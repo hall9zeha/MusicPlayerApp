@@ -101,6 +101,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     // Action close notify
     val closeIntent = Intent(context, MusicPlayerBroadcast::class.java)
         .setAction(SongAction.Close.ordinal.toString())
+
     val closePI = PendingIntent.getBroadcast(
         context,
         4,
