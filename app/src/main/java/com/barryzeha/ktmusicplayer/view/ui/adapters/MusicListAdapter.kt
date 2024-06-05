@@ -48,7 +48,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: MViewHolder, position: Int) {
         if(selectedPos == position){
-            holder.bind.root.setBackgroundColor(mColorList(context!!).getColor(2,0).adjustAlpha(0.3f))
+            holder.bind.root.setBackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f))
         }else{
             holder.bind.root.setBackgroundColor(Color.TRANSPARENT)
         }
@@ -63,7 +63,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             notifyItemChanged(lastSelectedPos,Color.TRANSPARENT)
             lastSelectedPos = selectedPos
         }
-        notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context!!).getColor(2,0).adjustAlpha(0.3f)))
+        notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f)))
     }
     fun addAll(songs:List<SongEntity>){
        submitList(songs)
