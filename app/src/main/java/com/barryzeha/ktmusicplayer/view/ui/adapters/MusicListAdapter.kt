@@ -3,15 +3,11 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.TypedArray
 import android.graphics.Color
 import android.media.MediaPlayer
-import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +16,7 @@ import com.barryzeha.core.common.getBitrate
 import com.barryzeha.core.common.getTimeOfSong
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
 
@@ -34,31 +31,39 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
 
     private var selectedPos = -1
     private var lastSelectedPos = -1
-    private lateinit  var context:Context
+    private  var context:Context = MyApp.context
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
         context=parent.context
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_song,parent,false)
         return MViewHolder(itemView)
     }
 
+    override fun onBindViewHolder(holder: MViewHolder, position: Int, payloads: MutableList<Any>) {
+             when (val latestPayload = payloads.lastOrNull()) {
+                is SongChangePayload.BackgroundColor -> holder.bindBackgroundColor(latestPayload.color)
+                else -> onBindViewHolder(holder, position)
+            }
+
+    }
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: MViewHolder, position: Int) {
         if(selectedPos == position){
-            holder.bind.root.setBackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f))
+            holder.bind.root.setBackgroundColor(mColorList(context!!).getColor(2,0).adjustAlpha(0.3f))
         }else{
             holder.bind.root.setBackgroundColor(Color.TRANSPARENT)
         }
         holder.onBind(position, getItem(position))
     }
+    @SuppressLint("ResourceType")
     fun changeBackgroundColorSelectedItem(position: Int){
         selectedPos = position
         if(lastSelectedPos == -1){
             lastSelectedPos = selectedPos
         }else{
-            notifyItemChanged(lastSelectedPos)
+            notifyItemChanged(lastSelectedPos,Color.TRANSPARENT)
             lastSelectedPos = selectedPos
         }
-        notifyItemChanged(selectedPos)
+        notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context!!).getColor(2,0).adjustAlpha(0.3f)))
     }
     fun addAll(songs:List<SongEntity>){
        submitList(songs)
@@ -113,6 +118,9 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             ivOptions.setOnClickListener { onMenuItemClick(it,position,song) }
 
         }
+        internal  fun bindBackgroundColor(color: Int) {
+            bind.root.setBackgroundColor(color)
+        }
 
     }
     private class SongDiffCallback:DiffUtil.ItemCallback<SongEntity>(){
@@ -123,6 +131,9 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         override fun areContentsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
             return oldItem == newItem
         }
+    }
+    private sealed interface SongChangePayload{
+        data class BackgroundColor(val color:Int):SongChangePayload
     }
 
 }
