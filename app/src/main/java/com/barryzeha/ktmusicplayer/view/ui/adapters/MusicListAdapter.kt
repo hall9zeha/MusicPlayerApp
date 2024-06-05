@@ -32,9 +32,8 @@ import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
 
 class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity,MusicListAdapter.MViewHolder>(SongDiffCallback()) {
 
-    private var songList:MutableList<SongEntity> = arrayListOf()
-    var selectedPos = -1
-    var lastSelectedPos = -1
+    private var selectedPos = -1
+    private var lastSelectedPos = -1
     private lateinit  var context:Context
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
         context=parent.context
@@ -49,7 +48,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }else{
             holder.bind.root.setBackgroundColor(Color.TRANSPARENT)
         }
-        //holder.onBind(position,songList[position])
         holder.onBind(position, getItem(position))
     }
     fun changeBackgroundColorSelectedItem(position: Int){
@@ -75,15 +73,16 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
 
     }
     fun remove(song:SongEntity){
-        if(songList.contains(song)){
-            val position = songList.indexOf(song)
-            notifyItemRemoved(position)
-            songList.remove(song)
+        val currentList=currentList.toMutableList()
+        if(currentList.contains(song)){
+            val position = currentList.indexOf(song)
+            currentList.removeAt(position)
+            submitList(currentList)
         }
     }
     fun getSongByPosition(position: Int): SongEntity?{
-        return if(songList.isNotEmpty()){
-            songList[position]
+        return if(currentList.isNotEmpty()){
+            currentList[position]
         }else{
             null
         }
