@@ -12,6 +12,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.getBitrate
@@ -28,7 +30,7 @@ import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>() {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity,MusicListAdapter.MViewHolder>(SongDiffCallback()) {
 
     private var songList:MutableList<SongEntity> = arrayListOf()
     var selectedPos = -1
@@ -47,7 +49,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }else{
             holder.bind.root.setBackgroundColor(Color.TRANSPARENT)
         }
-        holder.onBind(position,songList[position])
+        //holder.onBind(position,songList[position])
+        holder.onBind(position, getItem(position))
     }
     fun changeBackgroundColorSelectedItem(position: Int){
         selectedPos = position
@@ -59,22 +62,17 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
         notifyItemChanged(selectedPos)
     }
-    override fun getItemCount() = songList.size
-
     fun addAll(songs:List<SongEntity>){
-        songs.forEach {
-           add(it)
-        }
+       submitList(songs)
+
     }
     fun add(song: SongEntity) {
-        if (!songList.contains(song)) {
-            songList.add(song)
-            notifyItemInserted(songList.size - 1)
-        } else {
-            val position = songList.indexOf(song)
-            songList[position] = song
-            notifyItemChanged(position)
+        val currentList = currentList.toMutableList()
+        if (!currentList.contains(song)) {
+            currentList.add(song)
+            submitList(currentList)
         }
+
     }
     fun remove(song:SongEntity){
         if(songList.contains(song)){
@@ -117,6 +115,15 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
 
         }
 
+    }
+    private class SongDiffCallback:DiffUtil.ItemCallback<SongEntity>(){
+        override fun areItemsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
+            return oldItem == newItem
+        }
     }
 
 }

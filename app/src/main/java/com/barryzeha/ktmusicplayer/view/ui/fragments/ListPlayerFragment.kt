@@ -201,12 +201,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             if(it.isEmpty()){
                 Toast.makeText(context, "No hay ninguna canción", Toast.LENGTH_SHORT).show()
             }else{
-                adapter.addAll(it)
+              adapter.addAll(it)
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
-                adapter.add(song)
+              adapter.add(song)
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
