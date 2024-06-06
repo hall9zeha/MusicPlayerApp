@@ -19,7 +19,8 @@ data class SongEntity(
     val timestamp:Long=0,
     val duration:Long=0,
     val bitrate:String?="",
-    val format:String?=""
+    val format:String?="",
+    val favorite:Boolean=false,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
