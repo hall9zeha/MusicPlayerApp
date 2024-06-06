@@ -33,6 +33,7 @@ import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -179,7 +180,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         mainViewModel.fetchAllSong()
         mainViewModel.musicState.observe(viewLifecycleOwner){savedMusicState->
             currentMusicState = savedMusicState
-            bind.ivCover.setImageBitmap(savedMusicState.albumArt)
+            bind.ivCover.setImageBitmap(getSongCover(requireContext(), savedMusicState.songPath)?.albumArt)
             val durationInMillis = savedMusicState.duration
             val formattedDuration = createTime(durationInMillis).third
             bind.seekbarControl.loadSeekBar.max = savedMusicState.duration.toInt()
@@ -388,6 +389,20 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
+    }
+
+    override fun onStop() {
+     /*   if(currentMusicState.idSong>0) {
+            mainViewModel.saveSongState(
+                SongState(
+                    idSongState = 1,
+                    idSong = currentMusicState.idSong,
+                    songDuration = currentMusicState.duration,
+                    currentPosition = currentMusicState.currentPosition
+                )
+            )
+        }*/
+        super.onStop()
     }
     override fun onDestroyView() {
         super.onDestroyView()

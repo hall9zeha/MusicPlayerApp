@@ -142,7 +142,6 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private fun setUpObservers(){
         bind.ivMusicCover.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
-        mainViewModel.fetchSongState()
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             if(songs.isNotEmpty()){
                 songs.forEach {
@@ -150,9 +149,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                 }
             }
         }
-        mainViewModel.songState.observe(viewLifecycleOwner){songState->
-           Log.e("SONG-STATE-DB", songState.toString() )
-        }
+
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
            it?.let{currentTrack->
                 setUpSongInfo(currentTrack)
@@ -187,10 +184,11 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     private fun setUpSongInfo(musicState: MusicState){
         currentMusicState=musicState
+        val albumArt = getSongCover(requireContext(), musicState.songPath)?.albumArt
         bind.tvSongAlbum.text=musicState.album
         bind.tvSongArtist.text=musicState.artist
         bind.tvSongDescription.text = musicState.title
-        bind.ivMusicCover.loadImage(musicState.albumArt)
+        bind.ivMusicCover.loadImage(albumArt!!)
         bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
 
@@ -315,9 +313,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                     idSongState = 1,
                     idSong = currentMusicState.idSong,
                     songDuration = currentMusicState.duration,
-                    currentPosition = currentMusicState.currentPosition
+                    currentPosition = currentMusicState.currentDuration
                 )
             )
+
         }
         super.onStop()
 

@@ -1,6 +1,7 @@
 package com.barryzeha.data.repository
 
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.model.entities.SongEntity
@@ -48,6 +49,7 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
 
     override suspend fun saveSongState(songState: SongState): Long {
         return dao.saveSongState(songState)
+
     }
 
     override suspend fun updateSongState(songState: SongState): Int {

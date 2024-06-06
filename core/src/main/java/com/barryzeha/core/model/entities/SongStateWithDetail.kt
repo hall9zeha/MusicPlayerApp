@@ -13,7 +13,7 @@ import androidx.room.Relation
 data class SongStateWithDetail(
     @Embedded val songState: SongState,
     @Relation(
-        parentColumn = "idSongState", // Column of SongState entity
+        parentColumn = "idSong", // Column of SongState entity
         entityColumn = "id" // Column of SongEntity
     )
     val songEntity: SongEntity

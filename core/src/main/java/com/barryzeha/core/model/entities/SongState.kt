@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
     ForeignKey(
         entity = SongEntity::class,
         parentColumns =["id"],
-        childColumns = ["idSongState"],
+        childColumns = ["idSong"],
         onDelete = ForeignKey.CASCADE
     )
  ]
@@ -25,7 +25,7 @@ import androidx.room.PrimaryKey
 data class SongState(
  @PrimaryKey(autoGenerate = true)
  val idSongState:Long =0,
- val idSong:Long?=null,
+ val idSong:Long=0, // No dejar las propiedades que se usan en relaciones o id como null
  val songDuration:Long=0,
  val currentPosition:Long=0,
 ) {

@@ -29,6 +29,8 @@ import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongState
+import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
@@ -69,12 +71,13 @@ class MusicPlayerService : Service() {
     val songController: SongController get() = _songController!!
     private var isForegroundService = false
     private var currentMusicState = MusicState()
-
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
     private var musicState:MusicState?=null
     private lateinit var mPrefs:MyPreferences
+    private var songEntity:SongEntity=SongEntity()
+    private lateinit var songMetaData:MusicState
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -163,7 +166,10 @@ class MusicPlayerService : Service() {
                     songsList.add(s)
                 }
             }
-
+            // TODO CORREGIR EL ERROR QUE MUESTRA SIEMPRE EL COVER Y LOS DATOS DEL PRIMER REGISTRO
+            // Y LA CONSTANTE CREACIÓN DE MEDIATRIEVERDATA INSTANCE
+            /*val songState=repository.fetchSongState()
+            if(!songState.isNullOrEmpty())setMusicStateSaved(songState[0])*/
         }
     }
     private fun nextOrPrevTRack(position:Int){
@@ -181,8 +187,9 @@ class MusicPlayerService : Service() {
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
+
         currentMusicState?.let { newState ->
-                 mediaSession.setPlaybackState(
+              mediaSession.setPlaybackState(
                     PlaybackState.Builder()
                         .setState(
                             if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
@@ -206,7 +213,7 @@ class MusicPlayerService : Service() {
                     MediaStyle()
                         .setMediaSession(mediaSession.sessionToken)
                         .setShowActionsInCompactView(0, 1, 2),
-                    currentMusicState
+                   currentMusicState
                 )
                 startForeground(NOTIFICATION_ID, mediaPlayerNotify).also {
                     isForegroundService = true
@@ -241,6 +248,7 @@ class MusicPlayerService : Service() {
 
     }
     private fun setUpExoPlayer(song:SongEntity){
+        songEntity = song
         val songPath = song.pathLocation.toString()
         if(exoPlayer.isPlaying){
             exoPlayer.stop()
@@ -264,10 +272,12 @@ class MusicPlayerService : Service() {
                         title = songPath.substringAfterLast("/","No named"),
                         artist = songMetadata!!.artist,
                         album = songMetadata.album,
-                        albumArt = songMetadata.albumArt,
+                        //albumArt = songMetadata.albumArt,
                         duration =(exoPlayer.duration),
                         songPath = songPath
                     )
+
+
                     // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
                     // información que de la pista en reproducción que no requiere cambios constantes
                     // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
@@ -288,6 +298,7 @@ class MusicPlayerService : Service() {
         exoPlayer.prepare()
         exoPlayer.play()
     }
+
     override fun onBind(intent: Intent?): IBinder {
         return binder
     }
@@ -324,6 +335,30 @@ class MusicPlayerService : Service() {
     fun stopStartLoop(state:Boolean){
         if(state)songHandler?.removeCallbacks(songRunnable)
         else songHandler?.post(songRunnable)
+    }
+    private fun setMusicStateSaved(songState: SongStateWithDetail){
+        val song=songState.songEntity
+        val songPath=song.pathLocation.toString()
+        songMetaData= getSongCover(applicationContext!!,songPath)!!
+        // Set info currentSongEntity
+        currentMusicState = MusicState(
+                idSong = song.id,
+                isPlaying = exoPlayer.isPlaying,
+                title = songPath.substringAfterLast("/", "No named"),
+                artist = songMetaData!!.artist,
+                album = songMetaData.album,
+                duration = songState.songState.songDuration,
+                songPath = songPath,
+                currentDuration = songState.songState.currentPosition
+            )
+        _songController?.currentTrack(currentMusicState)
+
+       /*
+        exoPlayer.release()
+        exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+        exoPlayer.seekTo(songState.songState.currentPosition)
+        exoPlayer.prepare()*/
+
     }
 
     fun unregisterController(){

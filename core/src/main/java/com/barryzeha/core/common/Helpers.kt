@@ -121,15 +121,16 @@ fun createNotificationChannel(notificationManager:NotificationManager){
     }
 }
 
-fun getSongCover(context: Context, path: String?): MusicState? {
-    path?.let {
+fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): MusicState? {
+    if(!path.isNullOrEmpty()){
         val mmr = MediaMetadataRetriever()
         mmr.setDataSource(path)
         val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
         val bitmap = mmr.embeddedPicture?.let {
             val originalBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
-            scaleBitmap(originalBitmap, 350, 350)
+            if(isForNotify)scaleBitmap(originalBitmap, 96, 96)
+            else scaleBitmap(originalBitmap, 500, 500)
         }
         return MusicState(
             artist = artist ?: "Unknown",
