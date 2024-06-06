@@ -10,6 +10,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongState
+import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +32,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
 
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
+
+    private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
+    val songState:LiveData<List<SongStateWithDetail>> = _songState
+
+
 
     private var _allSongFromMain:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongFromMain:LiveData<List<SongEntity>> = _allSongFromMain
@@ -68,10 +75,22 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
             _allSongFromMain.value = repository.fetchAllSongs()
         }
     }
+    // SongState
+    fun fetchSongState(){
+        viewModelScope.launch {
+            _songState.value = repository.fetchSongState()
+        }
+    }
+    //*************************************
     fun saveNewSong(songEntity: SongEntity){
         viewModelScope.launch {
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
+        }
+    }
+    fun saveSongState(songState: SongState){
+        viewModelScope.launch {
+            repository.saveSongState(songState)
         }
     }
     fun deleteSong(songEntity: SongEntity){
@@ -91,12 +110,15 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
                 .collect{_currentTimeOfSong.value = it}
         }
     }
+
+    // Temporal values, not insert with database
     fun setCurrentPosition(position:Int){
         viewModelScope.launch {
             _currentSongListPosition.value = position
             MyApp.mPrefs.currentPosition=position.toLong()
         }
     }
+
 
     fun setMusicState(musicState: MusicState){
         viewModelScope.launch {

@@ -4,6 +4,8 @@ import android.media.MediaPlayer
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongState
+import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.database.SongDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -37,6 +39,19 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
 
     override suspend fun deleteSong(idSong: Long): Int {
         return dao.deleteSong(idSong)
+    }
+
+    // SongState
+    override suspend fun fetchSongState(): List<SongStateWithDetail> {
+        return dao.fetchSongState()
+    }
+
+    override suspend fun saveSongState(songState: SongState): Long {
+        return dao.saveSongState(songState)
+    }
+
+    override suspend fun updateSongState(songState: SongState): Int {
+        return dao.updateSongState(songState)
     }
 
     // UI Flows

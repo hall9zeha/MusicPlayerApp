@@ -23,6 +23,7 @@ import com.barryzeha.core.common.toObject
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
@@ -141,12 +142,16 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private fun setUpObservers(){
         bind.ivMusicCover.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
+        mainViewModel.fetchSongState()
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             if(songs.isNotEmpty()){
                 songs.forEach {
                     if(!songLists.contains(it))songLists.add(it)
                 }
             }
+        }
+        mainViewModel.songState.observe(viewLifecycleOwner){songState->
+           Log.e("SONG-STATE-DB", songState.toString() )
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
            it?.let{currentTrack->
@@ -202,7 +207,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         btnMainPlay.setOnClickListener {
             if (songLists.size > 0) {
                 if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
-                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition).pathLocation.toString())
+                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition))
                     bind.btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
 
                 } else {
@@ -219,12 +224,12 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
         btnMainPrevious.setOnClickListener{
             if (currentSelectedPosition > 0) {
-                     musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition -1).pathLocation.toString())
+                     musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition -1))
               }
         }
         btnMainNext.setOnClickListener {
             if(currentSelectedPosition<=songLists.size -1){
-                   musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition +1).pathLocation.toString())
+                   musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition +1))
             }
         }
         bind.mainSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
@@ -301,6 +306,21 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
+    }
+
+    override fun onStop() {
+        if(currentMusicState.idSong>0) {
+            mainViewModel.saveSongState(
+                SongState(
+                    idSongState = 1,
+                    idSong = currentMusicState.idSong,
+                    songDuration = currentMusicState.duration,
+                    currentPosition = currentMusicState.currentPosition
+                )
+            )
+        }
+        super.onStop()
+
     }
     override fun onDestroy() {
         super.onDestroy()

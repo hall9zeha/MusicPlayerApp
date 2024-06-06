@@ -169,7 +169,7 @@ class MusicPlayerService : Service() {
     private fun nextOrPrevTRack(position:Int){
         if(_songController==null){
             if(songsList.isNotEmpty()) {
-                startPlayer(songsList[position].pathLocation.toString())
+                startPlayer(songsList[position])
                 mPrefs.currentPosition = position.toLong()
             }
             mPrefs.nextOrPrevFromNotify=true
@@ -240,7 +240,8 @@ class MusicPlayerService : Service() {
             songHandler.post(songRunnable)
 
     }
-    private fun setUpExoPlayer(songPath:String){
+    private fun setUpExoPlayer(song:SongEntity){
+        val songPath = song.pathLocation.toString()
         if(exoPlayer.isPlaying){
             exoPlayer.stop()
             exoPlayer= ExoPlayer.Builder(applicationContext)
@@ -258,11 +259,12 @@ class MusicPlayerService : Service() {
                     val songMetadata= getSongCover(applicationContext!!,songPath)
                     // Set info currentSongEntity
                     currentMusicState = MusicState(
+                        idSong = song.id,
                         isPlaying=exoPlayer.isPlaying,
-                        title = songPath.substringAfterLast("/","No named")!!,
+                        title = songPath.substringAfterLast("/","No named"),
                         artist = songMetadata!!.artist,
-                        album = songMetadata!!.album,
-                        albumArt = songMetadata!!.albumArt,
+                        album = songMetadata.album,
+                        albumArt = songMetadata.albumArt,
                         duration =(exoPlayer.duration),
                         songPath = songPath
                     )
@@ -295,14 +297,14 @@ class MusicPlayerService : Service() {
     fun setSongController(controller:SongController){
         _songController=controller
     }
-    fun startPlayer(songPath:String){
-        songPath?.let {
+    fun startPlayer(song:SongEntity){
+        song.pathLocation?.let {
             if(mPrefs.playerIsStop){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información que de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
-            setUpExoPlayer(songPath)
+            setUpExoPlayer(song)
         }
     }
     fun pauseExoPlayer(){

@@ -13,6 +13,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class MusicState(
+    val idSong:Long=0,
     val isPlaying: Boolean = false,
     val currentDuration: Long = 0,
     val title: String = "",

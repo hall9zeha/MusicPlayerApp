@@ -262,7 +262,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
        bottomPlayerControls.btnPlay.setOnClickListener{
             if(adapter.itemCount>0) {
                 if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->
-                    musicPlayerService?.startPlayer(song.pathLocation.toString())
+                    musicPlayerService?.startPlayer(song)
 
                 }
                 else {
@@ -280,7 +280,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         bottomPlayerControls.btnPrevious.setOnClickListener{
              if (currentSelectedPosition > 0) {
                 getSongOfAdapter(currentSelectedPosition - 1)?.let{song->
-                    musicPlayerService?.startPlayer(song.pathLocation.toString())
+                    musicPlayerService?.startPlayer(song)
                     mPrefs.currentPosition = currentSelectedPosition.toLong()
                 }
             }
@@ -288,7 +288,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         bottomPlayerControls.btnNext.setOnClickListener {
            if(currentSelectedPosition<adapter.itemCount-1){
                getSongOfAdapter(currentSelectedPosition +1)?.let{song->
-                   musicPlayerService?.startPlayer(song.pathLocation.toString())
+                   musicPlayerService?.startPlayer(song)
                    mPrefs.currentPosition = currentSelectedPosition.toLong()
                }
            }
@@ -335,7 +335,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun onItemClick(position:Int,song: SongEntity){
-        musicPlayerService?.startPlayer(song.pathLocation.toString())
+        musicPlayerService?.startPlayer(song)
         mainViewModel.setCurrentPosition(position)
 
     }
