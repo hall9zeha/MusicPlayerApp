@@ -104,6 +104,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         mainViewModel.setCurrentPosition(0)
+                        return
+                    }
+                    if(musicState.currentDuration>0){
+                        bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                        mainViewModel.saveStatePlaying(false)
+                        return
                     }
                     else {
                         mainViewModel.saveStatePlaying(true)
@@ -292,6 +298,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                    musicPlayerService?.startPlayer(song)
                    mPrefs.currentPosition = currentSelectedPosition.toLong()
                }
+           }else{
+               getSongOfAdapter(0)?.let{song->
+                   musicPlayerService?.startPlayer(song)
+                   mPrefs.currentPosition = currentSelectedPosition.toLong()
+               }
            }
         }
         bind.seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
@@ -389,10 +400,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
+
     }
 
     override fun onStop() {
-     /*   if(currentMusicState.idSong>0) {
+        if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
                 SongState(
                     idSongState = 1,
@@ -401,7 +413,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                     currentPosition = currentMusicState.currentPosition
                 )
             )
-        }*/
+        }
         super.onStop()
     }
     override fun onDestroyView() {

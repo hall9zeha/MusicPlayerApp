@@ -22,5 +22,7 @@ data class MusicState(
     val albumArt: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
     val duration: Long = 0,
     val songPath: String = "",
-    val currentPosition:Long=0L
+    val currentPosition:Long=0L,
+    val latestPlayed:Boolean=false
+
 ) : Parcelable

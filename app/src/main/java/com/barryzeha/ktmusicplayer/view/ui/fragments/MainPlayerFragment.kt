@@ -87,19 +87,28 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         override fun currentTrack(musicState: MusicState?) {
             musicState?.let{
-                mainViewModel.setCurrentTrack(musicState)
-                if(!musicState.isPlaying){
-                    if((songLists.size -1)  == currentSelectedPosition) {
+
+                 if(!musicState.isPlaying){
+                    if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
                         bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
-                        mainViewModel.setCurrentPosition(0)
+                        //mainViewModel.setCurrentPosition(0)
+                        return
                     }
-
+                    else if(musicState.duration>0 && musicState.latestPlayed){
+                        bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
+                        mainViewModel.saveStatePlaying(false)
+                        mainViewModel.setCurrentTrack(musicState)
+                        return
+                    }
                     else {
                         mainViewModel.saveStatePlaying(true)
-                        bind.btnMainNext.performClick()}
+                        bind.btnMainNext.performClick()
+                       mainViewModel.setCurrentTrack(musicState)
+                    }
                 }else{
                     mainViewModel.saveStatePlaying(true)
+                    mainViewModel.setCurrentTrack(musicState)
                 }
             }
         }
@@ -226,8 +235,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
               }
         }
         btnMainNext.setOnClickListener {
-            if(currentSelectedPosition<=songLists.size -1){
+            if(currentSelectedPosition<songLists.size-1){
                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition +1))
+            }else{
+                musicPlayerService?.startPlayer(getSongOfList(0))
             }
         }
         bind.mainSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
@@ -254,7 +265,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     private fun getSongOfList(position:Int): SongEntity{
         mainViewModel.setCurrentPosition(position)
-        val song = songLists[currentSelectedPosition]
+        val song = songLists[position]
         return song
     }
     private fun linkToService(){
@@ -304,8 +315,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
-    }
 
+    }
     override fun onStop() {
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(

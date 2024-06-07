@@ -166,10 +166,8 @@ class MusicPlayerService : Service() {
                     songsList.add(s)
                 }
             }
-            // TODO CORREGIR EL ERROR QUE MUESTRA SIEMPRE EL COVER Y LOS DATOS DEL PRIMER REGISTRO
-            // Y LA CONSTANTE CREACIÓN DE MEDIATRIEVERDATA INSTANCE
-            /*val songState=repository.fetchSongState()
-            if(!songState.isNullOrEmpty())setMusicStateSaved(songState[0])*/
+            val songState=repository.fetchSongState()
+            if(!songState.isNullOrEmpty())setMusicStateSaved(songState[0])
         }
     }
     private fun nextOrPrevTRack(position:Int){
@@ -234,7 +232,7 @@ class MusicPlayerService : Service() {
                     currentMusicState = currentMusicState.copy(
                         isPlaying = exoPlayer.isPlaying,
                         currentDuration = exoPlayer.currentPosition,
-                        duration = exoPlayer.duration
+                        duration = exoPlayer.duration,
 
                     )
                 }
@@ -250,6 +248,12 @@ class MusicPlayerService : Service() {
     private fun setUpExoPlayer(song:SongEntity){
         songEntity = song
         val songPath = song.pathLocation.toString()
+
+        // Obtenemos el archivo bitmap de la carátula del albúm y lo reducimos  enviando true como argumento de isForNotify ya que si el bitmap es muy grande superando cierto límite
+        // y es enviado directamente dentro de la intención la aplicación se romperá. De esta manera creamos el bitmap de un tamaño
+        // de 96 x 96(isForNotify = true) para la notificación mientras que por defecto será de 500 x 500
+        val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
+
         if(exoPlayer.isPlaying){
             exoPlayer.stop()
             exoPlayer= ExoPlayer.Builder(applicationContext)
@@ -264,7 +268,7 @@ class MusicPlayerService : Service() {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
                 if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
-                    val songMetadata= getSongCover(applicationContext!!,songPath)
+
                     // Set info currentSongEntity
                     currentMusicState = MusicState(
                         idSong = song.id,
@@ -272,9 +276,10 @@ class MusicPlayerService : Service() {
                         title = songPath.substringAfterLast("/","No named"),
                         artist = songMetadata!!.artist,
                         album = songMetadata.album,
-                        //albumArt = songMetadata.albumArt,
+                        albumArt = songMetadata.albumArt,
                         duration =(exoPlayer.duration),
-                        songPath = songPath
+                        songPath = songPath,
+                        latestPlayed = false
                     )
 
 
@@ -332,33 +337,28 @@ class MusicPlayerService : Service() {
     fun setExoPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
     }
-    fun stopStartLoop(state:Boolean){
-        if(state)songHandler?.removeCallbacks(songRunnable)
-        else songHandler?.post(songRunnable)
-    }
+
     private fun setMusicStateSaved(songState: SongStateWithDetail){
         val song=songState.songEntity
         val songPath=song.pathLocation.toString()
-        songMetaData= getSongCover(applicationContext!!,songPath)!!
+        songMetaData= getSongCover(applicationContext!!,songPath, isForNotify = true)!!
         // Set info currentSongEntity
         currentMusicState = MusicState(
                 idSong = song.id,
                 isPlaying = exoPlayer.isPlaying,
                 title = songPath.substringAfterLast("/", "No named"),
-                artist = songMetaData!!.artist,
+                artist = songMetaData.artist,
                 album = songMetaData.album,
+                albumArt = songMetaData.albumArt,
                 duration = songState.songState.songDuration,
                 songPath = songPath,
-                currentDuration = songState.songState.currentPosition
+                currentDuration = songState.songState.currentPosition,
+                latestPlayed = true
             )
-        _songController?.currentTrack(currentMusicState)
-
-       /*
-        exoPlayer.release()
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.seekTo(songState.songState.currentPosition)
-        exoPlayer.prepare()*/
-
+        exoPlayer.prepare()
+        _songController?.currentTrack(currentMusicState)
     }
 
     fun unregisterController(){

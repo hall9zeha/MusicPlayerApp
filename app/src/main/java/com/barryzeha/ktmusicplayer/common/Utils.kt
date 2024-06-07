@@ -43,11 +43,7 @@ fun createNotificationChannel(context: Context){
 
 @Suppress("Deprecation")
 fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyle, state: MusicState): Notification {
-    // Obtenemos aquí el archivo bitmap de portada del album ya que los Intents si el archivo supera cierto límite
-    // y es enviado directamente dentro de la intención la aplicación se romperá. De esta manera creamos el bitmap de un tamaño
-    // de 96 x 96(isForNotify = true) para la notificación mientras que por defecto será de 500 x 500
-    val albumArt = getSongCover(context,state.songPath, isForNotify = true)!!.albumArt
-    ///
+
     val pMainIntent = PendingIntent.getActivity(
         context,
         123,
@@ -123,7 +119,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     return builder
         .setStyle(mediaStyle)
         .setSmallIcon(R.drawable.ic_play)
-        .setLargeIcon(albumArt)
+        .setLargeIcon(state.albumArt)
         .setOnlyAlertOnce(true)
         .setOngoing(true)
         .setContentIntent(pMainIntent)

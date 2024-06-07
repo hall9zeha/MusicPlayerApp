@@ -34,6 +34,7 @@ import kotlin.math.min
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 private const val NOTIFICATION_ID = 202405
+private  val mmr = MediaMetadataRetriever()
 fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Boolean, List<Pair<String,Boolean>>) ->Unit){
     val permissionsGranted:MutableList<Pair<String,Boolean>> = mutableListOf()
     var grantedCount=0
@@ -123,7 +124,6 @@ fun createNotificationChannel(notificationManager:NotificationManager){
 
 fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
-        val mmr = MediaMetadataRetriever()
         mmr.setDataSource(path)
         val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
