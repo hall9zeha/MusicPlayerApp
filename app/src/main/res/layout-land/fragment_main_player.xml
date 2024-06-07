@@ -108,6 +108,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:progress="70"
+        android:thumb="@drawable/seekbar_thumb"
         app:layout_constraintStart_toStartOf="@id/tvSongDescription"
         app:layout_constraintEnd_toEndOf="@id/tvSongDescription"
         app:layout_constraintTop_toBottomOf="@id/tvSongDescription"

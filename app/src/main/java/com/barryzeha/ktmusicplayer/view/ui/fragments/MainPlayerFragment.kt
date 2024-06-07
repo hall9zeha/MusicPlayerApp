@@ -318,19 +318,18 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     }
     override fun onStop() {
+       super.onStop()
         if(currentMusicState.idSong>0) {
-            mainViewModel.saveSongState(
-                SongState(
-                    idSongState = 1,
-                    idSong = currentMusicState.idSong,
-                    songDuration = currentMusicState.duration,
-                    currentPosition = currentMusicState.currentDuration
-                )
-            )
+                   mainViewModel.saveSongState(
+                       SongState(
+                           idSongState = 1,
+                           idSong = currentMusicState.idSong,
+                           songDuration = currentMusicState.duration,
+                           currentPosition = currentMusicState.currentDuration
+                       )
+                   )
 
-        }
-        super.onStop()
-
+               }
     }
     override fun onDestroy() {
         super.onDestroy()

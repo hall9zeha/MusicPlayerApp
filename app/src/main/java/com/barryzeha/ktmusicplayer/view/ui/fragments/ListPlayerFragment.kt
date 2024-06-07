@@ -205,10 +205,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
-            if(it.isEmpty()){
-                Toast.makeText(context, "No hay ninguna canción", Toast.LENGTH_SHORT).show()
-            }else{
-              adapter.addAll(it)
+            if (it.isNotEmpty()) {
+                adapter.addAll(it)
+            } else {
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
@@ -382,13 +381,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onStart() {
         super.onStart()
         context?.bindService(startOrUpdateService(),this, Context.BIND_AUTO_CREATE)
-        /*//if(!requireContext().isServiceRunning(MusicPlayerService::class.java)) {
-            requireContext().bindService(startOrUpdateService(),
-                this,
-                Context.BIND_AUTO_CREATE
-            )
-            musicPlayerService?.setSongController(songController)
-        //}*/
+
     }
     override fun onResume() {
         super.onResume()
@@ -404,6 +397,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
 
     override fun onStop() {
+        super.onStop()
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
                 SongState(
@@ -414,7 +408,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 )
             )
         }
-        super.onStop()
+
     }
     override fun onDestroyView() {
         super.onDestroyView()

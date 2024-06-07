@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     private lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private var musicPlayerService: MusicPlayerService?=null
-    private var songStateWithDetail:List<SongStateWithDetail>?=null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         setUpViewPager()
         setUpObservers()
     }
@@ -57,14 +56,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             //Log.e("MAIN-ACTIVITY", it.toString() )
         }
         mainViewModel.songState.observe(this){songState->
-            Log.e("SONG-STATE", songState.toString() )
-            if(songState.isNotEmpty()){
-                songStateWithDetail=songState
 
-               /* musicPlayerService?.let{
-                    musicPlayerService!!.setMusicStateSaved(songState.first())
-                }*/
-            }
         }
     }
     private fun setUpViewPager(){
