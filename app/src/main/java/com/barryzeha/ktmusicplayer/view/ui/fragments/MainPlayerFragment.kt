@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.provider.SyncStateContract.Helpers
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +19,10 @@ import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.common.isServiceRunning
+import com.barryzeha.core.common.linkToService
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.common.toObject
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -86,7 +90,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
 
         override fun currentTrack(musicState: MusicState?) {
-            musicState?.let{
+           musicState?.let{
 
                  if(!musicState.isPlaying){
                     if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
@@ -167,7 +171,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         mainViewModel.musicState.observe(viewLifecycleOwner){
             it?.let{musicState->
                 setChangeInfoViews(musicState)
-                startOrUpdateService()
+                updateService()
             }
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
@@ -268,18 +272,11 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         val song = songLists[position]
         return song
     }
-    private fun linkToService(){
-        context?.bindService(startOrUpdateService(),this, Context.BIND_AUTO_CREATE)
-    }
-    private fun startOrUpdateService():Intent{
-        val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
-            putExtra("musicState", currentMusicState)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(requireContext(), serviceIntent)
-        } else activity?.startService(serviceIntent)
-
-        return serviceIntent
+    private fun updateService(){
+       val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
+           putExtra("musicState", currentMusicState)
+       }
+       context?.bindService(serviceIntent,this,Context.BIND_AUTO_CREATE)
     }
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
@@ -292,7 +289,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     override fun onStart() {
         super.onStart()
-        linkToService()
+        linkToService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
     }
 
     override fun onResume() {

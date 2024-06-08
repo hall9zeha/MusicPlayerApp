@@ -19,6 +19,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
+import com.barryzeha.core.common.isServiceRunning
+import com.barryzeha.core.common.linkToService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -75,23 +77,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         musicPlayerService = null
 
     }
-    private fun startOrUpdateService(): Intent {
-        val serviceIntent = Intent (this, MusicPlayerService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(this, serviceIntent)
-        } else startService(serviceIntent)
-
-        return serviceIntent
-    }
-    override fun onStart() {
+   override fun onStart() {
         super.onStart()
-        //if(!requireContext().isServiceRunning(MusicPlayerService::class.java)) {
-        bindService(startOrUpdateService(),
-            this,
-            Context.BIND_AUTO_CREATE
-        )
-
-        //}
+        linkToService(this,MusicPlayerService::class.java,this)
     }
 
     override fun onDestroy() {

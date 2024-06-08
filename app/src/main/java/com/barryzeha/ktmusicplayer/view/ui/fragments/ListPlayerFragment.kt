@@ -30,6 +30,7 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.common.isServiceRunning
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -193,7 +194,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             bind.seekbarControl.tvEndTime.text = formattedDuration
             bind.seekbarControl.tvInitTime.text = createTime(savedMusicState.currentDuration).third
             bind.seekbarControl.loadSeekBar.progress = savedMusicState.currentDuration.toInt()
-            startOrUpdateService()
+            updateService()
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -207,7 +208,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if (it.isNotEmpty()) {
                 adapter.addAll(it)
-            } else {
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
@@ -269,7 +269,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             if(adapter.itemCount>0) {
                 if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->
                     musicPlayerService?.startPlayer(song)
-
                 }
                 else {
                     if (isPlaying) {
@@ -360,15 +359,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         popupMenu.show()
     }
-    private fun startOrUpdateService():Intent{
+   private fun updateService(){
         val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
             putExtra("musicState", currentMusicState)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(requireContext(),serviceIntent)
-        } else activity?.startService(serviceIntent)
-
-        return serviceIntent
+        context?.bindService(serviceIntent,this,Context.BIND_AUTO_CREATE)
     }
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
@@ -380,8 +375,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     override fun onStart() {
         super.onStart()
-        context?.bindService(startOrUpdateService(),this, Context.BIND_AUTO_CREATE)
-
+        com.barryzeha.core.common.linkToService(
+            requireContext(),
+            MusicPlayerService::class.java,
+            this,
+            currentMusicState
+        )
     }
     override fun onResume() {
         super.onResume()
@@ -393,7 +392,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
-
     }
 
     override fun onStop() {
