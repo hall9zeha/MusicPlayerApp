@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -204,7 +205,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         bind.ivMusicCover.loadImage(albumArt!!)
         bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
-
+        Log.e("SONG-INFO", "EJECUTANDO" )
     }
     private fun setChangeInfoViews(musicState: MusicState){
         currentMusicState = musicState
@@ -290,11 +291,13 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onStart() {
         super.onStart()
         linkToService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
+
     }
 
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
+        //TODO corregir el parpadeo de los textviews dezplazables cuando se retorna de una pausa y se asigna nuevamente songController
         if(currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
             val song=songLists[mPrefs.currentPosition.toInt()]
             val songMetadata= getSongCover(requireContext(),song.pathLocation)
@@ -311,6 +314,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     override fun onPause() {
         super.onPause()
+
         musicPlayerService?.unregisterController()
 
     }

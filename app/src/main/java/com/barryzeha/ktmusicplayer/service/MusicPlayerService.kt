@@ -256,9 +256,9 @@ class MusicPlayerService : Service() {
 
         if(exoPlayer.isPlaying){
             exoPlayer.stop()
+            exoPlayer.release()
             exoPlayer= ExoPlayer.Builder(applicationContext)
                 .build()
-
         }else{
             exoPlayer= ExoPlayer.Builder(applicationContext)
                 .build()
@@ -313,6 +313,9 @@ class MusicPlayerService : Service() {
     fun setSongController(controller:SongController){
         _songController=controller
     }
+    fun unregisterController(){
+        _songController=null
+    }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
             if(mPrefs.playerIsStop){songHandler.post(songRunnable)}
@@ -361,9 +364,7 @@ class MusicPlayerService : Service() {
         _songController?.currentTrack(currentMusicState)
     }
 
-    fun unregisterController(){
-        _songController=null
-    }
+
     override fun onDestroy() {
         isForegroundService = false
         _songController?.stop()

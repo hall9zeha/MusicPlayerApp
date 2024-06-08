@@ -30,7 +30,8 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongCover
-import com.barryzeha.core.common.isServiceRunning
+import com.barryzeha.core.common.linkToService
+
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -227,7 +228,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun setUpViews(musicState:MusicState)=with(bind){
-
             val durationInMillis = musicState.duration
             val formattedDuration = createTime(durationInMillis).third
             seekbarControl.tvEndTime.text = formattedDuration
@@ -375,12 +375,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     override fun onStart() {
         super.onStart()
-        com.barryzeha.core.common.linkToService(
-            requireContext(),
-            MusicPlayerService::class.java,
-            this,
-            currentMusicState
-        )
+        linkToService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
     }
     override fun onResume() {
         super.onResume()
@@ -406,7 +401,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 )
             )
         }
-
     }
     override fun onDestroyView() {
         super.onDestroyView()
