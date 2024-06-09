@@ -1,41 +1,29 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.provider.SyncStateContract.Helpers
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongCover
-import com.barryzeha.core.common.isServiceRunning
-import com.barryzeha.core.common.linkToService
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.common.toObject
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.MyApp
-import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import dagger.hilt.android.AndroidEntryPoint
 import com.barryzeha.core.R as coreRes
 
@@ -274,10 +262,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         return song
     }
     private fun updateService(){
-       val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
-           putExtra("musicState", currentMusicState)
-       }
-       context?.bindService(serviceIntent,this,Context.BIND_AUTO_CREATE)
+        startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
     }
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
@@ -290,7 +275,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     override fun onStart() {
         super.onStart()
-        linkToService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
+        startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
 
     }
 

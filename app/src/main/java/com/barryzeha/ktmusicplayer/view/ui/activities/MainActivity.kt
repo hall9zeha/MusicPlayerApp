@@ -1,36 +1,22 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
-import android.content.BroadcastReceiver
 import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.ServiceConnection
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
-import com.barryzeha.core.common.isServiceRunning
-import com.barryzeha.core.common.linkToService
-import com.barryzeha.core.model.entities.MusicState
-import com.barryzeha.core.model.entities.SongState
-import com.barryzeha.core.model.entities.SongStateWithDetail
+import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), ServiceConnection {
@@ -79,7 +65,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     }
    override fun onStart() {
         super.onStart()
-        linkToService(this,MusicPlayerService::class.java,this)
+        startOrUpdateService(this,MusicPlayerService::class.java,this)
     }
 
     override fun onDestroy() {

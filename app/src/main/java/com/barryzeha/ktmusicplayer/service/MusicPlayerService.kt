@@ -139,7 +139,7 @@ class MusicPlayerService : Service() {
                 exoPlayer.stop()
                 exoPlayer.release()
                 songHandler.removeCallbacks(songRunnable)
-                //_songController?.currentTrack(currentMusicState.copy(isPlaying = false))
+
                 // Remove notification of foreground service process
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
@@ -363,17 +363,15 @@ class MusicPlayerService : Service() {
         exoPlayer.prepare()
         _songController?.currentTrack(currentMusicState)
     }
-
-
     override fun onDestroy() {
         isForegroundService = false
         _songController?.stop()
         mediaSession.release()
-        stopSelf()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        cancelPersistentNotify(applicationContext)
+        stopSelf()
         super.onDestroy()
     }
-
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         exitProcess(0)

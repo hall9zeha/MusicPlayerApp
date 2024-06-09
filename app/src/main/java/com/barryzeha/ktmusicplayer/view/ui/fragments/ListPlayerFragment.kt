@@ -3,7 +3,6 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.app.Activity
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.net.Uri
@@ -16,11 +15,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat.startForegroundService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,8 +27,7 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongCover
-import com.barryzeha.core.common.linkToService
-
+import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -360,10 +356,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         popupMenu.show()
     }
    private fun updateService(){
-        val serviceIntent = Intent (context, MusicPlayerService::class.java).apply {
-            putExtra("musicState", currentMusicState)
-        }
-        context?.bindService(serviceIntent,this,Context.BIND_AUTO_CREATE)
+       startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
     }
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
@@ -375,7 +368,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     override fun onStart() {
         super.onStart()
-        linkToService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
+        startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
     }
     override fun onResume() {
         super.onResume()

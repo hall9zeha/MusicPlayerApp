@@ -51,25 +51,17 @@ fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Bool
     isGranted((grantedCount == permissions.size),permissionsGranted)
 }
 
-fun <T> startOrUpdateService(context: Context,service:Class<T>,musicState: MusicState): Intent {
+fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:ServiceConnection,musicState: MusicState=MusicState()){
     val serviceIntent = Intent (context, service).apply {
         putExtra("musicState", musicState)
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        ContextCompat.startForegroundService(context, serviceIntent)
-    } else context.startService(serviceIntent)
-
-    return serviceIntent
-}
-fun  <T> linkToService(context: Context, service: Class<T>,serviceConn: ServiceConnection,musicState: MusicState=MusicState()){
-    if (!context.isServiceRunning(service) ){
-        context.bindService(startOrUpdateService(context,service,musicState), serviceConn, Context.BIND_AUTO_CREATE)
-    }else{
-        val serviceIntent = Intent (context, service).apply {
-            putExtra("musicState", musicState)
-        }
-        context.bindService(serviceIntent,serviceConn,Context.BIND_AUTO_CREATE)
+    if (!context.isServiceRunning(service) ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(context, serviceIntent)
+        } else context.startService(serviceIntent)
     }
+    context.bindService(serviceIntent, serviceConn, Context.BIND_AUTO_CREATE)
+
 }
 
 fun getTimeOfSong(duration:Long):String{
