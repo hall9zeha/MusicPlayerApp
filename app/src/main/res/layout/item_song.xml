@@ -13,7 +13,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
+        <com.google.android.material.imageview.ShapeableImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/ivItem"
+            android:layout_marginStart="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tvSongDesc"/>
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvSongDesc"
             android:layout_width="0dp"
@@ -21,7 +29,7 @@
             android:maxLines="1"
             tools:text="12. Song name  and some info aditional.mp3"
             android:ellipsize="end"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivItem"
             app:layout_constraintEnd_toStartOf="@id/ivOptions"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

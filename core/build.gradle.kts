@@ -61,6 +61,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // JaudioTagger
+    implementation(libs.jaudiotagger)
+
     // Glide
     implementation(libs.glide)
     ksp(libs.glide.compiler)

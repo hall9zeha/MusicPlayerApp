@@ -18,8 +18,11 @@ import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import com.barryzeha.core.model.entities.AudioMetadata
 
 import com.barryzeha.core.model.entities.MusicState
+import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.tag.FieldKey
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -64,6 +67,32 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 
 }
 
+fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
+    val metadata = AudioFileIO.read(File(pathFile))
+    val tag = metadata.tag
+    val coverArtData = try{
+        tag.firstArtwork.binaryData
+    }catch(e:Exception){
+        null
+    }
+    val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+
+    return AudioMetadata(
+        artist=tag.getFirst(FieldKey.ARTIST)?:"Unknown",
+        album=tag.getFirst(FieldKey.ALBUM)?:"Unknown",
+        title=tag.getFirst(FieldKey.TITLE)?:"No title",
+        comment=tag.getFirst(FieldKey.COMMENT),
+        year=tag.getFirst(FieldKey.YEAR),
+        track=tag.getFirst(FieldKey.TRACK),
+        discNumber=tag.getFirst(FieldKey.DISC_NO),
+        composer=tag.getFirst(FieldKey.COMPOSER),
+        artistSort = tag.getFirst(FieldKey.ARTIST_SORT),
+        bitRate = metadata.audioHeader.bitRate,
+        songLength = getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong()),
+        format = metadata.audioHeader.format,
+        coverArt = bitmapCoverArt
+    )
+}
 fun getTimeOfSong(duration:Long):String{
     return String.format(
         Locale.ROOT,"::%02d:%02d",
@@ -144,9 +173,7 @@ fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): Mus
         val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
         val bitmap = mmr.embeddedPicture?.let {
-            val originalBitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
-            if(isForNotify)scaleBitmap(originalBitmap, 96, 96)
-            else scaleBitmap(originalBitmap, 500, 500)
+           getBitmap(context,it,isForNotify)
         }
         return MusicState(
             artist = artist ?: "Unknown",
@@ -160,6 +187,15 @@ fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): Mus
         album ="Album Unknown",
         albumArt = BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
     )
+}
+fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):Bitmap?{
+    return byteArray?.let {
+        val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        if (isForNotify) scaleBitmap(originalBitmap, 96, 96)
+        else scaleBitmap(originalBitmap, 500, 500)
+    }?:run{
+        BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+    }
 }
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     val originalWidth = bitmap.width
