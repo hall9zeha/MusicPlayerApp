@@ -106,8 +106,6 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             }
         }
     }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -299,9 +297,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     override fun onPause() {
         super.onPause()
-
         musicPlayerService?.unregisterController()
-
     }
     override fun onStop() {
        super.onStop()

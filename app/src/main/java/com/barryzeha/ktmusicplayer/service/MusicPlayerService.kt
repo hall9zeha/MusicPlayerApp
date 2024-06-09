@@ -368,12 +368,15 @@ class MusicPlayerService : Service() {
         _songController?.stop()
         mediaSession.release()
         stopForeground(STOP_FOREGROUND_REMOVE)
-        cancelPersistentNotify(applicationContext)
         stopSelf()
         super.onDestroy()
     }
+    // TODO
+    // Si queremos mantener las notificaciones una vez cerrada la aplicación
+    // no debemos sobreescribir onTaskRemoved - volveremos más tarde para implementar algo con eso
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        cancelPersistentNotify(applicationContext)
         exitProcess(0)
     }
     inner class MusicPlayerServiceBinder : Binder() {

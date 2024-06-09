@@ -9,6 +9,7 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+
     }
 }
 dependencyResolutionManagement {
@@ -16,6 +17,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // For jaudiotagger repo find in bitbucket
+        maven ( url  ="https://dl.bintray.com/ijabz/maven" )
     }
 }
 

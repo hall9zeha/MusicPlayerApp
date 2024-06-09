@@ -92,19 +92,17 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             null
         }
     }
-
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
 
         fun onBind(position:Int,song: SongEntity) = with(bind){
-            val mediaPlayer = MediaPlayer()
+            // We use mediaPlayer from retrieve file music metadata
+            val mediaPlayer=MediaPlayer()
             mediaPlayer.setDataSource(song.pathLocation)
             mediaPlayer.prepare()
-            val info=mediaPlayer.trackInfo
-            for(i in info){
+            mediaPlayer.trackInfo?.forEach {i->
                 if(i.trackType == MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_AUDIO)
                     tvBitrate.text=String.format("%s::kbps",getBitrate(song.pathLocation!!).toString())
-
             }
             tvSongDesc.text=String.format("%s. %s",(position+1),song.pathLocation?.substringAfterLast("/","No named"))
             tvDuration.text= getTimeOfSong( (mediaPlayer.duration).toLong())
@@ -123,6 +121,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
 
     }
+
     private class SongDiffCallback:DiffUtil.ItemCallback<SongEntity>(){
         override fun areItemsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
             return oldItem.id == newItem.id
