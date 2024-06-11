@@ -2,9 +2,9 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.content.ComponentName
 import android.content.ServiceConnection
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +43,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var songLists:MutableList<SongEntity> = arrayListOf()
     private var currentSelectedPosition=0
     private lateinit var mPrefs:MyPreferences
+
     private val bind:FragmentMainPlayerBinding get() = _bind!!
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
@@ -75,7 +76,15 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         override fun musicState(musicState: MusicState?) {
             musicState?.let{
-                mainViewModel.setMusicState(musicState)
+                // Había un error de parpadeo especialmente en los textViews con marquee_forever dezplazables.
+                // Se debía que al recibir las actualizaciones cada 500ms las volvía a enviar a mi viewModel:
+                // mainViewModel.setMusicState(musicState) y recién dentro del observador actualizaba las vistas
+                // esto probablemente generaba más retardo en la actualización de las vistas y un trabajo innecesario
+                // pero sin el viewModel el estado no sobrevive  a un cambio de orientación, a veces lo hace y a veces no.
+                // Al agregar una implementación de ScopedViewModel como base para las clases ViewModels ayudó a solucionar el problema
+                // por ahora
+            mainViewModel.setMusicState(musicState)
+            //setChangeInfoViews(musicState)
             }
         }
 
@@ -157,10 +166,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
-            it?.let{musicState->
-                setChangeInfoViews(musicState)
-                updateService()
-            }
+            setChangeInfoViews(it)
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -184,22 +190,24 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     }
     private fun setUpSongInfo(musicState: MusicState){
-        currentMusicState=musicState
+        currentMusicState = musicState
         val albumArt = getSongCover(requireContext(), musicState.songPath)?.albumArt
-        bind.tvSongAlbum.text=musicState.album
-        bind.tvSongArtist.text=musicState.artist
+        bind.tvSongAlbum.text = musicState.album
+        bind.tvSongArtist.text = musicState.artist
         bind.tvSongDescription.text = musicState.title
         bind.ivMusicCover.loadImage(albumArt!!)
-        bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
+        bind.mainSeekBar.max = musicState.duration.toInt()
+        bind.tvSongTimeRest.text = createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
-        Log.e("SONG-INFO", "EJECUTANDO" )
+
     }
     private fun setChangeInfoViews(musicState: MusicState){
         currentMusicState = musicState
         bind.mainSeekBar.max=musicState.duration.toInt()
-        bind.mainSeekBar.progress=musicState.currentDuration.toInt()
-        bind.tvSongTimeRest.text= createTime(musicState.currentDuration).third
+        bind.mainSeekBar.progress = musicState.currentDuration.toInt()
+        bind.tvSongTimeRest.text = createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
+        updateService()
 
     }
     private fun setUpListeners()=with(bind){
@@ -272,6 +280,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onServiceDisconnected(name: ComponentName?) {
         musicPlayerService=null
     }
+
     override fun onStart() {
         super.onStart()
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
@@ -281,7 +290,6 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
-        //TODO corregir el parpadeo de los textviews dezplazables cuando se retorna de una pausa y se asigna nuevamente songController
         if(currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
             val song=songLists[mPrefs.currentPosition.toInt()]
             val songMetadata= getSongCover(requireContext(),song.pathLocation)

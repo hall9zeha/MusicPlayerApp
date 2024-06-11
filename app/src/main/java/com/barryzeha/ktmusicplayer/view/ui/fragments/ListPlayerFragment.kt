@@ -91,30 +91,33 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         override fun musicState(musicState: MusicState?) {
             musicState?.let {
-                mainViewModel.setMusicState(musicState)
-               //setUpViews(musicState)
+               mainViewModel.setMusicState(musicState)
+
             }
         }
         override fun currentTrack(musicState: MusicState?) {
             musicState?.let{
-                setUpViews(musicState)
                 if(!musicState.isPlaying){
                     if((adapter.itemCount -1)  == currentSelectedPosition) {
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
-                        mainViewModel.setCurrentPosition(0)
+                        //mainViewModel.setCurrentPosition(0)
                         return
                     }
                     if(musicState.currentDuration>0){
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
+                        mainViewModel.setCurrentTrack(musicState)
                         return
                     }
                     else {
                         mainViewModel.saveStatePlaying(true)
-                        bind.bottomPlayerControls.btnNext.performClick()}
+                        bind.bottomPlayerControls.btnNext.performClick()
+                        mainViewModel.setCurrentTrack(musicState)
+                    }
                 }else{
                     mainViewModel.saveStatePlaying(true)
+                    mainViewModel.setCurrentTrack(musicState)
                 }
             }
         }
@@ -183,16 +186,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     private fun setUpObservers(){
         mainViewModel.fetchAllSong()
-        mainViewModel.musicState.observe(viewLifecycleOwner){savedMusicState->
-            currentMusicState = savedMusicState
-            bind.ivCover.setImageBitmap(getSongCover(requireContext(), savedMusicState.songPath)?.albumArt)
-            val durationInMillis = savedMusicState.duration
-            val formattedDuration = createTime(durationInMillis).third
-            bind.seekbarControl.loadSeekBar.max = savedMusicState.duration.toInt()
-            bind.seekbarControl.tvEndTime.text = formattedDuration
-            bind.seekbarControl.tvInitTime.text = createTime(savedMusicState.currentDuration).third
-            bind.seekbarControl.loadSeekBar.progress = savedMusicState.currentDuration.toInt()
-            updateService()
+        mainViewModel.musicState.observe(viewLifecycleOwner){musicState->
+           setChangeInfoViews(musicState)
+        }
+        mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
+            setUpViews(currentTRack)
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -225,20 +223,32 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun setUpViews(musicState:MusicState)=with(bind){
+            currentMusicState = musicState
             val durationInMillis = musicState.duration
             val formattedDuration = createTime(durationInMillis).third
+            bind.ivCover.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
+            bind.seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvEndTime.text = formattedDuration
             seekbarControl.loadSeekBar.max = durationInMillis.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
 
         activity?.let {
             val songMetadata = getSongCover(requireActivity(), musicState.songPath)
-            mainViewModel.setCurrentTrack(musicState)
             songMetadata?.let {
                 ivCover.setImageBitmap(it.albumArt)
             }
 
         }
+        updateService()
+    }
+    private fun setChangeInfoViews(musicState: MusicState){
+        currentMusicState = musicState
+        //bind.ivCover.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
+        bind.seekbarControl.loadSeekBar.max = musicState.duration.toInt()
+        bind.seekbarControl.tvEndTime.text = createTime(musicState.duration).third
+        bind.seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
+        bind.seekbarControl.loadSeekBar.progress = musicState.currentDuration.toInt()
+        updateService()
     }
     private fun setUpListeners()= with(bind){
         val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{

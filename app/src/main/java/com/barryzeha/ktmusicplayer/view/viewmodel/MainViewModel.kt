@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.exoplayer.ExoPlayer
+import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
@@ -28,7 +29,7 @@ import javax.inject.Inject
  **/
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val repository:MainRepository):ViewModel() {
+class MainViewModel @Inject constructor(private val repository:MainRepository):ScopedViewModel() {
 
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
@@ -65,46 +66,49 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
     private var _isPlaying:MutableLiveData<Boolean> = MutableLiveData()
     val isPlaying:LiveData<Boolean> = _isPlaying
 
+    init{
+        initScope()
+    }
     fun fetchAllSong(){
-        viewModelScope.launch {
+      launch {
             _allSongs.value = repository.fetchAllSongs()
         }
     }
     fun fetchAllSongFromMain(){
-        viewModelScope.launch {
+        launch {
             _allSongFromMain.value = repository.fetchAllSongs()
         }
     }
     // SongState
     fun fetchSongState(){
-        viewModelScope.launch {
+        launch {
             _songState.value = repository.fetchSongState()
         }
     }
     //*************************************
     fun saveNewSong(songEntity: SongEntity){
-        viewModelScope.launch {
+        launch {
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
         }
     }
     fun saveSongState(songState: SongState){
-        viewModelScope.launch {
+        launch {
             repository.saveSongState(songState)
         }
     }
     fun deleteSong(songEntity: SongEntity){
-        viewModelScope.launch {
+      launch {
             _deletedRow.value = repository.deleteSong(songEntity.id)
         }
     }
     fun getSongById(idSong:Long){
-        viewModelScope.launch {
+        launch {
             _songById.value = repository.fetchSongById(idSong)
         }
     }
     fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer){
-        viewModelScope.launch {
+       launch {
             repository.fetchCurrentTimeOfSong(mediaPlayer)
                 .catch { Log.e("ERROR_FLOW",it.message.toString() ) }
                 .collect{_currentTimeOfSong.value = it}
@@ -113,7 +117,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
 
     // Temporal values, not insert with database
     fun setCurrentPosition(position:Int){
-        viewModelScope.launch {
+        launch {
             _currentSongListPosition.value = position
             MyApp.mPrefs.currentPosition=position.toLong()
         }
@@ -121,21 +125,25 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):V
 
 
     fun setMusicState(musicState: MusicState){
-        viewModelScope.launch {
+        launch {
             _musicState.value = musicState
         }
     }
     fun setCurrentTrack(musicState: MusicState){
-        viewModelScope.launch {
+       launch {
             _currentTrack.value = musicState
         }
     }
     fun saveStatePlaying(isPlaying:Boolean){
-        viewModelScope.launch {
+       launch {
             _isPlaying.value = isPlaying
         }
     }
 
+    override fun onCleared() {
+        destroyScope()
+        super.onCleared()
+    }
 
 
 
