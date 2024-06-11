@@ -16,9 +16,11 @@ import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -70,19 +72,19 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
         initScope()
     }
     fun fetchAllSong(){
-      launch {
-            _allSongs.value = repository.fetchAllSongs()
-        }
+      launch{
+          _allSongs.value=repository.fetchAllSongs()
+         }
     }
     fun fetchAllSongFromMain(){
         launch {
-            _allSongFromMain.value = repository.fetchAllSongs()
+            _allSongFromMain.value=repository.fetchAllSongs()
         }
     }
     // SongState
     fun fetchSongState(){
-        launch {
-            _songState.value = repository.fetchSongState()
+        launch{
+            _songState.value=repository.fetchSongState()
         }
     }
     //*************************************

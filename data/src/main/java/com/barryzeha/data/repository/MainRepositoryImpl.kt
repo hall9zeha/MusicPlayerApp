@@ -26,34 +26,34 @@ import javax.inject.Inject
 class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
     private val dao = db.getSongDao()
     // Room database
-    override suspend fun fetchAllSongs(): List<SongEntity> {
-        return dao.fetchAllSongs()
+    override suspend fun fetchAllSongs(): List<SongEntity> = withContext(Dispatchers.IO){
+        dao.fetchAllSongs()
     }
 
-    override suspend fun fetchSongById(idSong: Long): SongEntity {
-        return dao.fetchSongById(idSong)
+    override suspend fun fetchSongById(idSong: Long): SongEntity = withContext(Dispatchers.IO){
+        dao.fetchSongById(idSong)
     }
 
-    override suspend fun saveNewSong(song: SongEntity): Long {
-        return dao.saveNewSong(song)
+    override suspend fun saveNewSong(song: SongEntity): Long = withContext(Dispatchers.IO) {
+        dao.saveNewSong(song)
     }
 
-    override suspend fun deleteSong(idSong: Long): Int {
-        return dao.deleteSong(idSong)
+    override suspend fun deleteSong(idSong: Long): Int= withContext(Dispatchers.IO) {
+        dao.deleteSong(idSong)
     }
 
     // SongState
-    override suspend fun fetchSongState(): List<SongStateWithDetail> {
-        return dao.fetchSongState()
+    override suspend fun fetchSongState(): List<SongStateWithDetail> = withContext(Dispatchers.IO){
+        dao.fetchSongState()
     }
 
-    override suspend fun saveSongState(songState: SongState): Long {
-        return dao.saveSongState(songState)
+    override suspend fun saveSongState(songState: SongState): Long = withContext(Dispatchers.IO){
+        dao.saveSongState(songState)
 
     }
 
-    override suspend fun updateSongState(songState: SongState): Int {
-        return dao.updateSongState(songState)
+    override suspend fun updateSongState(songState: SongState): Int = withContext(Dispatchers.IO){
+        dao.updateSongState(songState)
     }
 
     // UI Flows
