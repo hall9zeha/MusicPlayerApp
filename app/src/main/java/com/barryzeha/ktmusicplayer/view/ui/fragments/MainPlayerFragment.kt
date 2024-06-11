@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.MyPreferences
@@ -298,6 +299,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
+
     }
     override fun onStop() {
        super.onStop()

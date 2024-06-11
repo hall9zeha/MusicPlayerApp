@@ -102,8 +102,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
             val audioTag = getAudioMetadata(context,song.pathLocation!!)
-            ivItem.loadImage(audioTag.coverArt!!)
-            Log.e("ITEM", audioTag.coverArt.toString() )
+
             tvBitrate.text=String.format("%s::kbps",audioTag.bitRate)
             tvSongDesc.text=String.format("%s. %s",(position+1),song.pathLocation?.substringAfterLast("/","No named"))
             tvDuration.text= audioTag.songLength

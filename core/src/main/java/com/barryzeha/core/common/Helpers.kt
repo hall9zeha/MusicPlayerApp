@@ -70,12 +70,14 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
     val metadata = AudioFileIO.read(File(pathFile))
     val tag = metadata.tag
-    val coverArtData = try{
+    // retrieve covert art of song file uncomment if you want implement,
+    /*val coverArtData = try{
         tag.firstArtwork.binaryData
     }catch(e:Exception){
         null
     }
     val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+    */
 
     return AudioMetadata(
         artist=tag.getFirst(FieldKey.ARTIST)?:"Unknown",
@@ -90,7 +92,7 @@ fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
         bitRate = metadata.audioHeader.bitRate,
         songLength = getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong()),
         format = metadata.audioHeader.format,
-        coverArt = bitmapCoverArt
+        //coverArt = bitmapCoverArt
     )
 }
 fun getTimeOfSong(duration:Long):String{
