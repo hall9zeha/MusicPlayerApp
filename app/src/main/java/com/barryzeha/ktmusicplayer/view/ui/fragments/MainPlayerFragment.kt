@@ -263,7 +263,9 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         })
     }
+
     private fun getSongOfList(position:Int): SongEntity{
+        mPrefs.currentPosition = position.toLong()
         mainViewModel.setCurrentPosition(position)
         val song = songLists[position]
         return song

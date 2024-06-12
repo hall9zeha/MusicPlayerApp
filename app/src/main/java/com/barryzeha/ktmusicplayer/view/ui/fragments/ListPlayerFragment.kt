@@ -293,7 +293,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
              if (currentSelectedPosition > 0) {
                 getSongOfAdapter(currentSelectedPosition - 1)?.let{song->
                     musicPlayerService?.startPlayer(song)
-                    mPrefs.currentPosition = currentSelectedPosition.toLong()
+
                 }
             }
         }
@@ -301,12 +301,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
            if(currentSelectedPosition<adapter.itemCount-1){
                getSongOfAdapter(currentSelectedPosition +1)?.let{song->
                    musicPlayerService?.startPlayer(song)
-                   mPrefs.currentPosition = currentSelectedPosition.toLong()
+
                }
            }else{
                getSongOfAdapter(0)?.let{song->
                    musicPlayerService?.startPlayer(song)
-                   mPrefs.currentPosition = currentSelectedPosition.toLong()
+
                }
            }
         }
@@ -330,7 +330,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     private fun getSongOfAdapter(position:Int): SongEntity?{
         mainViewModel.setCurrentPosition(position)
-        val song = adapter.getSongByPosition(currentSelectedPosition)
+        mPrefs.currentPosition = position.toLong()
+        val song = adapter.getSongByPosition(position)
         return song
     }
     private fun initCheckPermission(){
