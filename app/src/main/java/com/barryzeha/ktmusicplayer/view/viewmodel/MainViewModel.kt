@@ -39,8 +39,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
     val songState:LiveData<List<SongStateWithDetail>> = _songState
 
-
-
     private var _allSongFromMain:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongFromMain:LiveData<List<SongEntity>> = _allSongFromMain
 
@@ -106,7 +104,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     }
     fun getSongById(idSong:Long){
         launch {
-            _songById.value = repository.fetchSongById(idSong)
+            _songById.value=repository.fetchSongById(idSong)
         }
     }
     fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer){

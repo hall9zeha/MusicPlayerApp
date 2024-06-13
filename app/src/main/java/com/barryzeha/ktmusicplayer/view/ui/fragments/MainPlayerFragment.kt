@@ -262,10 +262,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                 bind.mainSeekBar.progress=userSelectPosition
 
             }
-
         })
     }
-
     private fun getSongOfList(position:Int): SongEntity{
         mPrefs.currentPosition = position.toLong()
         mainViewModel.setCurrentPosition(position)
@@ -280,17 +278,13 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         musicPlayerService = binder.getService()
         musicPlayerService!!.setSongController(songController)
     }
-
     override fun onServiceDisconnected(name: ComponentName?) {
         musicPlayerService=null
     }
-
     override fun onStart() {
         super.onStart()
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
-
     }
-
     override fun onResume() {
         super.onResume()
         musicPlayerService?.setSongController(songController)
@@ -305,15 +299,12 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             setUpSongInfo(newState)
         }
         mPrefs.nextOrPrevFromNotify=false
-
     }
-
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
 
     }
-
     override fun onStop() {
         super.onStop()
         context?.unbindService(this)
@@ -330,15 +321,11 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                     currentPosition = mPrefs.currentDuration
                 )
             )
-
         }
-
     }
     override fun onDestroy() {
         super.onDestroy()
         _bind=null
-
-
     }
     companion object {
         @JvmStatic

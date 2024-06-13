@@ -22,6 +22,10 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
@@ -73,19 +77,18 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     }
     fun addAll(songs:List<SongEntity>){
        submitList(songs)
-
     }
     fun add(song: SongEntity) {
-        val currentList = currentList.toMutableList()
         if (!currentList.contains(song)) {
+            val currentList = currentList.toMutableList()
             currentList.add(song)
             submitList(currentList)
         }
 
     }
     fun remove(song:SongEntity){
-        val currentList=currentList.toMutableList()
         if(currentList.contains(song)){
+            val currentList=currentList.toMutableList()
             val position = currentList.indexOf(song)
             currentList.removeAt(position)
             submitList(currentList)
@@ -101,18 +104,26 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
-            val audioTag = getAudioMetadata(context,song.pathLocation!!)
+            CoroutineScope(Dispatchers.IO).launch {
+                val audioTag = getAudioMetadata(context,song.pathLocation!!)
+                withContext(Dispatchers.Main) {
+                    tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
+                    tvSongDesc.text = String.format(
+                        "%s. %s",
+                        (position + 1),
+                        song.pathLocation?.substringAfterLast("/", "No named")
+                    )
+                    tvDuration.text = audioTag.songLength
+                    tvFileFormat.text =
+                        String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
+                    root.setOnClickListener {
+                        changeBackgroundColorSelectedItem(bindingAdapterPosition)
+                        onItemClick(position, song)
 
-            tvBitrate.text=String.format("%s::kbps",audioTag.bitRate)
-            tvSongDesc.text=String.format("%s. %s",(position+1),song.pathLocation?.substringAfterLast("/","No named"))
-            tvDuration.text= audioTag.songLength
-            tvFileFormat.text = String.format("::%s",song.pathLocation?.substringAfterLast(".","NA"))
-            root.setOnClickListener {
-                changeBackgroundColorSelectedItem(bindingAdapterPosition)
-                onItemClick(position,song)
-
+                    }
+                    ivOptions.setOnClickListener { onMenuItemClick(it,position,song) }
+                }
             }
-            ivOptions.setOnClickListener { onMenuItemClick(it,position,song) }
 
         }
         internal  fun bindBackgroundColor(color: Int) {

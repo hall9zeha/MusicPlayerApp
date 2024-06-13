@@ -25,6 +25,7 @@ import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -70,6 +71,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
     val metadata = AudioFileIO.read(File(pathFile))
     val tag = metadata.tag
+
     // retrieve covert art of song file uncomment if you want implement,
     /*val coverArtData = try{
         tag.firstArtwork.binaryData
@@ -80,18 +82,18 @@ fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
     */
 
     return AudioMetadata(
-        artist=tag.getFirst(FieldKey.ARTIST)?:"Unknown",
-        album=tag.getFirst(FieldKey.ALBUM)?:"Unknown",
-        title=tag.getFirst(FieldKey.TITLE)?:"No title",
-        comment=tag.getFirst(FieldKey.COMMENT),
-        year=tag.getFirst(FieldKey.YEAR),
-        track=tag.getFirst(FieldKey.TRACK),
-        discNumber=tag.getFirst(FieldKey.DISC_NO),
-        composer=tag.getFirst(FieldKey.COMPOSER),
-        artistSort = tag.getFirst(FieldKey.ARTIST_SORT),
-        bitRate = metadata.audioHeader.bitRate,
-        songLength = getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong()),
-        format = metadata.audioHeader.format,
+        artist=try{tag.getFirst(FieldKey.ARTIST)}catch(ex:Exception){"Unknown"},
+        album=try{tag.getFirst(FieldKey.ALBUM)}catch(ex:Exception){"Unknown"},
+        title=try{tag.getFirst(FieldKey.TITLE)}catch(ex:Exception){"No title"},
+        comment=try{tag.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"Unknown"},
+        year=try{tag.getFirst(FieldKey.YEAR)}catch(ex:Exception){"Unknown"},
+        track=try{tag.getFirst(FieldKey.TRACK)}catch(ex:Exception){"Unknown"},
+        discNumber=try{tag.getFirst(FieldKey.DISC_NO)}catch(ex:Exception){"Unknown"},
+        composer=try{tag.getFirst(FieldKey.COMPOSER)}catch(ex:Exception){"Unknown"},
+        artistSort = try{tag.getFirst(FieldKey.ARTIST_SORT)}catch(ex:Exception){""},
+        bitRate = try{metadata.audioHeader.bitRate}catch(ex:Exception){""},
+        songLength = try{getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong())}catch(ex:Exception){"0"},
+        format = try{metadata.audioHeader.format}catch (ex:Exception){"unknown"},
         //coverArt = bitmapCoverArt
     )
 }

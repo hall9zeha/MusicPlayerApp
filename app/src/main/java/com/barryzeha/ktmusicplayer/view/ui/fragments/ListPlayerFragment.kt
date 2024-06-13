@@ -56,6 +56,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
     private lateinit var launcher:ActivityResultLauncher<Intent>
+    private lateinit var launcherOpenMultipleDocs:ActivityResultLauncher<Array<String>>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private var isPlaying = false
     private var isUserSeeking=false
@@ -151,6 +152,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         setUpListeners()
     }
     private fun activityResultFile(){
+/*
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
             if(result.resultCode == Activity.RESULT_OK){
                 uri = result.data?.data
@@ -162,17 +164,25 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 )
                 )
             }
+        }*/
+        launcherOpenMultipleDocs= registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
+            uris.forEach {uri->
+                val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
+                mainViewModel.saveNewSong(
+                    SongEntity(
+                        pathLocation = realPathFromFile,
+                        timestamp = Date().time
+                    )
+                )
+            }
         }
+
+
     }
     private fun activityResultForPermission(){
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply{
-            type = "audio/*"
-        }
-        intent.putExtra("read_storage", READ_STORAGE_REQ_CODE)
-       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
+      launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
             if(it){
                 initCheckPermission()
-                //launcher.launch(intent)
             }
         }
     }
@@ -252,16 +262,18 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         updateService()
     }
     private fun setUpListeners()= with(bind){
-        val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
-            type = "audio/*"
-        }
+       // val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
+       //     type = "audio/*"
+       // }
         btnAdd.setOnClickListener {
             checkPermissions(bind.root.context,
                 listOf( Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.RECORD_AUDIO)
             ){ isGranted, permissionsList->
                 if(isGranted){
-                    launcher.launch(chooseFileIntent)
+                    //launcher.launch(chooseFileIntent)
+                    val mimeTypes = arrayOf("audio/*")
+                    launcherOpenMultipleDocs.launch(mimeTypes)
                 }
                 else{
                     permissionsList.forEach {permission->
