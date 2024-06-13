@@ -5,6 +5,7 @@ import android.content.ServiceConnection
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -203,6 +204,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     private fun setChangeInfoViews(musicState: MusicState){
         currentMusicState = musicState
+        mPrefs.currentDuration = musicState.currentDuration
         bind.mainSeekBar.max=musicState.duration.toInt()
         bind.mainSeekBar.progress = musicState.currentDuration.toInt()
         bind.tvSongTimeRest.text = createTime(musicState.currentDuration).third
@@ -311,24 +313,32 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         musicPlayerService?.unregisterController()
 
     }
-    override fun onStop() {
-       super.onStop()
-        if(currentMusicState.idSong>0) {
-                   mainViewModel.saveSongState(
-                       SongState(
-                           idSongState = 1,
-                           idSong = currentMusicState.idSong,
-                           songDuration = currentMusicState.duration,
-                           currentPosition = currentMusicState.currentDuration
-                       )
-                   )
 
-               }
+    override fun onStop() {
+        super.onStop()
+        context?.unbindService(this)
+        super.onDestroyView()
+        if(currentMusicState.idSong>0) {
+            mainViewModel.saveSongState(
+                SongState(
+                    idSongState = 1,
+                    idSong = currentMusicState.idSong,
+                    songDuration = currentMusicState.duration,
+                    // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
+                    // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
+                    // por el momento
+                    currentPosition = mPrefs.currentDuration
+                )
+            )
+
+        }
+
     }
     override fun onDestroy() {
         super.onDestroy()
         _bind=null
-        context?.unbindService(this)
+
+
     }
     companion object {
         @JvmStatic

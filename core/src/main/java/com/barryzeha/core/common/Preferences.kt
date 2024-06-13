@@ -13,6 +13,7 @@ import com.google.gson.Gson
 
 private const val PREFERENCES_FILE = "kTMusicPreferences"
 private const val CURRENT_POSITION = "currentPosition"
+private const val CURRENT_DURATION = "currentDuration"
 private const val MUSIC_STATE = "musicStateJson"
 private const val PREV_OR_NEXT = "prevOrNext"
 private const val PLAYER_IS_STOP = "playerIsStop"
@@ -35,4 +36,7 @@ class MyPreferences(private val context: Context){
     var musicStateJsonSaved:String?
         get()=myPreferences.getString(MUSIC_STATE,"")
         set(value)=myPreferences.edit().putString(MUSIC_STATE,value).apply()
+    var currentDuration:Long
+        get()=myPreferences.getLong(CURRENT_DURATION,0)
+        set(value)=myPreferences.edit().putLong(CURRENT_DURATION,value).apply()
 }

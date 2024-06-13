@@ -243,6 +243,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     private fun setChangeInfoViews(musicState: MusicState){
         currentMusicState = musicState
+        mPrefs.currentDuration = musicState.currentDuration
         //bind.ivCover.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
         bind.seekbarControl.loadSeekBar.max = musicState.duration.toInt()
         bind.seekbarControl.tvEndTime.text = createTime(musicState.duration).third
@@ -394,19 +395,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         musicPlayerService?.unregisterController()
     }
 
-    override fun onStop() {
-        super.onStop()
-        if(currentMusicState.idSong>0) {
-            mainViewModel.saveSongState(
-                SongState(
-                    idSongState = 1,
-                    idSong = currentMusicState.idSong,
-                    songDuration = currentMusicState.duration,
-                    currentPosition = currentMusicState.currentPosition
-                )
-            )
-        }
-    }
     override fun onDestroyView() {
         super.onDestroyView()
         _bind=null
@@ -415,7 +403,27 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         } catch (e: IllegalArgumentException) {
             Log.e("STOP_SERVICE", "Service not registered")
         }
+
     }
+
+    override fun onStop() {
+        if(currentMusicState.idSong>0) {
+            mainViewModel.saveSongState(
+                SongState(
+                    idSongState = 1,
+                    idSong = currentMusicState.idSong,
+                    songDuration = currentMusicState.duration,
+                    // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
+                    // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
+                    // por el momento
+                    currentPosition = mPrefs.currentDuration
+                )
+            )
+
+        }
+        super.onStop()
+    }
+
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
