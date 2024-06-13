@@ -78,6 +78,7 @@ class MusicPlayerService : Service() {
     private lateinit var mPrefs:MyPreferences
     private var songEntity:SongEntity=SongEntity()
     private lateinit var songMetaData:MusicState
+    private var playerListener:Player.Listener?=null
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -167,7 +168,11 @@ class MusicPlayerService : Service() {
                 }
             }
             val songState=repository.fetchSongState()
-            if(!songState.isNullOrEmpty())setMusicStateSaved(songState[0])
+            if(!songState.isNullOrEmpty()) {
+                setMusicStateSaved(songState[0])
+                setUpExoplayerListener(songState[0].songEntity)
+
+            }
         }
     }
     private fun nextOrPrevTRack(position:Int){
@@ -233,7 +238,7 @@ class MusicPlayerService : Service() {
                         isPlaying = exoPlayer.isPlaying,
                         currentDuration = exoPlayer.currentPosition,
                         duration = exoPlayer.duration,
-
+                        latestPlayed = false
                     )
                 }
                 //if(exoPlayer.isPlaying) {
@@ -264,7 +269,9 @@ class MusicPlayerService : Service() {
                 .build()
 
         }
-        exoPlayer.addListener(object: Player.Listener{
+
+        setUpExoplayerListener(song)?.let{exoPlayer.addListener(it)}
+       /* exoPlayer.addListener(object: Player.Listener{
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
                 if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
@@ -291,19 +298,61 @@ class MusicPlayerService : Service() {
                 }
                 if(playbackState == Player.STATE_ENDED ){
                     currentMusicState = currentMusicState.copy(
-                        isPlaying = false
+                        isPlaying = false,
+                        latestPlayed = false
                     )
                    _songController?.currentTrack(currentMusicState)
                }
 
             }
-        })
+        })*/
 
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.prepare()
         exoPlayer.play()
     }
+    private fun setUpExoplayerListener(song: SongEntity):Player.Listener?{
+        val songPath = song.pathLocation.toString()
+        val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
+         playerListener = object : Player.Listener {
+             override fun onPlaybackStateChanged(playbackState: Int) {
+                 super.onPlaybackStateChanged(playbackState)
+                 if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
 
+                     // Set info currentSongEntity
+                     currentMusicState = MusicState(
+                         idSong = song.id,
+                         isPlaying = exoPlayer.isPlaying,
+                         title = songPath.substringAfterLast("/", "No named"),
+                         artist = songMetadata!!.artist,
+                         album = songMetadata.album,
+                         albumArt = songMetadata.albumArt,
+                         duration = (exoPlayer.duration),
+                         songPath = songPath,
+                         latestPlayed = false
+                     )
+
+
+                     // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
+                     // información que de la pista en reproducción que no requiere cambios constantes
+                     // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
+                     if (!executeOnceTime) _songController?.currentTrack(currentMusicState)
+                     executeOnceTime = true
+                 }
+                 if (playbackState == Player.STATE_ENDED) {
+                     currentMusicState = currentMusicState.copy(
+                         isPlaying = false,
+                         latestPlayed = false
+                     )
+                     _songController?.currentTrack(currentMusicState)
+                 }
+
+             }
+         }
+
+       return playerListener
+
+    }
     override fun onBind(intent: Intent?): IBinder {
         return binder
     }
@@ -334,6 +383,7 @@ class MusicPlayerService : Service() {
     }
     fun playingExoPlayer(){
         if(!exoPlayer.isPlaying){
+            playerListener?.let{exoPlayer.addListener(it)}
             exoPlayer.play()
         }
     }
@@ -362,6 +412,7 @@ class MusicPlayerService : Service() {
         exoPlayer.seekTo(songState.songState.currentPosition)
         exoPlayer.prepare()
         _songController?.currentTrack(currentMusicState)
+
     }
     override fun onDestroy() {
         isForegroundService = false

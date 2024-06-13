@@ -78,6 +78,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     fun addAll(songs:List<SongEntity>){
        submitList(songs)
     }
+
     fun add(song: SongEntity) {
         if (!currentList.contains(song)) {
             val currentList = currentList.toMutableList()

@@ -91,19 +91,18 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         override fun currentTrack(musicState: MusicState?) {
            musicState?.let{
-
                  if(!musicState.isPlaying){
-                    if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
+                    if((songLists.size -1)  == mPrefs.currentPosition.toInt()) {
                         bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         //mainViewModel.setCurrentPosition(0)
-                        return
+
                     }
                     else if(musicState.duration>0 && musicState.latestPlayed){
                         bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         mainViewModel.setCurrentTrack(musicState)
-                        return
+
                     }
                     else {
                         mainViewModel.saveStatePlaying(true)

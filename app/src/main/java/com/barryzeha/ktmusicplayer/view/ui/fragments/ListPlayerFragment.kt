@@ -103,22 +103,24 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         //mainViewModel.setCurrentPosition(0)
-                        return
                     }
-                    if(musicState.currentDuration>0){
+                    else if(musicState.currentDuration>0 && musicState.latestPlayed){
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         mainViewModel.setCurrentTrack(musicState)
-                        return
+
+
                     }
                     else {
                         mainViewModel.saveStatePlaying(true)
                         bind.bottomPlayerControls.btnNext.performClick()
                         mainViewModel.setCurrentTrack(musicState)
+
                     }
                 }else{
                     mainViewModel.saveStatePlaying(true)
                     mainViewModel.setCurrentTrack(musicState)
+
                 }
             }
         }
@@ -218,6 +220,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
+                // TODO al insertar más de un registro a la vez se reciben los datos pero el adaptador solo agrega el último
               adapter.add(song)
             }
         }
