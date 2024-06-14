@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -37,8 +38,10 @@ import java.io.File
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity,MusicListAdapter.MViewHolder>(SongDiffCallback()) {
-
+//class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity,MusicListAdapter.MViewHolder>(SongDiffCallback()) {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
+    private var songList:MutableList<SongEntity> = arrayListOf()
+    private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
     private var selectedPos = -1
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
@@ -55,15 +58,28 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             }
 
     }
+
+    override fun getItemCount()=songList.size/*asyncListDiffer.currentList.size*/
+
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: MViewHolder, position: Int) {
-        if(selectedPos == position){
-            holder.bind.root.setBackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f))
-        }else{
-            holder.bind.root.setBackgroundColor(Color.TRANSPARENT)
+        try {
+            if (selectedPos == position) {
+                holder.bind.root.setBackgroundColor(
+                    mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+                )
+            } else {
+                holder.bind.root.setBackgroundColor(Color.TRANSPARENT)
+            }
+
+        }finally {
+            mColorList(context).recycle()
         }
-        holder.onBind(position, getItem(position))
+        //holder.onBind(position, getItem(position))
+        holder.onBind(position, songList[position])
+        //holder.onBind(position, asyncListDiffer.currentList[position])
     }
+
     @SuppressLint("ResourceType")
     fun changeBackgroundColorSelectedItem(position: Int){
         selectedPos = position
@@ -76,28 +92,48 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f)))
     }
     fun addAll(songs:List<SongEntity>){
-       submitList(songs)
+       //submitList(songs)
+        //asyncListDiffer.submitList(songs)
+        songs.forEach {
+            add(it)
+        }
     }
-
+    // TODO al usar DiffUtils o asyncListDiffer para agregar mas de un item a la vez a veces solo ingresa el último
+    // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
+    // regresar para solucionarlo
     fun add(song: SongEntity) {
-        if (!currentList.contains(song)) {
-            val currentList = currentList.toMutableList()
-            currentList.add(song)
-            submitList(currentList)
+       /* val updateList = asyncListDiffer.currentList.toMutableList()
+        if (!updateList.contains(song)) {
+            updateList.add(song)
+            asyncListDiffer.submitList(updateList)
+        }
+        */
+        if (!songList.contains(song)) {
+            songList.add(song)
+            notifyItemInserted(songList.size-1)
         }
 
     }
     fun remove(song:SongEntity){
+       /* val currentList=asyncListDiffer.currentList.toMutableList()
         if(currentList.contains(song)){
-            val currentList=currentList.toMutableList()
             val position = currentList.indexOf(song)
             currentList.removeAt(position)
-            submitList(currentList)
+            asyncListDiffer.submitList(currentList)
+
+        }*/
+
+        if(songList.contains(song)){
+            val position = songList.indexOf(song)
+            songList.removeAt(position)
+            notifyItemRemoved(position)
         }
     }
     fun getSongByPosition(position: Int): SongEntity?{
-        return if(currentList.isNotEmpty()){
-            currentList[position]
+        //return if(asyncListDiffer.currentList.isNotEmpty()){
+        return if(songList.isNotEmpty()){
+            //asyncListDiffer.currentList[position]
+            songList[position]
         }else{
             null
         }
@@ -105,6 +141,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
+
             CoroutineScope(Dispatchers.IO).launch {
                 val audioTag = getAudioMetadata(context,song.pathLocation!!)
                 withContext(Dispatchers.Main) {
