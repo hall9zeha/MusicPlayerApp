@@ -90,7 +90,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
 
         override fun currentTrack(musicState: MusicState?) {
-           musicState?.let{
+            musicState?.let{
                  if(!musicState.isPlaying){
                     if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
                         bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)

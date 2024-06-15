@@ -52,6 +52,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private var param1: String? = null
     private var param2: String? = null
     private var _bind:FragmentListPlayerBinding? = null
+    private val bind:FragmentListPlayerBinding get() = _bind!!
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
@@ -61,7 +62,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private var isPlaying = false
     private var isUserSeeking=false
     private var userSelectPosition=0
-    private val bind:FragmentListPlayerBinding get() = _bind!!
+
     private  var currentSelectedPosition:Int =0
 
     private var currentMusicState = MusicState()
@@ -97,7 +98,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
         override fun currentTrack(musicState: MusicState?) {
-            musicState?.let{
+           musicState?.let{
                 if(!musicState.isPlaying){
                     if((adapter.itemCount -1)  == currentSelectedPosition && !musicState.latestPlayed) {
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
@@ -113,7 +114,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                     }
                     else {
                         mainViewModel.saveStatePlaying(true)
-                        bind.bottomPlayerControls.btnNext.performClick()
+                        bind?.bottomPlayerControls?.btnNext?.performClick()
                         mainViewModel.setCurrentTrack(musicState)
 
                     }
@@ -124,6 +125,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 }
             }
         }
+
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -405,14 +407,15 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
         mPrefs.nextOrPrevFromNotify=false
         bind.rvSongs.scrollToPosition(currentSelectedPosition)
+
     }
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
+        super.onDestroy()
         _bind=null
         try {
             activity?.unbindService(this)
