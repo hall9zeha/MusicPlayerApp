@@ -43,6 +43,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.log
 import kotlin.system.exitProcess
 
 
@@ -158,7 +159,6 @@ class MusicPlayerService : Service() {
         }
         return START_NOT_STICKY
     }
-
     private fun setUpRepository(){
         CoroutineScope(Dispatchers.Main).launch {
             val songs=repository.fetchAllSongs()
@@ -271,7 +271,7 @@ class MusicPlayerService : Service() {
         }
 
         setUpExoplayerListener(song)?.let{exoPlayer.addListener(it)}
-       /* exoPlayer.addListener(object: Player.Listener{
+     /*   exoPlayer.addListener(object: Player.Listener{
             override fun onPlaybackStateChanged(playbackState: Int) {
                 super.onPlaybackStateChanged(playbackState)
                 if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {

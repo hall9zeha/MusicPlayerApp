@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.ScopedViewModel
+import com.barryzeha.core.common.SingleMutableLiveData
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
@@ -48,7 +49,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _deletedRow:MutableLiveData<Int> = MutableLiveData()
     val deletedRow:LiveData<Int> = _deletedRow
 
-    private var _songById:MutableLiveData<SongEntity> = MutableLiveData()
+    private var _songById:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
     private var _currentTimeOfSong:MutableLiveData<Triple<Int,Int,String>> = MutableLiveData()

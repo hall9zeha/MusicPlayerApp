@@ -99,7 +99,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         override fun currentTrack(musicState: MusicState?) {
             musicState?.let{
                 if(!musicState.isPlaying){
-                    if((adapter.itemCount -1)  == currentSelectedPosition) {
+                    if((adapter.itemCount -1)  == currentSelectedPosition && !musicState.latestPlayed) {
                         bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         //mainViewModel.setCurrentPosition(0)
@@ -220,8 +220,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
-                // TODO al insertar más de un registro a la vez se reciben los datos pero el adaptador solo agrega el último
-              adapter.add(song)
+                adapter.add(song)
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
@@ -348,6 +347,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         mainViewModel.setCurrentPosition(position)
         mPrefs.currentPosition = position.toLong()
         val song = adapter.getSongByPosition(position)
+        bind.rvSongs.scrollToPosition(position)
         return song
     }
     private fun initCheckPermission(){
@@ -404,6 +404,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
         mPrefs.nextOrPrevFromNotify=false
+        bind.rvSongs.scrollToPosition(currentSelectedPosition)
     }
     override fun onPause() {
         super.onPause()

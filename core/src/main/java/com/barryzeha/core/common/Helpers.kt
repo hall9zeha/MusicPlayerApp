@@ -173,6 +173,7 @@ fun createNotificationChannel(notificationManager:NotificationManager){
 
 fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
+        getAudioMetadata(context,path)
         mmr.setDataSource(path)
         val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
@@ -196,7 +197,9 @@ fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):
     return byteArray?.let {
         val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
         if (isForNotify) scaleBitmap(originalBitmap, 96, 96)
-        else scaleBitmap(originalBitmap, 500, 500)
+        //else scaleBitmap(originalBitmap, 500, 500) // optional
+        // return original size of covert art
+        else originalBitmap
     }?:run{
         BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
     }

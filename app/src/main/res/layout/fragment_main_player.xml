@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="96dp"
         app:layout_constraintWidth_percent="0.72"
-        app:layout_constraintHeight_percent="0.36">
+        app:layout_constraintDimensionRatio="H,1:1">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivMusicCover"

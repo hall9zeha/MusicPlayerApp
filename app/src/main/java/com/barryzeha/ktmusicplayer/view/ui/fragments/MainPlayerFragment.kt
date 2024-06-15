@@ -92,7 +92,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         override fun currentTrack(musicState: MusicState?) {
            musicState?.let{
                  if(!musicState.isPlaying){
-                    if((songLists.size -1)  == mPrefs.currentPosition.toInt()) {
+                    if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
                         bind.btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         //mainViewModel.setCurrentPosition(0)
@@ -199,7 +199,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         bind.mainSeekBar.max = musicState.duration.toInt()
         bind.tvSongTimeRest.text = createTime(musicState.currentDuration).third
         bind.tvSongTimeCompleted.text = createTime(musicState.duration).third
-
+        Log.e("CURRENT-TRACK", musicState.toString() )
     }
     private fun setChangeInfoViews(musicState: MusicState){
         currentMusicState = musicState
@@ -276,6 +276,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicPlayerService = binder.getService()
         musicPlayerService!!.setSongController(songController)
+
     }
     override fun onServiceDisconnected(name: ComponentName?) {
         musicPlayerService=null

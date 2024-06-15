@@ -41,7 +41,7 @@ import java.io.File
 //class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity,MusicListAdapter.MViewHolder>(SongDiffCallback()) {
 class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
     private var songList:MutableList<SongEntity> = arrayListOf()
-    private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
+    //private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
     private var selectedPos = -1
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
@@ -92,7 +92,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f)))
     }
     fun addAll(songs:List<SongEntity>){
-       //submitList(songs)
+        //submitList(songs)
         //asyncListDiffer.submitList(songs)
         songs.forEach {
             add(it)
@@ -105,15 +105,14 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
        /* val updateList = asyncListDiffer.currentList.toMutableList()
         if (!updateList.contains(song)) {
             updateList.add(song)
-            asyncListDiffer.submitList(updateList)
-        }
-        */
+            asyncListDiffer.submitList(updateList.toList())
+        }*/
         if (!songList.contains(song)) {
             songList.add(song)
-            notifyItemInserted(songList.size-1)
-        }
+            notifyItemInserted(songList.size - 1)
 
-    }
+            }
+     }
     fun remove(song:SongEntity){
        /* val currentList=asyncListDiffer.currentList.toMutableList()
         if(currentList.contains(song)){
@@ -141,8 +140,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
-
-            CoroutineScope(Dispatchers.IO).launch {
+           CoroutineScope(Dispatchers.IO).launch {
                 val audioTag = getAudioMetadata(context,song.pathLocation!!)
                 withContext(Dispatchers.Main) {
                     tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
@@ -160,8 +158,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
 
                     }
                     ivOptions.setOnClickListener { onMenuItemClick(it,position,song) }
-                }
-            }
+               }
+           }
 
         }
         internal  fun bindBackgroundColor(color: Int) {
@@ -169,7 +167,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
 
     }
-
     private class SongDiffCallback:DiffUtil.ItemCallback<SongEntity>(){
         override fun areItemsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
             return oldItem.id == newItem.id
