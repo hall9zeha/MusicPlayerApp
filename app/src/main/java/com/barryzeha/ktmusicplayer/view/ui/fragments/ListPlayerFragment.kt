@@ -109,19 +109,14 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         mainViewModel.setCurrentTrack(musicState)
-
-
                     }
                     else {
                         mainViewModel.saveStatePlaying(true)
                         bind?.bottomPlayerControls?.btnNext?.performClick()
-                        mainViewModel.setCurrentTrack(musicState)
-
                     }
                 }else{
                     mainViewModel.saveStatePlaying(true)
                     mainViewModel.setCurrentTrack(musicState)
-
                 }
             }
         }
@@ -156,7 +151,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         setUpListeners()
     }
     private fun activityResultFile(){
-/*
+        /*
         launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
             if(result.resultCode == Activity.RESULT_OK){
                 uri = result.data?.data
@@ -429,6 +424,19 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         musicPlayerService?.setSongController(songController)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
+        if(currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
+            val song=getSongOfAdapter(mPrefs.currentPosition.toInt())
+            song?.let {
+                val songMetadata = getSongCover(requireContext(), song.pathLocation)
+                val newState = MusicState(
+                    title = song.pathLocation.toString().substringAfterLast("/", "No named")!!,
+                    artist = songMetadata!!.artist,
+                    album = songMetadata!!.album,
+                    albumArt = songMetadata!!.albumArt,
+                )
+                setUpViews(newState)
+            }
+        }
         mPrefs.nextOrPrevFromNotify=false
         bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
 
@@ -440,15 +448,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
     override fun onDestroy() {
         super.onDestroy()
-
         try {
             activity?.unbindService(this)
         } catch (e: IllegalArgumentException) {
             Log.e("STOP_SERVICE", "Service not registered")
         }
-
     }
-
     override fun onStop() {
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(

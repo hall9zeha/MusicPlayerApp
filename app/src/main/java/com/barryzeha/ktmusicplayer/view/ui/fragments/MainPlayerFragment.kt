@@ -107,7 +107,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                     else {
                         mainViewModel.saveStatePlaying(true)
                         bind?.btnMainNext?.performClick()
-                       mainViewModel.setCurrentTrack(musicState)
+
                     }
                 }else{
                     mainViewModel.saveStatePlaying(true)
@@ -200,8 +200,9 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
-            Log.e("CURRENT-TRACK", musicState.toString())
+
         }
+
     }
     private fun setChangeInfoViews(musicState: MusicState)=with(bind){
         this?.let {

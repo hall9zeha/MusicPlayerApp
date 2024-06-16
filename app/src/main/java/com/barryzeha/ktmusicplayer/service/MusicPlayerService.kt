@@ -85,7 +85,6 @@ class MusicPlayerService : Service() {
     override fun onCreate() {
         super.onCreate()
         mPrefs = MyApp.mPrefs
-
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
@@ -251,7 +250,6 @@ class MusicPlayerService : Service() {
 
     }
     private fun setUpExoPlayer(song:SongEntity){
-        songEntity = song
         val songPath = song.pathLocation.toString()
 
         // Obtenemos el archivo bitmap de la carátula del albúm y lo reducimos  enviando true como argumento de isForNotify ya que si el bitmap es muy grande superando cierto límite
@@ -312,6 +310,8 @@ class MusicPlayerService : Service() {
         exoPlayer.play()
     }
     private fun setUpExoplayerListener(song: SongEntity):Player.Listener?{
+        var countReady=0
+        var countEnd=0
         val songPath = song.pathLocation.toString()
         val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
          playerListener = object : Player.Listener {
@@ -331,20 +331,25 @@ class MusicPlayerService : Service() {
                          songPath = songPath,
                          latestPlayed = false
                      )
-
-
                      // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
                      // información que de la pista en reproducción que no requiere cambios constantes
                      // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
                      if (!executeOnceTime) _songController?.currentTrack(currentMusicState)
                      executeOnceTime = true
+
                  }
-                 if (playbackState == Player.STATE_ENDED) {
+                 if(playbackState == Player.STATE_ENDED  && _songController==null){
+                     if(mPrefs.currentPosition < songsList.size -1 ){
+                         nextOrPrevTRack((mPrefs.currentPosition + 1).toInt())
+                     }
+                 }
+                 else if (playbackState == Player.STATE_ENDED) {
                      currentMusicState = currentMusicState.copy(
                          isPlaying = false,
                          latestPlayed = false
                      )
                      _songController?.currentTrack(currentMusicState)
+
                  }
 
              }
