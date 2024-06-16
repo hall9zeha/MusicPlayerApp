@@ -51,8 +51,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
     private var param1: String? = null
     private var param2: String? = null
-    private var _bind:FragmentListPlayerBinding? = null
-    private val bind:FragmentListPlayerBinding get() = _bind!!
+    private var bind:FragmentListPlayerBinding? = null
+
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
@@ -72,20 +72,20 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
     private val songController = object:SongController{
         override fun play() {
-            bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+            bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_pause)
             musicPlayerService?.playingExoPlayer()
             mainViewModel.saveStatePlaying(true)
     }
         override fun pause() {
-            bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+            bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
             musicPlayerService?.pauseExoPlayer()
             mainViewModel.saveStatePlaying(false)
         }
         override fun next() {
-            bind.bottomPlayerControls.btnNext.performClick()
+            bind?.bottomPlayerControls?.btnNext?.performClick()
         }
         override fun previous() {
-            bind.bottomPlayerControls.btnPrevious.performClick()
+            bind?.bottomPlayerControls?.btnPrevious?.performClick()
         }
         override fun stop() {
             activity?.finish()
@@ -101,12 +101,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
            musicState?.let{
                 if(!musicState.isPlaying){
                     if((adapter.itemCount -1)  == currentSelectedPosition && !musicState.latestPlayed) {
-                        bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                        bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         //mainViewModel.setCurrentPosition(0)
                     }
                     else if(musicState.currentDuration>0 && musicState.latestPlayed){
-                        bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                        bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         mainViewModel.setCurrentTrack(musicState)
 
@@ -139,8 +139,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         savedInstanceState: Bundle?
     ): View? {
         activity?.let{
-            _bind = FragmentListPlayerBinding.inflate(inflater,container,false)
-            _bind?.let { bind-> return bind.root }
+            bind = FragmentListPlayerBinding.inflate(inflater,container,false)
+            bind?.let { bind-> return bind.root }
         }
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -192,7 +192,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     private fun setUpAdapter(){
         adapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
-        bind.rvSongs.apply {
+        bind?.rvSongs?.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
             adapter = this@ListPlayerFragment.adapter
@@ -210,9 +210,9 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             isPlaying=statePlay
             if (statePlay) {
                 isPlaying = true
-                bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
+                bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_pause)
             }else{
-                bind.bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
+                bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
             }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
@@ -237,119 +237,143 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun setUpViews(musicState:MusicState)=with(bind){
+        this?.let {
             currentMusicState = musicState
             val durationInMillis = musicState.duration
             val formattedDuration = createTime(durationInMillis).third
-            bind.ivCover.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
-            bind.seekbarControl.loadSeekBar.max = musicState.duration.toInt()
+            bind?.ivCover?.setImageBitmap(
+                getSongCover(
+                    requireContext(),
+                    musicState.songPath
+                )?.albumArt
+            )
+            bind?.seekbarControl?.loadSeekBar?.max = musicState.duration.toInt()
             seekbarControl.tvEndTime.text = formattedDuration
             seekbarControl.loadSeekBar.max = durationInMillis.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
 
-        activity?.let {
-            val songMetadata = getSongCover(requireActivity(), musicState.songPath)
-            songMetadata?.let {
-                ivCover.setImageBitmap(it.albumArt)
-            }
+            activity?.let {
+                val songMetadata = getSongCover(requireActivity(), musicState.songPath)
+                songMetadata?.let {
+                    ivCover.setImageBitmap(it.albumArt)
+                }
 
+            }
+            updateService()
         }
-        updateService()
     }
     private fun setChangeInfoViews(musicState: MusicState){
         currentMusicState = musicState
         mPrefs.currentDuration = musicState.currentDuration
         //bind.ivCover.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
-        bind.seekbarControl.loadSeekBar.max = musicState.duration.toInt()
-        bind.seekbarControl.tvEndTime.text = createTime(musicState.duration).third
-        bind.seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
-        bind.seekbarControl.loadSeekBar.progress = musicState.currentDuration.toInt()
+        bind?.seekbarControl?.loadSeekBar?.max = musicState.duration.toInt()
+        bind?.seekbarControl?.tvEndTime?.text = createTime(musicState.duration).third
+        bind?.seekbarControl?.tvInitTime?.text = createTime(musicState.currentDuration).third
+        bind?.seekbarControl?.loadSeekBar?.progress = musicState.currentDuration.toInt()
         updateService()
     }
     private fun setUpListeners()= with(bind){
-       // val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
-       //     type = "audio/*"
-       // }
-        btnAdd.setOnClickListener {
-            checkPermissions(bind.root.context,
-                listOf( Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO)
-            ){ isGranted, permissionsList->
-                if(isGranted){
-                    //launcher.launch(chooseFileIntent)
-                    val mimeTypes = arrayOf("audio/*")
-                    launcherOpenMultipleDocs.launch(mimeTypes)
-                }
-                else{
-                    permissionsList.forEach {permission->
-                        if(!permission.second) {
-                            launcherPermission.launch(permission.first)
+        this?.let {
+            // val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
+            //     type = "audio/*"
+            // }
+            btnAdd.setOnClickListener {
+                checkPermissions(
+                    requireContext(),
+                    listOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO
+                    )
+                ) { isGranted, permissionsList ->
+                    if (isGranted) {
+                        //launcher.launch(chooseFileIntent)
+                        val mimeTypes = arrayOf("audio/*")
+                        launcherOpenMultipleDocs.launch(mimeTypes)
+                    } else {
+                        permissionsList.forEach { permission ->
+                            if (!permission.second) {
+                                launcherPermission.launch(permission.first)
 
+                            }
                         }
                     }
                 }
             }
-        }
-       bottomPlayerControls.btnPlay.setOnClickListener{
-            if(adapter.itemCount>0) {
-                if(!currentMusicState.isPlaying && currentMusicState.duration<=0)getSongOfAdapter(currentSelectedPosition)?.let{song->
-                    musicPlayerService?.startPlayer(song)
-                }
-                else {
-                    if (isPlaying) {
-                        musicPlayerService?.pauseExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_play)
-                        mainViewModel.saveStatePlaying(false)
+            bottomPlayerControls.btnPlay.setOnClickListener {
+                if (adapter.itemCount > 0) {
+                    if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) getSongOfAdapter(
+                        currentSelectedPosition
+                    )?.let { song ->
+                        musicPlayerService?.startPlayer(song)
+                    }
+                    else {
+                        if (isPlaying) {
+                            musicPlayerService?.pauseExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(
+                                coreRes.drawable.ic_play
+                            )
+                            mainViewModel.saveStatePlaying(false)
 
-                    } else {
-                        musicPlayerService?.playingExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(coreRes.drawable.ic_pause)
-                        mainViewModel.saveStatePlaying(true)
+                        } else {
+                            musicPlayerService?.playingExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(
+                                coreRes.drawable.ic_pause
+                            )
+                            mainViewModel.saveStatePlaying(true)
+                        }
                     }
                 }
             }
-        }
-        bottomPlayerControls.btnPrevious.setOnClickListener{
-             if (currentSelectedPosition > 0) {
-                getSongOfAdapter(currentSelectedPosition - 1)?.let{song->
-                    musicPlayerService?.startPlayer(song)
+            bottomPlayerControls.btnPrevious.setOnClickListener {
+                if (currentSelectedPosition > 0) {
+                    getSongOfAdapter(currentSelectedPosition - 1)?.let { song ->
+                        musicPlayerService?.startPlayer(song)
 
+                    }
                 }
             }
-        }
-        bottomPlayerControls.btnNext.setOnClickListener {
-           if(currentSelectedPosition<adapter.itemCount-1){
-               getSongOfAdapter(currentSelectedPosition +1)?.let{song->
-                   musicPlayerService?.startPlayer(song)
+            bottomPlayerControls.btnNext.setOnClickListener {
+                if (currentSelectedPosition < adapter.itemCount - 1) {
+                    getSongOfAdapter(currentSelectedPosition + 1)?.let { song ->
+                        musicPlayerService?.startPlayer(song)
 
-               }
-           }else{
-               getSongOfAdapter(0)?.let{song->
-                   musicPlayerService?.startPlayer(song)
+                    }
+                } else {
+                    getSongOfAdapter(0)?.let { song ->
+                        musicPlayerService?.startPlayer(song)
 
-               }
-           }
-        }
-        bind.seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    bind.seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
-                    musicPlayerService?.setExoPlayerProgress(progress.toLong())
-                    userSelectPosition=progress
-                    seekBar?.progress=progress
+                    }
                 }
             }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                isUserSeeking=true
-            }
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                isUserSeeking=false
-                bind.seekbarControl.loadSeekBar.progress=userSelectPosition
-            }
-        })
+            seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object :
+                SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    if (fromUser) {
+                        seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
+                        musicPlayerService?.setExoPlayerProgress(progress.toLong())
+                        userSelectPosition = progress
+                        seekBar?.progress = progress
+                    }
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    isUserSeeking = true
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    isUserSeeking = false
+                    seekbarControl.loadSeekBar.progress = userSelectPosition
+                }
+            })
+        }
     }
     private fun getSongOfAdapter(position:Int): SongEntity?{
         mainViewModel.setCurrentPosition(position)
         mPrefs.currentPosition = position.toLong()
         val song = adapter.getSongByPosition(position)
-        bind.rvSongs.scrollToPosition(position)
+        bind?.rvSongs?.scrollToPosition(position)
         return song
     }
     private fun initCheckPermission(){
@@ -406,7 +430,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
         mPrefs.nextOrPrevFromNotify=false
-        bind.rvSongs.scrollToPosition(currentSelectedPosition)
+        bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
 
     }
     override fun onPause() {
@@ -416,7 +440,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
     override fun onDestroy() {
         super.onDestroy()
-        _bind=null
+
         try {
             activity?.unbindService(this)
         } catch (e: IllegalArgumentException) {
