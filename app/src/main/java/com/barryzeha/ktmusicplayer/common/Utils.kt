@@ -10,6 +10,8 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Log
+import android.widget.RemoteViews
+import android.widget.RemoteViews.RemoteView
 import androidx.annotation.RequiresApi
 import com.barryzeha.core.R
 import com.barryzeha.core.common.getSongCover
@@ -130,6 +132,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         .addAction(nextAction)
         .addAction(null)
         .addAction(closeAction)
+
         .build()
 
 }

@@ -199,6 +199,7 @@ class MusicPlayerService : Service() {
                             1f
                         )
                         .setActions(PlaybackState.ACTION_PLAY_PAUSE)
+                        .setActions(PlaybackState.ACTION_SEEK_TO)
                         .build()
                 )
                 mediaSession.setMetadata(
@@ -208,6 +209,7 @@ class MusicPlayerService : Service() {
                         .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
                         .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
                         .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+
                         .build()
                 )
                 mediaPlayerNotify = notificationMediaPlayer(
@@ -269,41 +271,6 @@ class MusicPlayerService : Service() {
         }
 
         setUpExoplayerListener(song)?.let{exoPlayer.addListener(it)}
-     /*   exoPlayer.addListener(object: Player.Listener{
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                super.onPlaybackStateChanged(playbackState)
-                if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
-
-                    // Set info currentSongEntity
-                    currentMusicState = MusicState(
-                        idSong = song.id,
-                        isPlaying=exoPlayer.isPlaying,
-                        title = songPath.substringAfterLast("/","No named"),
-                        artist = songMetadata!!.artist,
-                        album = songMetadata.album,
-                        albumArt = songMetadata.albumArt,
-                        duration =(exoPlayer.duration),
-                        songPath = songPath,
-                        latestPlayed = false
-                    )
-
-
-                    // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-                    // información que de la pista en reproducción que no requiere cambios constantes
-                    // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
-                    if(!executeOnceTime)_songController?.currentTrack(currentMusicState)
-                    executeOnceTime=true
-                }
-                if(playbackState == Player.STATE_ENDED ){
-                    currentMusicState = currentMusicState.copy(
-                        isPlaying = false,
-                        latestPlayed = false
-                    )
-                   _songController?.currentTrack(currentMusicState)
-               }
-
-            }
-        })*/
 
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.prepare()
