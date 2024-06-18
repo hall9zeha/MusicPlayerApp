@@ -90,7 +90,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun saveNewSong(songEntity: SongEntity){
         launch {
             val idInserted=repository.saveNewSong(songEntity)
-            getSongById(idInserted)
+            fetchAllSong()
+            //getSongById(idInserted)
         }
     }
     fun saveSongState(songState: SongState){

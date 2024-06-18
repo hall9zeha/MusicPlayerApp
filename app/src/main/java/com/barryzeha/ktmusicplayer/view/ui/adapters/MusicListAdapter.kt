@@ -40,8 +40,8 @@ import java.io.File
 
 //class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity,MusicListAdapter.MViewHolder>(SongDiffCallback()) {
 class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
-    private var songList:MutableList<SongEntity> = arrayListOf()
-    //private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
+    //private var songList:MutableList<SongEntity> = arrayListOf()
+    private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
     private var selectedPos = -1
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
@@ -59,7 +59,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
 
     }
 
-    override fun getItemCount()=songList.size/*asyncListDiffer.currentList.size*/
+    override fun getItemCount()=/*songList.size*/asyncListDiffer.currentList.size
 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: MViewHolder, position: Int) {
@@ -76,8 +76,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             mColorList(context).recycle()
         }
         //holder.onBind(position, getItem(position))
-        holder.onBind(position, songList[position])
-        //holder.onBind(position, asyncListDiffer.currentList[position])
+        //holder.onBind(position, songList[position])
+        holder.onBind(position, asyncListDiffer.currentList[position])
     }
 
     @SuppressLint("ResourceType")
@@ -93,46 +93,46 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     }
     fun addAll(songs:List<SongEntity>){
         //submitList(songs)
-        //asyncListDiffer.submitList(songs)
-        songs.forEach {
+        asyncListDiffer.submitList(songs)
+       /* songs.forEach {
             add(it)
-        }
+        }*/
     }
-    // TODO al usar DiffUtils o asyncListDiffer para agregar mas de un item a la vez a veces solo ingresa el último
+    // Al usar DiffUtils o asyncListDiffer para agregar mas de un item a la vez a veces solo ingresa el último
     // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
-    // regresar para solucionarlo
+    // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo
     fun add(song: SongEntity) {
-       /* val updateList = asyncListDiffer.currentList.toMutableList()
+        val updateList = asyncListDiffer.currentList.toMutableList()
         if (!updateList.contains(song)) {
             updateList.add(song)
             asyncListDiffer.submitList(updateList.toList())
-        }*/
-        if (!songList.contains(song)) {
+        }
+        /*if (!songList.contains(song)) {
             songList.add(song)
             notifyItemInserted(songList.size - 1)
 
-            }
+            }*/
      }
     fun remove(song:SongEntity){
-       /* val currentList=asyncListDiffer.currentList.toMutableList()
+        val currentList=asyncListDiffer.currentList.toMutableList()
         if(currentList.contains(song)){
             val position = currentList.indexOf(song)
             currentList.removeAt(position)
             asyncListDiffer.submitList(currentList)
 
-        }*/
-
+        }
+/*
         if(songList.contains(song)){
             val position = songList.indexOf(song)
             songList.removeAt(position)
             notifyItemRemoved(position)
-        }
+        }*/
     }
     fun getSongByPosition(position: Int): SongEntity?{
-        //return if(asyncListDiffer.currentList.isNotEmpty()){
-        return if(songList.isNotEmpty()){
-            //asyncListDiffer.currentList[position]
-            songList[position]
+        return if(asyncListDiffer.currentList.isNotEmpty()){
+        //return if(songList.isNotEmpty()){
+            asyncListDiffer.currentList[position]
+            //songList[position]
         }else{
             null
         }
