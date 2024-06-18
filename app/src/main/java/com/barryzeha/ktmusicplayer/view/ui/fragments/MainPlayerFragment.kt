@@ -309,6 +309,9 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                 album = songMetadata!!.album,
                 albumArt = songMetadata!!.albumArt,)
             setUpSongInfo(newState)
+
+        }else if(!currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
+            mainViewModel.saveStatePlaying(true)
         }
         mPrefs.nextOrPrevFromNotify=false
     }

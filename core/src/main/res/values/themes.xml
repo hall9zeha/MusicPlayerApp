@@ -6,4 +6,7 @@
     </style>
 
     <style name="Theme.KTMusicPlayer" parent="Base.Theme.KTMusicPlayer" />
+    <style name="imageViewCornerStyle" parent="">
+        <item name="cornerSize">8%</item>
+    </style>
 </resources>

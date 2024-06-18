@@ -127,10 +127,13 @@ class MusicPlayerService : Service() {
             SongAction.Pause -> {
                _songController?.pause()
                 exoPlayer.pause()
+                if(_songController==null)mPrefs.nextOrPrevFromNotify=true
             }
             SongAction.Resume -> {
                 _songController?.play()
+                playerListener?.let{exoPlayer.addListener(it)}
                 exoPlayer.play()
+                if(_songController==null)mPrefs.nextOrPrevFromNotify=true
             }
             SongAction.Stop -> {
                 _songController?.stop()
@@ -218,7 +221,6 @@ class MusicPlayerService : Service() {
                         .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
                         .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
                         .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-
                         .build()
                 )
                 mediaPlayerNotify = notificationMediaPlayer(

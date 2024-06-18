@@ -436,6 +436,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 )
                 setUpViews(newState)
             }
+        }else if(!currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
+            mainViewModel.saveStatePlaying(true)
         }
         mPrefs.nextOrPrevFromNotify=false
         bind?.rvSongs?.scrollToPosition(currentSelectedPosition)

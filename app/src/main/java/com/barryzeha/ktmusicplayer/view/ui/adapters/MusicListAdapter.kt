@@ -100,7 +100,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     }
     // Al usar DiffUtils o asyncListDiffer para agregar mas de un item a la vez a veces solo ingresa el último
     // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
-    // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo
+    // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo, parece poco eficiente,
+    // pero diff util está diseñado para manejarlo, aún así seguiremos averiguando más.
     fun add(song: SongEntity) {
         val updateList = asyncListDiffer.currentList.toMutableList()
         if (!updateList.contains(song)) {

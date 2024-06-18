@@ -16,17 +16,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintGuide_percent="0.4"
         />
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:id="@+id/ivCover"
         tools:src="@mipmap/ic_launcher"
+        app:shapeAppearanceOverlay="@style/imageViewCornerStyle"
         app:layout_constraintEnd_toStartOf="@id/guideLine"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottomActionsMenu"
-        app:layout_constraintWidth_percent="0.3"
-        app:layout_constraintHeight_percent="0.48"
+        app:layout_constraintWidth_percent="0.2"
+        app:layout_constraintDimensionRatio="H,1:1"
         android:layout_marginTop="16dp"
         />
     <androidx.recyclerview.widget.RecyclerView
