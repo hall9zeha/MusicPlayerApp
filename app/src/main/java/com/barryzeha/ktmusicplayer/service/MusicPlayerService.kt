@@ -109,8 +109,16 @@ class MusicPlayerService : Service() {
         })
         initExoplayer()
         setUpRepository()
+        mediaSessionCallback()
     }
-
+    private fun mediaSessionCallback(){
+        mediaSession.setCallback(object:MediaSession.Callback(){
+            override fun onSeekTo(pos: Long) {
+                super.onSeekTo(pos)
+                exoPlayer.seekTo(pos)
+            }
+        })
+    }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
@@ -183,6 +191,7 @@ class MusicPlayerService : Service() {
             mPrefs.nextOrPrevFromNotify=true
         }
     }
+
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
     // nos ayuda a controlar el estado de la notificación cuando el móvil esta en modo de bloqueo
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
