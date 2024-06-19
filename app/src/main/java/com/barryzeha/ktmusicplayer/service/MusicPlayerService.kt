@@ -23,6 +23,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.getAudioMetadata
 import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.common.toJson
 import com.barryzeha.core.model.SongAction
@@ -378,11 +379,12 @@ class MusicPlayerService : Service() {
         val song=songState.songEntity
         val songPath=song.pathLocation.toString()
         songMetaData= getSongCover(applicationContext!!,songPath, isForNotify = true)!!
+
         // Set info currentSongEntity
         currentMusicState = MusicState(
                 idSong = song.id,
                 isPlaying = exoPlayer.isPlaying,
-                title = songPath.substringAfterLast("/", "No named"),
+                title = songMetaData.title,
                 artist = songMetaData.artist,
                 album = songMetaData.album,
                 albumArt = songMetaData.albumArt,

@@ -30,6 +30,7 @@ import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
+import kotlin.coroutines.CoroutineContext
 
 
 /**
@@ -45,6 +46,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     private var selectedPos = -1
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
         context=parent.context
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_song,parent,false)
@@ -141,27 +143,26 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
-           CoroutineScope(Dispatchers.IO).launch {
-                val audioTag = getAudioMetadata(context,song.pathLocation!!)
-                withContext(Dispatchers.Main) {
-                    tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
-                    tvSongDesc.text = String.format(
-                        "%s. %s",
-                        (position + 1),
-                        song.pathLocation?.substringAfterLast("/", "No named")
-                    )
-                    tvDuration.text = audioTag.songLength
-                    tvFileFormat.text =
-                        String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
+                CoroutineScope(Dispatchers.IO).launch {
+                    val audioTag = getAudioMetadata(context, song.pathLocation!!)
+                    withContext(Dispatchers.Main) {
+                        tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
+                        tvSongDesc.text = String.format(
+                            "%s. %s - %s",
+                            (position + 1), audioTag.title,
+                            audioTag.artist
+                        )
+                        tvDuration.text = audioTag.songLength
+                        tvFileFormat.text =
+                            String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
+                    }
                     root.setOnClickListener {
                         changeBackgroundColorSelectedItem(bindingAdapterPosition)
                         onItemClick(position, song)
 
                     }
-                    ivOptions.setOnClickListener { onMenuItemClick(it,position,song) }
-               }
-           }
-
+                    ivOptions.setOnClickListener { onMenuItemClick(it, position, song) }
+                }
         }
         internal  fun bindBackgroundColor(color: Int) {
             bind.root.setBackgroundColor(color)

@@ -71,22 +71,21 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
     val metadata = AudioFileIO.read(File(pathFile))
     val tag = metadata.tag
-
+    val nameFile=metadata.file.name.substringBeforeLast(".")
     // retrieve covert art of song file uncomment if you want implement,
     /*val coverArtData = try{
         tag.firstArtwork.binaryData
     }catch(e:Exception){
         null
     }
-    val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
-    */
+    val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
 
     return AudioMetadata(
-        artist=try{tag.getFirst(FieldKey.ARTIST)}catch(ex:Exception){"Unknown"},
-        album=try{tag.getFirst(FieldKey.ALBUM)}catch(ex:Exception){"Unknown"},
-        title=try{tag.getFirst(FieldKey.TITLE)}catch(ex:Exception){"No title"},
-        comment=try{tag.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"Unknown"},
-        year=try{tag.getFirst(FieldKey.YEAR)}catch(ex:Exception){"Unknown"},
+        artist=if(tag.getFirst(FieldKey.ARTIST).isNullOrEmpty()) "Artist Unknown" else tag.getFirst(FieldKey.ARTIST),
+        album=if(tag.getFirst(FieldKey.ALBUM).isNullOrEmpty())"Album Unknown" else tag.getFirst(FieldKey.ALBUM),
+        title=if(tag.getFirst(FieldKey.TITLE).isNullOrEmpty())nameFile else tag.getFirst(FieldKey.TITLE),
+        comment=try{tag.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"No comment"},
+        year=try{tag.getFirst(FieldKey.YEAR)}catch(ex:Exception){"Unknown year"},
         track=try{tag.getFirst(FieldKey.TRACK)}catch(ex:Exception){"Unknown"},
         discNumber=try{tag.getFirst(FieldKey.DISC_NO)}catch(ex:Exception){"Unknown"},
         composer=try{tag.getFirst(FieldKey.COMPOSER)}catch(ex:Exception){"Unknown"},
@@ -173,16 +172,17 @@ fun createNotificationChannel(notificationManager:NotificationManager){
 
 fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
-        getAudioMetadata(context,path)
+        val metadata=getAudioMetadata(context,path)
         mmr.setDataSource(path)
-        val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-        val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+        //val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+        //val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
         val bitmap = mmr.embeddedPicture?.let {
            getBitmap(context,it,isForNotify)
         }
         return MusicState(
-            artist = artist ?: "Unknown",
-            album = album ?: "Album Unknown",
+            title = metadata.title!!,
+            artist = metadata.artist!!,
+            album = metadata.album!!,
             albumArt = bitmap
                 ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
         )

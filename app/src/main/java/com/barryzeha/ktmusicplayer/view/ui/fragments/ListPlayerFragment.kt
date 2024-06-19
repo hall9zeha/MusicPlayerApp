@@ -151,19 +151,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         setUpListeners()
     }
     private fun activityResultFile(){
-        /*
-        launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
-            if(result.resultCode == Activity.RESULT_OK){
-                uri = result.data?.data
-                val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
-                mainViewModel.saveNewSong(
-                    SongEntity(
-                    pathLocation = realPathFromFile,
-                    timestamp = Date().time
-                )
-                )
-            }
-        }*/
         launcherOpenMultipleDocs= registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
             uris.forEach {uri->
                 val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
@@ -189,6 +176,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         adapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
         bind?.rvSongs?.apply {
             setHasFixedSize(true)
+            setItemViewCacheSize(10)
             layoutManager = LinearLayoutManager(context)
             adapter = this@ListPlayerFragment.adapter
         }
