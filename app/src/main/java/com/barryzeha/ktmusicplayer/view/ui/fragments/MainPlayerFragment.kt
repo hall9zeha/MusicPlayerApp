@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -11,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.MyPreferences
@@ -21,6 +23,7 @@ import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
@@ -28,7 +31,6 @@ import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.barryzeha.core.R as coreRes
-
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -44,7 +46,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var songLists:MutableList<SongEntity> = arrayListOf()
     private var currentSelectedPosition=0
     private lateinit var mPrefs:MyPreferences
-
+    private var songMode =-1
+    private var countMode =0
 
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
@@ -222,7 +225,6 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
                         musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition))
                         btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
-
                     } else {
                         if (isPlaying) {
                             musicPlayerService?.pauseExoPlayer(); btnMainPlay.setIconResource(com.barryzeha.core.R.drawable.ic_play)
@@ -262,18 +264,42 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
                     }
                 }
-
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
                     //isUserSeeking=true
                 }
-
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     //isUserSeeking=false
                     mainSeekBar.progress = userSelectPosition
 
                 }
             })
+            btnRepeat.setOnClickListener {
+                if (countMode < 3) {
+                    when (songMode) {
+                        SongMode.RepeatOne.ordinal -> {
+                            btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                            countMode++
+                            songMode=-1
+                            btnRepeat.backgroundTintList=null
+                            countMode=0
+                        }
+                        SongMode.RepeatAll.ordinal -> {
+                            btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
+                            songMode = SongMode.RepeatOne.ordinal
+                            countMode++
+                        }
+                        else -> {
+                            songMode = SongMode.RepeatAll.ordinal
+                            btnRepeat.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                            countMode++
+                        }
+                    }
+                }else{
+                    countMode=0
+                }
+            }
         }
+
     }
     private fun getSongOfList(position:Int): SongEntity{
         mPrefs.currentPosition = position.toLong()
