@@ -221,5 +221,6 @@ fun mColorList(context:Context)=
         com.google.android.material.R.attr.colorAccent,
         com.google.android.material.R.attr.colorOnPrimary,
         com.google.android.material.R.attr.colorSurface,
+        android.R.attr.colorBackground,
         android.R.color.transparent
     ))

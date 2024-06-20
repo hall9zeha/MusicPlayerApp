@@ -2,6 +2,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.content.ComponentName
 import android.content.ServiceConnection
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -19,6 +20,7 @@ import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -280,7 +282,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                             countMode++
                             songMode=-1
-                            btnRepeat.backgroundTintList=null
+                            btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            )
                             countMode=0
                         }
                         SongMode.RepeatAll.ordinal -> {
