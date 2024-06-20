@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
@@ -16,7 +17,11 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.REPEAT_ALL
+import com.barryzeha.core.common.REPEAT_ONE
+import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.common.loadImage
@@ -48,8 +53,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var songLists:MutableList<SongEntity> = arrayListOf()
     private var currentSelectedPosition=0
     private lateinit var mPrefs:MyPreferences
-    private var songMode =-1
-    private var countMode =0
+
+
 
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
@@ -154,6 +159,43 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         bind?.tvSongAlbum?.setSelected(true)
 
     }
+    @SuppressLint("ResourceType")
+    private fun checkPreferences()=with(bind){
+        this?.let {
+            when (mPrefs.songMode) {
+                SongMode.RepeatOne.ordinal -> {
+
+                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
+                    btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
+                        requireContext(),
+                        coreRes.color.controls_colors
+                    )?.withAlpha(128)
+                }
+                SongMode.RepeatAll.ordinal -> {
+                    btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
+                        requireContext(),
+                        coreRes.color.controls_colors
+                    )?.withAlpha(128)
+                }
+                SongMode.Shuffle.ordinal ->{
+                    btnShuffle.backgroundTintList = ContextCompat.getColorStateList(
+                        requireContext(),
+                        coreRes.color.controls_colors
+                    )?.withAlpha(128)
+                }
+                else -> {
+                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                    btnRepeat.backgroundTintList = ColorStateList.valueOf(
+                        mColorList(requireContext()).getColor(5, 6)
+                    )
+                    btnShuffle.backgroundTintList = ColorStateList.valueOf(
+                        mColorList(requireContext()).getColor(5, 6)
+                    )
+
+                }
+            }
+        }
+    }
     private fun setUpObservers(){
         bind?.ivMusicCover?.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
@@ -220,6 +262,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             updateService()
         }
     }
+    @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
         this?.let {
             btnMainPlay.setOnClickListener {
@@ -276,29 +319,49 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                 }
             })
             btnRepeat.setOnClickListener {
-                if (countMode < 3) {
-                    when (songMode) {
+
+                    when (mPrefs.songMode) {
                         SongMode.RepeatOne.ordinal -> {
+                            //  Third: deactivate modes
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                            countMode++
-                            songMode=-1
                             btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                             )
-                            countMode=0
+                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            )
+                            mPrefs.songMode = CLEAR_MODE
                         }
                         SongMode.RepeatAll.ordinal -> {
+                            // Second: repeat one
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                            songMode = SongMode.RepeatOne.ordinal
-                            countMode++
+                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            )
+                            mPrefs.songMode = REPEAT_ONE
+
                         }
                         else -> {
-                            songMode = SongMode.RepeatAll.ordinal
+                            // First: active repeat All
                             btnRepeat.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
-                            countMode++
+                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            )
+                            mPrefs.songMode= REPEAT_ALL
                         }
                     }
-                }else{
-                    countMode=0
+
+            }
+            btnShuffle.setOnClickListener {
+                when(mPrefs.songMode){
+                        SongMode.Shuffle.ordinal->{
+                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        )
+                        mPrefs.songMode= CLEAR_MODE
+                    }
+                    else->{
+                        btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                        mPrefs.songMode= SHUFFLE
+                        btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                        btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        )
+                    }
                 }
             }
         }
@@ -328,6 +391,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     override fun onResume() {
         super.onResume()
+        checkPreferences()
         musicPlayerService?.setSongController(songController)
         if(currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
             val song=songLists[mPrefs.currentPosition.toInt()]
