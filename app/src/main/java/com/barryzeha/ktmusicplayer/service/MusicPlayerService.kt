@@ -338,6 +338,7 @@ class MusicPlayerService : Service() {
                      if (!executeOnceTime) _songController?.currentTrack(currentMusicState)
                      executeOnceTime = true
                      mPrefs.isPlaying = exoPlayer.isPlaying
+
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
                      if(mPrefs.currentPosition < songsList.size -1 ){
