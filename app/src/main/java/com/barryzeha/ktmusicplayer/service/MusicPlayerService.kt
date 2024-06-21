@@ -5,7 +5,6 @@ import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -14,23 +13,19 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
-import com.barryzeha.core.common.getAudioMetadata
 import com.barryzeha.core.common.getSongCover
-import com.barryzeha.core.common.toJson
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
-import com.barryzeha.core.model.entities.SongState
+import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
@@ -40,11 +35,8 @@ import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.log
 import kotlin.system.exitProcess
 
 
@@ -128,13 +120,21 @@ class MusicPlayerService : Service() {
             SongAction.Pause -> {
                _songController?.pause()
                 exoPlayer.pause()
-                if(_songController==null)mPrefs.nextOrPrevFromNotify=true
+                if(_songController==null){
+                    mPrefs.nextOrPrevFromNotify=true
+                    mPrefs.controlFromNotify = true
+                    mPrefs.isPlaying = exoPlayer.isPlaying
+                }
             }
             SongAction.Resume -> {
                 _songController?.play()
                 playerListener?.let{exoPlayer.addListener(it)}
                 exoPlayer.play()
-                if(_songController==null)mPrefs.nextOrPrevFromNotify=true
+                if(_songController==null){
+                    mPrefs.nextOrPrevFromNotify=true
+                    mPrefs.controlFromNotify = true
+                    mPrefs.isPlaying = exoPlayer.isPlaying
+                }
             }
             SongAction.Stop -> {
                 _songController?.stop()
@@ -193,6 +193,8 @@ class MusicPlayerService : Service() {
                 mPrefs.currentPosition = position.toLong()
             }
             mPrefs.nextOrPrevFromNotify=true
+            mPrefs.controlFromNotify = true
+            mPrefs.isPlaying = exoPlayer.isPlaying
         }
     }
 
@@ -258,10 +260,28 @@ class MusicPlayerService : Service() {
                     _songController?.musicState(currentMusicState)
                     updateNotify()
                 //}
-                songHandler.postDelayed(songRunnable, 500)
+                setUpExoPlayerRepeatMode()
+               songHandler.postDelayed(songRunnable, 500)
             }
             songHandler.post(songRunnable)
 
+    }
+    private fun setUpExoPlayerRepeatMode(){
+        when(mPrefs.songMode){
+            SongMode.RepeatAll.ordinal->{
+                exoPlayer.repeatMode=Player.REPEAT_MODE_ONE
+            }
+            SongMode.RepeatOne.ordinal->{
+                exoPlayer.repeatMode=Player.REPEAT_MODE_ALL
+            }
+            SongMode.Shuffle.ordinal->{
+
+            }
+            else->{
+                exoPlayer.repeatMode=Player.REPEAT_MODE_OFF
+            }
+
+        }
     }
     private fun setUpExoPlayer(song:SongEntity){
         val songPath = song.pathLocation.toString()
@@ -286,6 +306,7 @@ class MusicPlayerService : Service() {
 
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.prepare()
+
         exoPlayer.play()
     }
     private fun setUpExoplayerListener(song: SongEntity):Player.Listener?{
@@ -315,7 +336,7 @@ class MusicPlayerService : Service() {
                      // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
                      if (!executeOnceTime) _songController?.currentTrack(currentMusicState)
                      executeOnceTime = true
-
+                     mPrefs.isPlaying = exoPlayer.isPlaying
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
                      if(mPrefs.currentPosition < songsList.size -1 ){
@@ -351,7 +372,7 @@ class MusicPlayerService : Service() {
     }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
-            if(mPrefs.playerIsStop){songHandler.post(songRunnable)}
+            if(mPrefs.isPlaying){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información que de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido

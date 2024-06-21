@@ -4,16 +4,12 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
-import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -393,18 +389,20 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         super.onResume()
         checkPreferences()
         musicPlayerService?.setSongController(songController)
-        if(currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
-            val song=songLists[mPrefs.currentPosition.toInt()]
-            val songMetadata= getSongCover(requireContext(),song.pathLocation)
-            val newState = MusicState(
-                title = song.pathLocation.toString().substringAfterLast("/","No named")!!,
-                artist = songMetadata!!.artist,
-                album = songMetadata!!.album,
-                albumArt = songMetadata!!.albumArt,)
-            setUpSongInfo(newState)
+        if(mPrefs.nextOrPrevFromNotify){
+            try {
+                val song = songLists[mPrefs.currentPosition.toInt()]
+                val songMetadata = getSongCover(requireContext(), song.pathLocation)
+                val newState = MusicState(
+                    songPath = song.pathLocation.toString(),
+                    title = songMetadata!!.title,
+                    artist = songMetadata!!.artist,
+                    album = songMetadata!!.album,
+                )
+                setUpSongInfo(newState)
+                mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+            }catch(ex:Exception){}
 
-        }else if(!currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
-            mainViewModel.saveStatePlaying(true)
         }
         mPrefs.nextOrPrevFromNotify=false
     }

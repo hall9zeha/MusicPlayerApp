@@ -248,11 +248,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private fun setChangeInfoViews(musicState: MusicState){
         currentMusicState = musicState
         mPrefs.currentDuration = musicState.currentDuration
-        //bind.ivCover.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
+        //bind?.ivCover?.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
         bind?.seekbarControl?.loadSeekBar?.max = musicState.duration.toInt()
         bind?.seekbarControl?.tvEndTime?.text = createTime(musicState.duration).third
         bind?.seekbarControl?.tvInitTime?.text = createTime(musicState.currentDuration).third
         bind?.seekbarControl?.loadSeekBar?.progress = musicState.currentDuration.toInt()
+        //mainViewModel.saveStatePlaying(musicState.isPlaying)
         updateService()
     }
     private fun setUpListeners()= with(bind){
@@ -411,22 +412,25 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         musicPlayerService?.setSongController(songController)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
-        if(currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
-            val song=getSongOfAdapter(mPrefs.currentPosition.toInt())
-            song?.let {
-                val songMetadata = getSongCover(requireContext(), song.pathLocation)
-                val newState = MusicState(
-                    title = song.pathLocation.toString().substringAfterLast("/", "No named")!!,
-                    artist = songMetadata!!.artist,
-                    album = songMetadata!!.album,
-                    albumArt = songMetadata!!.albumArt,
-                )
-                setUpViews(newState)
-            }
-        }else if(!currentMusicState.isPlaying && mPrefs.nextOrPrevFromNotify){
-            mainViewModel.saveStatePlaying(true)
+        if(mPrefs.controlFromNotify){
+            try {
+                val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
+                song?.let {
+                    val songMetadata = getSongCover(requireContext(), song.pathLocation)
+                    val newState = MusicState(
+                        songPath = song.pathLocation.toString(),
+                        title = songMetadata!!.title,
+                        artist = songMetadata!!.artist,
+                        album = songMetadata!!.album
+                    )
+                    mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+                    setUpViews(newState)
+                }
+
+            }catch(ex:Exception){}
         }
-        mPrefs.nextOrPrevFromNotify=false
+        mPrefs.controlFromNotify=false
+
         bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
 
     }

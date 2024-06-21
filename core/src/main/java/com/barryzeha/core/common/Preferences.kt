@@ -1,7 +1,6 @@
 package com.barryzeha.core.common
 
 import android.content.Context
-import com.barryzeha.core.model.entities.MusicState
 import com.google.gson.Gson
 
 
@@ -16,6 +15,7 @@ private const val CURRENT_POSITION = "currentPosition"
 private const val CURRENT_DURATION = "currentDuration"
 private const val MUSIC_STATE = "musicStateJson"
 private const val PREV_OR_NEXT = "prevOrNext"
+private const val CONTROL_FROM_NOTIFY_2 = "controlFromNotify2"
 private const val PLAYER_IS_STOP = "playerIsStop"
 private const val SONG_MODE = "songMode"
 class MyPreferences(private val context: Context){
@@ -28,7 +28,10 @@ class MyPreferences(private val context: Context){
     var nextOrPrevFromNotify:Boolean
         get()= myPreferences.getBoolean(PREV_OR_NEXT,false)
         set(value)=myPreferences.edit().putBoolean(PREV_OR_NEXT,value).apply()
-    var playerIsStop:Boolean
+    var controlFromNotify:Boolean
+        get()= myPreferences.getBoolean(CONTROL_FROM_NOTIFY_2,false)
+        set(value)=myPreferences.edit().putBoolean(CONTROL_FROM_NOTIFY_2,value).apply()
+    var isPlaying:Boolean
         get()= myPreferences.getBoolean(PLAYER_IS_STOP,false)
         set(value)=myPreferences.edit().putBoolean(PLAYER_IS_STOP,value).apply()
     var currentPosition:Long
