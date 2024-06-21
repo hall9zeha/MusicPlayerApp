@@ -206,6 +206,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
                 adapter.add(song)
+                musicPlayerService?.setNewMediaItem(song.pathLocation.toString())
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->

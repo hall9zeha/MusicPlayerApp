@@ -13,6 +13,7 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
@@ -21,6 +22,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.common.toJson
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -100,7 +102,7 @@ class MusicPlayerService : Service() {
                 return true
             }
         })
-        initExoplayer()
+        initMusicStateLooper()
         setUpRepository()
         mediaSessionCallback()
     }
@@ -176,6 +178,7 @@ class MusicPlayerService : Service() {
             songs.forEach { s->
                 if(!songsList.contains(s)){
                     songsList.add(s)
+                    exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
                 }
             }
             val songState=repository.fetchSongState()
@@ -243,7 +246,7 @@ class MusicPlayerService : Service() {
             }
 
     }
-    private fun initExoplayer(){
+    private fun initMusicStateLooper(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
             .build()
 
@@ -283,7 +286,7 @@ class MusicPlayerService : Service() {
 
         }
     }
-    private fun setUpExoPlayer(song:SongEntity){
+    private fun initExoPlayer(song:SongEntity){
         val songPath = song.pathLocation.toString()
 
         // Obtenemos el archivo bitmap de la carátula del albúm y lo reducimos  enviando true como argumento de isForNotify ya que si el bitmap es muy grande superando cierto límite
@@ -301,12 +304,10 @@ class MusicPlayerService : Service() {
                 .build()
 
         }
-
         setUpExoplayerListener(song)?.let{exoPlayer.addListener(it)}
 
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
         exoPlayer.prepare()
-
         exoPlayer.play()
     }
     private fun setUpExoplayerListener(song: SongEntity):Player.Listener?{
@@ -367,6 +368,9 @@ class MusicPlayerService : Service() {
     fun setSongController(controller:SongController){
         _songController=controller
     }
+    fun setNewMediaItem(songPath:String){
+        exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+    }
     fun unregisterController(){
         _songController=null
     }
@@ -377,7 +381,7 @@ class MusicPlayerService : Service() {
             // información que de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
-            setUpExoPlayer(song)
+            initExoPlayer(song)
         }
     }
     fun pauseExoPlayer(){
@@ -414,7 +418,14 @@ class MusicPlayerService : Service() {
                 currentDuration = songState.songState.currentPosition,
                 latestPlayed = true
             )
-        exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+        // Al agregar todos los items de la lista al inicio, no necesitamos agregar uno nuevo,
+        // lo necesitamos para la repetición de toda la lista
+        //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+
+        // Cuando tenemos toda la lista de items desde el inicio, siempre comienza por el primer archivo de la lista
+        // entonces para iniciar por el item de una posición específica usamos lo siguiente:
+        exoPlayer.seekToDefaultPosition(mPrefs.currentPosition.toInt())
+
         exoPlayer.seekTo(songState.songState.currentPosition)
         exoPlayer.prepare()
         _songController?.currentTrack(currentMusicState)
