@@ -16,8 +16,10 @@ import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
@@ -38,6 +40,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -75,7 +78,7 @@ class MusicPlayerService : Service() {
     private var songEntity:SongEntity=SongEntity()
     private lateinit var songMetaData:MusicState
     private var playerListener:Player.Listener?=null
-
+    private var isFirstTime=true
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -84,7 +87,13 @@ class MusicPlayerService : Service() {
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongCover(applicationContext,null)!!.albumArt)
-        mediaSession.setCallback(object : MediaSession.Callback(){
+        mediaSession.setCallback(mediaSessionCallback())
+        initMusicStateLooper()
+        setUpRepository()
+
+    }
+    private fun mediaSessionCallback():MediaSession.Callback{
+        return object:MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
                 if(Intent.ACTION_MEDIA_BUTTON == mediaButtonIntent.action){
                     val event = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
@@ -101,18 +110,12 @@ class MusicPlayerService : Service() {
                 }
                 return true
             }
-        })
-        initMusicStateLooper()
-        setUpRepository()
-        mediaSessionCallback()
-    }
-    private fun mediaSessionCallback(){
-        mediaSession.setCallback(object:MediaSession.Callback(){
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
                 exoPlayer.seekTo(pos)
             }
-        })
+
+        }
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -175,18 +178,22 @@ class MusicPlayerService : Service() {
     private fun setUpRepository(){
         CoroutineScope(Dispatchers.Main).launch {
             val songs=repository.fetchAllSongs()
-            songs.forEach { s->
-                if(!songsList.contains(s)){
+            val songState=repository.fetchSongState()
+            // TODO Revisar, no cargar toda la lista antes del estado de la canción
+            songs.forEach { s ->
+                if (!songsList.contains(s)) {
                     songsList.add(s)
                     exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
                 }
+
             }
-            val songState=repository.fetchSongState()
             if(!songState.isNullOrEmpty()) {
                 setMusicStateSaved(songState[0])
                 setUpExoplayerListener(songState[0].songEntity)
 
             }
+
+            exoPlayer.prepare()
         }
     }
     private fun nextOrPrevTRack(position:Int){
@@ -264,6 +271,7 @@ class MusicPlayerService : Service() {
                     updateNotify()
                 //}
                 setUpExoPlayerRepeatMode()
+                //Log.e("ITEM-POSITION", exoPlayer.currentMediaItemIndex.toString() )
                songHandler.postDelayed(songRunnable, 500)
             }
             songHandler.post(songRunnable)
@@ -286,29 +294,34 @@ class MusicPlayerService : Service() {
 
         }
     }
-    private fun initExoPlayer(song:SongEntity){
+    private fun initExoPlayer(song:SongEntity,position: Int=0){
         val songPath = song.pathLocation.toString()
 
         // Obtenemos el archivo bitmap de la carátula del albúm y lo reducimos  enviando true como argumento de isForNotify ya que si el bitmap es muy grande superando cierto límite
         // y es enviado directamente dentro de la intención la aplicación se romperá. De esta manera creamos el bitmap de un tamaño
         // de 96 x 96(isForNotify = true) para la notificación mientras que por defecto será de 500 x 500
         val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
+        // TODO modificar para no limpiar la lista inicial cada vez que enviemos un nuevo objeto a reproducir
+        // Esa es la razón por la que no se puede obtener el mediaItemIndex, refactorizar
 
         if(exoPlayer.isPlaying){
             exoPlayer.stop()
             exoPlayer.release()
             exoPlayer= ExoPlayer.Builder(applicationContext)
                 .build()
+
         }else{
-            exoPlayer= ExoPlayer.Builder(applicationContext)
+           exoPlayer= ExoPlayer.Builder(applicationContext)
                 .build()
 
         }
         setUpExoplayerListener(song)?.let{exoPlayer.addListener(it)}
-
         exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+        //exoPlayer.seekTo(position,0)
         exoPlayer.prepare()
         exoPlayer.play()
+        Log.e("ITEM-COUNT", exoPlayer.currentMediaItemIndex.toString() )
+
     }
     private fun setUpExoplayerListener(song: SongEntity):Player.Listener?{
         var countReady=0
@@ -340,6 +353,7 @@ class MusicPlayerService : Service() {
                      mPrefs.isPlaying = exoPlayer.isPlaying
 
                  }
+
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
                      if(mPrefs.currentPosition < songsList.size -1 ){
                          nextOrPrevTRack((mPrefs.currentPosition + 1).toInt())
@@ -355,11 +369,22 @@ class MusicPlayerService : Service() {
                  }
 
              }
+
+             override fun onPositionDiscontinuity(
+                 oldPosition: Player.PositionInfo,
+                 newPosition: Player.PositionInfo,
+                 reason: Int
+             ) {
+
+                 super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+             }
+
          }
 
        return playerListener
 
     }
+
     override fun onBind(intent: Intent?): IBinder {
         return binder
     }
@@ -375,15 +400,16 @@ class MusicPlayerService : Service() {
     fun unregisterController(){
         _songController=null
     }
-    fun startPlayer(song:SongEntity){
+    fun startPlayer(song:SongEntity, position: Int=0){
         song.pathLocation?.let {
             if(mPrefs.isPlaying){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información que de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
-            initExoPlayer(song)
+            initExoPlayer(song,position)
         }
+
     }
     fun pauseExoPlayer(){
         if(exoPlayer.isPlaying){
@@ -395,7 +421,9 @@ class MusicPlayerService : Service() {
         if(!exoPlayer.isPlaying){
             playerListener?.let{exoPlayer.addListener(it)}
             exoPlayer.play()
+            isFirstTime=false
         }
+
     }
     fun setExoPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)

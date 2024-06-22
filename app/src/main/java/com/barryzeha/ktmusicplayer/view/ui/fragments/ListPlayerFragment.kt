@@ -223,17 +223,16 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private fun setUpViews(musicState:MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
-            val durationInMillis = musicState.duration
-            val formattedDuration = createTime(durationInMillis).third
+
             bind?.ivCover?.setImageBitmap(
                 getSongCover(
                     requireContext(),
                     musicState.songPath
                 )?.albumArt
             )
-            bind?.seekbarControl?.loadSeekBar?.max = musicState.duration.toInt()
-            seekbarControl.tvEndTime.text = formattedDuration
-            seekbarControl.loadSeekBar.max = durationInMillis.toInt()
+
+            seekbarControl.tvEndTime.text = createTime(musicState.duration).third
+            seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
 
             activity?.let {
@@ -379,7 +378,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun onItemClick(position:Int,song: SongEntity){
-        musicPlayerService?.startPlayer(song)
+        musicPlayerService?.startPlayer(song,position)
         mainViewModel.setCurrentPosition(position)
 
     }
