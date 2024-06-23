@@ -42,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.log
 import kotlin.system.exitProcess
 
 
@@ -79,6 +80,7 @@ class MusicPlayerService : Service() {
     private lateinit var songMetaData:MusicState
     private var playerListener:Player.Listener?=null
     private var isFirstTime=true
+    private var songs:MutableList<SongEntity> = arrayListOf()
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -88,8 +90,8 @@ class MusicPlayerService : Service() {
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongCover(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
-        initMusicStateLooper()
         setUpRepository()
+        initMusicStateLooper()
 
     }
     private fun mediaSessionCallback():MediaSession.Callback{
@@ -176,6 +178,8 @@ class MusicPlayerService : Service() {
         return START_NOT_STICKY
     }
     private fun setUpRepository(){
+        exoPlayer = ExoPlayer.Builder(applicationContext)
+            .build()
         CoroutineScope(Dispatchers.Main).launch {
             val songs=repository.fetchAllSongs()
             val songState=repository.fetchSongState()
@@ -183,17 +187,21 @@ class MusicPlayerService : Service() {
             songs.forEach { s ->
                 if (!songsList.contains(s)) {
                     songsList.add(s)
-                    exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
                 }
+                exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
 
             }
             if(!songState.isNullOrEmpty()) {
                 setMusicStateSaved(songState[0])
                 setUpExoplayerListener(songState[0].songEntity)
-
             }
+            // Prueba
+            playerListener?.let{listener->exoPlayer.addListener(listener)}
 
-            exoPlayer.prepare()
+            Log.e("ITEM-COUNT", exoPlayer.mediaItemCount.toString() )
+            //
+
+
         }
     }
     private fun nextOrPrevTRack(position:Int){
@@ -254,8 +262,7 @@ class MusicPlayerService : Service() {
 
     }
     private fun initMusicStateLooper(){
-        exoPlayer = ExoPlayer.Builder(applicationContext)
-            .build()
+
 
             songRunnable = Runnable {
                 if(exoPlayer.currentPosition>0) {
@@ -289,53 +296,31 @@ class MusicPlayerService : Service() {
 
             }
             else->{
-                exoPlayer.repeatMode=Player.REPEAT_MODE_OFF
+                exoPlayer.repeatMode= REPEAT_MODE_OFF
             }
 
         }
     }
     private fun initExoPlayer(song:SongEntity,position: Int=0){
-        val songPath = song.pathLocation.toString()
 
-        // Obtenemos el archivo bitmap de la carátula del albúm y lo reducimos  enviando true como argumento de isForNotify ya que si el bitmap es muy grande superando cierto límite
-        // y es enviado directamente dentro de la intención la aplicación se romperá. De esta manera creamos el bitmap de un tamaño
-        // de 96 x 96(isForNotify = true) para la notificación mientras que por defecto será de 500 x 500
-        val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
-        // TODO modificar para no limpiar la lista inicial cada vez que enviemos un nuevo objeto a reproducir
-        // Esa es la razón por la que no se puede obtener el mediaItemIndex, refactorizar
-
-        if(exoPlayer.isPlaying){
-            exoPlayer.stop()
-            exoPlayer.release()
-            exoPlayer= ExoPlayer.Builder(applicationContext)
-                .build()
-
-        }else{
-           exoPlayer= ExoPlayer.Builder(applicationContext)
-                .build()
-
-        }
-        setUpExoplayerListener(song)?.let{exoPlayer.addListener(it)}
-        exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
-        //exoPlayer.seekTo(position,0)
+        songEntity=song
+        exoPlayer.seekTo(position,0)
         exoPlayer.prepare()
         exoPlayer.play()
         Log.e("ITEM-COUNT", exoPlayer.currentMediaItemIndex.toString() )
 
     }
     private fun setUpExoplayerListener(song: SongEntity):Player.Listener?{
-        var countReady=0
-        var countEnd=0
-        val songPath = song.pathLocation.toString()
-        val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
+
          playerListener = object : Player.Listener {
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
-
+                     val songPath = songEntity.pathLocation.toString()
+                     val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
                      // Set info currentSongEntity
                      currentMusicState = MusicState(
-                         idSong = song.id,
+                         idSong = songEntity.id,
                          isPlaying = exoPlayer.isPlaying,
                          title = songPath.substringAfterLast("/", "No named"),
                          artist = songMetadata!!.artist,
@@ -357,6 +342,7 @@ class MusicPlayerService : Service() {
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
                      if(mPrefs.currentPosition < songsList.size -1 ){
                          nextOrPrevTRack((mPrefs.currentPosition + 1).toInt())
+
                      }
                  }
                  else if (playbackState == Player.STATE_ENDED) {
@@ -369,7 +355,6 @@ class MusicPlayerService : Service() {
                  }
 
              }
-
              override fun onPositionDiscontinuity(
                  oldPosition: Player.PositionInfo,
                  newPosition: Player.PositionInfo,
@@ -404,7 +389,7 @@ class MusicPlayerService : Service() {
         song.pathLocation?.let {
             if(mPrefs.isPlaying){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-            // información que de la pista en reproducción que no requiere cambios constantes
+            // información  de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
             initExoPlayer(song,position)
@@ -419,7 +404,8 @@ class MusicPlayerService : Service() {
     }
     fun playingExoPlayer(){
         if(!exoPlayer.isPlaying){
-            playerListener?.let{exoPlayer.addListener(it)}
+            //exoPlayer.seekTo(mPrefs.currentPosition.toInt(),mPrefs.currentDuration)
+            exoPlayer.prepare()
             exoPlayer.play()
             isFirstTime=false
         }
@@ -428,7 +414,15 @@ class MusicPlayerService : Service() {
     fun setExoPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
     }
+    fun setMusicList(){
+        songs.forEach { s ->
+            if (!songsList.contains(s)) {
+                songsList.add(s)
+                exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
+            }
 
+        }
+    }
     private fun setMusicStateSaved(songState: SongStateWithDetail){
         val song=songState.songEntity
         val songPath=song.pathLocation.toString()
@@ -453,10 +447,11 @@ class MusicPlayerService : Service() {
 
         // Cuando tenemos toda la lista de items desde el inicio, siempre comienza por el primer archivo de la lista
         // entonces para iniciar por el item de una posición específica usamos lo siguiente:
-        exoPlayer.seekToDefaultPosition(mPrefs.currentPosition.toInt())
-
-        exoPlayer.seekTo(songState.songState.currentPosition)
+        //exoPlayer.seekToDefaultPosition(mPrefs.currentPosition.toInt())
+        //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+        exoPlayer.seekTo(mPrefs.currentPosition.toInt(),songState.songState.currentPosition)
         exoPlayer.prepare()
+        exoPlayer.playWhenReady=false
         _songController?.currentTrack(currentMusicState)
 
     }

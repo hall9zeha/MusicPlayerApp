@@ -96,7 +96,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     }
     fun saveSongState(songState: SongState){
         launch {
-            repository.saveSongState(songState)
+             repository.saveSongState(songState)
         }
     }
     fun deleteSong(songEntity: SongEntity){

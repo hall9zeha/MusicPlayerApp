@@ -6,6 +6,7 @@ import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -96,28 +97,31 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
 
         override fun currentTrack(musicState: MusicState?) {
+            // TODO corregir el caso 2 y el caso 3 ya no será necesario si usamos la lista agregada al inicio en mediaItems
+            // pero aún falta obtener los metadatos de la reproducción en curso si es automática
             musicState?.let{
                  if(!musicState.isPlaying){
                     if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
                         bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         //mainViewModel.setCurrentPosition(0)
-
+                        Log.e("CASO 1", "ACTIVO" )
                     }
                     else if(musicState.duration>0 && musicState.latestPlayed){
                         bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
                         mainViewModel.saveStatePlaying(false)
                         mainViewModel.setCurrentTrack(musicState)
-
+                        Log.e("CASO 2", "ACTIVO" )
                     }
                     else {
-                        mainViewModel.saveStatePlaying(true)
-                        bind?.btnMainNext?.performClick()
-
+                       /* mainViewModel.saveStatePlaying(true)
+                        bind?.btnMainNext?.performClick()*/
+                        Log.e("CASO 3", "ACTIVO" )
                     }
                 }else{
                     mainViewModel.saveStatePlaying(true)
                     mainViewModel.setCurrentTrack(musicState)
+                     Log.e("CASO 4", "ACTIVO" )
                 }
             }
         }
@@ -264,7 +268,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             btnMainPlay.setOnClickListener {
                 if (songLists.size > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
-                        musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition))
+                        musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition),mPrefs.currentPosition.toInt())
                         btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                     } else {
                         if (isPlaying) {
@@ -414,7 +418,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onStop() {
         super.onStop()
         context?.unbindService(this)
-        super.onDestroyView()
+
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
                 SongState(
