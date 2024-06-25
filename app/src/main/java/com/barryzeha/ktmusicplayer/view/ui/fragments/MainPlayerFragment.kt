@@ -255,10 +255,15 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         this?.let {
             currentMusicState = musicState
             mPrefs.currentDuration = musicState.currentDuration
-            mainSeekBar.max = musicState.duration.toInt()
+            // Quitamos esta propiedad de mainSeekBar.max en actualización constante
+            // porque genera un mal efecto en la vista al cargar la pista guardada
+            // entre otros pequeños inconvenientes, ahora está en onResumen para actualizarse cuando cambiemos de lista
+            // a main
+            //mainSeekBar.max = musicState.duration.toInt()
+
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
-            tvSongTimeCompleted.text = createTime(musicState.duration).third
+            //tvSongTimeCompleted.text = createTime(musicState.duration).third
             updateService()
         }
     }
@@ -284,14 +289,14 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             }
             btnMainPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
-                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition - 1))
+                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition - 1),currentSelectedPosition -1)
                 }
             }
             btnMainNext.setOnClickListener {
                 if (currentSelectedPosition < songLists.size - 1) {
-                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition + 1))
+                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition + 1),currentSelectedPosition + 1)
                 } else {
-                    musicPlayerService?.startPlayer(getSongOfList(0))
+                    musicPlayerService?.startPlayer(getSongOfList(0),0)
                 }
             }
             mainSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -305,8 +310,6 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                         tvSongTimeRest.text = createTime(progress.toLong()).third
                         musicPlayerService?.setExoPlayerProgress(progress.toLong())
                         userSelectPosition = progress
-                        seekBar?.progress = progress
-
                     }
                 }
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -409,6 +412,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         }
         mPrefs.nextOrPrevFromNotify=false
+        bind?.mainSeekBar?.max = currentMusicState.duration.toInt()
     }
     override fun onPause() {
         super.onPause()

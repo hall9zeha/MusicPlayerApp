@@ -193,21 +193,15 @@ class MusicPlayerService : Service() {
             }
             if(!songState.isNullOrEmpty()) {
                 setMusicStateSaved(songState[0])
-                setUpExoplayerListener(songState[0].songEntity)
             }
-            // Prueba
+            setUpExoplayerListener()
             playerListener?.let{listener->exoPlayer.addListener(listener)}
-
-            Log.e("ITEM-COUNT", exoPlayer.mediaItemCount.toString() )
-            //
-
-
         }
     }
     private fun nextOrPrevTRack(position:Int){
         if(_songController==null){
             if(songsList.isNotEmpty()) {
-                startPlayer(songsList[position])
+                startPlayer(songsList[position],position)
                 mPrefs.currentPosition = position.toLong()
             }
             mPrefs.nextOrPrevFromNotify=true
@@ -262,8 +256,6 @@ class MusicPlayerService : Service() {
 
     }
     private fun initMusicStateLooper(){
-
-
             songRunnable = Runnable {
                 if(exoPlayer.currentPosition>0) {
                     currentMusicState = currentMusicState.copy(
@@ -278,7 +270,7 @@ class MusicPlayerService : Service() {
                     updateNotify()
                 //}
                 setUpExoPlayerRepeatMode()
-                //Log.e("ITEM-POSITION", exoPlayer.currentMediaItemIndex.toString() )
+
                songHandler.postDelayed(songRunnable, 500)
             }
             songHandler.post(songRunnable)
@@ -287,10 +279,12 @@ class MusicPlayerService : Service() {
     private fun setUpExoPlayerRepeatMode(){
         when(mPrefs.songMode){
             SongMode.RepeatAll.ordinal->{
-                exoPlayer.repeatMode=Player.REPEAT_MODE_ONE
+
+                exoPlayer.repeatMode=Player.REPEAT_MODE_ALL
             }
             SongMode.RepeatOne.ordinal->{
-                exoPlayer.repeatMode=Player.REPEAT_MODE_ALL
+                exoPlayer.repeatMode=Player.REPEAT_MODE_ONE
+
             }
             SongMode.Shuffle.ordinal->{
 
@@ -301,41 +295,41 @@ class MusicPlayerService : Service() {
 
         }
     }
-    private fun initExoPlayer(song:SongEntity,position: Int=0){
+    private fun initExoPlayer(song:SongEntity,position:Int){
 
         songEntity=song
         exoPlayer.seekTo(position,0)
         exoPlayer.prepare()
         exoPlayer.play()
-        Log.e("ITEM-COUNT", exoPlayer.currentMediaItemIndex.toString() )
 
     }
-    private fun setUpExoplayerListener(song: SongEntity):Player.Listener?{
+    private fun setUpExoplayerListener():Player.Listener?{
 
          playerListener = object : Player.Listener {
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
-                 if (playbackState == Player.STATE_READY && exoPlayer.duration > 0) {
+                 if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
                      val songPath = songEntity.pathLocation.toString()
                      val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
                      // Set info currentSongEntity
-                     currentMusicState = MusicState(
-                         idSong = songEntity.id,
-                         isPlaying = exoPlayer.isPlaying,
-                         title = songPath.substringAfterLast("/", "No named"),
-                         artist = songMetadata!!.artist,
-                         album = songMetadata.album,
-                         albumArt = songMetadata.albumArt,
-                         duration = (exoPlayer.duration),
-                         songPath = songPath,
-                         latestPlayed = false
-                     )
-                     // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-                     // información que de la pista en reproducción que no requiere cambios constantes
-                     // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
-                     if (!executeOnceTime) _songController?.currentTrack(currentMusicState)
-                     executeOnceTime = true
-                     mPrefs.isPlaying = exoPlayer.isPlaying
+                         currentMusicState = MusicState(
+                             idSong = songEntity.id,
+                             isPlaying = exoPlayer.isPlaying,
+                             title = songPath.substringAfterLast("/", "No named"),
+                             artist = songMetadata!!.artist,
+                             album = songMetadata.album,
+                             albumArt = songMetadata.albumArt,
+                             duration = exoPlayer.duration,
+                             songPath = songPath,
+                             latestPlayed = false
+                         )
+                         // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
+                         // información que de la pista en reproducción que no requiere cambios constantes
+                         // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
+                         if (!executeOnceTime) _songController?.currentTrack(currentMusicState)
+                         executeOnceTime = true
+                         mPrefs.isPlaying = exoPlayer.isPlaying
+
 
                  }
 
@@ -362,6 +356,16 @@ class MusicPlayerService : Service() {
              ) {
 
                  super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+                    if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
+                         fetchSong(newPosition.mediaItemIndex)?.let {
+                                currentMusicState = it.copy(
+                                    currentPosition = newPosition.mediaItemIndex.toLong()
+                                )
+                                _songController?.currentTrack(currentMusicState)
+                                mPrefs.currentPosition = newPosition.mediaItemIndex.toLong()
+                           }
+                    }
+
              }
 
          }
@@ -369,7 +373,24 @@ class MusicPlayerService : Service() {
        return playerListener
 
     }
-
+    private fun fetchSong(position:Int):MusicState?{
+        if(songsList.isNotEmpty()){
+            val songPath = songsList[position].pathLocation.toString()
+            val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
+           return MusicState(
+                idSong = songEntity.id,
+                isPlaying = exoPlayer.isPlaying,
+                title = songPath.substringAfterLast("/", "No named"),
+                artist = songMetadata!!.artist,
+                album = songMetadata.album,
+                albumArt = songMetadata.albumArt,
+                duration = songMetadata.duration,
+                songPath = songPath,
+                latestPlayed = false
+            )
+        }
+        return null
+    }
     override fun onBind(intent: Intent?): IBinder {
         return binder
     }
@@ -385,7 +406,7 @@ class MusicPlayerService : Service() {
     fun unregisterController(){
         _songController=null
     }
-    fun startPlayer(song:SongEntity, position: Int=0){
+    fun startPlayer(song:SongEntity, position:Int){
         song.pathLocation?.let {
             if(mPrefs.isPlaying){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
@@ -424,10 +445,11 @@ class MusicPlayerService : Service() {
         }
     }
     private fun setMusicStateSaved(songState: SongStateWithDetail){
+
         val song=songState.songEntity
+        songEntity = song
         val songPath=song.pathLocation.toString()
         songMetaData= getSongCover(applicationContext!!,songPath, isForNotify = true)!!
-
         // Set info currentSongEntity
         currentMusicState = MusicState(
                 idSong = song.id,

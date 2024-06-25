@@ -112,8 +112,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         mainViewModel.setCurrentTrack(musicState)
                     }
                     else {
-                        mainViewModel.saveStatePlaying(true)
-                        bind?.bottomPlayerControls?.btnNext?.performClick()
+                       /* mainViewModel.saveStatePlaying(true)
+                        bind?.bottomPlayerControls?.btnNext?.performClick()*/
                     }
                 }else{
                     mainViewModel.saveStatePlaying(true)
@@ -235,6 +235,8 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
 
+            //adapter.changeBackgroundColorSelectedItem(musicState.currentPosition.toInt())
+
             activity?.let {
                 val songMetadata = getSongCover(requireActivity(), musicState.songPath)
                 songMetadata?.let {
@@ -287,7 +289,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) getSongOfAdapter(
                         currentSelectedPosition
                     )?.let { song ->
-                        musicPlayerService?.startPlayer(song)
+                        musicPlayerService?.startPlayer(song,currentSelectedPosition)
                     }
                     else {
                         if (isPlaying) {
@@ -308,7 +310,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             bottomPlayerControls.btnPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
                     getSongOfAdapter(currentSelectedPosition - 1)?.let { song ->
-                        musicPlayerService?.startPlayer(song)
+                        musicPlayerService?.startPlayer(song,currentSelectedPosition -1)
 
                     }
                 }
@@ -316,12 +318,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             bottomPlayerControls.btnNext.setOnClickListener {
                 if (currentSelectedPosition < adapter.itemCount - 1) {
                     getSongOfAdapter(currentSelectedPosition + 1)?.let { song ->
-                        musicPlayerService?.startPlayer(song)
+                        musicPlayerService?.startPlayer(song,currentSelectedPosition + 1)
 
                     }
                 } else {
                     getSongOfAdapter(0)?.let { song ->
-                        musicPlayerService?.startPlayer(song)
+                        musicPlayerService?.startPlayer(song,currentSelectedPosition)
 
                     }
                 }
@@ -337,7 +339,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
                         musicPlayerService?.setExoPlayerProgress(progress.toLong())
                         userSelectPosition = progress
-                        seekBar?.progress = progress
                     }
                 }
 
