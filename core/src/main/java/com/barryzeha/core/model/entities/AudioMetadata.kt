@@ -1,7 +1,6 @@
 package com.barryzeha.core.model.entities
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 
 
 /**
@@ -11,18 +10,19 @@ import android.graphics.BitmapFactory
  **/
 
 data class AudioMetadata(
- val artist: String?="",
- val album: String?="",
- val title: String?="",
- val comment: String?="",
- val year: String?="",
- val track: String?="",
- val discNumber: String?="",
- val composer: String?="",
- val artistSort: String?="",
- val coverArt: Bitmap?=null,
- val bitRate:String?="",
- val songLength:String?="",
- val format:String?=""
+    val artist: String?="",
+    val album: String?="",
+    val title: String?="",
+    val comment: String?="",
+    val year: String?="",
+    val track: String?="",
+    val discNumber: String?="",
+    val composer: String?="",
+    val artistSort: String?="",
+    val coverArt: Bitmap?=null,
+    val bitRate:String?="",
+    val songLengthFormatted:String?="",
+    val songLength:Long=0,
+    val format:String?=""
 
 )

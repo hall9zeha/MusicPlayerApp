@@ -25,7 +25,6 @@ import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -91,7 +90,8 @@ fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
         composer=try{tag.getFirst(FieldKey.COMPOSER)}catch(ex:Exception){"Unknown"},
         artistSort = try{tag.getFirst(FieldKey.ARTIST_SORT)}catch(ex:Exception){""},
         bitRate = try{metadata.audioHeader.bitRate}catch(ex:Exception){""},
-        songLength = try{getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong())}catch(ex:Exception){"0"},
+        songLengthFormatted = try{getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong())}catch(ex:Exception){"0"},
+        songLength = try{(metadata.audioHeader.trackLength * 1000).toLong()}catch(ex:Exception){0},
         format = try{metadata.audioHeader.format}catch (ex:Exception){"unknown"},
         //coverArt = bitmapCoverArt
     )
@@ -183,6 +183,7 @@ fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): Mus
             title = metadata.title!!,
             artist = metadata.artist!!,
             album = metadata.album!!,
+            duration = metadata.songLength,
             albumArt = bitmap
                 ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
         )

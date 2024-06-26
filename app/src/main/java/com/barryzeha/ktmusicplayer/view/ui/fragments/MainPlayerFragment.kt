@@ -124,6 +124,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                      Log.e("CASO 4", "ACTIVO" )
                 }
             }
+
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {

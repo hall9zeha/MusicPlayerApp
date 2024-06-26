@@ -4,20 +4,14 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.media.MediaPlayer
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.getAudioMetadata
-import com.barryzeha.core.common.getBitrate
-import com.barryzeha.core.common.getTimeOfSong
-import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
@@ -27,10 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jaudiotagger.audio.AudioFileIO
-import org.jaudiotagger.tag.FieldKey
-import java.io.File
-import kotlin.coroutines.CoroutineContext
 
 
 /**
@@ -152,7 +142,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
                             (position + 1), audioTag.title,
                             audioTag.artist
                         )
-                        tvDuration.text = audioTag.songLength
+                        tvDuration.text = audioTag.songLengthFormatted
                         tvFileFormat.text =
                             String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
                     }
