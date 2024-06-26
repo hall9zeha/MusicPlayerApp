@@ -206,7 +206,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
                 adapter.add(song)
-                musicPlayerService?.setNewMediaItem(song.pathLocation.toString())
+                musicPlayerService?.setNewMediaItem(song)
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
@@ -217,7 +217,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
         mainViewModel.deletedRow.observe(viewLifecycleOwner){deletedRow->
-            if(deletedRow>0) song?.let{song->adapter.remove(song)}
+            if(deletedRow>0) song?.let{song->
+                adapter.remove(song)
+                musicPlayerService?.removeMediaItem(song)
+            }
         }
     }
     private fun setUpViews(musicState:MusicState)=with(bind){

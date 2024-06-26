@@ -322,7 +322,6 @@ class MusicPlayerService : Service() {
 
 
                  }
-
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
                      if(mPrefs.currentPosition < songsList.size -1 ){
                          nextOrPrevTRack((mPrefs.currentPosition + 1).toInt())
@@ -344,7 +343,6 @@ class MusicPlayerService : Service() {
                  newPosition: Player.PositionInfo,
                  reason: Int
              ) {
-
                  super.onPositionDiscontinuity(oldPosition, newPosition, reason)
                     if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
                         if (songsList.isNotEmpty()) {
@@ -376,8 +374,16 @@ class MusicPlayerService : Service() {
     fun setSongController(controller:SongController){
         _songController=controller
     }
-    fun setNewMediaItem(songPath:String){
-        exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+    fun setNewMediaItem(song:SongEntity){
+        exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation.toString()))
+        if(!songsList.contains(song)) songsList.add(song)
+    }
+    fun removeMediaItem(song: SongEntity){
+        if(songsList.contains(song)) {
+            val index = songsList.indexOf(song)
+            exoPlayer.removeMediaItem(index)
+            songsList.remove(song)
+        }
     }
     fun unregisterController(){
         _songController=null
@@ -401,7 +407,6 @@ class MusicPlayerService : Service() {
     }
     fun playingExoPlayer(){
         if(!exoPlayer.isPlaying){
-            //exoPlayer.seekTo(mPrefs.currentPosition.toInt(),mPrefs.currentDuration)
             exoPlayer.prepare()
             exoPlayer.play()
             isFirstTime=false
