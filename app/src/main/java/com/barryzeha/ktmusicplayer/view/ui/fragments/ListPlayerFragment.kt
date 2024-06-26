@@ -237,8 +237,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             seekbarControl.tvEndTime.text = createTime(musicState.duration).third
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
-
-            //adapter.changeBackgroundColorSelectedItem(musicState.currentPosition.toInt())
+            adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
 
             activity?.let {
                 val songMetadata = getSongCover(requireActivity(), musicState.songPath)
