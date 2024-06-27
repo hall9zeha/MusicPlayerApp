@@ -44,12 +44,13 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
             //Log.e("MAIN-ACTIVITY", it.toString() )
         }
         mainViewModel.songState.observe(this){songState->
-
         }
     }
     private fun setUpViewPager(){
-        val viewPagerAdapter= PageCollectionAdapter(this, listOf(HOME_PLAYER, LIST_PLAYER))
+        val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
         bind.mViewPager.adapter=viewPagerAdapter
+        // Para precargar el segundo fragmento mientras se muestra el primero
+        bind.mViewPager.offscreenPageLimit=2
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {

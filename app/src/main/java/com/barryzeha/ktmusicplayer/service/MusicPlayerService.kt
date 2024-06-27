@@ -13,7 +13,6 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
@@ -23,8 +22,7 @@ import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
-import com.barryzeha.core.common.getSongCover
-import com.barryzeha.core.common.toJson
+import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -40,9 +38,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.math.log
 import kotlin.system.exitProcess
 
 
@@ -88,7 +84,7 @@ class MusicPlayerService : Service() {
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
-        currentMusicState = MusicState(albumArt = getSongCover(applicationContext,null)!!.albumArt)
+        currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
         setUpRepository()
         initMusicStateLooper()
@@ -311,7 +307,7 @@ class MusicPlayerService : Service() {
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
                      val songPath = songEntity.pathLocation.toString()
-                     val songMetadata= getSongCover(applicationContext!!,songPath, isForNotify = true)
+                     val songMetadata= getSongMetadata(applicationContext!!,songPath, isForNotify = true)
                      // Set info currentSongEntity
                          fetchSong(songEntity)?.let{currentMusicState=it}
                          // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
@@ -461,7 +457,7 @@ class MusicPlayerService : Service() {
     private fun fetchSong(song:SongEntity):MusicState?{
         try {
         val songPath = song.pathLocation.toString()
-        val songMetadata = getSongCover(applicationContext!!, songPath, isForNotify = true)!!
+        val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!
         return MusicState(
             idSong = song.id,
             isPlaying = exoPlayer.isPlaying,

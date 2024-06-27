@@ -9,12 +9,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
-import android.util.Log
-import android.widget.RemoteViews
-import android.widget.RemoteViews.RemoteView
 import androidx.annotation.RequiresApi
 import com.barryzeha.core.R
-import com.barryzeha.core.common.getSongCover
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 

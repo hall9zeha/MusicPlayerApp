@@ -1,7 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -15,20 +14,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.SeekBar
-import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.MyPreferences
-import com.barryzeha.core.common.READ_STORAGE_REQ_CODE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getRealPathFromURI
-import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.SongController
 import com.barryzeha.core.model.entities.MusicState
@@ -40,6 +35,9 @@ import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Date
 import com.barryzeha.core.R as coreRes
 
@@ -182,12 +180,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
     }
     private fun setUpObservers(){
-        mainViewModel.fetchAllSong()
+        //mainViewModel.fetchAllSong()
         mainViewModel.musicState.observe(viewLifecycleOwner){musicState->
-           setChangeInfoViews(musicState)
+           updateUI(musicState)
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
-            setUpViews(currentTRack)
+            updateUIOnceTime(currentTRack)
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -200,12 +198,14 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if (it.isNotEmpty()) {
-                adapter.addAll(it)
+                CoroutineScope(Dispatchers.IO).launch {
+                    adapter.addAll(it)
+                }
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
-                adapter.add(song)
+                //adapter.add(song)
                 musicPlayerService?.setNewMediaItem(song)
             }
         }
@@ -223,12 +223,12 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             }
         }
     }
-    private fun setUpViews(musicState:MusicState)=with(bind){
+    private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
 
             bind?.ivCover?.setImageBitmap(
-                getSongCover(
+                getSongMetadata(
                     requireContext(),
                     musicState.songPath
                 )?.albumArt
@@ -240,7 +240,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
 
             activity?.let {
-                val songMetadata = getSongCover(requireActivity(), musicState.songPath)
+                val songMetadata = getSongMetadata(requireActivity(), musicState.songPath)
                 songMetadata?.let {
                     ivCover.setImageBitmap(it.albumArt)
                 }
@@ -249,7 +249,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             updateService()
         }
     }
-    private fun setChangeInfoViews(musicState: MusicState){
+    private fun updateUI(musicState: MusicState){
         currentMusicState = musicState
         mPrefs.currentDuration = musicState.currentDuration
         //bind?.ivCover?.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
@@ -415,12 +415,13 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         musicPlayerService?.setSongController(songController)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
+
         bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
         if(mPrefs.controlFromNotify){
             try {
                 val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
                 song?.let {
-                    val songMetadata = getSongCover(requireContext(), song.pathLocation)
+                    val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
                     val newState = MusicState(
                         songPath = song.pathLocation.toString(),
                         title = songMetadata!!.title,
@@ -428,7 +429,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         album = songMetadata!!.album
                     )
                     mainViewModel.saveStatePlaying(mPrefs.isPlaying)
-                    setUpViews(newState)
+                    updateUIOnceTime(newState)
                 }
 
             }catch(ex:Exception){}

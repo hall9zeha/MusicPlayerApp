@@ -67,7 +67,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 
 }
 
-fun getAudioMetadata(context: Context,pathFile:String):AudioMetadata{
+fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata{
     val metadata = AudioFileIO.read(File(pathFile))
     val tag = metadata.tag
     val nameFile=metadata.file.name.substringBeforeLast(".")
@@ -170,9 +170,9 @@ fun createNotificationChannel(notificationManager:NotificationManager){
     }
 }
 
-fun getSongCover(context: Context, path: String?,isForNotify:Boolean=false): MusicState? {
+fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
-        val metadata=getAudioMetadata(context,path)
+        val metadata=fetchFileMetadata(context,path)
         mmr.setDataSource(path)
         //val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         //val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)

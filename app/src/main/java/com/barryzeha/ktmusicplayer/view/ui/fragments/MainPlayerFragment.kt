@@ -20,7 +20,7 @@ import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
-import com.barryzeha.core.common.getSongCover
+import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
@@ -210,11 +210,11 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
            it?.let{currentTrack->
-                setUpSongInfo(currentTrack)
+                updateUIOnceTime(currentTrack)
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
-            setChangeInfoViews(it)
+            updateUI(it)
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -237,10 +237,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
 
     }
-    private fun setUpSongInfo(musicState: MusicState)=with(bind){
+    private fun updateUIOnceTime(musicState: MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
-            val albumArt = getSongCover(requireContext(), musicState.songPath)?.albumArt
+            val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
             tvSongAlbum.text = musicState.album
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
@@ -252,7 +252,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
 
     }
-    private fun setChangeInfoViews(musicState: MusicState)=with(bind){
+    private fun updateUI(musicState: MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
             mPrefs.currentDuration = musicState.currentDuration
@@ -400,14 +400,14 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         if(mPrefs.nextOrPrevFromNotify){
             try {
                 val song = songLists[mPrefs.currentPosition.toInt()]
-                val songMetadata = getSongCover(requireContext(), song.pathLocation)
+                val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
                 val newState = MusicState(
                     songPath = song.pathLocation.toString(),
                     title = songMetadata!!.title,
                     artist = songMetadata!!.artist,
                     album = songMetadata!!.album,
                 )
-                setUpSongInfo(newState)
+                updateUIOnceTime(newState)
                 mainViewModel.saveStatePlaying(mPrefs.isPlaying)
             }catch(ex:Exception){}
 
