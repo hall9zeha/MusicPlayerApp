@@ -198,9 +198,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if (it.isNotEmpty()) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    adapter.addAll(it)
-                }
+                adapter.addAll(it)
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
