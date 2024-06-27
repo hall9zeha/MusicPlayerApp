@@ -415,6 +415,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         musicPlayerService?.setSongController(songController)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
+        bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
         if(mPrefs.controlFromNotify){
             try {
                 val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
@@ -434,7 +435,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         }
         mPrefs.controlFromNotify=false
 
-        bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
 
     }
     override fun onPause() {

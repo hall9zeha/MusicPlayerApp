@@ -287,10 +287,11 @@ class MusicPlayerService : Service() {
 
             }
             SongMode.Shuffle.ordinal->{
-
+                exoPlayer.shuffleModeEnabled = true
             }
             else->{
                 exoPlayer.repeatMode= REPEAT_MODE_OFF
+                exoPlayer.shuffleModeEnabled = false
             }
 
         }
@@ -353,6 +354,11 @@ class MusicPlayerService : Service() {
                                 )
                                 _songController?.currentTrack(currentMusicState)
                                 mPrefs.currentPosition = newPosition.mediaItemIndex.toLong()
+                                if(_songController == null){
+                                    mPrefs.controlFromNotify = true
+                                    mPrefs.nextOrPrevFromNotify = true
+                                    mPrefs.isPlaying = exoPlayer.isPlaying
+                                }
                             }
                         }
                     }
