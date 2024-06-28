@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
     }
    override fun onStart() {
         super.onStart()
-        //startOrUpdateService(this,MusicPlayerService::class.java,this)
+        startOrUpdateService(this,MusicPlayerService::class.java,this)
     }
 
     override fun onDestroy() {
