@@ -67,7 +67,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 
 }
 
-fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata{
+ fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata{
     val metadata = AudioFileIO.read(File(pathFile))
     val tag = metadata.tag
     val nameFile=metadata.file.name.substringBeforeLast(".")

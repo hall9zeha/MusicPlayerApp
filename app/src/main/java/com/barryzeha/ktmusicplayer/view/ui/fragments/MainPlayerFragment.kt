@@ -34,6 +34,9 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
@@ -201,9 +204,11 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         bind?.ivMusicCover?.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
-            if(songs.isNotEmpty()){
-                songs.forEach {
-                    if(!songLists.contains(it))songLists.add(it)
+            CoroutineScope(Dispatchers.IO).launch {
+                if (songs.isNotEmpty()) {
+                    songs.forEach {
+                        if (!songLists.contains(it)) songLists.add(it)
+                    }
                 }
             }
         }

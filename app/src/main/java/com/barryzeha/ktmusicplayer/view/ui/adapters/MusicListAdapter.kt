@@ -38,6 +38,9 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
 
+    init{
+        setHasStableIds(true)
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
         context=parent.context
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_song,parent,false)
@@ -51,8 +54,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             }
 
     }
-
-    //override fun getItemCount()=/*songList.size*/asyncListDiffer.currentList.size
+    override fun getItemId(position: Int): Long = currentList[position].id
 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: MViewHolder, position: Int) {

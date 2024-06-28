@@ -199,6 +199,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if (it.isNotEmpty()) {
                 adapter.addAll(it)
+
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
@@ -407,6 +408,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onStart() {
         super.onStart()
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
+
     }
     override fun onResume() {
         super.onResume()
@@ -439,6 +441,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
+
     }
 
     override fun onDestroy() {

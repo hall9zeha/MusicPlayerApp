@@ -38,6 +38,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -49,7 +50,7 @@ import kotlin.system.exitProcess
  **/
 
 @AndroidEntryPoint
-class MusicPlayerService : Service() {
+class MusicPlayerService : Service(){
 
     @Inject
     lateinit var repository: MainRepository
@@ -180,12 +181,15 @@ class MusicPlayerService : Service() {
             val songs=repository.fetchAllSongs()
             val songState=repository.fetchSongState()
             // TODO Revisar, no cargar toda la lista antes del estado de la canción
-            songs.forEach { s ->
-                if (!songsList.contains(s)) {
-                    songsList.add(s)
+            withContext(Dispatchers.IO) {
+                songs.forEach { s ->
+                    if (!songsList.contains(s)) {
+                        songsList.add(s)
+                    }
+                    withContext(Dispatchers.Main) {
+                        exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
+                    }
                 }
-                exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
-
             }
             if(!songState.isNullOrEmpty()) {
                 setMusicStateSaved(songState[0])
