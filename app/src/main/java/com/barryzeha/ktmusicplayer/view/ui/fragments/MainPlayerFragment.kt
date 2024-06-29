@@ -153,15 +153,16 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mPrefs = MyApp.mPrefs
-        currentSelectedPosition = mPrefs.currentPosition.toInt()
-        // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
-        setUpObservers()
-        setUpListeners()
-        bind?.tvSongDescription?.setSelected(true)
-        bind?.tvSongArtist?.setSelected(true)
-        bind?.tvSongAlbum?.setSelected(true)
 
+            mPrefs = MyApp.mPrefs
+            currentSelectedPosition = mPrefs.currentPosition.toInt()
+            // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
+            setUpObservers()
+            setUpListeners()
+            bind?.tvSongDescription?.setSelected(true)
+            bind?.tvSongArtist?.setSelected(true)
+            bind?.tvSongAlbum?.setSelected(true)
+        
     }
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
