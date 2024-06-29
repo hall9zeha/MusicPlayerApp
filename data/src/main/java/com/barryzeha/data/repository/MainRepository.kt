@@ -20,6 +20,7 @@ interface MainRepository {
     suspend fun fetchAllSongs():List<SongEntity>
     suspend fun fetchSongById(idSong:Long): SongEntity
     suspend fun saveNewSong(song: SongEntity):Long
+    suspend fun updateSong(song:SongEntity):Int
     suspend fun deleteSong(idSong:Long):Int
 
     // SongState

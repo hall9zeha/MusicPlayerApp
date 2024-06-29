@@ -46,6 +46,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _registerRowInserted:MutableLiveData<Long> = MutableLiveData()
     val registerRowInserted:LiveData<Long> = _registerRowInserted
 
+    private var _updatedRow:MutableLiveData<Int> = MutableLiveData()
+    val updateRow:LiveData<Int> = _updatedRow
+
     private var _deletedRow:MutableLiveData<Int> = MutableLiveData()
     val deletedRow:LiveData<Int> = _deletedRow
 
@@ -97,6 +100,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun saveSongState(songState: SongState){
         launch {
              repository.saveSongState(songState)
+        }
+    }
+    fun updateSong(songEntity: SongEntity){
+        launch {
+            repository.updateSong(songEntity)
         }
     }
     fun deleteSong(songEntity: SongEntity){

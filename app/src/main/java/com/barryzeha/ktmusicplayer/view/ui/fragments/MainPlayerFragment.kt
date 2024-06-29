@@ -374,6 +374,9 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                     }
                 }
             }
+            btnFavorite.setOnClickListener {
+
+            }
         }
 
     }

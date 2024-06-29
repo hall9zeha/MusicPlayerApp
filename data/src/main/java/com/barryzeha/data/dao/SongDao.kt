@@ -30,6 +30,10 @@ interface  SongDao {
     @Transaction
     @Insert
     suspend fun saveNewSong(song: SongEntity):Long
+
+    @Transaction
+    @Update
+    suspend fun updateSong(song:SongEntity):Int
     @Transaction
     @Query("delete  from SongEntity where id = :idSong ")
     suspend fun deleteSong(idSong:Long):Int

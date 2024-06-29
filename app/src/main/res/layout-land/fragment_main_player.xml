@@ -18,7 +18,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginStart="48dp"
         app:layout_constraintWidth_percent="0.30"
-        app:layout_constraintHeight_percent="0.64">
+        app:layout_constraintDimensionRatio="H,1:1">
 
         <com.google.android.material.imageview.ShapeableImageView
 
@@ -64,7 +64,7 @@
         app:layout_constraintStart_toEndOf="@id/cardCover"
         app:layout_constraintTop_toTopOf="@id/cardCover"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="8dp"/>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongAlbum"
@@ -82,7 +82,20 @@
         app:layout_constraintStart_toStartOf="@id/tvSongArtist"
         app:layout_constraintTop_toBottomOf="@id/tvSongArtist"
         android:layout_marginTop="8dp"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ctlActions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/cardCover"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSongDescription"
 
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        >
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongTimeRest"
         android:layout_width="wrap_content"
@@ -111,9 +124,9 @@
         android:thumb="@drawable/seekbar_thumb"
         app:layout_constraintStart_toStartOf="@id/tvSongDescription"
         app:layout_constraintEnd_toEndOf="@id/tvSongDescription"
-        app:layout_constraintTop_toBottomOf="@id/tvSongDescription"
+        app:layout_constraintTop_toBottomOf="@id/ctlActions"
         android:layout_marginStart="-4dp"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="8dp"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnMainPlay"
@@ -172,7 +185,7 @@
         app:layout_constraintEnd_toStartOf="@id/btnMainPlay"
         app:layout_constraintTop_toTopOf="@id/btnMainPlay"
         app:layout_constraintBottom_toBottomOf="@id/btnMainPlay"
-        android:layout_marginEnd="48dp"/>
+        android:layout_marginEnd="16dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnMainNext"
         android:layout_width="wrap_content"
@@ -192,7 +205,7 @@
         app:layout_constraintStart_toEndOf="@id/btnMainPlay"
         app:layout_constraintTop_toTopOf="@id/btnMainPlay"
         app:layout_constraintBottom_toBottomOf="@id/btnMainPlay"
-        android:layout_marginStart="48dp"/>
+        android:layout_marginStart="16dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRepeat"
         android:layout_width="wrap_content"
@@ -213,4 +226,26 @@
         app:layout_constraintTop_toTopOf="@id/btnMainNext"
         app:layout_constraintBottom_toBottomOf="@id/btnMainNext"
         android:layout_marginStart="16dp"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnFavorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_favorite"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:iconTint="@color/controls_colors"
+        android:clickable="true"
+        android:focusable="true"
+        android:insetBottom="0dp"
+        android:insetLeft="0dp"
+        android:insetRight="0dp"
+        android:insetTop="0dp"
+        style="@style/Widget.Material3.Button.IconButton"
+
+        app:layout_constraintStart_toEndOf="@id/btnRepeat"
+        app:layout_constraintTop_toTopOf="@id/btnRepeat"
+        app:layout_constraintBottom_toBottomOf="@id/btnRepeat"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
