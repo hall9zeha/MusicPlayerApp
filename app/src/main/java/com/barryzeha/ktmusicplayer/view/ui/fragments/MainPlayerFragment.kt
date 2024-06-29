@@ -53,6 +53,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var songLists:MutableList<SongEntity> = arrayListOf()
     private var currentSelectedPosition=0
     private lateinit var mPrefs:MyPreferences
+    private var isFavorite:Boolean = false
 
 
 
@@ -167,6 +168,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
         this?.let {
+
             when (mPrefs.songMode) {
                 SongMode.RepeatOne.ordinal -> {
 
@@ -211,11 +213,13 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                         if (!songLists.contains(it)) songLists.add(it)
                     }
                 }
+
             }
         }
 
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
            it?.let{currentTrack->
+               mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                 updateUIOnceTime(currentTrack)
            }
         }
@@ -240,6 +244,10 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             song?.let{
                 if(!songLists.contains(song)) songLists.add(song)
             }
+        }
+        mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
+            this.isFavorite = isFavorite
+            bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
         }
 
     }
@@ -375,7 +383,14 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                 }
             }
             btnFavorite.setOnClickListener {
-
+                val song=songLists[mPrefs.currentPosition.toInt()]
+                if(!isFavorite){
+                    mainViewModel.updateSong(song.copy(favorite = true))
+                    //isFavorite=true
+                }else{
+                    mainViewModel.updateSong(song.copy(favorite=false))
+                    //isFavorite=false
+                }
             }
         }
 

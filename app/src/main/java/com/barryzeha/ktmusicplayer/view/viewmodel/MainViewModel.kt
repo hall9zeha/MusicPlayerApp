@@ -46,6 +46,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _registerRowInserted:MutableLiveData<Long> = MutableLiveData()
     val registerRowInserted:LiveData<Long> = _registerRowInserted
 
+    private var _isFavorite:MutableLiveData<Boolean> = MutableLiveData()
+    val isFavorite:LiveData<Boolean> = _isFavorite
+
     private var _updatedRow:MutableLiveData<Int> = MutableLiveData()
     val updateRow:LiveData<Int> = _updatedRow
 
@@ -104,7 +107,16 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     }
     fun updateSong(songEntity: SongEntity){
         launch {
-            repository.updateSong(songEntity)
+            val rowUpdated=repository.updateSong(songEntity)
+            if(rowUpdated>0){
+                checkIfIsFavorite(songEntity.id)
+            }
+        }
+    }
+    fun checkIfIsFavorite(idSong:Long){
+        launch{
+            val entity = repository.fetchSongById(idSong)
+            _isFavorite.value = entity.favorite
         }
     }
     fun deleteSong(songEntity: SongEntity){
