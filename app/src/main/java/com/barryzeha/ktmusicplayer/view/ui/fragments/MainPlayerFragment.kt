@@ -120,8 +120,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
                         Log.e("CASO 2", "ACTIVO" )
                     }
                     else {
-                        mainViewModel.saveStatePlaying(true)
-                        bind?.btnMainNext?.performClick()
+                        /*mainViewModel.saveStatePlaying(true)
+                        bind?.btnMainNext?.performClick()*/
                         Log.e("CASO 3", "ACTIVO" )
                     }
                 }else{
