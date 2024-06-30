@@ -87,7 +87,7 @@
             android:layout_marginStart="4dp"
             />
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRepeatFavorite"
+            android:id="@+id/btnFavorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:icon="@drawable/ic_favorite"

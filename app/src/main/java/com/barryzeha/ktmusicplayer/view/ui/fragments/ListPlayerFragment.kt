@@ -77,6 +77,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private var song:SongEntity?=null
     private var musicPlayerService: MusicPlayerService?=null
     private lateinit var mPrefs:MyPreferences
+    private var isFavorite:Boolean=false
 
     private val songController = object:SongController{
         override fun play() {
@@ -230,6 +231,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 musicPlayerService?.removeMediaItem(song)
             }
         }
+        mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
+            this.isFavorite = isFavorite
+            bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
+        }
     }
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {
@@ -254,6 +259,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                 }
 
             }
+            mainViewModel.checkIfIsFavorite(musicState.idSong)
             updateService()
         }
     }
@@ -406,6 +412,18 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                         btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                         btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
+                    }
+                }
+            }
+            btnFavorite.setOnClickListener {
+                val song=getSongOfAdapter(mPrefs.currentPosition.toInt())
+                song?.let {
+                    if (!isFavorite) {
+                        mainViewModel.updateSong(song.copy(favorite = true))
+                        //isFavorite=true
+                    } else {
+                        mainViewModel.updateSong(song.copy(favorite = false))
+                        //isFavorite=false
                     }
                 }
             }
