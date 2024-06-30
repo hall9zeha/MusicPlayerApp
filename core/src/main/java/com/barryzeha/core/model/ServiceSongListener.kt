@@ -1,5 +1,7 @@
 package com.barryzeha.core.model
 
+import android.content.ServiceConnection
+import android.os.IBinder
 import com.barryzeha.core.model.entities.MusicState
 
 
@@ -9,7 +11,7 @@ import com.barryzeha.core.model.entities.MusicState
  * Copyright (c)  All rights reserved.
  **/
 
-interface SongController {
+interface ServiceSongListener {
  fun play()
  fun pause()
  fun next()
@@ -17,4 +19,8 @@ interface SongController {
  fun stop()
  fun musicState(musicState: MusicState?)
  fun currentTrack(musicState: MusicState?)
+ fun onServiceConnected(conn: ServiceConnection, service: IBinder?)
+ fun onServiceBinder(binder: IBinder?)
+ fun onServiceDisconnected()
+
 }

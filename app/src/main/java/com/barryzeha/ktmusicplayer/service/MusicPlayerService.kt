@@ -24,7 +24,7 @@ import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.model.SongAction
-import com.barryzeha.core.model.SongController
+import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
@@ -64,8 +64,8 @@ class MusicPlayerService : Service(){
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
 
-    private var _songController: SongController? = null
-    val songController: SongController get() = _songController!!
+    private var _songController: ServiceSongListener? = null
+    val songController: ServiceSongListener get() = _songController!!
     private var isForegroundService = false
     private var currentMusicState = MusicState()
     private var songRunnable: Runnable = Runnable {}
@@ -377,8 +377,9 @@ class MusicPlayerService : Service(){
     fun setActivity(activity:AppCompatActivity){
         this._activity=activity
     }
-    fun setSongController(controller:SongController){
+    fun setSongController(controller:ServiceSongListener){
         _songController=controller
+
     }
     fun setNewMediaItem(song:SongEntity){
         exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation.toString()))

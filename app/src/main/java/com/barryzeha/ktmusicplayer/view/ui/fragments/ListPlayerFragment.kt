@@ -33,7 +33,7 @@ import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.model.SongController
+import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
@@ -44,9 +44,6 @@ import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.Date
 import com.barryzeha.core.R as coreRes
 
@@ -79,7 +76,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private lateinit var mPrefs:MyPreferences
     private var isFavorite:Boolean=false
 
-    private val songController = object:SongController{
+    private val songController = object:ServiceSongListener{
         override fun play() {
             bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_pause)
             musicPlayerService?.playingExoPlayer()
@@ -128,6 +125,18 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
                     mainViewModel.setCurrentTrack(musicState)
                 }
             }
+        }
+
+        override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
+
+        }
+
+        override fun onServiceBinder(binder: IBinder?) {
+
+        }
+
+        override fun onServiceDisconnected() {
+
         }
 
     }

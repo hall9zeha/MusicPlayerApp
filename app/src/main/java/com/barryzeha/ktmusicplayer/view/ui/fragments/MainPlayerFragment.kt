@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,12 +25,13 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.model.SongController
+import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
@@ -43,7 +45,7 @@ private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
-class MainPlayerFragment : Fragment() , ServiceConnection{
+class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , ServiceConnection{
 
     private var param1: String? = null
     private var param2: String? = null
@@ -54,13 +56,13 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     private var currentSelectedPosition=0
     private lateinit var mPrefs:MyPreferences
     private var isFavorite:Boolean = false
-
+    private var service:ServiceConnection?=null
 
 
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var musicPlayerService: MusicPlayerService?=null
-    private var songController:SongController = object:SongController{
+    private var songController:ServiceSongListener = object:ServiceSongListener{
         override fun play() {
             bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_pause)
             musicPlayerService?.playingExoPlayer()
@@ -118,8 +120,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                         Log.e("CASO 2", "ACTIVO" )
                     }
                     else {
-                       /* mainViewModel.saveStatePlaying(true)
-                        bind?.btnMainNext?.performClick()*/
+                        mainViewModel.saveStatePlaying(true)
+                        bind?.btnMainNext?.performClick()
                         Log.e("CASO 3", "ACTIVO" )
                     }
                 }else{
@@ -128,6 +130,18 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
                      Log.e("CASO 4", "ACTIVO" )
                 }
             }
+
+        }
+
+        override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
+            startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
+        }
+
+        override fun onServiceBinder(binder: IBinder?) {
+
+        }
+
+        override fun onServiceDisconnected() {
 
         }
     }
@@ -139,7 +153,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
         }
     }
 
-    override fun onCreateView(
+   /* override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
@@ -150,11 +164,11 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             }
         }
        return super.onCreateView(inflater, container, savedInstanceState)
-    }
+    }*/
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+            bind=FragmentMainPlayerBinding.bind(view)
             mPrefs = MyApp.mPrefs
             currentSelectedPosition = mPrefs.currentPosition.toInt()
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
@@ -165,6 +179,9 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
             bind?.tvSongAlbum?.setSelected(true)
         
     }
+
+
+
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
         this?.let {
@@ -403,6 +420,7 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     }
     private fun updateService(){
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
+
     }
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
@@ -413,6 +431,8 @@ class MainPlayerFragment : Fragment() , ServiceConnection{
     override fun onServiceDisconnected(name: ComponentName?) {
         musicPlayerService=null
     }
+
+
     override fun onStart() {
         super.onStart()
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
