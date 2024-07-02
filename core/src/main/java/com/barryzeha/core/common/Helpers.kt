@@ -39,7 +39,7 @@ import kotlin.math.min
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 private const val NOTIFICATION_ID = 202405
-private  val mmr = MediaMetadataRetriever()
+val mmr = MediaMetadataRetriever()
 fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Boolean, List<Pair<String,Boolean>>) ->Unit){
     val permissionsGranted:MutableList<Pair<String,Boolean>> = mutableListOf()
     var grantedCount=0
@@ -184,14 +184,14 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
             artist = metadata.artist!!,
             album = metadata.album!!,
             duration = metadata.songLength,
-            albumArt = bitmap
-                ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+            albumArt = bitmap!!
         )
     }
     return MusicState(
         artist = "Unknown",
         album ="Album Unknown",
         albumArt = BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+
     )
 }
 fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):Bitmap?{
@@ -202,7 +202,7 @@ fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):
         // return original size of covert art
         else originalBitmap
     }?:run{
-        BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+       BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
     }
 }
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {

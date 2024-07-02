@@ -7,13 +7,9 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MyPreferences
@@ -45,7 +41,7 @@ private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
-class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , ServiceConnection{
+class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     private var param1: String? = null
     private var param2: String? = null
@@ -56,95 +52,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
     private var currentSelectedPosition=0
     private lateinit var mPrefs:MyPreferences
     private var isFavorite:Boolean = false
-    private var service:ServiceConnection?=null
+    private var serviceConnection:ServiceConnection?=null
 
 
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var musicPlayerService: MusicPlayerService?=null
-    private var songController:ServiceSongListener = object:ServiceSongListener{
-        override fun play() {
-            bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_pause)
-            musicPlayerService?.playingExoPlayer()
-            mainViewModel.saveStatePlaying(true)
-        }
 
-        override fun pause() {
-            bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
-            musicPlayerService?.pauseExoPlayer()
-            mainViewModel.saveStatePlaying(false)
-        }
-
-        override fun next() {
-            bind?.btnMainNext?.performClick()
-        }
-
-        override fun previous() {
-            bind?.btnMainPrevious?.performClick()
-        }
-
-        override fun stop() {
-            activity?.finish()
-
-        }
-
-        override fun musicState(musicState: MusicState?) {
-            musicState?.let{
-                // Había un error de parpadeo especialmente en los textViews con marquee_forever dezplazables.
-                // Se debía que al recibir las actualizaciones cada 500ms las volvía a enviar a mi viewModel:
-                // mainViewModel.setMusicState(musicState) y recién dentro del observador actualizaba las vistas
-                // esto probablemente generaba más retardo en la actualización de las vistas y un trabajo innecesario
-                // pero sin el viewModel el estado no sobrevive  a un cambio de orientación, a veces lo hace y a veces no.
-                // Al agregar una implementación de ScopedViewModel como base para las clases ViewModels ayudó a solucionar el problema
-                // por ahora
-            mainViewModel.setMusicState(musicState)
-            //setChangeInfoViews(musicState)
-            }
-        }
-
-        override fun currentTrack(musicState: MusicState?) {
-            // TODO corregir el caso 2 y el caso 3 ya no será necesario si usamos la lista agregada al inicio en mediaItems
-            // pero aún falta obtener los metadatos de la reproducción en curso si es automática
-            musicState?.let{
-                 if(!musicState.isPlaying){
-                    if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
-                        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
-                        mainViewModel.saveStatePlaying(false)
-                        //mainViewModel.setCurrentPosition(0)
-                        Log.e("CASO 1", "ACTIVO" )
-                    }
-                    else if(musicState.duration>0 && musicState.latestPlayed){
-                        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
-                        mainViewModel.saveStatePlaying(false)
-                        mainViewModel.setCurrentTrack(musicState)
-                        Log.e("CASO 2", "ACTIVO" )
-                    }
-                    else {
-                        /*mainViewModel.saveStatePlaying(true)
-                        bind?.btnMainNext?.performClick()*/
-                        Log.e("CASO 3", "ACTIVO" )
-                    }
-                }else{
-                    mainViewModel.saveStatePlaying(true)
-                    mainViewModel.setCurrentTrack(musicState)
-                     Log.e("CASO 4", "ACTIVO" )
-                }
-            }
-
-        }
-
-        override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
-            startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
-        }
-
-        override fun onServiceBinder(binder: IBinder?) {
-
-        }
-
-        override fun onServiceDisconnected() {
-
-        }
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -153,18 +67,19 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
         }
     }
 
-   /* override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        activity?.let{
-            bind = FragmentMainPlayerBinding.inflate(inflater,container,false)
-            bind?.let{bind->
-                return bind.root
-            }
-        }
-       return super.onCreateView(inflater, container, savedInstanceState)
-    }*/
+
+    /* override fun onCreateView(
+         inflater: LayoutInflater, container: ViewGroup?,
+         savedInstanceState: Bundle?
+     ): View? {
+         activity?.let{
+             bind = FragmentMainPlayerBinding.inflate(inflater,container,false)
+             bind?.let{bind->
+                 return bind.root
+             }
+         }
+        return super.onCreateView(inflater, container, savedInstanceState)
+     }*/
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -177,10 +92,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
             bind?.tvSongDescription?.setSelected(true)
             bind?.tvSongArtist?.setSelected(true)
             bind?.tvSongAlbum?.setSelected(true)
-        
+
     }
-
-
 
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
@@ -268,6 +181,95 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
         }
 
     }
+
+    override fun play() {
+        super.play()
+        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_pause)
+        musicPlayerService?.playingExoPlayer()
+        mainViewModel.saveStatePlaying(true)
+    }
+
+    override fun pause() {
+        super.pause()
+        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
+        musicPlayerService?.pauseExoPlayer()
+        mainViewModel.saveStatePlaying(false)
+    }
+
+    override fun next() {
+        super.next()
+        bind?.btnMainNext?.performClick()
+    }
+
+    override fun previous() {
+        super.previous()
+        bind?.btnMainPrevious?.performClick()
+    }
+
+    override fun stop() {
+        super.stop()
+        activity?.finish()
+    }
+
+    override fun musicState(musicState: MusicState?) {
+        super.musicState(musicState)
+        musicState?.let{
+            // Había un error de parpadeo especialmente en los textViews con marquee_forever dezplazables.
+            // Se debía que al recibir las actualizaciones cada 500ms las volvía a enviar a mi viewModel:
+            // mainViewModel.setMusicState(musicState) y recién dentro del observador actualizaba las vistas
+            // esto probablemente generaba más retardo en la actualización de las vistas y un trabajo innecesario
+            // pero sin el viewModel el estado no sobrevive  a un cambio de orientación, a veces lo hace y a veces no.
+            // Al agregar una implementación de ScopedViewModel como base para las clases ViewModels ayudó a solucionar el problema
+            // por ahora
+            mainViewModel.setMusicState(musicState)
+            //setChangeInfoViews(musicState)
+        }
+    }
+
+    override fun currentTrack(musicState: MusicState?) {
+        super.currentTrack(musicState)
+        // TODO corregir el caso 2 y el caso 3 ya no será necesario si usamos la lista agregada al inicio en mediaItems
+        // pero aún falta obtener los metadatos de la reproducción en curso si es automática
+        musicState?.let{
+            if(!musicState.isPlaying){
+                if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
+                    bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
+                    mainViewModel.saveStatePlaying(false)
+                    //mainViewModel.setCurrentPosition(0)
+                    Log.e("CASO 1", "ACTIVO" )
+                }
+                else if(musicState.duration>0 && musicState.latestPlayed){
+                    bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
+                    mainViewModel.saveStatePlaying(false)
+                    mainViewModel.setCurrentTrack(musicState)
+                    Log.e("CASO 2", "ACTIVO" )
+                }
+                else {
+                    //mainViewModel.saveStatePlaying(true)
+                    //bind?.btnMainNext?.performClick()
+                    Log.e("CASO 3", "ACTIVO" )
+                }
+            }else{
+                mainViewModel.saveStatePlaying(true)
+                mainViewModel.setCurrentTrack(musicState)
+                Log.e("CASO 4", "ACTIVO" )
+            }
+
+        }
+
+    }
+    override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
+        super.onServiceConnected(conn, service)
+        val bind = service as MusicPlayerService.MusicPlayerServiceBinder
+        musicPlayerService = bind.getService()
+        this.serviceConnection=conn
+        startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
+    }
+    override fun onServiceDisconnected() {
+        super.onServiceDisconnected()
+        musicPlayerService=null
+    }
+
     private fun updateUIOnceTime(musicState: MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
@@ -419,28 +421,15 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
         return song
     }
     private fun updateService(){
-        startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
+        serviceConnection?.let{
+        startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
 
     }
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
-        musicPlayerService = binder.getService()
-        musicPlayerService!!.setSongController(songController)
 
-    }
-    override fun onServiceDisconnected(name: ComponentName?) {
-        musicPlayerService=null
-    }
-
-
-    override fun onStart() {
-        super.onStart()
-        startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
-    }
     override fun onResume() {
         super.onResume()
         checkPreferences()
-        musicPlayerService?.setSongController(songController)
+        //musicPlayerService?.setSongController(songController)
         if(mPrefs.nextOrPrevFromNotify){
             try {
                 val song = songLists[mPrefs.currentPosition.toInt()]
@@ -459,6 +448,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
         mPrefs.nextOrPrevFromNotify=false
         bind?.mainSeekBar?.max = currentMusicState.duration.toInt()
     }
+
     override fun onPause() {
         super.onPause()
         musicPlayerService?.unregisterController()
@@ -466,7 +456,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) , Service
     }
     override fun onStop() {
         super.onStop()
-        context?.unbindService(this)
+        serviceConnection?.let{
+        //context?.unbindService(it)
+        }
 
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(

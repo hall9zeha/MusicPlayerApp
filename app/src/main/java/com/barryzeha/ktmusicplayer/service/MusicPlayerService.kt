@@ -14,6 +14,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -91,6 +92,7 @@ class MusicPlayerService : Service(){
         initMusicStateLooper()
 
     }
+
     private fun mediaSessionCallback():MediaSession.Callback{
         return object:MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -116,6 +118,7 @@ class MusicPlayerService : Service(){
 
         }
     }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
@@ -376,6 +379,7 @@ class MusicPlayerService : Service(){
     }
     fun setActivity(activity:AppCompatActivity){
         this._activity=activity
+
     }
     fun setSongController(controller:ServiceSongListener){
         _songController=controller
@@ -457,6 +461,7 @@ class MusicPlayerService : Service(){
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false
         _songController?.currentTrack(currentMusicState)
+
 
     }
     private fun fetchSong(song:SongEntity):MusicState?{

@@ -130,11 +130,6 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
 
         }
-
-        override fun onServiceBinder(binder: IBinder?) {
-
-        }
-
         override fun onServiceDisconnected() {
 
         }

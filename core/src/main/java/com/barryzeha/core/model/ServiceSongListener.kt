@@ -20,7 +20,6 @@ interface ServiceSongListener {
  fun musicState(musicState: MusicState?)
  fun currentTrack(musicState: MusicState?)
  fun onServiceConnected(conn: ServiceConnection, service: IBinder?)
- fun onServiceBinder(binder: IBinder?)
  fun onServiceDisconnected()
 
 }

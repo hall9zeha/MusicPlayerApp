@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,20 +13,19 @@ import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
-import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.security.Provider.Service
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), ServiceConnection, ServiceSongListener {
+class MainActivity : AppCompatActivity(), ServiceConnection {
     private lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
-    private var musicPlayerService: MusicPlayerService?=null
+    private var musicService: MusicPlayerService?=null
 
+    private var serviceSongListener:ServiceSongListener?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bind= ActivityMainBinding.inflate(layoutInflater)
@@ -41,6 +39,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, ServiceSongListener
         setUpViewPager()
         setUpObservers()
     }
+
     private fun setUpObservers(){
         mainViewModel.fetchSongState()
         mainViewModel.musicState.observe(this){
@@ -57,58 +56,24 @@ class MainActivity : AppCompatActivity(), ServiceConnection, ServiceSongListener
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-       this@MainActivity.onServiceConnected(this,service)
-
-        /*val binder = service as MusicPlayerService.MusicPlayerServiceBinder
-        musicPlayerService = binder.getService()
-        musicPlayerService?.setActivity(this)*/
+        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
+        musicService = binder.getService()
+        musicService?.setActivity(this)
+        serviceSongListener?.onServiceConnected(this,service)
 
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
-        this@MainActivity.onServiceDisconnected()
-        //musicPlayerService = null
+         musicService = null
 
     }
+
     fun registerSongListener(songListener: ServiceSongListener){
-        musicPlayerService?.setSongController(songListener)
+        this.serviceSongListener=songListener
+        musicService?.setSongController(serviceSongListener!!)
     }
     fun unregisterSongListener(){
-        musicPlayerService?.unregisterController()
-    }
-    override fun play() {
-    }
-
-    override fun pause() {
-    }
-
-    override fun next() {
-    }
-
-    override fun previous() {
-    }
-
-    override fun stop() {
-    }
-
-    override fun musicState(musicState: MusicState?) {
-    }
-
-    override fun currentTrack(musicState: MusicState?) {
-    }
-
-    override fun onServiceConnected(conn: ServiceConnection,service: IBinder?) {
-        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
-        musicPlayerService = binder.getService()
-        musicPlayerService?.setActivity(this)
-    }
-
-    override fun onServiceBinder(binder: IBinder?) {
-        Toast.makeText(this, "Hola", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onServiceDisconnected() {
-        musicPlayerService = null
+        musicService?.unregisterController()
     }
 
     override fun onStart() {
