@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
+import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
@@ -20,10 +22,11 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), ServiceConnection {
+class MainActivity : AppCompatActivity(), ServiceConnection{
     private lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
+
 
     private var serviceSongListener:ServiceSongListener?=null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,17 +63,17 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         musicService = binder.getService()
         musicService?.setActivity(this)
         serviceSongListener?.onServiceConnected(this,service)
-
+        registerSongListener(serviceSongListener!!)
+        mainViewModel.setServiceInstance(this,musicService!!)
     }
-
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null
-
+        serviceSongListener?.onServiceDisconnected()
     }
-
     fun registerSongListener(songListener: ServiceSongListener){
         this.serviceSongListener=songListener
         musicService?.setSongController(serviceSongListener!!)
+
     }
     fun unregisterSongListener(){
         musicService?.unregisterController()
@@ -85,4 +88,5 @@ class MainActivity : AppCompatActivity(), ServiceConnection {
         super.onDestroy()
         unbindService(this)
     }
+
 }

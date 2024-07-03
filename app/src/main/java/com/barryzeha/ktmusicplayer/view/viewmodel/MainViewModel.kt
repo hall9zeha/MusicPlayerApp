@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.viewmodel
 
+import android.content.ServiceConnection
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -16,6 +17,7 @@ import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,6 +74,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
 
     private var _isPlaying:MutableLiveData<Boolean> = MutableLiveData()
     val isPlaying:LiveData<Boolean> = _isPlaying
+
+    private var _serviceInstance:MutableLiveData<Pair<ServiceConnection,MusicPlayerService>> = MutableLiveData()
+    val serviceInstance:LiveData<Pair<ServiceConnection,MusicPlayerService>> = _serviceInstance
 
     init{
         initScope()
@@ -161,7 +166,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             _isPlaying.value = isPlaying
         }
     }
-
+    fun setServiceInstance(serviceConnection:ServiceConnection,serviceInstance:MusicPlayerService){
+        launch {
+            _serviceInstance.value=Pair(serviceConnection,serviceInstance)
+        }
+    }
     override fun onCleared() {
         destroyScope()
         super.onCleared()

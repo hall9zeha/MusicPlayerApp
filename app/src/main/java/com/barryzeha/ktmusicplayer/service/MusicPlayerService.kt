@@ -79,6 +79,7 @@ class MusicPlayerService : Service(){
     private var playerListener:Player.Listener?=null
     private var isFirstTime=true
     private var songs:MutableList<SongEntity> = arrayListOf()
+    private var songState:List<SongStateWithDetail> = arrayListOf()
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -182,7 +183,7 @@ class MusicPlayerService : Service(){
             .build()
         CoroutineScope(Dispatchers.Main).launch {
             val songs=repository.fetchAllSongs()
-            val songState=repository.fetchSongState()
+            songState=repository.fetchSongState()
             // TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {
                 songs.forEach { s ->
@@ -307,6 +308,7 @@ class MusicPlayerService : Service(){
         exoPlayer.play()
 
     }
+
     private fun setUpExoplayerListener():Player.Listener?{
 
          playerListener = object : Player.Listener {
@@ -314,7 +316,7 @@ class MusicPlayerService : Service(){
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
                      val songPath = songEntity.pathLocation.toString()
-                     val songMetadata= getSongMetadata(applicationContext!!,songPath, isForNotify = true)
+
                      // Set info currentSongEntity
                          fetchSong(songEntity)?.let{currentMusicState=it}
                          // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar

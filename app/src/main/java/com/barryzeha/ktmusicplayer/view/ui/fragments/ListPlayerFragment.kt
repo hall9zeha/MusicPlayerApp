@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -39,6 +40,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
@@ -52,7 +54,7 @@ private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
-class ListPlayerFragment : Fragment(), ServiceConnection {
+class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     private var param1: String? = null
     private var param2: String? = null
@@ -67,7 +69,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private var isPlaying = false
     private var isUserSeeking=false
     private var userSelectPosition=0
-
+    private var serviceConnection:ServiceConnection?=null
     private  var currentSelectedPosition:Int =0
 
     private var currentMusicState = MusicState()
@@ -76,65 +78,7 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     private lateinit var mPrefs:MyPreferences
     private var isFavorite:Boolean=false
 
-    private val songController = object:ServiceSongListener{
-        override fun play() {
-            bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_pause)
-            musicPlayerService?.playingExoPlayer()
-            mainViewModel.saveStatePlaying(true)
-    }
-        override fun pause() {
-            bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
-            musicPlayerService?.pauseExoPlayer()
-            mainViewModel.saveStatePlaying(false)
-        }
-        override fun next() {
-            bind?.bottomPlayerControls?.btnNext?.performClick()
-        }
-        override fun previous() {
-            bind?.bottomPlayerControls?.btnPrevious?.performClick()
-        }
-        override fun stop() {
-            activity?.finish()
 
-        }
-        override fun musicState(musicState: MusicState?) {
-            musicState?.let {
-               mainViewModel.setMusicState(musicState)
-
-            }
-        }
-        override fun currentTrack(musicState: MusicState?) {
-           musicState?.let{
-                if(!musicState.isPlaying){
-                    if((adapter.itemCount -1)  == currentSelectedPosition && !musicState.latestPlayed) {
-                        bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
-                        mainViewModel.saveStatePlaying(false)
-                        //mainViewModel.setCurrentPosition(0)
-                    }
-                    else if(musicState.currentDuration>0 && musicState.latestPlayed){
-                        bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
-                        mainViewModel.saveStatePlaying(false)
-                        mainViewModel.setCurrentTrack(musicState)
-                    }
-                    else {
-                       /* mainViewModel.saveStatePlaying(true)
-                        bind?.bottomPlayerControls?.btnNext?.performClick()*/
-                    }
-                }else{
-                    mainViewModel.saveStatePlaying(true)
-                    mainViewModel.setCurrentTrack(musicState)
-                }
-            }
-        }
-
-        override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
-
-        }
-        override fun onServiceDisconnected() {
-
-        }
-
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -142,20 +86,11 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
             param2 = it.getString(ARG_PARAM2)
         }
     }
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        activity?.let{
-            bind = FragmentListPlayerBinding.inflate(inflater,container,false)
-            bind?.let { bind-> return bind.root }
-        }
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPrefs = MyApp.mPrefs
-
+        bind = FragmentListPlayerBinding.bind(view)
         activityResultFile()
         activityResultForPermission()
         initCheckPermission()
@@ -195,6 +130,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
     }
     private fun setUpObservers(){
         //mainViewModel.fetchAllSong()
+        mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
+            serviceConnection=instance.first
+            musicPlayerService=instance.second
+        }
         mainViewModel.musicState.observe(viewLifecycleOwner){musicState->
            updateUI(musicState)
         }
@@ -513,25 +452,76 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
         popupMenu.show()
     }
    private fun updateService(){
-       startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
-    }
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
-        musicPlayerService = binder.getService()
-        musicPlayerService!!.setSongController(songController)
-    }
-    override fun onServiceDisconnected(name: ComponentName?) {
-        musicPlayerService = null
-    }
-    override fun onStart() {
-        super.onStart()
-        startOrUpdateService(requireContext(),MusicPlayerService::class.java,this,currentMusicState)
+        serviceConnection?.let{
+       startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
 
     }
+    override fun play() {
+        super.play()
+        bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_pause)
+        musicPlayerService?.playingExoPlayer()
+        mainViewModel.saveStatePlaying(true)
+    }
+    override fun pause() {
+        super.pause()
+        bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
+        musicPlayerService?.pauseExoPlayer()
+        mainViewModel.saveStatePlaying(false)
+    }
+
+    override fun next() {
+        super.next()
+        bind?.bottomPlayerControls?.btnNext?.performClick()
+    }
+    override fun previous() {
+        super.previous()
+        bind?.bottomPlayerControls?.btnPrevious?.performClick()
+    }
+    override fun stop() {
+        super.stop()
+        activity?.finish()
+
+    }
+    override fun musicState(musicState: MusicState?) {
+        super.musicState(musicState)
+        musicState?.let {
+            mainViewModel.setMusicState(musicState)
+        }
+    }
+    override fun currentTrack(musicState: MusicState?) {
+        super.currentTrack(musicState)
+        musicState?.let{
+            if(!musicState.isPlaying){
+                if((adapter.itemCount -1)  == currentSelectedPosition && !musicState.latestPlayed) {
+                    bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
+                    mainViewModel.saveStatePlaying(false)
+
+                }
+                else if(musicState.currentDuration>0 && musicState.latestPlayed){
+                    bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
+                    mainViewModel.saveStatePlaying(false)
+                    mainViewModel.setCurrentTrack(musicState)
+                }
+                else {
+
+                }
+            }else{
+                mainViewModel.saveStatePlaying(true)
+                mainViewModel.setCurrentTrack(musicState)
+            }
+        }
+    }
+    // El método sobreescrito onConnectedService no se dispara aquí debido a que se ejecuta después del primer fragmento
+    // La conexión al servicio la obtenemos a través del view model enviado desde main activity
+    override fun onServiceDisconnected() {
+        super.onServiceDisconnected()
+        musicPlayerService = null
+    }
+
     override fun onResume() {
         super.onResume()
         checkPreferences()
-        musicPlayerService?.setSongController(songController)
+        //musicPlayerService?.setSongController(songController)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
 
@@ -557,16 +547,10 @@ class ListPlayerFragment : Fragment(), ServiceConnection {
 
 
     }
-    override fun onPause() {
-        super.onPause()
-        musicPlayerService?.unregisterController()
-
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         try {
-            activity?.unbindService(this)
+            //activity?.unbindService(this)
         } catch (e: IllegalArgumentException) {
             Log.e("STOP_SERVICE", "Service not registered")
         }

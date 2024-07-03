@@ -176,9 +176,7 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
         mmr.setDataSource(path)
         //val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         //val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
-        val bitmap = mmr.embeddedPicture?.let {
-           getBitmap(context,it,isForNotify)
-        }
+        val bitmap = getBitmap(context,mmr.embeddedPicture,isForNotify)
         return MusicState(
             title = metadata.title!!,
             artist = metadata.artist!!,

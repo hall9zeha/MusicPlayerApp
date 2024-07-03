@@ -11,6 +11,7 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 
 
@@ -23,10 +24,12 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongListener {
     var baseActivity: MainActivity? = null
         private set
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
             baseActivity = context as MainActivity?
+
         } catch (e: ClassCastException) {
             Log.e("EXCEPTION", e.message.toString())
         }
@@ -39,12 +42,18 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        baseActivity?.registerSongListener(this)
+
     }
     @CallSuper
     override fun onResume() {
         super.onResume()
         baseActivity?.registerSongListener(this)
+
+    }
+    @CallSuper
+    override fun onPause() {
+        super.onPause()
+        baseActivity?.unregisterSongListener()
     }
     @CallSuper
     override fun onDestroyView() {
@@ -58,7 +67,9 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     override fun stop() {}
     override fun musicState(musicState: MusicState?) {}
     override fun currentTrack(musicState: MusicState?) {}
-    override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {}
+    override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
+
+    }
     override fun onServiceDisconnected() {}
 
 }

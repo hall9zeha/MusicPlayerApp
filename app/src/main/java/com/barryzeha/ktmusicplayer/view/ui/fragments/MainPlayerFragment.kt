@@ -67,20 +67,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
 
-
-    /* override fun onCreateView(
-         inflater: LayoutInflater, container: ViewGroup?,
-         savedInstanceState: Bundle?
-     ): View? {
-         activity?.let{
-             bind = FragmentMainPlayerBinding.inflate(inflater,container,false)
-             bind?.let{bind->
-                 return bind.root
-             }
-         }
-        return super.onCreateView(inflater, container, savedInstanceState)
-     }*/
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
             bind=FragmentMainPlayerBinding.bind(view)
@@ -223,7 +209,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // por ahora
             mainViewModel.setMusicState(musicState)
             //setChangeInfoViews(musicState)
-        }
+          }
     }
 
     override fun currentTrack(musicState: MusicState?) {
@@ -451,7 +437,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     override fun onPause() {
         super.onPause()
-        musicPlayerService?.unregisterController()
+        //musicPlayerService?.unregisterController()
 
     }
     override fun onStop() {
