@@ -176,28 +176,25 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
         mmr.setDataSource(path)
         //val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         //val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
-        val bitmap = getBitmap(context,mmr.embeddedPicture,isForNotify)
+        val bitmap = getBitmap(context,mmr.embeddedPicture,isForNotify)!!
         return MusicState(
             title = metadata.title!!,
             artist = metadata.artist!!,
             album = metadata.album!!,
             duration = metadata.songLength,
-            albumArt = bitmap!!
+            albumArt = bitmap
         )
     }
     return MusicState(
         artist = "Unknown",
         album ="Album Unknown",
         albumArt = BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
-
-    )
+        )
 }
 fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):Bitmap?{
     return byteArray?.let {
         val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
         if (isForNotify) scaleBitmap(originalBitmap, 96, 96)
-        //else scaleBitmap(originalBitmap, 500, 500) // optional
-        // return original size of covert art
         else originalBitmap
     }?:run{
        BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))

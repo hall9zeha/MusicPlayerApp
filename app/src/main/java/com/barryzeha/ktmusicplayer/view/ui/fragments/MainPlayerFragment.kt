@@ -380,10 +380,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     }
                     else->{
                         btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
-                        mPrefs.songMode= SHUFFLE
                         btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                         btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
+                        mPrefs.songMode= SHUFFLE
                     }
                 }
             }
@@ -415,7 +415,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onResume() {
         super.onResume()
         checkPreferences()
-        //musicPlayerService?.setSongController(songController)
         if(mPrefs.nextOrPrevFromNotify){
             try {
                 val song = songLists[mPrefs.currentPosition.toInt()]
@@ -435,16 +434,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         bind?.mainSeekBar?.max = currentMusicState.duration.toInt()
     }
 
-    override fun onPause() {
-        super.onPause()
-        //musicPlayerService?.unregisterController()
-
-    }
     override fun onStop() {
         super.onStop()
         serviceConnection?.let{
-        //context?.unbindService(it)
-        }
+       }
 
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(

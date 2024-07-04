@@ -521,7 +521,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun onResume() {
         super.onResume()
         checkPreferences()
-        //musicPlayerService?.setSongController(songController)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
 
@@ -546,14 +545,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mPrefs.controlFromNotify=false
 
 
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        try {
-            //activity?.unbindService(this)
-        } catch (e: IllegalArgumentException) {
-            Log.e("STOP_SERVICE", "Service not registered")
-        }
     }
     override fun onStop() {
         if(currentMusicState.idSong>0) {

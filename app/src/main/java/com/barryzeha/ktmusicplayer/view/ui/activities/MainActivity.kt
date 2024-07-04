@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
 import android.content.ComponentName
+import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
@@ -78,7 +79,10 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
     fun unregisterSongListener(){
         musicService?.unregisterController()
     }
-
+    private fun closeService(){
+        val intent= Intent(this, MusicPlayerService::class.java)
+        stopService(intent)
+    }
     override fun onStart() {
         super.onStart()
         startOrUpdateService(this,MusicPlayerService::class.java,this)
@@ -87,6 +91,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
     override fun onDestroy() {
         super.onDestroy()
         unbindService(this)
+        closeService()
     }
 
 }
