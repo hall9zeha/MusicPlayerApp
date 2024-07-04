@@ -23,7 +23,7 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class MyApp:Application() ,ServiceConnection{
-    private var musicPlayerService: MusicPlayerService?=null
+
     companion object{
         @SuppressLint("StaticFieldLeak")
         private var _context: Context?=null
@@ -39,16 +39,11 @@ class MyApp:Application() ,ServiceConnection{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(this)
         }
+        // Start service
         startOrUpdateService(this, MusicPlayerService::class.java,this)
     }
 
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
-        musicPlayerService = binder.getService()
-
-    }
-    override fun onServiceDisconnected(name: ComponentName?) {
-        musicPlayerService = null
-    }
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {}
+    override fun onServiceDisconnected(name: ComponentName?) {}
 
 }

@@ -499,6 +499,7 @@ class MusicPlayerService : Service(){
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         cancelPersistentNotify(applicationContext)
+        stopSelf()
         exitProcess(0)
     }
     inner class MusicPlayerServiceBinder : Binder() {
