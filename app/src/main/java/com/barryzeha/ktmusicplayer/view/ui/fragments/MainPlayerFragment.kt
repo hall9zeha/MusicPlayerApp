@@ -297,10 +297,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                     } else {
                         if (isPlaying) {
-                            musicPlayerService?.pauseExoPlayer(); btnMainPlay.setIconResource(com.barryzeha.core.R.drawable.ic_play)
+                            musicPlayerService?.pauseExoPlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                             mainViewModel.saveStatePlaying(false)
                         } else {
-                            musicPlayerService?.playingExoPlayer(); btnMainPlay.setIconResource(com.barryzeha.core.R.drawable.ic_pause)
+                            musicPlayerService?.playingExoPlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                             mainViewModel.saveStatePlaying(true)
                         }
                     }
@@ -400,6 +400,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
 
     }
+
     private fun getSongOfList(position:Int): SongEntity{
         mPrefs.currentPosition = position.toLong()
         mainViewModel.setCurrentPosition(position)

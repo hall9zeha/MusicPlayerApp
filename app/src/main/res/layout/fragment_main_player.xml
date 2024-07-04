@@ -46,7 +46,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginTop="16dp"/>
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/lnTrackDescription"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -74,9 +74,6 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="8dp"/>
 
 
@@ -95,21 +92,10 @@
             android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
             android:singleLine="true"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSongArtist"
             android:layout_marginTop="4dp"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/ctlActions"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lnTrackDescription"
-        android:layout_marginTop="8dp"
-        >
+    </LinearLayout>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnFavorite"
             android:layout_width="wrap_content"
@@ -117,18 +103,20 @@
             app:icon="@drawable/ic_favorite"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
             app:iconSize="24dp"
             app:iconTint="@color/controls_colors"
             android:clickable="true"
             android:focusable="true"
             style="@style/Widget.Material3.Button.IconButton"
            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-
+            app:layout_constraintTop_toBottomOf="@id/lnTrackDescription"
             android:layout_marginEnd="16dp"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongTimeRest"
         android:layout_width="wrap_content"
@@ -157,7 +145,7 @@
         android:thumb="@drawable/seekbar_thumb"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ctlActions"
+        app:layout_constraintTop_toBottomOf="@id/btnFavorite"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"/>
@@ -251,6 +239,5 @@
         app:layout_constraintStart_toEndOf="@id/btnMainNext"
         app:layout_constraintTop_toTopOf="@id/btnMainNext"
         app:layout_constraintBottom_toBottomOf="@id/btnMainNext"
-
         android:layout_marginStart="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

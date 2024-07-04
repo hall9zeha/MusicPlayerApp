@@ -82,20 +82,7 @@
         app:layout_constraintStart_toStartOf="@id/tvSongArtist"
         app:layout_constraintTop_toBottomOf="@id/tvSongArtist"
         android:layout_marginTop="8dp"/>
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/ctlActions"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@id/cardCover"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSongDescription"
 
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        >
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongTimeRest"
         android:layout_width="wrap_content"
@@ -124,7 +111,7 @@
         android:thumb="@drawable/seekbar_thumb"
         app:layout_constraintStart_toStartOf="@id/tvSongDescription"
         app:layout_constraintEnd_toEndOf="@id/tvSongDescription"
-        app:layout_constraintTop_toBottomOf="@id/ctlActions"
+        app:layout_constraintTop_toBottomOf="@id/tvSongDescription"
         android:layout_marginStart="-4dp"
         android:layout_marginTop="8dp"/>
 
