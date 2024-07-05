@@ -7,6 +7,8 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -30,10 +32,11 @@ import kotlinx.coroutines.withContext
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity, MusicListAdapter.MViewHolder>(SongDiffCallback()) {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity, MusicListAdapter.MViewHolder>(SongDiffCallback()), Filterable {
 //class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
-    //private var songList:MutableList<SongEntity> = arrayListOf()
+    private var originalList:MutableList<SongEntity> = arrayListOf()
     //private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
+
     private var selectedPos = -1
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
@@ -87,6 +90,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f)))
     }
     fun addAll(songs:List<SongEntity>){
+        this.originalList=songs.toMutableList()
         submitList(songs)
         //asyncListDiffer.submitList(songs)
        /* songs.forEach {
@@ -163,6 +167,27 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
 
     }
+    // Filter
+    private val searchFilter:Filter = object:Filter(){
+        override fun performFiltering(input: CharSequence?): FilterResults {
+            val filteredList = if(input.toString().isEmpty()){
+                originalList
+            }else{
+                originalList.filter{it.description.toString().lowercase().contains(input!!)}
+            }
+            return FilterResults().apply { values=filteredList }
+        }
+
+        override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+            submitList(results?.values as ArrayList<SongEntity>)
+        }
+    }
+    override fun getFilter(): Filter {
+        return searchFilter
+    }
+    //
+
+
     private class SongDiffCallback:DiffUtil.ItemCallback<SongEntity>(){
         override fun areItemsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
             return oldItem.id == newItem.id
@@ -175,5 +200,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     private sealed interface SongChangePayload{
         data class BackgroundColor(val color:Int):SongChangePayload
     }
+
 
 }

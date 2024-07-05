@@ -102,9 +102,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         launcherOpenMultipleDocs= registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
             uris.forEach {uri->
                 val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
+                val nameFile=realPathFromFile?.substringAfterLast("/","No named")
                 mainViewModel.saveNewSong(
                     SongEntity(
                         pathLocation = realPathFromFile,
+                        description = nameFile,
                         timestamp = Date().time
                     )
                 )
