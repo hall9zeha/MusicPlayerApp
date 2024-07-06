@@ -2,25 +2,24 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.CLEAR_MODE
@@ -34,7 +33,6 @@ import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
@@ -379,7 +377,24 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             btnClose?.setOnClickListener {
                showOrHideSearchbar()
             }
+            edtSearch?.addTextChangedListener (object: TextWatcher{
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
 
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    adapter.filter.filter(s)
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+
+                }
+            })
         }
     }
     private fun showOrHideSearchbar()=with(bind){
@@ -388,6 +403,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                 searchBar?.visibility=View.VISIBLE
                 isFiltering=true
+                showKeyboard()
             }else {
                 edtSearch?.setText("")
                 searchBar?.visibility = View.GONE
@@ -396,6 +412,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 isFiltering = false
             }
         }
+    }
+    private fun showKeyboard(){
+        bind?.edtSearch?.requestFocus()
+        val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        imm!!.showSoftInput(bind?.edtSearch, InputMethodManager.SHOW_IMPLICIT)
     }
     private fun getSongOfAdapter(position:Int): SongEntity?{
         mainViewModel.setCurrentPosition(position)
