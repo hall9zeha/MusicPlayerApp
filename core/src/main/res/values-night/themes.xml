@@ -22,4 +22,18 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+    <style name="mySearchBoxStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <!--<item name="android:textSize">16sp</item>-->
+        <!--<item name="boxBackgroundColor">@color/search_box_background_color</item>-->
+        <item name="boxCornerRadiusBottomStart">24dp</item>
+        <item name="boxCornerRadiusBottomEnd">24dp</item>
+        <item name="boxCornerRadiusTopEnd">24dp</item>
+        <item name="boxCornerRadiusTopStart">24dp</item>
+        <item name="boxStrokeWidth">0.5dp</item>
+        <item name="boxStrokeWidthFocused">0.5dp</item>
+        <!--  <item name="boxStrokeColor">@color/yellow</item>-->
+        <item name="endIconMode">custom</item>
+        <item name="hintEnabled">false</item>
+
+    </style>
 </resources>

@@ -77,6 +77,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var musicPlayerService: MusicPlayerService?=null
     private lateinit var mPrefs:MyPreferences
     private var isFavorite:Boolean=false
+    private var isFiltering:Boolean=false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -372,7 +373,28 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     }
                 }
             }
+            btnSearch.setOnClickListener{
+               showOrHideSearchbar()
+            }
+            btnClose?.setOnClickListener {
+               showOrHideSearchbar()
+            }
 
+        }
+    }
+    private fun showOrHideSearchbar()=with(bind){
+        this?.let{
+            if(!isFiltering){
+                btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                searchBar?.visibility=View.VISIBLE
+                isFiltering=true
+            }else {
+                edtSearch?.setText("")
+                searchBar?.visibility = View.GONE
+                btnSearch.backgroundTintList =
+                    ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
+                isFiltering = false
+            }
         }
     }
     private fun getSongOfAdapter(position:Int): SongEntity?{
