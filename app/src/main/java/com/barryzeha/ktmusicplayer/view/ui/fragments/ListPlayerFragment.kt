@@ -144,6 +144,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
             updateUIOnceTime(currentTRack)
+            bind?.seekbarControl?.tvNumberSong?.text=String.format("#%s/%s",mPrefs.currentPosition + 1, adapter.itemCount)
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -157,7 +158,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if (it.isNotEmpty()) {
                 adapter.addAll(it)
-
+                bind?.seekbarControl?.tvNumberSong?.text=String.format("#%s/%s",mPrefs.currentPosition + 1, adapter.itemCount)
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
