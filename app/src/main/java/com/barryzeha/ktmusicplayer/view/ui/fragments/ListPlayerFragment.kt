@@ -13,13 +13,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.CLEAR_MODE
@@ -44,6 +44,10 @@ import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Date
 import com.barryzeha.core.R as coreRes
 
@@ -403,20 +407,30 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                 searchBar?.visibility=View.VISIBLE
                 isFiltering=true
-                showKeyboard()
+                showKeyboard(true)
             }else {
                 edtSearch?.setText("")
                 searchBar?.visibility = View.GONE
                 btnSearch.backgroundTintList =
                     ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
                 isFiltering = false
+                showKeyboard(false)
             }
         }
     }
-    private fun showKeyboard(){
-        bind?.edtSearch?.requestFocus()
+    private fun showKeyboard(show:Boolean){
         val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-        imm!!.showSoftInput(bind?.edtSearch, InputMethodManager.SHOW_IMPLICIT)
+        if(show) {
+            bind?.edtSearch?.requestFocus()
+            imm!!.showSoftInput(bind?.edtSearch, InputMethodManager.SHOW_IMPLICIT)
+
+        }else{
+            imm!!.hideSoftInputFromWindow(bind?.edtSearch?.windowToken,0)
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(1000)
+                adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
+            }
+        }
     }
     private fun getSongOfAdapter(position:Int): SongEntity?{
         mainViewModel.setCurrentPosition(position)
@@ -482,8 +496,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun onItemClick(position:Int,song: SongEntity){
-        musicPlayerService?.startPlayer(song,position)
-        mainViewModel.setCurrentPosition(position)
+        if(!isFiltering) {
+            musicPlayerService?.startPlayer(song, position)
+            mainViewModel.setCurrentPosition(position)
+        }else{
+            adapter.getPositionByItem(song)?.let {pos->
+                musicPlayerService?.startPlayer(song,pos)
+                mainViewModel.setCurrentPosition(pos)
+                mPrefs.currentPosition=pos.toLong()
+            }
+        }
 
     }
     private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {

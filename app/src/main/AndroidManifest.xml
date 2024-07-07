@@ -24,7 +24,9 @@
         <activity
             android:name=".view.ui.activities.MainActivity"
             android:exported="true"
-            android:configChanges="orientation">
+            android:configChanges="orientation"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

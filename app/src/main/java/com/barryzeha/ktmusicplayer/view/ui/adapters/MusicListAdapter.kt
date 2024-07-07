@@ -131,9 +131,14 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     }
     fun getSongByPosition(position: Int): SongEntity?{
         return if(currentList.isNotEmpty()){
-        //return if(songList.isNotEmpty()){
-            currentList[position]
-            //songList[position]
+           currentList[position]
+        }else{
+            null
+        }
+    }
+    fun getPositionByItem(songItem:SongEntity):Int?{
+        return if(originalList.isNotEmpty()){
+            originalList.indexOf(songItem)
         }else{
             null
         }
