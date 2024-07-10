@@ -121,7 +121,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun checkIfIsFavorite(idSong:Long){
         launch{
             val entity = repository.fetchSongById(idSong)
-            _isFavorite.value = entity.favorite
+            entity?.let {e->
+                _isFavorite.value = e.favorite
+            }
         }
     }
     fun deleteSong(songEntity: SongEntity){

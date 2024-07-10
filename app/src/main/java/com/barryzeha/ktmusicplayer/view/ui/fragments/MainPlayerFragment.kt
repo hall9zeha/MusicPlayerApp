@@ -416,6 +416,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onResume() {
         super.onResume()
         checkPreferences()
+        mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
             try {
                 val song = songLists[mPrefs.currentPosition.toInt()]

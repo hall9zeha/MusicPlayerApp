@@ -589,6 +589,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun onResume() {
         super.onResume()
         checkPreferences()
+        mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
 
