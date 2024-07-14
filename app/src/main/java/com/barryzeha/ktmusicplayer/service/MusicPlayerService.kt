@@ -5,7 +5,10 @@ import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -13,6 +16,7 @@ import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -80,6 +84,7 @@ class MusicPlayerService : Service(){
     private var isFirstTime=true
     private var songs:MutableList<SongEntity> = arrayListOf()
     private var songState:List<SongStateWithDetail> = arrayListOf()
+    private var headsetReceiver:BroadcastReceiver?=null
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -91,9 +96,32 @@ class MusicPlayerService : Service(){
         mediaSession.setCallback(mediaSessionCallback())
         setUpRepository()
         initMusicStateLooper()
+        setUpHeadsetReceiver()
 
     }
+    private fun setUpHeadsetReceiver(){
+        headsetReceiver = object:BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val action = intent?.action
+                if(action != null && action == Intent.ACTION_HEADSET_PLUG){
+                    val state = intent.getIntExtra("state",-1)
+                    if(state==0){
+                        if(exoPlayer.isPlaying) {
+                            exoPlayer.pause()
+                            _songController?.pause()
+                            _songController?.musicState(currentMusicState.copy(isPlaying = exoPlayer.isPlaying))
+                        }
+                        Log.e("HEADSET_STATE","disconnect")
 
+                    }else if(state == 1){
+                        Log.e("HEADSET_STATE","connect")
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
+        registerReceiver(headsetReceiver,filter)
+    }
     private fun mediaSessionCallback():MediaSession.Callback{
         return object:MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -486,6 +514,7 @@ class MusicPlayerService : Service(){
         }
     }
     override fun onDestroy() {
+        unregisterReceiver(headsetReceiver)
         isForegroundService = false
         _songController?.stop()
         mediaSession.release()
