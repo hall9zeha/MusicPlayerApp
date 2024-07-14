@@ -443,7 +443,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun initCheckPermission(){
         val permissionList:MutableList<String> = mutableListOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.RECORD_AUDIO)
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_CONNECT)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
             permissionList.add(Manifest.permission.POST_NOTIFICATIONS)
         }

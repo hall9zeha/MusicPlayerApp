@@ -5,10 +5,13 @@ import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.NotificationManager
 import android.app.Service
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -85,6 +88,9 @@ class MusicPlayerService : Service(){
     private var songs:MutableList<SongEntity> = arrayListOf()
     private var songState:List<SongStateWithDetail> = arrayListOf()
     private var headsetReceiver:BroadcastReceiver?=null
+    private var bluetoothReceiver:BroadcastReceiver?=null
+    private var bluetoothIsConnect:Boolean = false
+
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -96,10 +102,10 @@ class MusicPlayerService : Service(){
         mediaSession.setCallback(mediaSessionCallback())
         setUpRepository()
         initMusicStateLooper()
-        setUpHeadsetReceiver()
+        setUpHeadsetAndBluetoothReceiver()
 
     }
-    private fun setUpHeadsetReceiver(){
+    private fun setUpHeadsetAndBluetoothReceiver(){
         headsetReceiver = object:BroadcastReceiver(){
             override fun onReceive(context: Context?, intent: Intent?) {
                 val action = intent?.action
@@ -119,9 +125,60 @@ class MusicPlayerService : Service(){
                 }
             }
         }
+        bluetoothReceiver = object:BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+
+                val action = intent?.action
+
+                if (action != null) {
+                    when (action) {
+                        BluetoothDevice.ACTION_ACL_CONNECTED -> {
+                            bluetoothIsConnect = true
+                            Log.d("BLUETOOTH_STATE", "Bluetooth connected")
+
+                            // Aquí puedes agregar la lógica cuando se conecta el Bluetooth
+                        }
+                        BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+
+                        }
+                        BluetoothAdapter.ACTION_STATE_CHANGED -> {
+                            val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                            when (state) {
+                                BluetoothAdapter.STATE_OFF -> {
+                                    Log.d("BLUETOOTH_STATE", "Bluetooth disconnected")
+                                    // Aquí puedes agregar la lógica cuando se desconecta el Bluetooth
+                                    if (exoPlayer.isPlaying) {
+                                        exoPlayer.pause()
+                                        _songController?.pause()
+                                        _songController?.musicState(currentMusicState.copy(isPlaying = false))
+                                    }
+                                }
+                                BluetoothAdapter.STATE_ON -> {
+                                    Log.d("BluetoothReceiver", "Bluetooth adapter turned on")
+                                    // Aquí puedes agregar lógica adicional cuando el adaptador Bluetooth se enciende
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+        }
         val filter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
         registerReceiver(headsetReceiver,filter)
+
+        val bluetoothFilter = IntentFilter().apply {
+
+            addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        }
+
+        registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
+
     private fun mediaSessionCallback():MediaSession.Callback{
         return object:MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -515,6 +572,7 @@ class MusicPlayerService : Service(){
     }
     override fun onDestroy() {
         unregisterReceiver(headsetReceiver)
+        unregisterReceiver(bluetoothReceiver)
         isForegroundService = false
         _songController?.stop()
         mediaSession.release()
