@@ -426,6 +426,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     title = songMetadata!!.title,
                     artist = songMetadata!!.artist,
                     album = songMetadata!!.album,
+                    duration = currentMusicState.duration
                 )
                 updateUIOnceTime(newState)
                 mainViewModel.saveStatePlaying(mPrefs.isPlaying)
