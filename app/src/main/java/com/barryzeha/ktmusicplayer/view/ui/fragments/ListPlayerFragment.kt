@@ -48,6 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Date
 import com.barryzeha.core.R as coreRes
 
@@ -144,7 +145,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
             updateUIOnceTime(currentTRack)
-            bind?.seekbarControl?.tvNumberSong?.text=String.format("#%s/%s",mPrefs.currentPosition + 1, adapter.itemCount)
+            bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, adapter.itemCount)
+
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
@@ -157,8 +159,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){
             if (it.isNotEmpty()) {
-                adapter.addAll(it)
-                bind?.seekbarControl?.tvNumberSong?.text=String.format("#%s/%s",mPrefs.currentPosition + 1, adapter.itemCount)
+                CoroutineScope(Dispatchers.IO).launch {
+                    adapter.addAll(it)
+                    withContext(Dispatchers.Main) {
+                        bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, adapter.itemCount)
+                    }
+                }
             }
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
@@ -445,7 +451,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         val permissionList:MutableList<String> = mutableListOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_CONNECT)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
             permissionList.add(Manifest.permission.POST_NOTIFICATIONS)

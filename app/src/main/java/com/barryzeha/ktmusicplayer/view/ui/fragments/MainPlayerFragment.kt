@@ -35,6 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
@@ -136,8 +137,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
            it?.let{currentTrack->
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
-                updateUIOnceTime(currentTrack)
+               updateUIOnceTime(currentTrack)
                setNumberOfTrack(currentTrack)
+
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
