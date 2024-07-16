@@ -178,6 +178,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(deletedRow>0) song?.let{song->
                 adapter.remove(song)
                 musicPlayerService?.removeMediaItem(song)
+                bind?.seekbarControl?.tvNumberSong?.text=String.format("#%s/%s",mPrefs.currentPosition + 1, adapter.itemCount)
             }
         }
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->

@@ -137,6 +137,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
            it?.let{currentTrack->
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                 updateUIOnceTime(currentTrack)
+               setNumberOfTrack(currentTrack)
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
@@ -244,6 +245,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
 
     }
+
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
         super.onServiceConnected(conn, service)
         val bind = service as MusicPlayerService.MusicPlayerServiceBinder
@@ -285,6 +287,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             //tvSongTimeCompleted.text = createTime(musicState.duration).third
             updateService()
+        }
+    }
+    private fun setNumberOfTrack(currentTrack:MusicState){
+        if(mPrefs.currentPosition>0) {
+            bind?.tvNumberSong?.text =
+                String.format("#%s/%s", mPrefs.currentPosition + 1, songLists.count())
         }
     }
     @SuppressLint("ResourceType")
