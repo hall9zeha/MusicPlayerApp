@@ -15,6 +15,9 @@ data class SongEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("id")
     val id:Long=0,
     val description:String?="",
+    val artist:String="",
+    val album:String="",
+    val genre:String="",
     val pathLocation:String?="",
     val timestamp:Long=0,
     val duration:Long=0,

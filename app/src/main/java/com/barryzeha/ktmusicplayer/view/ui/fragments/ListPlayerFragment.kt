@@ -29,6 +29,7 @@ import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
@@ -104,16 +105,24 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun activityResultFile(){
         launcherOpenMultipleDocs= registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
-            uris.forEach {uri->
-                val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
-                val nameFile=realPathFromFile?.substringAfterLast("/","No named")
-                mainViewModel.saveNewSong(
-                    SongEntity(
-                        pathLocation = realPathFromFile,
-                        description = nameFile,
-                        timestamp = Date().time
-                    )
-                )
+            uris.forEach { uri ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
+                    val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
+                    val nameFile = realPathFromFile?.substringAfterLast("/", "No named")
+                    withContext(Dispatchers.Main) {
+                        mainViewModel.saveNewSong(
+                            SongEntity(
+                                pathLocation = realPathFromFile,
+                                description = metadata.title,
+                                artist = metadata.artist!!,
+                                album = metadata.album!!,
+                                genre = metadata.genre!!,
+                                timestamp = Date().time
+                            )
+                        )
+                    }
+                }
             }
         }
 
