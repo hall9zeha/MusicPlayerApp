@@ -138,8 +138,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
            it?.let{currentTrack->
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                updateUIOnceTime(currentTrack)
-               setNumberOfTrack(currentTrack)
-
+               setNumberOfTrack()
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
@@ -291,11 +290,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             updateService()
         }
     }
-    private fun setNumberOfTrack(currentTrack:MusicState){
-        if(mPrefs.currentPosition>0) {
-            bind?.tvNumberSong?.text =
-                String.format("#%s/%s", mPrefs.currentPosition + 1, songLists.count())
-        }
+    private fun setNumberOfTrack(){
+        bind?.tvNumberSong?.text =
+        String.format("#%s/%s", mPrefs.currentPosition + 1, songLists.count())
     }
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
@@ -425,6 +422,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     override fun onResume() {
         super.onResume()
+        setNumberOfTrack()
         checkPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
