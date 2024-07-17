@@ -421,17 +421,27 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun showOrHideSearchbar()=with(bind){
         this?.let{
             if(!isFiltering){
+
+                btnMenu?.visibility=View.GONE
+                btnFilter?.visibility=View.GONE
+                tvPlayListName?.visibility=View.GONE
+                tilSearch?.visibility=View.VISIBLE
+                btnClose?.visibility=View.VISIBLE
                 btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                 searchBar?.visibility=View.VISIBLE
                 isFiltering=true
                 showKeyboard(true)
             }else {
                 edtSearch?.setText("")
-                searchBar?.visibility = View.GONE
                 btnSearch.backgroundTintList =
                     ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
                 isFiltering = false
                 showKeyboard(false)
+                tilSearch?.visibility=View.GONE
+                btnClose?.visibility=View.GONE
+                btnMenu?.visibility=View.VISIBLE
+                btnFilter?.visibility=View.VISIBLE
+                tvPlayListName?.visibility=View.VISIBLE
             }
         }
     }
