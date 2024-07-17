@@ -171,7 +171,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 CoroutineScope(Dispatchers.IO).launch {
                     adapter.addAll(it)
                     withContext(Dispatchers.Main) {
-                        bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, adapter.itemCount)
+                        bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, it.size)
                     }
                 }
             }
