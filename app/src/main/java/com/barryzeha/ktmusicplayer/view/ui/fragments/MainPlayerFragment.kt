@@ -57,7 +57,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var isFavorite:Boolean = false
     private var serviceConnection:ServiceConnection?=null
 
-
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var musicPlayerService: MusicPlayerService?=null
