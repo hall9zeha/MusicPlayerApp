@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MyPreferences
@@ -30,6 +31,7 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
+import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -297,6 +299,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
         this?.let {
+            btnMainMenu?.setOnClickListener {
+
+                (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
+            }
             btnMainPlay.setOnClickListener {
                 if (songLists.size > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {

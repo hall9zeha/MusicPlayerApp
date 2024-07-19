@@ -8,9 +8,12 @@ import android.os.IBinder
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.barryzeha.core.common.HOME_PLAYER
@@ -26,7 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), ServiceConnection{
-    private lateinit var bind:ActivityMainBinding
+    internal lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
 
@@ -37,13 +40,14 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         bind= ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(bind.root)
-        ViewCompat.setOnApplyWindowInsetsListener(bind.main) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
         setUpViewPager()
         setUpObservers()
+        //mOnBackPressedDispatcher()
     }
 
     private fun setUpObservers(){
@@ -82,6 +86,17 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         musicService?.unregisterController()
     }
 
+    private fun mOnBackPressedDispatcher(){
+        onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                if(bind.mainDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                }else{
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+    }
     override fun onStart() {
         super.onStart()
         startOrUpdateService(this,MusicPlayerService::class.java,this)
@@ -92,5 +107,16 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         unbindService(this)
 
     }
+
+    @Suppress("DEPRECATION")
+    override fun onBackPressed() {
+        if(bind.mainDrawerLayout.isDrawerOpen(GravityCompat.START)){
+            bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+        }else{
+            super.onBackPressed()
+        }
+
+    }
+
 
 }

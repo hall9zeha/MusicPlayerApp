@@ -7,10 +7,10 @@
     tools:context=".view.ui.fragments.ListPlayerFragment">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/searchBar"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="visible"
-        tools:visibility="visible"
+
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -226,7 +226,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
     <include layout="@layout/seekbar_layout"
         android:id="@+id/seekbarControl"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -234,7 +234,7 @@
 
     <include layout="@layout/small_player_controls"
         android:id="@+id/bottomPlayerControls"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

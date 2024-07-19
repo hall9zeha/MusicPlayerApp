@@ -20,6 +20,7 @@ import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.CLEAR_MODE
@@ -42,6 +43,7 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
+import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -241,6 +243,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun setUpListeners()= with(bind){
         this?.let {
+            btnMenu?.setOnClickListener {
+                (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
+            }
             // val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
             //     type = "audio/*"
             // }

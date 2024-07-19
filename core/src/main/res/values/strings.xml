@@ -6,4 +6,7 @@
     <string name="artist_placeholder">Artist</string>
     <string name="album_placeholder">Album</string>
     <string name="delete_title">Eliminar</string>
+    <string name="list">Lista</string>
+    <string name="home">Inicio</string>
+    <string name="settings">Configuración</string>
 </resources>
