@@ -16,11 +16,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.get
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
+import com.barryzeha.core.common.MAIN_FRAGMENT
+import com.barryzeha.core.common.SETTINGS
+import com.barryzeha.core.common.SETTINGS_FRAGMENT
+import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
@@ -47,6 +53,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         }
         setUpViewPager()
         setUpObservers()
+        setUpListeners()
         //mOnBackPressedDispatcher()
     }
 
@@ -59,10 +66,33 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         }
     }
     private fun setUpViewPager(){
-        val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
+        val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER,
+            SETTINGS))
         bind.mViewPager.adapter=viewPagerAdapter
         // Para precargar el segundo fragmento mientras se muestra el primero
         bind.mViewPager.offscreenPageLimit=2
+
+    }
+    private fun setUpListeners(){
+        bind.navView.setNavigationItemSelectedListener {menuItem->
+            when(menuItem.itemId){
+                coreRes.id.home->{
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                    bind.mViewPager.setCurrentItem(MAIN_FRAGMENT,true)
+                }
+                coreRes.id.music_list->{
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                    bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT,true)
+                }
+                coreRes.id.settings->{
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                    bind.mViewPager.setCurrentItem(SETTINGS_FRAGMENT,true)
+                }
+
+            }
+
+            true
+        }
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
