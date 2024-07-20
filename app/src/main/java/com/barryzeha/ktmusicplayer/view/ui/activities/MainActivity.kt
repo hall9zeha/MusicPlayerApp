@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
 
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
-        if(bind.mainDrawerLayout.isDrawerOpen(GravityCompat.START)){
+        if(bind.mainDrawerLayout.isOpen){
             bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
         }else{
             super.onBackPressed()
