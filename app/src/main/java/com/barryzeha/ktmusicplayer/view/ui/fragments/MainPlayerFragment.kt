@@ -124,6 +124,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private fun setUpObservers(){
         bind?.ivMusicCover?.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
+        mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
+            serviceConnection= instance.first
+            musicPlayerService= instance.second
+
+        }
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             CoroutineScope(Dispatchers.IO).launch {
                 if (songs.isNotEmpty()) {
