@@ -73,24 +73,24 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         bind.mViewPager.offscreenPageLimit=2
 
     }
+    // Usamos  la navegación sin el componente de navegación ya que necesitamos el viewPager para deslizarnos
+    // y solo el menú para poder mostrar los índices del viewPager programaticamente
     private fun setUpListeners(){
         bind.navView.setNavigationItemSelectedListener {menuItem->
             when(menuItem.itemId){
                 coreRes.id.home->{
-                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                     bind.mViewPager.setCurrentItem(MAIN_FRAGMENT,true)
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                 }
                 coreRes.id.music_list->{
-                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                     bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT,true)
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                 }
                 coreRes.id.settings->{
-                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                     bind.mViewPager.setCurrentItem(SETTINGS_FRAGMENT,true)
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                 }
-
             }
-
             true
         }
     }

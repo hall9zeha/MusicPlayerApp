@@ -227,7 +227,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }
             mainViewModel.checkIfIsFavorite(musicState.idSong)
-            updateService()
+
         }
     }
     private fun updateUI(musicState: MusicState){
@@ -295,17 +295,25 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
             bottomPlayerControls.btnPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
-                    getSongOfAdapter(currentSelectedPosition - 1)?.let { song ->
-                        musicPlayerService?.startPlayer(song,currentSelectedPosition -1)
+                    if(mPrefs.songMode==SongMode.Shuffle.ordinal){
+                        musicPlayerService?.prevSong()
+                    }else {
+                        getSongOfAdapter(currentSelectedPosition - 1)?.let { song ->
+                            musicPlayerService?.startPlayer(song, currentSelectedPosition - 1)
 
+                        }
                     }
                 }
             }
             bottomPlayerControls.btnNext.setOnClickListener {
                 if (currentSelectedPosition < adapter.itemCount - 1) {
-                    getSongOfAdapter(currentSelectedPosition + 1)?.let { song ->
-                        musicPlayerService?.startPlayer(song,currentSelectedPosition + 1)
+                    if(mPrefs.songMode==SongMode.Shuffle.ordinal){
+                        musicPlayerService?.nextSong()
+                    }else {
+                        getSongOfAdapter(currentSelectedPosition + 1)?.let { song ->
+                            musicPlayerService?.startPlayer(song, currentSelectedPosition + 1)
 
+                        }
                     }
                 } else {
                     getSongOfAdapter(0)?.let { song ->
@@ -602,13 +610,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     mainViewModel.saveStatePlaying(false)
                     mainViewModel.setCurrentTrack(musicState)
                 }
-                else {
-
+                else if(!musicState.latestPlayed && mPrefs.songMode == SongMode.Shuffle.ordinal){
+                    mainViewModel.setCurrentTrack(musicState)
                 }
+                else{}
             }else{
                 mainViewModel.saveStatePlaying(true)
                 mainViewModel.setCurrentTrack(musicState)
+
             }
+
         }
     }
     // El método sobreescrito onConnectedService no se dispara aquí debido a que se ejecuta después del primer fragmento

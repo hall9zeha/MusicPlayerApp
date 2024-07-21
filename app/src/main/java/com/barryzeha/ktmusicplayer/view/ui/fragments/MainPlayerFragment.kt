@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
@@ -128,6 +129,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             serviceConnection= instance.first
             musicPlayerService= instance.second
 
+
         }
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             CoroutineScope(Dispatchers.IO).launch {
@@ -232,25 +234,30 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     //mainViewModel.setCurrentPosition(0)
                     Log.e("CASO 1", "ACTIVO" )
                 }
+
                 else if(musicState.duration>0 && musicState.latestPlayed){
                     bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
                     mainViewModel.saveStatePlaying(false)
                     mainViewModel.setCurrentTrack(musicState)
-                    Log.e("CASO 2", "ACTIVO" )
                 }
+                 else if(!musicState.latestPlayed && (mPrefs.songMode == SongMode.Shuffle.ordinal)){
+                     mainViewModel.setCurrentTrack(musicState)
+                 }
                 else {
+
                     //mainViewModel.saveStatePlaying(true)
                     //bind?.btnMainNext?.performClick()
                     Log.e("CASO 3", "ACTIVO" )
                 }
             }else{
+
                 mainViewModel.saveStatePlaying(true)
                 mainViewModel.setCurrentTrack(musicState)
                 Log.e("CASO 4", "ACTIVO" )
             }
 
         }
-
+        Log.e("CURRENT-TEST", "ACTIVO" )
     }
 
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
@@ -276,7 +283,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
-
+            Log.e("ID-SONG", musicState.idSong.toString() )
+            updateService()
         }
 
     }
@@ -293,7 +301,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             //tvSongTimeCompleted.text = createTime(musicState.duration).third
-            updateService()
+
+            Log.e("ID-SONG", musicState.idSong.toString() )
         }
     }
     private fun setNumberOfTrack(){
@@ -326,12 +335,26 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
             btnMainPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
-                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition - 1),currentSelectedPosition -1)
+                    if (mPrefs.songMode == SongMode.Shuffle.ordinal) {
+                        musicPlayerService?.prevSong()
+                    } else {
+                        musicPlayerService?.startPlayer(
+                            getSongOfList(currentSelectedPosition - 1),
+                            currentSelectedPosition - 1
+                        )
+                    }
                 }
             }
             btnMainNext.setOnClickListener {
                 if (currentSelectedPosition < songLists.size - 1) {
-                    musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition + 1),currentSelectedPosition + 1)
+                    if(mPrefs.songMode == SongMode.Shuffle.ordinal ){
+                        musicPlayerService?.nextSong()
+                    }else {
+                        musicPlayerService?.startPlayer(
+                            getSongOfList(currentSelectedPosition + 1),
+                            currentSelectedPosition + 1
+                        )
+                    }
                 } else {
                     musicPlayerService?.startPlayer(getSongOfList(0),0)
                 }
@@ -459,7 +482,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         super.onStop()
         serviceConnection?.let{
        }
-
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
                 SongState(
@@ -472,6 +494,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     currentPosition = mPrefs.currentDuration
                 )
             )
+
         }
     }
      companion object {

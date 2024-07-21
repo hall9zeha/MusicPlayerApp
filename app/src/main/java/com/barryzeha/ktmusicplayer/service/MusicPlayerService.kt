@@ -354,6 +354,7 @@ class MusicPlayerService : Service(){
                         latestPlayed = false
                     )
                 }
+
                 //if(exoPlayer.isPlaying) {
                     _songController?.musicState(currentMusicState)
                     updateNotify()
@@ -386,7 +387,6 @@ class MusicPlayerService : Service(){
         }
     }
     private fun initExoPlayer(song:SongEntity,position:Int){
-
         songEntity=song
         exoPlayer.seekTo(position,0)
         exoPlayer.prepare()
@@ -400,17 +400,17 @@ class MusicPlayerService : Service(){
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
-                     val songPath = songEntity.pathLocation.toString()
-
-                     // Set info currentSongEntity
+                         // Set info currentSongEntity
                          fetchSong(songEntity)?.let{currentMusicState=it}
                          // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
                          // información que de la pista en reproducción que no requiere cambios constantes
                          // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
-                         if (!executeOnceTime) _songController?.currentTrack(currentMusicState)
+                         if (!executeOnceTime) {
+                             _songController?.currentTrack(currentMusicState)
+
+                         }
                          executeOnceTime = true
                          mPrefs.isPlaying = exoPlayer.isPlaying
-
 
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
@@ -440,7 +440,7 @@ class MusicPlayerService : Service(){
                             val song=songsList[newPosition.mediaItemIndex]
                             fetchSong(song)?.let {
                                 currentMusicState = it.copy(
-                                    currentPosition = newPosition.mediaItemIndex.toLong()
+                                    currentPosition = newPosition.mediaItemIndex.toLong(),
                                 )
                                 _songController?.currentTrack(currentMusicState)
                                 mPrefs.currentPosition = newPosition.mediaItemIndex.toLong()
@@ -451,6 +451,7 @@ class MusicPlayerService : Service(){
                                 }
                             }
                         }
+
                     }
 
              }
@@ -511,6 +512,16 @@ class MusicPlayerService : Service(){
         }
 
     }
+    fun nextSong(){
+        if(exoPlayer.isPlaying){
+            exoPlayer.seekToNext()
+        }
+    }
+    fun prevSong(){
+        if(exoPlayer.isPlaying){
+            exoPlayer.seekToPrevious()
+        }
+    }
     fun setExoPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
     }
@@ -548,8 +559,11 @@ class MusicPlayerService : Service(){
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false
         _songController?.currentTrack(currentMusicState)
-
-
+        // Al cargar la información de una pista guardada
+        // se ejecutaba una primera vez el evento currentTRack de la interface
+        // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
+        // para evitarlo
+        executeOnceTime = true
     }
     private fun fetchSong(song:SongEntity):MusicState?{
         try {
