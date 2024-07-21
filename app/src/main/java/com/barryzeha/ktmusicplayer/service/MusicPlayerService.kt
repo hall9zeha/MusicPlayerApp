@@ -395,13 +395,15 @@ class MusicPlayerService : Service(){
     }
 
     private fun setUpExoplayerListener():Player.Listener?{
-
          playerListener = object : Player.Listener {
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
                          // Set info currentSongEntity
-                         fetchSong(songEntity)?.let{currentMusicState=it}
+                         fetchSong(songEntity)?.let{
+                             currentMusicState=it
+
+                         }
                          // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
                          // información que de la pista en reproducción que no requiere cambios constantes
                          // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
@@ -438,8 +440,9 @@ class MusicPlayerService : Service(){
                     if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
                         if (songsList.isNotEmpty()) {
                             val song=songsList[newPosition.mediaItemIndex]
-                            fetchSong(song)?.let {
-                                currentMusicState = it.copy(
+                            songEntity = song
+                            fetchSong(song)?.let {songInfo->
+                                currentMusicState = songInfo.copy(
                                     currentPosition = newPosition.mediaItemIndex.toLong(),
                                 )
                                 _songController?.currentTrack(currentMusicState)
@@ -450,6 +453,7 @@ class MusicPlayerService : Service(){
                                     mPrefs.isPlaying = exoPlayer.isPlaying
                                 }
                             }
+
                         }
 
                     }
@@ -514,12 +518,12 @@ class MusicPlayerService : Service(){
     }
     fun nextSong(){
         if(exoPlayer.isPlaying){
-            exoPlayer.seekToNext()
+            exoPlayer.seekToNextMediaItem()
         }
     }
     fun prevSong(){
         if(exoPlayer.isPlaying){
-            exoPlayer.seekToPrevious()
+            exoPlayer.seekToPreviousMediaItem()
         }
     }
     fun setExoPlayerProgress(progress:Long){

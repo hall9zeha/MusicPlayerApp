@@ -257,7 +257,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
 
         }
-        Log.e("CURRENT-TEST", "ACTIVO" )
+
     }
 
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
@@ -494,7 +494,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     currentPosition = mPrefs.currentDuration
                 )
             )
-
         }
     }
      companion object {

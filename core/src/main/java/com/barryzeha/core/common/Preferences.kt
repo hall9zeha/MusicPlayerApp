@@ -18,6 +18,7 @@ private const val PREV_OR_NEXT = "prevOrNext"
 private const val CONTROL_FROM_NOTIFY_2 = "controlFromNotify2"
 private const val PLAYER_IS_STOP = "playerIsStop"
 private const val SONG_MODE = "songMode"
+private const val ID_SONG = "idSong"
 class MyPreferences(private val context: Context){
     val gson = Gson()
     private var myPreferences = context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
@@ -37,6 +38,9 @@ class MyPreferences(private val context: Context){
     var currentPosition:Long
         get()=myPreferences.getLong(CURRENT_POSITION,0)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()
+    var idSong:Long
+        get()=myPreferences.getLong(ID_SONG,-1)
+        set(value)=myPreferences.edit().putLong(ID_SONG,value).apply()
     var musicStateJsonSaved:String?
         get()=myPreferences.getString(MUSIC_STATE,"")
         set(value)=myPreferences.edit().putString(MUSIC_STATE,value).apply()

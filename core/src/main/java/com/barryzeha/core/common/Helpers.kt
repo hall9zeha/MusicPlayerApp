@@ -80,8 +80,8 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
     val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
 
     return AudioMetadata(
-        artist=try{tag.getFirst(FieldKey.ARTIST)} catch(ex:Exception){"Artist Unknown" },
-        album=try{tag.getFirst(FieldKey.ALBUM)}catch(ex:Exception){"Album Unknown"},
+        artist=try{if(tag.getFirst(FieldKey.ARTIST).isNullOrEmpty())"Artist unknown" else tag.getFirst(FieldKey.ARTIST) } catch(ex:Exception){"Artist Unknown" },
+        album=try{if(tag.getFirst(FieldKey.ALBUM).isNullOrEmpty())"Album unknown" else tag.getFirst(FieldKey.ALBUM) }catch(ex:Exception){"Album Unknown"},
         genre=try{tag.getFirst(FieldKey.GENRE)}catch(ex:Exception){"Unknown"},
         title=try{if(tag.getFirst(FieldKey.TITLE).isNullOrEmpty())nameFile else tag.getFirst(FieldKey.TITLE)}catch(ex:Exception){nameFile},
         comment=try{tag.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"No comment"},
