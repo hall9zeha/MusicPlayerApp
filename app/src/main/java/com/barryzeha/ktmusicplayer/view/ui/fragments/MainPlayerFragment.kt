@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.CLEAR_MODE
+import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
@@ -477,6 +478,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     override fun onStop() {
         super.onStop()
+        mPrefs.currentView = MAIN_FRAGMENT
         serviceConnection?.let{
        }
         if(currentMusicState.idSong>0) {

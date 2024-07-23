@@ -17,9 +17,11 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
+import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.MAIN_FRAGMENT
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SETTINGS
 import com.barryzeha.core.common.SETTINGS_FRAGMENT
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
     internal lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
+    private lateinit var mPrefs:MyPreferences
 
 
     private var serviceSongListener:ServiceSongListener?=null
@@ -46,6 +49,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         bind= ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(bind.root)
+        mPrefs = MyPreferences(this)
         ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -70,6 +74,16 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         bind.mViewPager.adapter=viewPagerAdapter
         // Para precargar el segundo fragmento mientras se muestra el primero
         bind.mViewPager.offscreenPageLimit=2
+        bind.mViewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback(){
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                when(position){
+                    0->mPrefs.currentView= MAIN_FRAGMENT
+                    1->mPrefs.currentView= SONG_LIST_FRAGMENT
+                }
+                bind.navView.menu[position].setChecked(true)
+            }
+        })
 
     }
     // Usamos  la navegación sin el componente de navegación ya que necesitamos el viewPager para deslizarnos
@@ -84,8 +98,12 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
                 coreRes.id.music_list->{
                     bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT,true)
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                    mPrefs.currentView = SONG_LIST_FRAGMENT
                 }
-
+                coreRes.id.settings->{
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                }
             }
             true
         }
@@ -111,18 +129,33 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
     fun unregisterSongListener(){
         musicService?.unregisterController()
     }
+    private fun checkedSelectedMenuDrawerItems(){
+        when(mPrefs.currentView){
+            MAIN_FRAGMENT->{
+                if(bind.mViewPager.currentItem == SONG_LIST_FRAGMENT){
+                    bind.navView.menu[SONG_LIST_FRAGMENT].setChecked(true)
+                    mPrefs.currentView = SONG_LIST_FRAGMENT
+                }else{
+                    bind.navView.menu[MAIN_FRAGMENT].setChecked(true)
+                }
+            }else->{
 
-    private fun mOnBackPressedDispatcher(){
+            }
+        }
+    }
+    /*private fun mOnBackPressedDispatcher(){
         onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
                 if(bind.mainDrawerLayout.isDrawerOpen(GravityCompat.START)){
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+
                 }else{
                     onBackPressedDispatcher.onBackPressed()
                 }
             }
         })
-    }
+    }*/
+
     override fun onStart() {
         super.onStart()
         startOrUpdateService(this,MusicPlayerService::class.java,this)
@@ -139,9 +172,21 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         if(bind.mainDrawerLayout.isOpen){
             bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
         }else{
-            super.onBackPressed()
+            checkedSelectedMenuDrawerItems()
+            if(mPrefs.currentView == SONG_LIST_FRAGMENT){
+                bind.mViewPager.setCurrentItem(MAIN_FRAGMENT,true)
+                mPrefs.currentView = MAIN_FRAGMENT
+
+            }else {
+                super.onBackPressed()
+            }
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkedSelectedMenuDrawerItems()
     }
 
 

@@ -38,4 +38,10 @@
         <item name="hintEnabled">false</item>
 
     </style>
+    <style name="Theme.With.Toolbar" parent = "Base.Theme.KTMusicPlayer">
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:colorPrimary">@color/color_primary</item>
+    </style>
 </resources>

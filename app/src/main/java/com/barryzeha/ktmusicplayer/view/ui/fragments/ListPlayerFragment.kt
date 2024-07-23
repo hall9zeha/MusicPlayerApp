@@ -17,6 +17,7 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -24,6 +25,7 @@ import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.CLEAR_MODE
+import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
@@ -659,6 +661,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     }
     override fun onStop() {
+        mPrefs.currentView = MAIN_FRAGMENT
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
                 SongState(
@@ -675,7 +678,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         super.onStop()
     }
-
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =

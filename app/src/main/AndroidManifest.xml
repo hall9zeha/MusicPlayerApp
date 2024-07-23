@@ -6,10 +6,10 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission
         android:name="android.permission.BLUETOOTH_CONNECT"
         android:usesPermissionFlags="neverForLocation"
@@ -26,35 +26,42 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KTMusicPlayer"
         tools:targetApi="31">
-
+        <activity
+            android:name=".view.ui.activities.SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.With.Toolbar"
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".view.ui.activities.MainActivity"
-            android:exported="true"
             android:configChanges="orientation"
-            android:windowSoftInputMode="adjustResize"
-            >
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".service.MusicPlayerService"
+
+        <service
+            android:name=".service.MusicPlayerService"
             android:enabled="true"
-            android:exported="false"
-            >
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.barryzeha.ktmusicplayer.service.MusicPlayerService"/>
+                <action android:name="com.barryzeha.ktmusicplayer.service.MusicPlayerService" />
             </intent-filter>
         </service>
-        <receiver android:name=".br.MusicPlayerBroadcast"
-            android:exported="false"
-            >
-           <!-- <intent-filter>
-                <action android:name="com.barryzeha.ktmusicplayer.ACTION_TOAST"/>
-            </intent-filter>-->
-        </receiver>
 
+        <receiver
+            android:name=".br.MusicPlayerBroadcast"
+            android:exported="false">
+
+            <!--
+            <intent-filter>
+                <action android:name="com.barryzeha.ktmusicplayer.ACTION_TOAST"/>
+            </intent-filter>
+            -->
+        </receiver>
     </application>
 
 </manifest>
