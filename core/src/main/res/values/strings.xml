@@ -9,4 +9,6 @@
     <string name="list">Lista</string>
     <string name="home">Inicio</string>
     <string name="settings">Configuración</string>
+    <string name="themeSection">Tema</string>
+    <string name="themeMsg">Activar tema oscuro</string>
 </resources>

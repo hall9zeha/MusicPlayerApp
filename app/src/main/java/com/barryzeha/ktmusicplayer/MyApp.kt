@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceManager
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.ktmusicplayer.common.createNotificationChannel
@@ -36,6 +38,7 @@ class MyApp:Application() ,ServiceConnection{
             _context = this
         }
         super.onCreate()
+        setUpGlobalPreferences()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(this)
         }
@@ -45,5 +48,15 @@ class MyApp:Application() ,ServiceConnection{
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {}
     override fun onServiceDisconnected(name: ComponentName?) {}
+    private fun setUpGlobalPreferences(){
+        val gPrefs=PreferenceManager.getDefaultSharedPreferences(this)
+        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.S){
+            if(gPrefs.getBoolean("themeKey",false)){
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            }else{
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
+            }
+        }
+    }
 }

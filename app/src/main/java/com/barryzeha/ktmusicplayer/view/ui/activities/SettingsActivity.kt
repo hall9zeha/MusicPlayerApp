@@ -1,9 +1,14 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
+import android.app.UiModeManager
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
+import androidx.preference.SwitchPreferenceCompat
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.R as coreRes
@@ -22,12 +27,34 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        mPrefs=MyPreferences(this)
+        mPrefs= MyPreferences(this)
+
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+            setUpListeners()
+        }
+        private fun setUpListeners(){
+            val uiMode = context?.getSystemService(UiModeManager::class.java)
+            val themePref = findPreference<SwitchPreferenceCompat>("themeKey")
+            themePref?.setOnPreferenceChangeListener {pref,newValue->
+                if(newValue as Boolean){
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        uiMode?.setApplicationNightMode(UiModeManager.MODE_NIGHT_YES)
+                    }else{
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    }
+                }else{
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        uiMode?.setApplicationNightMode(UiModeManager.MODE_NIGHT_NO)
+                    }else {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    }
+                }
+                true
+            }
         }
     }
 
