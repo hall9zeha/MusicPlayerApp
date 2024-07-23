@@ -66,8 +66,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         }
     }
     private fun setUpViewPager(){
-        val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER,
-            SETTINGS))
+        val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
         bind.mViewPager.adapter=viewPagerAdapter
         // Para precargar el segundo fragmento mientras se muestra el primero
         bind.mViewPager.offscreenPageLimit=2
@@ -86,10 +85,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
                     bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT,true)
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                 }
-                coreRes.id.settings->{
-                    bind.mViewPager.setCurrentItem(SETTINGS_FRAGMENT,true)
-                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
-                }
+
             }
             true
         }

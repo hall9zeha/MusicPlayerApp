@@ -296,13 +296,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // porque genera un mal efecto en la vista al cargar la pista guardada
             // entre otros pequeños inconvenientes, ahora está en onResumen para actualizarse cuando cambiemos de lista
             // a main
-            //mainSeekBar.max = musicState.duration.toInt()
-
+            mainSeekBar.max = musicState.duration.toInt()
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
-            //tvSongTimeCompleted.text = createTime(musicState.duration).third
-
-            Log.e("ID-SONG", musicState.idSong.toString() )
+            tvSongTimeCompleted.text = createTime(musicState.duration).third
         }
     }
     private fun setNumberOfTrack(){
@@ -467,7 +464,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     title = songMetadata!!.title,
                     artist = songMetadata!!.artist,
                     album = songMetadata!!.album,
-                    duration = currentMusicState.duration
+                    duration = songMetadata.duration
                 )
                 updateUIOnceTime(newState)
                 mainViewModel.saveStatePlaying(mPrefs.isPlaying)
