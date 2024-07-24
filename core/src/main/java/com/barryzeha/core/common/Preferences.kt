@@ -2,6 +2,7 @@ package com.barryzeha.core.common
 
 import android.content.Context
 import com.google.gson.Gson
+import javax.inject.Inject
 
 
 /**
@@ -20,7 +21,7 @@ private const val PLAYER_IS_STOP = "playerIsStop"
 private const val SONG_MODE = "songMode"
 private const val ID_SONG = "idSong"
 private const val CURRENT_VIEW = "currentView"
-class MyPreferences(private val context: Context){
+class  MyPreferences @Inject constructor(private val context: Context){
     val gson = Gson()
     private var myPreferences = context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
     fun cleanPreferences(){

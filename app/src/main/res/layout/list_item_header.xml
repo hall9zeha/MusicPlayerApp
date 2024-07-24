@@ -13,7 +13,7 @@
         tools:text="Ecabezado directorio de música"
         android:singleLine="true"
         android:ellipsize="end"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

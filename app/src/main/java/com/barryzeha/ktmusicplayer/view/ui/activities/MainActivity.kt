@@ -34,13 +34,16 @@ import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), ServiceConnection{
     internal lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
-    private lateinit var mPrefs:MyPreferences
+
+    @Inject
+    lateinit var mPrefs:MyPreferences
 
 
     private var serviceSongListener:ServiceSongListener?=null
@@ -49,7 +52,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         bind= ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(bind.root)
-        mPrefs = MyPreferences(this)
         ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

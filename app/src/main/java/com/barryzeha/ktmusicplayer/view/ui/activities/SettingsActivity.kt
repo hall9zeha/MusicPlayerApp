@@ -13,9 +13,14 @@ import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.R
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var mPrefs:MyPreferences
+    @Inject
+    lateinit var mPrefs:MyPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setTitle(coreRes.string.settings)
         super.onCreate(savedInstanceState)
@@ -27,7 +32,7 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        mPrefs= MyPreferences(this)
+
 
     }
 

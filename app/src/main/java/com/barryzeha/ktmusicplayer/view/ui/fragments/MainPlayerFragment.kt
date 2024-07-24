@@ -40,6 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
@@ -48,6 +49,9 @@ private const val ARG_PARAM2 = "param2"
 @AndroidEntryPoint
 class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
+    @Inject
+    lateinit var mPrefs:MyPreferences
+
     private var param1: String? = null
     private var param2: String? = null
     private var bind:FragmentMainPlayerBinding ? = null
@@ -55,7 +59,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var currentMusicState = MusicState()
     private var songLists:MutableList<SongEntity> = arrayListOf()
     private var currentSelectedPosition=0
-    private lateinit var mPrefs:MyPreferences
+
     private var isFavorite:Boolean = false
     private var serviceConnection:ServiceConnection?=null
 
@@ -74,7 +78,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
             bind=FragmentMainPlayerBinding.bind(view)
-            mPrefs = MyApp.mPrefs
+
             currentSelectedPosition = mPrefs.currentPosition.toInt()
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
             setUpObservers()

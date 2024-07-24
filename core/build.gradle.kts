@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
-    //alias(libs.plugins.dagger.hilt.plugin)
+    alias(libs.plugins.dagger.hilt.plugin)
     alias(libs.plugins.parcelize)
 
 }
@@ -76,6 +76,6 @@ dependencies {
     api(libs.room.ktx)
 
     // Dagger hilt
-    /*ksp(libs.dagger.hilt.compiler)
-    implementation(libs.dagger.hilt)*/
+    ksp(libs.dagger.hilt.compiler)
+    implementation(libs.dagger.hilt)
 }

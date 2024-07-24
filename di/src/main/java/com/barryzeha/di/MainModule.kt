@@ -3,6 +3,7 @@ package com.barryzeha.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.barryzeha.core.common.MyPreferences
 
 import com.barryzeha.data.database.SongDatabase
 import com.barryzeha.data.repository.MainRepository
@@ -36,6 +37,10 @@ class MainModule {
         DATABASE_NAME)
         .fallbackToDestructiveMigration()
         .build()
+
+    @Provides
+    @Singleton
+    fun preferencesProvides(app:Application):MyPreferences = MyPreferences(app.applicationContext)
 
 }
 @Module

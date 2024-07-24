@@ -55,6 +55,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
+import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
 
@@ -63,6 +64,9 @@ private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
 class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
+
+    @Inject
+    lateinit var mPrefs:MyPreferences
 
     private var param1: String? = null
     private var param2: String? = null
@@ -83,7 +87,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var currentMusicState = MusicState()
     private var song:SongEntity?=null
     private var musicPlayerService: MusicPlayerService?=null
-    private lateinit var mPrefs:MyPreferences
+
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
 
@@ -98,7 +102,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mPrefs = MyApp.mPrefs
+
         bind = FragmentListPlayerBinding.bind(view)
         activityResultFile()
         activityResultForPermission()
