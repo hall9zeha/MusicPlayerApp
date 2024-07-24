@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
     @Inject
     lateinit var mPrefs:MyPreferences
 
-
     private var serviceSongListener:ServiceSongListener?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
