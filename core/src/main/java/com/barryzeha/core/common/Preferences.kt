@@ -37,7 +37,7 @@ class MyPreferences(private val context: Context){
         get()= myPreferences.getBoolean(PLAYER_IS_STOP,false)
         set(value)=myPreferences.edit().putBoolean(PLAYER_IS_STOP,value).apply()
     var currentPosition:Long
-        get()=myPreferences.getLong(CURRENT_POSITION,0)
+        get()=myPreferences.getLong(CURRENT_POSITION,-1)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()
     var idSong:Long
         get()=myPreferences.getLong(ID_SONG,-1)

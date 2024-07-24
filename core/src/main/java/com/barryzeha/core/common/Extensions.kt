@@ -3,13 +3,16 @@ package com.barryzeha.core.common
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.MusicState
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.Resource
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import kotlin.math.roundToInt
@@ -56,5 +59,14 @@ fun  <T> T.toJson():String{
 fun String.toObject():MusicState{
     val gson = Gson()
     return gson.fromJson(this,MusicState::class.java)
+}
+
+fun getPixels(dipValue:Int, context: Context):Int{
+    val r:Resources = context.resources
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        dipValue.toFloat(),
+        r.displayMetrics
+    ).toInt()
 }
 
