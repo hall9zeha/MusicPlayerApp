@@ -221,3 +221,33 @@ fun mColorList(context:Context)=
         android.R.attr.colorBackground,
         android.R.color.transparent
     ))
+
+fun getParentDirectories(path: String): String {
+    // Encontrar la posición del nombre del archivo (última '/' antes del nombre de archivo)
+    val lastIndex = path.lastIndexOf('/')
+    if (lastIndex == -1) {
+        return path  // Si no se encuentra '/', retornar el path completo
+    }
+
+    // Encontrar la posición de 'primary' en el path
+    val primaryIndex = path.indexOf("primary")
+    if (primaryIndex == -1) {
+        return path  // Si no se encuentra 'primary', retornar el path completo
+    }
+
+    // Encontrar el primer '/' después de 'primary'
+    val firstSlashAfterPrimary = path.indexOf('/', primaryIndex)
+    if (firstSlashAfterPrimary == -1 || firstSlashAfterPrimary >= lastIndex) {
+        return if (primaryIndex == -1) {
+            path
+       }else{
+            return path.substring(primaryIndex + "primary:".length, lastIndex)
+        }
+
+          // Si no se encuentra '/', retornar el path completo
+    }
+
+    // Recortar el path desde el primer '/' después de 'primary' hasta el nombre del archivo
+    val directoriosRecortados = path.substring(firstSlashAfterPrimary + 1, lastIndex)
+    return directoriosRecortados
+}

@@ -19,6 +19,7 @@ data class SongEntity(
     val album:String="",
     val genre:String="",
     val pathLocation:String?="",
+    val parentDirectory:String?="",
     val timestamp:Long=0,
     val duration:Long=0,
     val bitrate:String?="",

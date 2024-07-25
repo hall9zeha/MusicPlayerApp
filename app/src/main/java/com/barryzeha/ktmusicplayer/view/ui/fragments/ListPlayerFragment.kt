@@ -33,6 +33,7 @@ import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.fetchFileMetadata
+import com.barryzeha.core.common.getParentDirectories
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
@@ -54,6 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Date
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
@@ -116,12 +118,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             uris.forEach { uri ->
                 CoroutineScope(Dispatchers.IO).launch {
                     val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
+                    Log.e("OLD-", uri.path.toString() )
+                    val parentDir= getParentDirectories(uri.path.toString())
                     val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
                     val nameFile = realPathFromFile?.substringAfterLast("/", "No named")
                     withContext(Dispatchers.Main) {
                         mainViewModel.saveNewSong(
                             SongEntity(
                                 pathLocation = realPathFromFile,
+                                parentDirectory = parentDir,
                                 description = metadata.title,
                                 artist = metadata.artist!!,
                                 album = metadata.album!!,
@@ -135,6 +140,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
 
     }
+
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
             if(it){
@@ -174,12 +180,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
             }
         }
-        mainViewModel.allSongs.observe(viewLifecycleOwner){
-            if (it.isNotEmpty()) {
+        mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
+            if (songList.isNotEmpty()) {
                 CoroutineScope(Dispatchers.IO).launch {
-                    adapter.addAll(it)
+                    adapter.addAll(songList)
                     withContext(Dispatchers.Main) {
-                        bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, it.size)
+                        bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, songList.size)
                     }
                 }
             }

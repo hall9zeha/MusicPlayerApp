@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +19,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
+import com.barryzeha.ktmusicplayer.databinding.ListItemHeaderBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,9 +32,12 @@ import kotlinx.coroutines.withContext
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<SongEntity, MusicListAdapter.MViewHolder>(SongDiffCallback()), Filterable {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(SongDiffCallback()), Filterable {
 //class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
-    private var originalList:MutableList<SongEntity> = arrayListOf()
+    private val SONG_ITEM=0
+    private val HEADER_ITEM=1
+
+    private var originalList:MutableList<Any> = arrayListOf()
     //private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
 
     private var selectedPos = -1
@@ -44,40 +47,54 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     init{
         setHasStableIds(true)
     }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         context=parent.context
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_song,parent,false)
-        return MViewHolder(itemView)
+        return if(viewType == SONG_ITEM) {
+            val itemViewSong = LayoutInflater.from(parent.context).inflate(R.layout.item_song, parent, false)
+            MViewHolder(itemViewSong)
+        }else{
+            val itemViewHeader = LayoutInflater.from(parent.context).inflate(R.layout.list_item_header,parent,false)
+            HeaderViewHolder(itemViewHeader)
+        }
+
+
     }
 
-    override fun onBindViewHolder(holder: MViewHolder, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
              when (val latestPayload = payloads.lastOrNull()) {
-                is SongChangePayload.BackgroundColor -> holder.bindBackgroundColor(latestPayload.color)
+                is SongChangePayload.BackgroundColor -> (holder as MViewHolder).bindBackgroundColor(latestPayload.color)
                 else -> onBindViewHolder(holder, position)
             }
 
     }
-    override fun getItemId(position: Int): Long = currentList[position].id
+    override fun getItemId(position: Int): Long = (currentList[position] as SongEntity).id
 
     @SuppressLint("ResourceType")
-    override fun onBindViewHolder(holder: MViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         try {
             if (selectedPos == position) {
-                holder.bind.root.setBackgroundColor(
+                (holder as MViewHolder).bind.root.setBackgroundColor(
                     mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
                 )
             } else {
-                holder.bind.root.setBackgroundColor(Color.TRANSPARENT)
+                (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
             }
 
         }finally {
             mColorList(context).recycle()
         }
-        holder.onBind(position, getItem(position))
+        if(holder is MViewHolder) {
+           holder.onBind(position, getItem(position) as SongEntity)
+        }else if(holder is HeaderViewHolder){
+            holder.onBind(getItem(position) as String)
+        }
         //holder.onBind(position, songList[position])
         //holder.onBind(position, asyncListDiffer.currentList[position])
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return if(getItem(position) is SongEntity) SONG_ITEM else HEADER_ITEM
+    }
     @SuppressLint("ResourceType")
     fun changeBackgroundColorSelectedItem(position: Int){
         selectedPos = position
@@ -89,9 +106,9 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
         notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f)))
     }
-    fun addAll(songs:List<SongEntity>){
+    fun addAll(songs:List<Any>){
         this.originalList=songs.toMutableList()
-        submitList(songs)
+        submitList(originalList)
         //asyncListDiffer.submitList(songs)
        /* songs.forEach {
             add(it)
@@ -131,7 +148,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     }
     fun getSongByPosition(position: Int): SongEntity?{
         return if(currentList.isNotEmpty()){
-           currentList[position]
+           currentList[position] as SongEntity
         }else{
             null
         }
@@ -172,19 +189,26 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
 
     }
+    inner class HeaderViewHolder(v:View):StickyViewHolder(v){
+        val bind = ListItemHeaderBinding.bind(v)
+        fun onBind(value:String)=with(bind){
+            tvHeaderDescription.text=value
+        }
+    }
     // Filter
     private val searchFilter:Filter = object:Filter(){
         override fun performFiltering(input: CharSequence?): FilterResults {
             val filteredList = if(input.toString().isEmpty()){
                 originalList
             }else{
-                originalList.filter{it.description.toString().lowercase().contains(input!!)}
+                originalList.filter{it as SongEntity
+                    it.description.toString().lowercase().contains(input!!)}
             }
             return FilterResults().apply { values=filteredList }
         }
 
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-            submitList(results?.values as ArrayList<SongEntity>)
+            submitList(results?.values as ArrayList<Any>)
         }
     }
     override fun getFilter(): Filter {
@@ -193,13 +217,13 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     //
 
 
-    private class SongDiffCallback:DiffUtil.ItemCallback<SongEntity>(){
-        override fun areItemsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
-            return oldItem.id == newItem.id
+    private class SongDiffCallback:DiffUtil.ItemCallback<Any>(){
+        override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
+            return (oldItem as SongEntity).id == (newItem as SongEntity).id
         }
 
-        override fun areContentsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
-            return oldItem == newItem
+        override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
+            return (oldItem as SongEntity) == (newItem as SongEntity)
         }
     }
     private sealed interface SongChangePayload{
