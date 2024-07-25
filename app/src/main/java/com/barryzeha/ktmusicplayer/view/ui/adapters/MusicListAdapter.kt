@@ -45,7 +45,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     private  var context:Context = MyApp.context
 
     init{
-        setHasStableIds(true)
+        //setHasStableIds(true)
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         context=parent.context
@@ -67,21 +67,29 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             }
 
     }
-    override fun getItemId(position: Int): Long = (currentList[position] as SongEntity).id
+   /* override fun getItemId(position: Int): Long {
+        if(currentList[position] is SongEntity) {
+            return ((currentList[position] as SongEntity)).id
+        }else{
+            return 0
+        }
+    }*/
 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        try {
-            if (selectedPos == position) {
-                (holder as MViewHolder).bind.root.setBackgroundColor(
-                    mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
-                )
-            } else {
-                (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
-            }
+        if(holder is MViewHolder) {
+            try {
+                if (selectedPos == position) {
+                    (holder as MViewHolder).bind.root.setBackgroundColor(
+                        mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+                    )
+                } else {
+                    (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
+                }
 
-        }finally {
-            mColorList(context).recycle()
+            } finally {
+                mColorList(context).recycle()
+            }
         }
         if(holder is MViewHolder) {
            holder.onBind(position, getItem(position) as SongEntity)
@@ -214,16 +222,13 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     override fun getFilter(): Filter {
         return searchFilter
     }
-    //
-
-
     private class SongDiffCallback:DiffUtil.ItemCallback<Any>(){
         override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
-            return (oldItem as SongEntity).id == (newItem as SongEntity).id
+            return if(oldItem is SongEntity && newItem is SongEntity){((oldItem as SongEntity).id == (newItem as SongEntity).id)} else false
         }
 
         override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
-            return (oldItem as SongEntity) == (newItem as SongEntity)
+            return if(oldItem is SongEntity && newItem is SongEntity)(oldItem as SongEntity) == (newItem as SongEntity) else false
         }
     }
     private sealed interface SongChangePayload{

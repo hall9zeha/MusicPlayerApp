@@ -48,6 +48,7 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
+import com.barryzeha.ktmusicplayer.view.ui.adapters.StickyHeaderItemDecoration
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -92,6 +93,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
+    private val itemList= mutableListOf<Any>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,10 +120,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             uris.forEach { uri ->
                 CoroutineScope(Dispatchers.IO).launch {
                     val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
-                    Log.e("OLD-", uri.path.toString() )
                     val parentDir= getParentDirectories(uri.path.toString())
                     val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
-                    val nameFile = realPathFromFile?.substringAfterLast("/", "No named")
+
                     withContext(Dispatchers.Main) {
                         mainViewModel.saveNewSong(
                             SongEntity(
@@ -181,10 +182,29 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
+            if(itemList.isNotEmpty()) itemList.clear()
             if (songList.isNotEmpty()) {
                 CoroutineScope(Dispatchers.IO).launch {
+                    // TODO descomentar cuando se haya mejorado la selección de item en la lista a través del id
+                    // o tipo de objeto no de su posición, porque al haber agregado un header colisiona con las posiciones de
+                    // la lista de reproducción de exoplayer
+                  /*  var temp=""
+                    songList.forEach { item->
+
+                        if(temp==item.parentDirectory.toString()){
+                                itemList.add(item)
+                            }else{
+                                itemList.add(item.parentDirectory.toString())
+                                itemList.add(item)
+                            }
+                        temp=   item.parentDirectory.toString()
+                    }*/
                     adapter.addAll(songList)
+                    //adapter.addAll(itemList)
+
+
                     withContext(Dispatchers.Main) {
+                        //bind?.rvSongs?.addItemDecoration(StickyHeaderItemDecoration())
                         bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, songList.size)
                     }
                 }
