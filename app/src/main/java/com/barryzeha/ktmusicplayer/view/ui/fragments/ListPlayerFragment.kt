@@ -188,7 +188,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     // TODO descomentar cuando se haya mejorado la selección de item en la lista a través del id
                     // o tipo de objeto no de su posición, porque al haber agregado un header colisiona con las posiciones de
                     // la lista de reproducción de exoplayer
-                  /*  var temp=""
+                    var temp=""
                     songList.forEach { item->
 
                         if(temp==item.parentDirectory.toString()){
@@ -198,9 +198,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                                 itemList.add(item)
                             }
                         temp=   item.parentDirectory.toString()
-                    }*/
-                    adapter.addAll(songList)
-                    //adapter.addAll(itemList)
+                    }
+                    //adapter.addAll(songList)
+                    adapter.addAll(itemList)
 
 
                     withContext(Dispatchers.Main) {
@@ -219,7 +219,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
             currentSelectedPosition = positionSelected
             positionSelected?.let{
-                adapter.changeBackgroundColorSelectedItem(positionSelected)
+                adapter.changeBackgroundColorSelectedItem(positionSelected, mPrefs.idSong)
 
             }
         }
@@ -249,7 +249,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             seekbarControl.tvEndTime.text = createTime(musicState.duration).third
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
-            adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
+            adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(), musicState.idSong)
 
             activity?.let {
                 val songMetadata = getSongMetadata(requireActivity(), musicState.songPath)
@@ -305,7 +305,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bottomPlayerControls.btnPlay.setOnClickListener {
                 if (adapter.itemCount > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) getSongOfAdapter(
-                        currentSelectedPosition
+                        mPrefs.idSong
                     )?.let { song ->
                         musicPlayerService?.startPlayer(song,currentSelectedPosition)
                     }
@@ -500,16 +500,33 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             imm!!.hideSoftInputFromWindow(bind?.edtSearch?.windowToken,0)
             CoroutineScope(Dispatchers.Main).launch {
                 delay(1000)
-                adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
+                adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(), mPrefs.idSong)
             }
         }
     }
     private fun getSongOfAdapter(position:Int): SongEntity?{
+
         mainViewModel.setCurrentPosition(position)
         mPrefs.currentPosition = position.toLong()
         val song = adapter.getSongByPosition(position)
         bind?.rvSongs?.scrollToPosition(position)
         return song
+
+    }
+    private fun getSongOfAdapter(idSong: Long):SongEntity?{
+        if(idSong>-1){
+            val song = adapter.getSongById(idSong)
+            song?.let {
+                val pos =  adapter.getPositionByItem(it)
+                mainViewModel.setCurrentPosition(pos!!)
+                mPrefs.currentPosition = pos.toLong()
+                bind?.rvSongs?.scrollToPosition(pos)
+                return song
+            }
+        }else{
+            getSongOfAdapter(mPrefs.currentPosition)
+        }
+        return null
     }
     private fun initCheckPermission(){
         val permissionList:MutableList<String> = mutableListOf(
@@ -666,8 +683,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         checkPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
-        adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt())
-
+        adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(),mPrefs.idSong)
+        // TODO corregir la posición con la nueva forma de obtenerla por id
         bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
         if(mPrefs.controlFromNotify){
             try {

@@ -249,16 +249,19 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                      mainViewModel.setCurrentTrack(musicState)
                  }
                 else {
-
+                    //TODO al usar los controles de next y prev directamente desde el servicio
+                    // nos vemos obligados e implementar esta sección, revisar su estabilidad
+                    mainViewModel.setCurrentTrack(musicState)
                     //mainViewModel.saveStatePlaying(true)
                     //bind?.btnMainNext?.performClick()
-                    Log.e("CASO 3", "ACTIVO" )
+
                 }
             }else{
 
                 mainViewModel.saveStatePlaying(true)
                 mainViewModel.setCurrentTrack(musicState)
                 Log.e("CASO 4", "ACTIVO" )
+
             }
 
         }
@@ -340,10 +343,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     if (mPrefs.songMode == SongMode.Shuffle.ordinal) {
                         musicPlayerService?.prevSong()
                     } else {
-                        musicPlayerService?.startPlayer(
+                       /* musicPlayerService?.startPlayer(
                             getSongOfList(currentSelectedPosition - 1),
                             currentSelectedPosition - 1
-                        )
+                        )*/
+                        musicPlayerService?.prevSong()
                     }
                 }
             }
@@ -352,10 +356,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     if(mPrefs.songMode == SongMode.Shuffle.ordinal ){
                         musicPlayerService?.nextSong()
                     }else {
-                        musicPlayerService?.startPlayer(
+                        /*musicPlayerService?.startPlayer(
                             getSongOfList(currentSelectedPosition + 1),
                             currentSelectedPosition + 1
-                        )
+                        )*/
+                        musicPlayerService?.nextSong()
+
                     }
                 } else {
                     musicPlayerService?.startPlayer(getSongOfList(0),0)
@@ -444,6 +450,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
 
     private fun getSongOfList(position:Int): SongEntity{
+
         mPrefs.currentPosition = position.toLong()
         mainViewModel.setCurrentPosition(position)
         val song = songLists[position]

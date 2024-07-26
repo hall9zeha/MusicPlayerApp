@@ -104,15 +104,28 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         return if(getItem(position) is SongEntity) SONG_ITEM else HEADER_ITEM
     }
     @SuppressLint("ResourceType")
-    fun changeBackgroundColorSelectedItem(position: Int){
-        selectedPos = position
-        if(lastSelectedPos == -1){
-            lastSelectedPos = selectedPos
-        }else{
-            notifyItemChanged(lastSelectedPos,Color.TRANSPARENT)
-            lastSelectedPos = selectedPos
+    fun changeBackgroundColorSelectedItem(position: Int, songId:Long){
+        // obtenemos la posición del item por su id, ya que tenemos dos tipos de vistas en el recyclerview
+        // solo debemos cambiar de color a items SongEntity
+        val songItem = originalList.filterIsInstance<SongEntity>().find {songId == it.id}
+
+        songItem?.let {
+            val position = originalList.indexOf(songItem)
+            //selectedPos = position
+            selectedPos = originalList.indexOf(songItem)
+            if (lastSelectedPos == -1) {
+                lastSelectedPos = selectedPos
+            } else {
+                notifyItemChanged(lastSelectedPos, Color.TRANSPARENT)
+                lastSelectedPos = selectedPos
+            }
+            notifyItemChanged(
+                selectedPos,
+                SongChangePayload.BackgroundColor(
+                    mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+                )
+            )
         }
-        notifyItemChanged(selectedPos,SongChangePayload.BackgroundColor(mColorList(context).getColor(2,0).adjustAlpha(0.3f)))
     }
     fun addAll(songs:List<Any>){
         this.originalList=songs.toMutableList()
@@ -156,7 +169,11 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     }
     fun getSongByPosition(position: Int): SongEntity?{
         return if(currentList.isNotEmpty()){
-           currentList[position] as SongEntity
+            if(currentList[position] is SongEntity) {
+                currentList[position] as SongEntity
+            }else{
+                currentList[position + 1] as SongEntity
+            }
         }else{
             null
         }
@@ -167,6 +184,9 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }else{
             null
         }
+    }
+    fun getSongById(idSong:Long):SongEntity?{
+        return originalList.filterIsInstance<SongEntity>().find { idSong == it.id }
     }
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
@@ -185,7 +205,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
                             String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
                     }
                     root.setOnClickListener {
-                        changeBackgroundColorSelectedItem(bindingAdapterPosition)
+                        changeBackgroundColorSelectedItem(bindingAdapterPosition, song.id)
                         onItemClick(position, song)
 
                     }
@@ -209,14 +229,24 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             val filteredList = if(input.toString().isEmpty()){
                 originalList
             }else{
-                originalList.filter{it as SongEntity
-                    it.description.toString().lowercase().contains(input!!)}
+                /*originalList.filter{it as SongEntity
+                    it.description.toString().lowercase().contains(input!!)}*/
+                originalList.filter { item ->
+                    // Verifica si el item es una instancia de SongEntity
+                    if (item is SongEntity) {
+                        item.description.toString().lowercase().contains(input!!)
+                    } else {
+                        false
+                    }
+                }
             }
             return FilterResults().apply { values=filteredList }
         }
 
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-            submitList(results?.values as ArrayList<Any>)
+            @Suppress("UNCHECKED_CAST")
+            submitList(results?.values as? List<Any> ?: emptyList())
+            //submitList((results?.values is SongEntity) as ArrayList<SongEntity>)
         }
     }
     override fun getFilter(): Filter {

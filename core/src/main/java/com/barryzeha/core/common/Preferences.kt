@@ -55,4 +55,5 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var currentView:Int
         get()=myPreferences.getInt(CURRENT_VIEW,-1)
         set(value)=myPreferences.edit().putInt(CURRENT_VIEW,value).apply()
+
 }
