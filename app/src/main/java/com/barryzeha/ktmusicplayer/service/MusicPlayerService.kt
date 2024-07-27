@@ -546,7 +546,6 @@ class MusicPlayerService : Service(){
     }
     fun nextSong(){
         if(exoPlayer.isPlaying){
-
             exoPlayer.seekToNext()
         }
     }

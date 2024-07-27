@@ -469,17 +469,20 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
             try {
-                val song = songLists[mPrefs.currentPosition.toInt()]
-                val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
-                val newState = MusicState(
-                    songPath = song.pathLocation.toString(),
-                    title = songMetadata!!.title,
-                    artist = songMetadata!!.artist,
-                    album = songMetadata!!.album,
-                    duration = songMetadata.duration
-                )
-                updateUIOnceTime(newState)
-                mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+                //val song = songLists[mPrefs.currentPosition.toInt()]
+                val song = songLists.find { mPrefs.idSong.toInt() == id }
+                song?.let {
+                    val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
+                    val newState = MusicState(
+                        songPath = song.pathLocation.toString(),
+                        title = songMetadata!!.title,
+                        artist = songMetadata!!.artist,
+                        album = songMetadata!!.album,
+                        duration = songMetadata.duration
+                    )
+                    updateUIOnceTime(newState)
+                    mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+                }
             }catch(ex:Exception){}
 
         }

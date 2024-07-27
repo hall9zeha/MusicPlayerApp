@@ -116,25 +116,26 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     fun changeBackgroundColorSelectedItem(position: Int, songId:Long){
         // obtenemos la posición del item por su id, ya que tenemos dos tipos de vistas en el recyclerview
         // solo debemos cambiar de color a items SongEntity
-        val songItem = originalList.filterIsInstance<SongEntity>().find {songId == it.id}
+        val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
 
-        songItem?.let {
-            val position = originalList.indexOf(songItem)
-            //selectedPos = position
-            selectedPos = originalList.indexOf(songItem)
-            if (lastSelectedPos == -1) {
-                lastSelectedPos = selectedPos
-            } else {
-                notifyItemChanged(lastSelectedPos, Color.TRANSPARENT)
-                lastSelectedPos = selectedPos
-            }
-            notifyItemChanged(
-                selectedPos,
-                SongChangePayload.BackgroundColor(
-                    mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+            songItem?.let {
+                val position = originalList.indexOf(songItem)
+                //selectedPos = position
+                selectedPos = originalList.indexOf(songItem)
+                if (lastSelectedPos == -1) {
+                    lastSelectedPos = selectedPos
+                } else {
+                    notifyItemChanged(lastSelectedPos, Color.TRANSPARENT)
+                    lastSelectedPos = selectedPos
+                }
+                notifyItemChanged(
+                    selectedPos,
+                    SongChangePayload.BackgroundColor(
+                        mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+                    )
                 )
-            )
-        }
+            }
+
     }
     fun addAll(songs:List<Any>){
         this.originalList=songs.toMutableList()
@@ -176,6 +177,14 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             notifyItemRemoved(position)
         }*/
     }
+    fun getSongItemCount():Int{
+        var itemSong = 0
+        originalList.forEach { it ->
+            if (it is SongEntity) itemSong++
+        }
+
+        return itemSong
+    }
     fun getSongByPosition(position: Int): SongEntity?{
         return if(currentList.isNotEmpty()){
             if(currentList[position] is SongEntity) {
@@ -216,7 +225,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
                             String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
                     }
                     root.setOnClickListener {
-                        changeBackgroundColorSelectedItem(bindingAdapterPosition, song.id)
+                        // La marcación del item se hará cuando se lance current track en nuestra interface
+                        //changeBackgroundColorSelectedItem(bindingAdapterPosition, song.id)
                         onItemClick(position, song)
 
                     }

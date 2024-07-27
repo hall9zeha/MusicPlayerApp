@@ -169,7 +169,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
             updateUIOnceTime(currentTRack)
-            bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, adapter.itemCount)
+            bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, adapter.getSongItemCount())
 
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
@@ -205,7 +205,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                     withContext(Dispatchers.Main) {
                         //bind?.rvSongs?.addItemDecoration(StickyHeaderItemDecoration())
-                        bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, songList.size)
+                        bind?.seekbarControl?.tvNumberSong?.text =String.format("#%s/%s", mPrefs.currentPosition + 1, adapter.getSongItemCount())
                     }
                 }
             }
@@ -227,7 +227,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(deletedRow>0) song?.let{song->
                 adapter.remove(song)
                 musicPlayerService?.removeMediaItem(song)
-                bind?.seekbarControl?.tvNumberSong?.text=String.format("#%s/%s",mPrefs.currentPosition + 1, adapter.itemCount)
+                bind?.seekbarControl?.tvNumberSong?.text=String.format("#%s/%s",mPrefs.currentPosition + 1, adapter.getSongItemCount())
             }
         }
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
@@ -249,6 +249,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             seekbarControl.tvEndTime.text = createTime(musicState.duration).third
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
+
             adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(), musicState.idSong)
 
             activity?.let {
@@ -330,10 +331,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     if(mPrefs.songMode==SongMode.Shuffle.ordinal){
                         musicPlayerService?.prevSong()
                     }else {
-                        getSongOfAdapter(currentSelectedPosition - 1)?.let { song ->
+                        musicPlayerService?.prevSong()
+                        /*getSongOfAdapter(currentSelectedPosition - 1)?.let { song ->
                             musicPlayerService?.startPlayer(song, currentSelectedPosition - 1)
 
-                        }
+                        }*/
                     }
                 }
             }
@@ -342,10 +344,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     if(mPrefs.songMode==SongMode.Shuffle.ordinal){
                         musicPlayerService?.nextSong()
                     }else {
+                        musicPlayerService?.nextSong()
+                       /*
                         getSongOfAdapter(currentSelectedPosition + 1)?.let { song ->
                             musicPlayerService?.startPlayer(song, currentSelectedPosition + 1)
 
-                        }
+                        }*/
                     }
                 } else {
                     getSongOfAdapter(0)?.let { song ->
@@ -662,7 +666,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 else if(!musicState.latestPlayed && mPrefs.songMode == SongMode.Shuffle.ordinal){
                     mainViewModel.setCurrentTrack(musicState)
                 }
-                else{}
+                else{
+                    //TODO al usar los controles de next y prev directamente desde el servicio
+                    // nos vemos obligados e implementar esta sección, revisar su estabilidad
+                    mainViewModel.setCurrentTrack(musicState)
+                }
             }else{
                 mainViewModel.saveStatePlaying(true)
                 mainViewModel.setCurrentTrack(musicState)
@@ -684,11 +692,18 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(),mPrefs.idSong)
+
         // TODO corregir la posición con la nueva forma de obtenerla por id
-        bind?.rvSongs?.scrollToPosition(currentSelectedPosition)
+        val itemSong = adapter.getSongById(mPrefs.idSong)
+        itemSong?.let{
+            val position = adapter.getPositionByItem(itemSong)
+            bind?.rvSongs?.scrollToPosition(position!! )
+        }
+
         if(mPrefs.controlFromNotify){
             try {
-                val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
+                //val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
+                val song = getSongOfAdapter(mPrefs.idSong.toInt())
                 song?.let {
                     val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
                     val newState = MusicState(
