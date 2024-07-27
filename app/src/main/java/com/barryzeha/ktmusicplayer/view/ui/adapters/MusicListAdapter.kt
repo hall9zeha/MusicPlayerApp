@@ -92,14 +92,23 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             }
         }
         if(holder is MViewHolder) {
-           holder.onBind(position, getItem(position) as SongEntity)
+            val songPosition = getSongPositionOnlySongItem(position)
+            holder.onBind(songPosition, getItem(position) as SongEntity)
         }else if(holder is HeaderViewHolder){
             holder.onBind(getItem(position) as String)
         }
         //holder.onBind(position, songList[position])
         //holder.onBind(position, asyncListDiffer.currentList[position])
     }
-
+    private fun getSongPositionOnlySongItem(position: Int): Int {
+        var count = 0
+        for (i in 0 until position) {
+            if (getItemViewType(i) == SONG_ITEM) {
+                count++
+            }
+        }
+        return count + 1
+    }
     override fun getItemViewType(position: Int): Int {
         return if(getItem(position) is SongEntity) SONG_ITEM else HEADER_ITEM
     }
@@ -191,13 +200,15 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
+
                 CoroutineScope(Dispatchers.IO).launch {
                     val audioTag = fetchFileMetadata(context, song.pathLocation!!)
                     withContext(Dispatchers.Main) {
+
                         tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
                         tvSongDesc.text = String.format(
                             "%s. %s - %s",
-                            (position + 1), audioTag.title,
+                            (position), audioTag.title,
                             audioTag.artist
                         )
                         tvDuration.text = audioTag.songLengthFormatted
