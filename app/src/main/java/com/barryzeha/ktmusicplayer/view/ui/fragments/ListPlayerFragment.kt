@@ -328,30 +328,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
             bottomPlayerControls.btnPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
-                    if(mPrefs.songMode==SongMode.Shuffle.ordinal){
                         musicPlayerService?.prevSong()
-                    }else {
-                        musicPlayerService?.prevSong()
-                        /*getSongOfAdapter(currentSelectedPosition - 1)?.let { song ->
-                            musicPlayerService?.startPlayer(song, currentSelectedPosition - 1)
-
-                        }*/
-                    }
                 }
             }
             bottomPlayerControls.btnNext.setOnClickListener {
                 if (currentSelectedPosition < adapter.itemCount - 1) {
-                    if(mPrefs.songMode==SongMode.Shuffle.ordinal){
-                        musicPlayerService?.nextSong()
-                    }else {
-                        musicPlayerService?.nextSong()
-                       /*
-                        getSongOfAdapter(currentSelectedPosition + 1)?.let { song ->
-                            musicPlayerService?.startPlayer(song, currentSelectedPosition + 1)
+                       musicPlayerService?.nextSong()
 
-                        }*/
                     }
-                } else {
+                else {
                     getSongOfAdapter(0)?.let { song ->
                         musicPlayerService?.startPlayer(song,currentSelectedPosition)
 
@@ -693,7 +678,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(),mPrefs.idSong)
 
-        // TODO corregir la posición con la nueva forma de obtenerla por id
+
         val itemSong = adapter.getSongById(mPrefs.idSong)
         itemSong?.let{
             val position = adapter.getPositionByItem(itemSong)

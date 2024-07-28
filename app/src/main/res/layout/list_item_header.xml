@@ -6,7 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#222"
     android:padding="8dp"
-    android:layout_marginTop ="8dp"
     android:layout_marginBottom="8dp"
 
     >
@@ -20,8 +19,20 @@
         android:textSize="16sp"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ivArrow"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
+    <ImageButton
+        android:id="@+id/ivArrow"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_arrow_down"
+        style="@style/Widget.Material3.Button.IconButton.Outlined"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvHeaderDescription"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

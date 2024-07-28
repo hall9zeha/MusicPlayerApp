@@ -78,7 +78,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
             bind=FragmentMainPlayerBinding.bind(view)
-
             currentSelectedPosition = mPrefs.currentPosition.toInt()
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
             setUpObservers()
@@ -340,29 +339,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
             btnMainPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
-                    if (mPrefs.songMode == SongMode.Shuffle.ordinal) {
-                        musicPlayerService?.prevSong()
-                    } else {
-                       /* musicPlayerService?.startPlayer(
-                            getSongOfList(currentSelectedPosition - 1),
-                            currentSelectedPosition - 1
-                        )*/
-                        musicPlayerService?.prevSong()
-                    }
+                       musicPlayerService?.prevSong()
                 }
             }
             btnMainNext.setOnClickListener {
                 if (currentSelectedPosition < songLists.size - 1) {
-                    if(mPrefs.songMode == SongMode.Shuffle.ordinal ){
-                        musicPlayerService?.nextSong()
-                    }else {
-                        /*musicPlayerService?.startPlayer(
-                            getSongOfList(currentSelectedPosition + 1),
-                            currentSelectedPosition + 1
-                        )*/
-                        musicPlayerService?.nextSong()
-
-                    }
+                      musicPlayerService?.nextSong()
                 } else {
                     musicPlayerService?.startPlayer(getSongOfList(0),0)
                 }
