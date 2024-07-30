@@ -461,6 +461,7 @@ class MusicPlayerService : Service(){
 
                                 )
                                 _songController?.currentTrack(currentMusicState)
+                                mPrefs.idSong = song.id
                                 mPrefs.currentPosition = newPosition.mediaItemIndex.toLong()
                                 if(_songController == null){
                                     mPrefs.controlFromNotify = true
@@ -468,9 +469,10 @@ class MusicPlayerService : Service(){
                                     mPrefs.isPlaying = exoPlayer.isPlaying
                                     // Para encontrar la posición del item en la lista de nuestra vista
                                     // por su id
-                                    mPrefs.idSong = song.id
+
 
                                 }
+
                             }
 
                         }

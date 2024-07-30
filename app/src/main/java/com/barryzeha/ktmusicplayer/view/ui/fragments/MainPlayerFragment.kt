@@ -244,15 +244,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     mainViewModel.saveStatePlaying(false)
                     mainViewModel.setCurrentTrack(musicState)
                 }
-                 else if(!musicState.latestPlayed && (mPrefs.songMode == SongMode.Shuffle.ordinal)){
+                else if(!musicState.latestPlayed && (mPrefs.songMode == SongMode.Shuffle.ordinal)){
                      mainViewModel.setCurrentTrack(musicState)
                  }
                 else {
                     //TODO al usar los controles de next y prev directamente desde el servicio
                     // nos vemos obligados e implementar esta sección, revisar su estabilidad
                     mainViewModel.setCurrentTrack(musicState)
-                    //mainViewModel.saveStatePlaying(true)
-                    //bind?.btnMainNext?.performClick()
+
 
                 }
             }else{
@@ -443,7 +442,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
 
     }
-
     override fun onResume() {
         super.onResume()
         setNumberOfTrack()

@@ -441,11 +441,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 ) {
 
                 }
-
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     adapter.filter.filter(s)
                 }
-
                 override fun afterTextChanged(s: Editable?) {
 
                 }
@@ -678,13 +676,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(),mPrefs.idSong)
 
-
         val itemSong = adapter.getSongById(mPrefs.idSong)
         itemSong?.let{
             val position = adapter.getPositionByItem(itemSong)
             bind?.rvSongs?.scrollToPosition(position!! )
         }
-
         if(mPrefs.controlFromNotify){
             try {
                 //val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
