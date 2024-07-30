@@ -80,5 +80,6 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":data"))
     implementation(project(":di"))
+    implementation(project(":features"))
 
 }

@@ -190,7 +190,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     // la lista de reproducción de exoplayer
                     var temp=""
                     songList.forEach { item->
-
                         if(temp==item.parentDirectory.toString()){
                                 itemList.add(item)
                             }else{
@@ -201,8 +200,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     }
                     //adapter.addAll(songList)
                     adapter.addAll(itemList)
-
-
                     withContext(Dispatchers.Main) {
                         //bind?.rvSongs?.addItemDecoration(StickyHeaderItemDecoration())
                         setNumberOfTrack()
@@ -699,12 +696,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     mainViewModel.saveStatePlaying(mPrefs.isPlaying)
                     updateUIOnceTime(newState)
                 }
-
             }catch(ex:Exception){}
         }
         mPrefs.controlFromNotify=false
-
-
     }
     override fun onStop() {
         mPrefs.currentView = MAIN_FRAGMENT
