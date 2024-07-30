@@ -453,6 +453,8 @@ class MusicPlayerService : Service(){
                     if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
                         if (songsList.isNotEmpty()) {
                             val song=songsList[newPosition.mediaItemIndex]
+
+
                             songEntity = song
                             fetchSong(song)?.let {songInfo->
                                 currentMusicState = songInfo.copy(
@@ -461,15 +463,15 @@ class MusicPlayerService : Service(){
 
                                 )
                                 _songController?.currentTrack(currentMusicState)
+                                // Para encontrar la posición del item en la lista de nuestra vista
+                                // por su id
                                 mPrefs.idSong = song.id
-                                mPrefs.currentPosition = newPosition.mediaItemIndex.toLong()
+                                mPrefs.currentPosition = newPosition.mediaItemIndex.toLong() +1
                                 if(_songController == null){
                                     mPrefs.controlFromNotify = true
                                     mPrefs.nextOrPrevFromNotify = true
                                     mPrefs.isPlaying = exoPlayer.isPlaying
-                                    // Para encontrar la posición del item en la lista de nuestra vista
-                                    // por su id
-
+                                    mPrefs.idSong = song.id
 
                                 }
 

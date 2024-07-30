@@ -289,7 +289,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
-            Log.e("ID-SONG", musicState.idSong.toString() )
             updateService()
         }
 
@@ -302,15 +301,15 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // porque genera un mal efecto en la vista al cargar la pista guardada
             // entre otros pequeños inconvenientes, ahora está en onResumen para actualizarse cuando cambiemos de lista
             // a main
-            mainSeekBar.max = musicState.duration.toInt()
+            //mainSeekBar.max = musicState.duration.toInt()
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
-            tvSongTimeCompleted.text = createTime(musicState.duration).third
+            //tvSongTimeCompleted.text = createTime(musicState.duration).third
         }
     }
     private fun setNumberOfTrack(){
         bind?.tvNumberSong?.text =
-        String.format("#%s/%s", mPrefs.currentPosition + 1, songLists.count())
+        String.format("#%s/%s", mPrefs.currentPosition, songLists.count())
     }
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
@@ -450,8 +449,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         if(mPrefs.nextOrPrevFromNotify){
             try {
                 //val song = songLists[mPrefs.currentPosition.toInt()]
-                val song = songLists.find { mPrefs.idSong.toInt() == id }
+                val song = songLists.find { mPrefs.idSong == it.id }
                 song?.let {
+
                     val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
                     val newState = MusicState(
                         songPath = song.pathLocation.toString(),
