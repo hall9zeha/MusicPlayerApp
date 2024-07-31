@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/di" />
             <option value="$PROJECT_DIR$/features" />
+            <option value="$PROJECT_DIR$/features/mfilepicker" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

@@ -50,6 +50,7 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.adapters.StickyHeaderItemDecoration
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
+import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -290,6 +291,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     if (isGranted) {
                         val mimeTypes = arrayOf("audio/*")
                         launcherOpenMultipleDocs.launch(mimeTypes)
+
+
+                        //startActivity(Intent(activity,FilePickerActivity::class.java))
                     } else {
                         permissionsList.forEach { permission ->
                             if (!permission.second) {

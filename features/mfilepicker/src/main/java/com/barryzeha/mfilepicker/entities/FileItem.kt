@@ -10,13 +10,13 @@ import com.barryzeha.mfilepicker.interfaces.FileType
  **/
 
 data class FileItem(
- var fileName:String,
- var filePath:String,
- var isChecked:Boolean,
- var fileType:FileType,
- var isDir:Boolean,
+ var fileName:String?="",
+ var filePath:String?="",
+ private var isChecked:Boolean=false,
+ var fileType:FileType?=null,
+ var isDir:Boolean=false,
 
 ){
- fun isChecked():Boolean = isChecked
+ fun getIsChecked():Boolean = isChecked
  fun setCheck(check:Boolean) {isChecked = check}
 }
