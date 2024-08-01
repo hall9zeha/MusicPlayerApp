@@ -5,12 +5,19 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.views.FilePickerActivity">
-
+    tools:context=".ui.views.FilePickerActivity"
+    android:fitsSystemWindows="true"
+    >
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFilePicker"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/file_picker_item"/>
+        tools:listitem="@layout/file_picker_item"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

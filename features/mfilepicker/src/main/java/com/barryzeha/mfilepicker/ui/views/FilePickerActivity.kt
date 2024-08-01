@@ -24,13 +24,17 @@ class FilePickerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bind = ActivityFilePickerBinding.inflate(layoutInflater)
-        enableEdgeToEdge()
+
+        //Para mostrar correctamente el toolbar debemos de comentar la configuración de ViewCompat
+
+        //enableEdgeToEdge()
         setContentView(bind.root)
-        ViewCompat.setOnApplyWindowInsetsListener(bind.main) { v, insets ->
+        /*ViewCompat.setOnApplyWindowInsetsListener(bind.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
+        }*/
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setupAdapter()
         rootDirectory = Environment.getExternalStorageDirectory()
         loadFiles(rootDirectory)
