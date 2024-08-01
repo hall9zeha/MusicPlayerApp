@@ -32,7 +32,7 @@ class FilePickerAdapter: RecyclerView.Adapter<FilePickerAdapter.FilePickerViewHo
         if(item.isDir){
             holder.bind.ivFileType.setImageResource(R.drawable.ic_folder)
         }else{
-            holder.bind.ivFileType.setImageResource(item.fileType?.fileIconResId?:R.drawable.ic_folder)
+            holder.bind.ivFileType.setImageResource(item.fileType?.fileIconResId?:R.drawable.ic_unknown_file)
         }
     }
 

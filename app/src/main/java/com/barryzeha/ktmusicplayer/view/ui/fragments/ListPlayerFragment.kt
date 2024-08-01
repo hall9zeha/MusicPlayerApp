@@ -289,11 +289,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     )
                 ) { isGranted, permissionsList ->
                     if (isGranted) {
+                        /*
                         val mimeTypes = arrayOf("audio/*")
                         launcherOpenMultipleDocs.launch(mimeTypes)
-
-
-                        //startActivity(Intent(activity,FilePickerActivity::class.java))
+                        */
+                         */
+                       startActivity(Intent(activity,FilePickerActivity::class.java))
                     } else {
                         permissionsList.forEach { permission ->
                             if (!permission.second) {

@@ -48,15 +48,26 @@ class FilePickerActivity : AppCompatActivity() {
         val files = directory.listFiles()
 
         if(files != null){
-            val filesList = files.filter { it.isFile || it.isDirectory}.sortedBy { it.name.lowercase() }
+            val filesList = files.sortedBy { it.name.lowercase() }
            filesList.forEach { file->
-               var type:FileType?=null
-               if(AudioFileType().verify(file.name)){
-                   type=AudioFileType()
+               if(file.isDirectory) {
+                   fileList.add(
+                       FileItem(
+                           fileName = file.name,
+                           isDir = file.isDirectory
+                       )
+                   )
                }
-
-              fileList.add(FileItem(fileName = file.name, isDir = file.isDirectory, fileType = type))
            }
+            filesList.forEach { file->
+                if(file.isFile){
+                    var type:FileType?=null
+                    if(AudioFileType().verify(file.name)){
+                        type=AudioFileType()
+                    }
+                    fileList.add(FileItem(fileName = file.name, isDir = file.isDirectory, fileType = type))
+                }
+            }
         }
         pickerAdapter.addAll(fileList)
 
