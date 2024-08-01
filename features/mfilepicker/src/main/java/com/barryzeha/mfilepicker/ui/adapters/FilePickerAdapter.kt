@@ -17,7 +17,7 @@ import com.barryzeha.mfilepicker.entities.FileItem
  * Copyright (c)  All rights reserved.
  **/
 
-class FilePickerAdapter: RecyclerView.Adapter<FilePickerAdapter.FilePickerViewHolder>(){
+class FilePickerAdapter(private val onItemClick:(item:FileItem)->Unit, private val onCheckboxClick:(position:Int,item:FileItem)->Unit): RecyclerView.Adapter<FilePickerAdapter.FilePickerViewHolder>(){
     private lateinit var context:Context
     private var listItems:MutableList<FileItem> = mutableListOf()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilePickerViewHolder {
@@ -28,11 +28,18 @@ class FilePickerAdapter: RecyclerView.Adapter<FilePickerAdapter.FilePickerViewHo
 
     override fun onBindViewHolder(holder: FilePickerViewHolder, position: Int) {
         val item = listItems[position]
+
         holder.bind.tvFileDescription.text = item.fileName
         if(item.isDir){
             holder.bind.ivFileType.setImageResource(R.drawable.ic_folder)
         }else{
             holder.bind.ivFileType.setImageResource(item.fileType?.fileIconResId?:R.drawable.ic_unknown_file)
+        }
+        holder.bind.root.setOnClickListener {
+            onItemClick(item)
+        }
+        holder.bind.chkSelected.setOnCheckedChangeListener { buttonView, isChecked ->
+            onCheckboxClick(position,item.copy(isChecked = isChecked))
         }
     }
 

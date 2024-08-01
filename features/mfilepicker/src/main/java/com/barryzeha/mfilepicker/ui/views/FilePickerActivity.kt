@@ -2,6 +2,7 @@ package com.barryzeha.mfilepicker.ui.views
 
 import android.os.Bundle
 import android.os.Environment
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -40,7 +41,7 @@ class FilePickerActivity : AppCompatActivity() {
         loadFiles(rootDirectory)
     }
     private fun setupAdapter(){
-        pickerAdapter = FilePickerAdapter()
+        pickerAdapter = FilePickerAdapter(::onItemClick, ::onCheckboxClick)
         bind.rvFilePicker.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@FilePickerActivity)
@@ -75,5 +76,11 @@ class FilePickerActivity : AppCompatActivity() {
         }
         pickerAdapter.addAll(fileList)
 
+    }
+    private fun onItemClick(item:FileItem){
+
+    }
+    private fun onCheckboxClick(position:Int, item:FileItem){
+        Toast.makeText(this, item.getIsChecked().toString(), Toast.LENGTH_SHORT).show()
     }
 }

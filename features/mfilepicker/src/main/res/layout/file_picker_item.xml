@@ -38,7 +38,8 @@
         android:id="@+id/chkSelected"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:theme="@style/checkBoxStyle"
+        android:button="@drawable/check_box_selector"
         app:layout_constraintStart_toEndOf="@id/tvFileDescription"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
