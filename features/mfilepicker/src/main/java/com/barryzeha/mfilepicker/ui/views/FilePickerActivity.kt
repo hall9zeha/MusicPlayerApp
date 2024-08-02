@@ -7,12 +7,9 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.databinding.ActivityFilePickerBinding
@@ -21,13 +18,13 @@ import com.barryzeha.mfilepicker.filetype.AudioFileType
 import com.barryzeha.mfilepicker.interfaces.FileType
 import com.barryzeha.mfilepicker.ui.adapters.FilePickerAdapter
 import java.io.File
-import java.util.Collections
 
 class FilePickerActivity : AppCompatActivity() {
     private lateinit var bind:ActivityFilePickerBinding
     private lateinit var pickerAdapter:FilePickerAdapter
     private var  fileList:MutableList<FileItem> = mutableListOf()
     private lateinit var rootDirectory:File
+    private var listTreeOfNav:MutableList<File> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,9 +55,15 @@ class FilePickerActivity : AppCompatActivity() {
     }
     private fun loadFiles(directory:File){
         fileList.clear()
+        listTreeOfNav.add(directory)
+
         val files = directory.listFiles()
 
         if(files != null){
+            //
+            if(checkIfRootDir(directory))setTitle(directory.parent)
+            else setTitle(directory.name)
+
             val filesList = files.sortedBy { it.name.lowercase() }
            filesList.forEach { file->
                if(file.isDirectory) {
@@ -91,10 +94,29 @@ class FilePickerActivity : AppCompatActivity() {
 
     }
     private fun onItemClick(item:FileItem){
+        val file = File(item.filePath.toString())
         Log.e("FILE-PATH", item.filePath.toString() )
+        if(item.isDir) {
+            pickerAdapter.clear()
+            loadFiles(file)
+        }
+
     }
     private fun onCheckboxClick(position:Int, item:FileItem){
         Toast.makeText(this, item.getIsChecked().toString(), Toast.LENGTH_SHORT).show()
+    }
+    private fun checkIfRootDir(directory: File):Boolean{
+        val internalRoot = File("/").canonicalFile
+        if(directory.canonicalFile == internalRoot) return true
+
+        val externalRoot = getExternalRoot()
+        return externalRoot.any{directory.canonicalFile == it.canonicalFile}
+    }
+    private fun getExternalRoot():List<File>{
+        val externalRoots = mutableListOf<File>()
+        val externalRootPrimary = Environment.getExternalStorageDirectory().canonicalFile
+        externalRoots.add(externalRootPrimary)
+        return externalRoots
     }
     private fun setUpMenuProvider(){
         val menuHost:MenuHost = this
@@ -104,8 +126,36 @@ class FilePickerActivity : AppCompatActivity() {
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                when(menuItem.itemId){
+                    android.R.id.home->{
+                        if( listTreeOfNav.size>1){
+                            navigationDirList(listTreeOfNav)
+
+                        }else{
+                            finish()
+                        }
+                    }
+                }
                return true
             }
         })
     }
+    private fun navigationDirList(dirList:MutableList<File>){
+        pickerAdapter.clear()
+
+        loadFiles(dirList[(dirList.size-1)-1])
+        dirList.removeAt(dirList.size - 1)
+        dirList.removeAt((dirList.size - 1)-1)
+    }
+    @Suppress("DEPRECATION")
+    override fun onBackPressed() {
+        if(listTreeOfNav.size>1){
+            navigationDirList(listTreeOfNav)
+        }else{
+            super.onBackPressed()
+        }
+
+
+    }
+
 }

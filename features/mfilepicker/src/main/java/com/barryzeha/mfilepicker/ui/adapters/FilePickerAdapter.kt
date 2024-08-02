@@ -1,10 +1,10 @@
 package com.barryzeha.mfilepicker.ui.adapters
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.databinding.FilePickerItemBinding
@@ -52,6 +52,12 @@ class FilePickerAdapter(private val onItemClick:(item:FileItem)->Unit, private v
                 notifyItemInserted(listItems.size -1)
             }
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun clear(){
+        listItems.clear()
+        notifyDataSetChanged()
     }
     inner class FilePickerViewHolder(itemView:View):RecyclerView.ViewHolder(itemView) {
 
