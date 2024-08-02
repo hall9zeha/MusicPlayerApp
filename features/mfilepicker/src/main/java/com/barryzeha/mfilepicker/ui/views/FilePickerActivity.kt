@@ -81,12 +81,12 @@ class FilePickerActivity : AppCompatActivity() {
                     var type:FileType?=null
                     if(AudioFileType().verify(file.name)){
                         type=AudioFileType()
+                        fileList.add(FileItem(
+                            filePath=file.absolutePath,
+                            fileName = file.name,
+                            isDir = file.isDirectory,
+                            fileType = type))
                     }
-                    fileList.add(FileItem(
-                        filePath=file.absolutePath,
-                        fileName = file.name,
-                        isDir = file.isDirectory,
-                        fileType = type))
                 }
             }
         }
@@ -145,7 +145,7 @@ class FilePickerActivity : AppCompatActivity() {
 
         loadFiles(dirList[(dirList.size-1)-1])
         dirList.removeAt(dirList.size - 1)
-        dirList.removeAt((dirList.size - 1)-1)
+        dirList.removeAt(dirList.size - 1)
     }
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
@@ -154,8 +154,6 @@ class FilePickerActivity : AppCompatActivity() {
         }else{
             super.onBackPressed()
         }
-
-
-    }
+  }
 
 }
