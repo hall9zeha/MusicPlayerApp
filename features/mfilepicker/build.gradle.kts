@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.dagger.hilt.plugin)
 }
 
 android {
@@ -46,6 +48,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Dagger hilt
+    ksp(libs.dagger.hilt.compiler)
+    implementation(libs.dagger.hilt)
 
     implementation(project(":core"))
 }

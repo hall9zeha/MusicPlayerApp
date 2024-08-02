@@ -135,6 +135,9 @@ class FilePickerActivity : AppCompatActivity() {
                             finish()
                         }
                     }
+                    R.id.itemConfirm->{
+
+                    }
                 }
                return true
             }
