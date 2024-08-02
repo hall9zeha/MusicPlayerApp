@@ -28,7 +28,7 @@ class FilePickerAdapter(private val onItemClick:(item:FileItem)->Unit, private v
 
     override fun onBindViewHolder(holder: FilePickerViewHolder, position: Int) {
         val item = listItems[position]
-
+       
         holder.bind.tvFileDescription.text = item.fileName
         if(item.isDir){
             holder.bind.ivFileType.setImageResource(R.drawable.ic_folder)

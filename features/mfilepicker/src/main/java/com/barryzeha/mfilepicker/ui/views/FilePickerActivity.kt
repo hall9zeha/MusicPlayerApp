@@ -2,12 +2,19 @@ package com.barryzeha.mfilepicker.ui.views
 
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.databinding.ActivityFilePickerBinding
 import com.barryzeha.mfilepicker.entities.FileItem
 import com.barryzeha.mfilepicker.filetype.AudioFileType
@@ -36,6 +43,7 @@ class FilePickerActivity : AppCompatActivity() {
             insets
         }*/
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setUpMenuProvider()
         setupAdapter()
         rootDirectory = Environment.getExternalStorageDirectory()
         loadFiles(rootDirectory)
@@ -58,6 +66,7 @@ class FilePickerActivity : AppCompatActivity() {
                if(file.isDirectory) {
                    fileList.add(
                        FileItem(
+                           filePath=file.absolutePath,
                            fileName = file.name,
                            isDir = file.isDirectory
                        )
@@ -70,7 +79,11 @@ class FilePickerActivity : AppCompatActivity() {
                     if(AudioFileType().verify(file.name)){
                         type=AudioFileType()
                     }
-                    fileList.add(FileItem(fileName = file.name, isDir = file.isDirectory, fileType = type))
+                    fileList.add(FileItem(
+                        filePath=file.absolutePath,
+                        fileName = file.name,
+                        isDir = file.isDirectory,
+                        fileType = type))
                 }
             }
         }
@@ -78,9 +91,21 @@ class FilePickerActivity : AppCompatActivity() {
 
     }
     private fun onItemClick(item:FileItem){
-
+        Log.e("FILE-PATH", item.filePath.toString() )
     }
     private fun onCheckboxClick(position:Int, item:FileItem){
         Toast.makeText(this, item.getIsChecked().toString(), Toast.LENGTH_SHORT).show()
+    }
+    private fun setUpMenuProvider(){
+        val menuHost:MenuHost = this
+        menuHost.addMenuProvider(object:MenuProvider{
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.file_picker_menu,menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+               return true
+            }
+        })
     }
 }
