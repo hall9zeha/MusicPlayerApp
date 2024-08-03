@@ -19,4 +19,16 @@ data class FileItem(
 ){
  fun getIsChecked():Boolean = isChecked
  fun setCheck(check:Boolean) {isChecked = check}
+ override fun equals(other: Any?): Boolean {
+  if (this === other) return true
+  if (javaClass != other?.javaClass) return false
+
+  other as FileItem
+
+  return filePath == other.filePath
+ }
+
+ override fun hashCode(): Int {
+  return filePath?.hashCode() ?: 0
+ }
 }

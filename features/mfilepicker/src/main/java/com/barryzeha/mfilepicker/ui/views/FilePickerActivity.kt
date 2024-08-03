@@ -25,6 +25,7 @@ class FilePickerActivity : AppCompatActivity() {
     private var  fileList:MutableList<FileItem> = mutableListOf()
     private lateinit var rootDirectory:File
     private var listTreeOfNav:MutableList<File> = arrayListOf()
+    private val selectedItemsList:MutableList<FileItem> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,7 +104,14 @@ class FilePickerActivity : AppCompatActivity() {
 
     }
     private fun onCheckboxClick(position:Int, item:FileItem){
-        Toast.makeText(this, item.getIsChecked().toString(), Toast.LENGTH_SHORT).show()
+        if(item.getIsChecked()){
+            selectedItemsList.add(item)
+        }else{
+            if(selectedItemsList.contains(item)){
+                selectedItemsList.remove(item)
+            }
+        }
+
     }
     private fun checkIfRootDir(directory: File):Boolean{
         val internalRoot = File("/").canonicalFile
@@ -136,7 +144,9 @@ class FilePickerActivity : AppCompatActivity() {
                         }
                     }
                     R.id.itemConfirm->{
-
+                        selectedItemsList.forEach {item->
+                            Log.e("ITEM", item.fileName.toString() )
+                        }
                     }
                 }
                return true
