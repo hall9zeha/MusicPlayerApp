@@ -81,6 +81,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private lateinit var adapter:MusicListAdapter
     private lateinit var launcher:ActivityResultLauncher<Intent>
     private lateinit var launcherOpenMultipleDocs:ActivityResultLauncher<Array<String>>
+    private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private var isPlaying = false
     private var isUserSeeking=false
@@ -110,6 +111,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
         bind = FragmentListPlayerBinding.bind(view)
         activityResultFile()
+        filePickerResult()
         activityResultForPermission()
         initCheckPermission()
         setUpAdapter()
@@ -142,7 +144,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
 
     }
-
+    private fun filePickerResult(){
+        launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()){paths->
+            paths.forEach {pat->
+                Log.e("PATHS-LIST",  pat)
+            }
+        }
+    }
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
             if(it){
@@ -292,7 +300,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         /*val mimeTypes = arrayOf("audio/*")
                         launcherOpenMultipleDocs.launch(mimeTypes)*/
                            */
-                       startActivity(Intent(activity,FilePickerActivity::class.java))
+                        launcherFilePickerActivity.launch(Unit)
+                    //startActivity(Intent(activity,FilePickerActivity::class.java))
                     } else {
                         permissionsList.forEach { permission ->
                             if (!permission.second) {

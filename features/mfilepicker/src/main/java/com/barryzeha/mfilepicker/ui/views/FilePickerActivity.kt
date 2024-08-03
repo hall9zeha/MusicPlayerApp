@@ -1,12 +1,17 @@
 package com.barryzeha.mfilepicker.ui.views
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -24,9 +29,9 @@ class FilePickerActivity : AppCompatActivity() {
     private lateinit var pickerAdapter:FilePickerAdapter
     private var  fileList:MutableList<FileItem> = mutableListOf()
     private lateinit var rootDirectory:File
-    private var listTreeOfNav:MutableList<File> = arrayListOf()
+    private var listTreeOfNav:MutableList<Pair<Int,File>> = arrayListOf()
     private val selectedItemsList:MutableList<FileItem> = arrayListOf()
-
+    private var toolbarMenu:Menu?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bind = ActivityFilePickerBinding.inflate(layoutInflater)
@@ -44,7 +49,7 @@ class FilePickerActivity : AppCompatActivity() {
         setUpMenuProvider()
         setupAdapter()
         rootDirectory = Environment.getExternalStorageDirectory()
-        loadFiles(rootDirectory)
+        loadFiles(directory = rootDirectory)
     }
     private fun setupAdapter(){
         pickerAdapter = FilePickerAdapter(::onItemClick, ::onCheckboxClick)
@@ -54,9 +59,9 @@ class FilePickerActivity : AppCompatActivity() {
             adapter= pickerAdapter
         }
     }
-    private fun loadFiles(directory:File){
+    private fun loadFiles(position:Int =0 ,directory:File){
         fileList.clear()
-        listTreeOfNav.add(directory)
+        listTreeOfNav.add(Pair(position,directory))
 
         val files = directory.listFiles()
 
@@ -94,12 +99,14 @@ class FilePickerActivity : AppCompatActivity() {
         pickerAdapter.addAll(fileList)
 
     }
-    private fun onItemClick(item:FileItem){
+    private fun onItemClick(position:Int,item:FileItem){
         val file = File(item.filePath.toString())
         Log.e("FILE-PATH", item.filePath.toString() )
         if(item.isDir) {
             pickerAdapter.clear()
-            loadFiles(file)
+            loadFiles(position,file)
+            toolbarMenu?.getItem(0)?.setVisible(false)
+            selectedItemsList.clear()
         }
 
     }
@@ -111,7 +118,8 @@ class FilePickerActivity : AppCompatActivity() {
                 selectedItemsList.remove(item)
             }
         }
-
+        if(selectedItemsList.size>0) toolbarMenu?.getItem(0)?.setVisible(true)
+        else toolbarMenu?.getItem(0)?.setVisible(false)
     }
     private fun checkIfRootDir(directory: File):Boolean{
         val internalRoot = File("/").canonicalFile
@@ -130,9 +138,11 @@ class FilePickerActivity : AppCompatActivity() {
         val menuHost:MenuHost = this
         menuHost.addMenuProvider(object:MenuProvider{
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                toolbarMenu=menu
                 menuInflater.inflate(R.menu.file_picker_menu,menu)
-            }
+                menu.getItem(0)?.setVisible(false)
 
+            }
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 when(menuItem.itemId){
                     android.R.id.home->{
@@ -144,21 +154,31 @@ class FilePickerActivity : AppCompatActivity() {
                         }
                     }
                     R.id.itemConfirm->{
+                        val fileList:MutableList<String> = arrayListOf()
                         selectedItemsList.forEach {item->
-                            Log.e("ITEM", item.fileName.toString() )
+                                fileList.add(item.filePath.toString())
                         }
+                        val resultIntent = Intent().apply {
+                            putStringArrayListExtra("paths", ArrayList(fileList))
+                        }
+                        setResult(Activity.RESULT_OK, resultIntent)
+                        finish()
+
                     }
                 }
                return true
             }
         })
     }
-    private fun navigationDirList(dirList:MutableList<File>){
+    private fun navigationDirList(dirList:MutableList<Pair<Int,File>>){
         pickerAdapter.clear()
 
-        loadFiles(dirList[(dirList.size-1)-1])
+        loadFiles(directory = dirList[(dirList.size-1)-1].second)
+        bind.rvFilePicker.scrollToPosition(dirList[(dirList.size-1)-1].first)
         dirList.removeAt(dirList.size - 1)
         dirList.removeAt(dirList.size - 1)
+        toolbarMenu?.getItem(0)?.setVisible(false)
+        selectedItemsList.clear()
     }
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
@@ -168,5 +188,14 @@ class FilePickerActivity : AppCompatActivity() {
             super.onBackPressed()
         }
   }
+    class FilePickerContract:ActivityResultContract<Unit,List<String>>(){
+        override fun createIntent(context: Context, input: Unit): Intent {
+            return Intent(context,FilePickerActivity::class.java)
+        }
+
+        override fun parseResult(resultCode: Int, intent: Intent?): List<String> {
+            return intent?.getStringArrayListExtra("paths")?: emptyList()
+        }
+    }
 
 }
