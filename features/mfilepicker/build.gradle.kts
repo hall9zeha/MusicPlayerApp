@@ -53,5 +53,8 @@ dependencies {
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.dagger.hilt)
 
+    // Gson
+    implementation(libs.gson)
+
     implementation(project(":core"))
 }

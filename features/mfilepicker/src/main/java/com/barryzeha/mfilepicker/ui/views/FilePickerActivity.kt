@@ -17,14 +17,21 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.mfilepicker.R
+import com.barryzeha.mfilepicker.common.Preferences
 import com.barryzeha.mfilepicker.databinding.ActivityFilePickerBinding
 import com.barryzeha.mfilepicker.entities.FileItem
 import com.barryzeha.mfilepicker.filetype.AudioFileType
 import com.barryzeha.mfilepicker.interfaces.FileType
 import com.barryzeha.mfilepicker.ui.adapters.FilePickerAdapter
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class FilePickerActivity : AppCompatActivity() {
+    @Inject
+    lateinit var mPrefs:Preferences
+
     private lateinit var bind:ActivityFilePickerBinding
     private lateinit var pickerAdapter:FilePickerAdapter
     private var  fileList:MutableList<FileItem> = mutableListOf()
@@ -44,11 +51,25 @@ class FilePickerActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }*/
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setUpMenuProvider()
         setupAdapter()
         rootDirectory = Environment.getExternalStorageDirectory()
-        loadFiles(directory = rootDirectory)
+
+        if(mPrefs.lastDirs?.isNotEmpty()!!){
+            val lastDirsVisited:MutableList<String> = arrayListOf()
+            lastDirsVisited.addAll(mPrefs.lastDirs!!)
+
+            val lastDir= File(lastDirsVisited[lastDirsVisited.size-1])
+            for( i in 0 until  lastDirsVisited.size  - 1 ){
+                listTreeOfNav.add(Pair(0,File(lastDirsVisited[i])))
+            }
+
+            loadFiles(directory = lastDir)
+        }else {
+            loadFiles(directory = rootDirectory)
+        }
     }
     private fun setupAdapter(){
         pickerAdapter = FilePickerAdapter(::onItemClick, ::onCheckboxClick)
@@ -58,9 +79,12 @@ class FilePickerActivity : AppCompatActivity() {
             adapter= pickerAdapter
         }
     }
+
     private fun loadFiles(position:Int =0 ,directory:File){
         fileList.clear()
         listTreeOfNav.add(Pair(position,directory))
+        // Para mostrar la nueva lista desde el inicio cuando navegamos en los directorios
+        // internos
         if(listTreeOfNav[listTreeOfNav.size-1].first > listTreeOfNav.size-1){
             bind.rvFilePicker.scrollToPosition(0)
         }
@@ -151,6 +175,7 @@ class FilePickerActivity : AppCompatActivity() {
                             navigationDirList(listTreeOfNav)
 
                         }else{
+                            mPrefs.clearLastDirs()
                             finish()
                         }
                     }
@@ -163,6 +188,8 @@ class FilePickerActivity : AppCompatActivity() {
                             putStringArrayListExtra("paths", ArrayList(fileList))
                         }
                         setResult(Activity.RESULT_OK, resultIntent)
+                        saveNavigationTree(listTreeOfNav)
+
                         finish()
 
                     }
@@ -171,21 +198,35 @@ class FilePickerActivity : AppCompatActivity() {
             }
         })
     }
+    private fun saveNavigationTree(listOfNavigation:List<Pair<Int,File>>){
+        val listOfDirPath:ArrayList<String> = arrayListOf()
+        listOfNavigation.forEach { pair->
+            Log.e("FILE-PATH", pair.second.absolutePath.toString())
+            listOfDirPath.add(pair.second.absolutePath)
+        }
+        mPrefs.lastDirs = listOfDirPath
+    }
+
     private fun navigationDirList(dirList:MutableList<Pair<Int,File>>){
         pickerAdapter.clear()
 
         loadFiles(directory = dirList[(dirList.size-1)-1].second)
+
+        // Para volver a mostrar la posición del directorio padre cuando naveguemos hacia atrás
         bind.rvFilePicker.scrollToPosition(dirList[(dirList.size - 1) - 1].first)
+
         dirList.removeAt(dirList.size - 1)
         dirList.removeAt(dirList.size - 1)
         toolbarMenu?.getItem(0)?.setVisible(false)
         selectedItemsList.clear()
     }
+
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if(listTreeOfNav.size>1){
             navigationDirList(listTreeOfNav)
         }else{
+            mPrefs.clearLastDirs()
             super.onBackPressed()
         }
   }
