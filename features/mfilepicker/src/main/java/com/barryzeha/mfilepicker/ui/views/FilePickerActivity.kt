@@ -37,7 +37,6 @@ class FilePickerActivity : AppCompatActivity() {
         bind = ActivityFilePickerBinding.inflate(layoutInflater)
 
         //Para mostrar correctamente el toolbar debemos de comentar la configuración de ViewCompat
-
         //enableEdgeToEdge()
         setContentView(bind.root)
         /*ViewCompat.setOnApplyWindowInsetsListener(bind.main) { v, insets ->
@@ -62,7 +61,9 @@ class FilePickerActivity : AppCompatActivity() {
     private fun loadFiles(position:Int =0 ,directory:File){
         fileList.clear()
         listTreeOfNav.add(Pair(position,directory))
-
+        if(listTreeOfNav[listTreeOfNav.size-1].first > listTreeOfNav.size-1){
+            bind.rvFilePicker.scrollToPosition(0)
+        }
         val files = directory.listFiles()
 
         if(files != null){
@@ -174,7 +175,7 @@ class FilePickerActivity : AppCompatActivity() {
         pickerAdapter.clear()
 
         loadFiles(directory = dirList[(dirList.size-1)-1].second)
-        bind.rvFilePicker.scrollToPosition(dirList[(dirList.size-1)-1].first)
+        bind.rvFilePicker.scrollToPosition(dirList[(dirList.size - 1) - 1].first)
         dirList.removeAt(dirList.size - 1)
         dirList.removeAt(dirList.size - 1)
         toolbarMenu?.getItem(0)?.setVisible(false)
