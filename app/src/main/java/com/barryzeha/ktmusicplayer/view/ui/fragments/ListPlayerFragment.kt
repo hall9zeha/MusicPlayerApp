@@ -57,6 +57,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.Date
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
@@ -282,6 +283,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         //mainViewModel.saveStatePlaying(musicState.isPlaying)
         updateService()
     }
+    // TODO terminar de implementar con los nombres de los directorios padre para cada pista
     private fun saveEntitySong(/*pathsFile:List<String>?=null,*/ path:String?=null, baseDirectory:String?=null){
         if(path!=null){
 
@@ -308,13 +310,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         val parentDir= getParentDirectories(uri!!.path.toString())
                         val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
 
-                        //withContext(Dispatchers.Main) {
+
                         Log.e("ITEM-FILE ->", path.toString() )
                         Log.e("ITEM-FILE ->", uri.toString() )
                         //Log.e("ITEM-FILE", metadata.title.toString() )
                         Log.e("ITEM-FILE", realPathFromFile.toString() )
-
-                           /* mainViewModel.saveNewSong(
+                        withContext(Dispatchers.Main) {
+                            mainViewModel.saveNewSong(
                                 SongEntity(
                                     pathLocation = realPathFromFile,
                                     parentDirectory = parentDir,
@@ -326,8 +328,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                                     genre = metadata.genre!!,
                                     timestamp = Date().time
                                 )
-                            )*/
-                        //}
+                            )
+                        }
                     }
                 }
             }
