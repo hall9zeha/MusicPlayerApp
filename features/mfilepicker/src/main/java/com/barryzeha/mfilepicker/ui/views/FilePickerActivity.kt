@@ -3,6 +3,7 @@ package com.barryzeha.mfilepicker.ui.views
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -97,11 +98,13 @@ class FilePickerActivity : AppCompatActivity() {
 
             val filesList = files.sortedBy { it.name.lowercase() }
            filesList.forEach { file->
+
                if(file.isDirectory) {
                    fileList.add(
                        FileItem(
                            filePath=file.absolutePath,
                            fileName = file.name,
+                           uri = Uri.fromFile(file),
                            isDir = file.isDirectory
                        )
                    )
@@ -115,6 +118,7 @@ class FilePickerActivity : AppCompatActivity() {
                         fileList.add(FileItem(
                             filePath=file.absolutePath,
                             fileName = file.name,
+                            uri = Uri.fromFile(file),
                             isDir = file.isDirectory,
                             fileType = type))
                     }

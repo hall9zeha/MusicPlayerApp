@@ -1,5 +1,6 @@
 package com.barryzeha.mfilepicker.entities
 
+import android.net.Uri
 import com.barryzeha.mfilepicker.interfaces.FileType
 
 
@@ -14,6 +15,7 @@ data class FileItem(
  var filePath:String?="",
  private var isChecked:Boolean=false,
  var fileType:FileType?=null,
+ var uri:Uri?=null,
  var isDir:Boolean=false,
 
 ){

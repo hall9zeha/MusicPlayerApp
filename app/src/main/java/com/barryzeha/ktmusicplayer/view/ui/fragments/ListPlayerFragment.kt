@@ -13,14 +13,14 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.text.isDigitsOnly
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -42,14 +42,13 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
-import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
-import com.barryzeha.ktmusicplayer.view.ui.adapters.StickyHeaderItemDecoration
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
+import com.barryzeha.mfilepicker.filetype.AudioFileType
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -58,7 +57,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.Date
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
@@ -127,17 +125,20 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
 
                     withContext(Dispatchers.Main) {
-                        mainViewModel.saveNewSong(
+                        Log.e("ITEM-FILE ->", uri.toString() )
+                       /* mainViewModel.saveNewSong(
                             SongEntity(
                                 pathLocation = realPathFromFile,
                                 parentDirectory = parentDir,
                                 description = metadata.title,
+                                duration = metadata.songLength,
+                                bitrate = metadata.bitRate,
                                 artist = metadata.artist!!,
                                 album = metadata.album!!,
                                 genre = metadata.genre!!,
                                 timestamp = Date().time
                             )
-                        )
+                        )*/
                     }
                 }
             }
@@ -147,6 +148,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun filePickerResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()){paths->
             paths.forEach {pat->
+                saveEntitySong(path=pat)
                 Log.e("PATHS-LIST",  pat)
             }
         }
@@ -280,6 +282,62 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         //mainViewModel.saveStatePlaying(musicState.isPlaying)
         updateService()
     }
+    private fun saveEntitySong(/*pathsFile:List<String>?=null,*/ path:String?=null, baseDirectory:String?=null){
+        if(path!=null){
+
+            val file=File(path)
+            val baseDir = baseDirectory?:""
+            if(file.isDirectory){
+                file.listFiles()?.forEach { file->
+                    saveEntitySong(path=file.absolutePath, baseDirectory=baseDir)
+
+                }
+            }
+            else{
+                 CoroutineScope(Dispatchers.IO).launch {
+                    if(AudioFileType().verify(path)) {
+                        var uri:Uri?=null
+                        uri = if(AudioFileType().verify(baseDir)){
+                            getUriFromFile(File( path),requireContext())
+                        }else{
+                            getUriFromFile(File(baseDir  + File.separator + path),requireContext())
+                        }
+
+
+                        val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
+                        val parentDir= getParentDirectories(uri!!.path.toString())
+                        val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
+
+                        //withContext(Dispatchers.Main) {
+                        Log.e("ITEM-FILE ->", path.toString() )
+                        Log.e("ITEM-FILE ->", uri.toString() )
+                        //Log.e("ITEM-FILE", metadata.title.toString() )
+                        Log.e("ITEM-FILE", realPathFromFile.toString() )
+
+                           /* mainViewModel.saveNewSong(
+                                SongEntity(
+                                    pathLocation = realPathFromFile,
+                                    parentDirectory = parentDir,
+                                    description = metadata.title,
+                                    duration = metadata.songLength,
+                                    bitrate = metadata.bitRate,
+                                    artist = metadata.artist!!,
+                                    album = metadata.album!!,
+                                    genre = metadata.genre!!,
+                                    timestamp = Date().time
+                                )
+                            )*/
+                        //}
+                    }
+                }
+            }
+        }
+
+    }
+    private fun getUriFromFile(file: File, context: Context): Uri {
+        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    }
+
     private fun setUpListeners()= with(bind){
         this?.let {
             btnMenu?.setOnClickListener {
@@ -297,11 +355,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     )
                 ) { isGranted, permissionsList ->
                     if (isGranted) {
-                        /*val mimeTypes = arrayOf("audio/*")
-                        launcherOpenMultipleDocs.launch(mimeTypes)*/
-                           */
+                       // val mimeTypes = arrayOf("audio/*")
+                       // launcherOpenMultipleDocs.launch(mimeTypes)
+
                         launcherFilePickerActivity.launch(Unit)
-                    //startActivity(Intent(activity,FilePickerActivity::class.java))
+
                     } else {
                         permissionsList.forEach { permission ->
                             if (!permission.second) {
