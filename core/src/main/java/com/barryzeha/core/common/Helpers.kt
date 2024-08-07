@@ -226,36 +226,62 @@ fun mColorList(context:Context)=
         android.R.color.transparent
     ))
 fun getParentDirectories(path: String): String {
-    val regex = "emulated/(\\d+)/".toRegex()
-    val matchResult = regex.find(path)
-    val storage= matchResult?.groups?.get(1)?.value
+  /*  val emulatedRegex = "emulated/(\\d+)/".toRegex()
+    val emulatedMatchResult = emulatedRegex.find(path)
 
-    Log.e("ITEM-FILE--:",storage.toString() )
-    // Encontrar la posición del nombre del archivo (última '/' antes del nombre de archivo)
-    val lastIndex = path.lastIndexOf('/')
-    if (lastIndex == -1) {
-        return path.substringBeforeLast("/")  // Si no se encuentra '/', retornar el path completo
-    }
+    val storage=   emulatedMatchResult?.groups?.get(1)?.value ?:""*/
 
-    // Encontrar la posición de '0' o '1' en el path
-    val primaryIndex = path.indexOf("0")
-    if (primaryIndex == -1) {
-        return path.substringBeforeLast("/")  // Si no se encuentra '0', retornar el path completo
-    }
+    val storage= getStorageIdentifier(path)
 
-    // Encontrar el primer '/' después de 'primary'
-    val firstSlashAfterPrimary = path.indexOf('/', primaryIndex)
-    if (firstSlashAfterPrimary == -1 || firstSlashAfterPrimary >= lastIndex) {
-        return if (primaryIndex == -1) {
-            path.substringBeforeLast("/")
-       }else{
-            return path.substring(primaryIndex + "0".length, lastIndex)
+        Log.e("ITEM-FILE--:", storage.toString())
+        // Encontrar la posición del nombre del archivo (última '/' antes del nombre de archivo)
+        val lastIndex = path.lastIndexOf('/')
+        if (lastIndex == -1) {
+            return path.substringBeforeLast("/")  // Si no se encuentra '/', retornar el path completo
         }
 
-          // Si no se encuentra '/', retornar el path completo
+        // Encontrar la posición de '0' o '1' en el path
+        val primaryIndex = path.indexOf(storage.toString())
+        if (primaryIndex == -1) {
+            return path.substringBeforeLast("/")  // Si no se encuentra '0', retornar el path completo
+        }
+
+        // Encontrar el primer '/' después de 'primary'
+        val firstSlashAfterPrimary = path.indexOf('/', primaryIndex)
+        if (firstSlashAfterPrimary == -1 || firstSlashAfterPrimary >= lastIndex) {
+            return if (primaryIndex == -1) {
+                path.substringBeforeLast("/")
+            } else {
+                return path.substring(primaryIndex + storage.toString().length, lastIndex)
+            }
+
+            // Si no se encuentra '/', retornar el path completo
+        }
+
+        // Recortar el path desde el primer '/' después de '0' hasta el nombre del archivo
+        val directoriosRecortados = path.substring(firstSlashAfterPrimary + 1, lastIndex)
+        return directoriosRecortados
+
+}
+fun getStorageIdentifier(path: String): String? {
+    // Expresiones regulares para detectar el número de almacenamiento en rutas emuladas y en tarjetas SD
+    val emulatedRegex = "emulated/(\\d+)/".toRegex()
+    val sdCardRegex = "storage/(extSdCard|external_sd)/".toRegex()
+
+    // Intentar encontrar una coincidencia para emulated
+    val emulatedMatchResult = emulatedRegex.find(path)
+    if (emulatedMatchResult != null) {
+        // Devolver solo el número de almacenamiento
+        return emulatedMatchResult.groups[1]?.value
     }
 
-    // Recortar el path desde el primer '/' después de '0' hasta el nombre del archivo
-    val directoriosRecortados = path.substring(firstSlashAfterPrimary + 1, lastIndex)
-    return directoriosRecortados
+    // Intentar encontrar una coincidencia para SD card
+    val sdCardMatchResult = sdCardRegex.find(path)
+    if (sdCardMatchResult != null) {
+        // Devolver el nombre de la SD card (extSdCard o external_sd)
+        return sdCardMatchResult.groups[1]?.value
+    }
+
+    // Si no se encuentra ninguna coincidencia, retornar null
+    return null
 }

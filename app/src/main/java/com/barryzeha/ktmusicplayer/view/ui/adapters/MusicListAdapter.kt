@@ -167,6 +167,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         if(currentList.contains(song)){
             val position = currentList.indexOf(song)
             currentList.removeAt(position)
+            originalList.removeAt(position)
             submitList(currentList)
 
         }
