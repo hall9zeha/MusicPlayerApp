@@ -305,17 +305,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             getUriFromFile(File(baseDir  + File.separator + path),requireContext())
                         }
 
-
                         val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
                         val parentDir= getParentDirectories(uri!!.path.toString())
                         val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
-
 
                         Log.e("ITEM-FILE ->", path.toString() )
                         Log.e("ITEM-FILE ->", uri.toString() )
                         //Log.e("ITEM-FILE", metadata.title.toString() )
                         Log.e("ITEM-FILE", realPathFromFile.toString() )
-                        withContext(Dispatchers.Main) {
+                        Log.e("ITEM-FILE", parentDir.toString() )
+                       /* withContext(Dispatchers.Main) {
                             mainViewModel.saveNewSong(
                                 SongEntity(
                                     pathLocation = realPathFromFile,
@@ -329,7 +328,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                                     timestamp = Date().time
                                 )
                             )
-                        }
+                        }*/
                     }
                 }
             }

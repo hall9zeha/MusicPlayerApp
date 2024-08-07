@@ -225,18 +225,22 @@ fun mColorList(context:Context)=
         android.R.attr.colorBackground,
         android.R.color.transparent
     ))
-
 fun getParentDirectories(path: String): String {
+    val regex = "emulated/(\\d+)/".toRegex()
+    val matchResult = regex.find(path)
+    val storage= matchResult?.groups?.get(1)?.value
+
+    Log.e("ITEM-FILE--:",storage.toString() )
     // Encontrar la posición del nombre del archivo (última '/' antes del nombre de archivo)
     val lastIndex = path.lastIndexOf('/')
     if (lastIndex == -1) {
         return path.substringBeforeLast("/")  // Si no se encuentra '/', retornar el path completo
     }
 
-    // Encontrar la posición de 'primary' en el path
-    val primaryIndex = path.indexOf("primary")
+    // Encontrar la posición de '0' o '1' en el path
+    val primaryIndex = path.indexOf("0")
     if (primaryIndex == -1) {
-        return path.substringBeforeLast("/")  // Si no se encuentra 'primary', retornar el path completo
+        return path.substringBeforeLast("/")  // Si no se encuentra '0', retornar el path completo
     }
 
     // Encontrar el primer '/' después de 'primary'
@@ -245,13 +249,13 @@ fun getParentDirectories(path: String): String {
         return if (primaryIndex == -1) {
             path.substringBeforeLast("/")
        }else{
-            return path.substring(primaryIndex + "primary:".length, lastIndex)
+            return path.substring(primaryIndex + "0".length, lastIndex)
         }
 
           // Si no se encuentra '/', retornar el path completo
     }
 
-    // Recortar el path desde el primer '/' después de 'primary' hasta el nombre del archivo
+    // Recortar el path desde el primer '/' después de '0' hasta el nombre del archivo
     val directoriosRecortados = path.substring(firstSlashAfterPrimary + 1, lastIndex)
     return directoriosRecortados
 }
