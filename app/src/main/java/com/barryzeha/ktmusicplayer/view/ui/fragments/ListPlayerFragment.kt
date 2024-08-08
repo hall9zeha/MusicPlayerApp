@@ -190,7 +190,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             }
                         temp=   item.parentDirectory.toString()
                     }
-                    //adapter.addAll(songList)
+
                     adapter.addAll(itemList)
                     withContext(Dispatchers.Main) {
                         //bind?.rvSongs?.addItemDecoration(StickyHeaderItemDecoration())

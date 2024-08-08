@@ -142,7 +142,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         if (!songLists.contains(it)) songLists.add(it)
                     }
                 }
-
+                withContext(Dispatchers.Main) {
+                    setNumberOfTrack()
+                }
             }
         }
 
@@ -179,7 +181,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
         }
-
+        mainViewModel.deletedRow.observe(viewLifecycleOwner){deleteRow->
+            if(deleteRow>0){
+                songLists.clear()
+                mainViewModel.fetchAllSongFromMain()
+            }
+        }
     }
 
     override fun play() {

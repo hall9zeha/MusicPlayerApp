@@ -4,6 +4,7 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -166,9 +167,18 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         val currentList=currentList.toMutableList()
         if(currentList.contains(song)){
             val position = currentList.indexOf(song)
+            // Remove the header if no other songs exist under it
             currentList.removeAt(position)
-            originalList.removeAt(position)
+            val headerPos=shouldRemoveHeaderForSong(song)
+            if(headerPos>-1){
+                currentList.removeAt(headerPos)
+                Log.e("HEADER-POS", "REMOVER POSITION" )
+            }else{
+                Log.e("HEADER-POS", "NO REMOVER" )
+            }
+
             submitList(currentList)
+            originalList = currentList
 
         }
         /*
@@ -176,7 +186,23 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             val position = songList.indexOf(song)
             songList.removeAt(position)
             notifyItemRemoved(position)
-        }*/
+        }
+        */
+    }
+
+    private fun shouldRemoveHeaderForSong(song:SongEntity):Int{
+        val position = currentList.indexOf(song)
+        val aboveItem = currentList[position - 1]
+        return if(aboveItem is String ) {
+            if(position<currentList.size-1 && currentList[position +1] is String){
+                position - 1
+
+            }else{
+                position -1
+            }
+        }
+        else if(aboveItem is String && position==currentList.size-1) position - 1
+        else -1
     }
     fun getSongItemCount():Int{
         var itemSong = 0
