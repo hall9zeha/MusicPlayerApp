@@ -3,7 +3,6 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -19,8 +18,6 @@ import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import androidx.core.text.isDigitsOnly
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,9 +29,6 @@ import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
-import com.barryzeha.core.common.fetchFileMetadata
-import com.barryzeha.core.common.getParentDirectories
-import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
@@ -43,23 +37,19 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
-import com.barryzeha.mfilepicker.filetype.AudioFileType
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.util.Date
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
@@ -81,8 +71,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     private var uri:Uri?=null
     private lateinit var adapter:MusicListAdapter
-    private lateinit var launcher:ActivityResultLauncher<Intent>
-    private lateinit var launcherOpenMultipleDocs:ActivityResultLauncher<Array<String>>
+
+
     private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private var isPlaying = false
@@ -98,8 +88,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
     private val itemList= mutableListOf<Any>()
-    private  val CONSUMER_COUNT = 4
-    private val operationsMutex = Mutex()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,47 +103,33 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onViewCreated(view, savedInstanceState)
 
         bind = FragmentListPlayerBinding.bind(view)
-        activityResultFile()
-        filePickerResult()
+
+        filePickerActivityResult()
         activityResultForPermission()
         initCheckPermission()
         setUpAdapter()
         setUpObservers()
         setUpListeners()
     }
-    private fun activityResultFile(){
-        launcherOpenMultipleDocs= registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()){uris->
-            uris.forEach { uri ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
-                    val parentDir= getParentDirectories(uri.path.toString())
-                    val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
 
-                    withContext(Dispatchers.Main) {
-                        Log.e("ITEM-FILE ->", uri.toString() )
-                       /* mainViewModel.saveNewSong(
-                            SongEntity(
-                                pathLocation = realPathFromFile,
-                                parentDirectory = parentDir,
-                                description = metadata.title,
-                                duration = metadata.songLength,
-                                bitrate = metadata.bitRate,
-                                artist = metadata.artist!!,
-                                album = metadata.album!!,
-                                genre = metadata.genre!!,
-                                timestamp = Date().time
-                            )
-                        )*/
-                    }
-                }
-            }
-        }
-
-    }
-    private fun filePickerResult(){
+    private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()){paths->
-            paths.forEach {pat->
-                saveEntitySong(path=pat)
+            paths.forEach {path->
+                processSongPaths(path=path){ realPathFromFile, parentDir, audioMetaData ->
+                    mainViewModel.saveNewSong(
+                        SongEntity(
+                            pathLocation = realPathFromFile,
+                            parentDirectory = parentDir ?: "",
+                            description = audioMetaData.title,
+                            duration = audioMetaData.songLength,
+                            bitrate = audioMetaData.bitRate,
+                            artist = audioMetaData.artist!!,
+                            album = audioMetaData.album!!,
+                            genre = audioMetaData.genre!!,
+                            timestamp = Date().time
+                        )
+                    )
+                }
 
             }
         }
@@ -289,92 +264,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         updateService()
     }
 
-    private fun saveEntitySong(path: String? = null, baseDirectory: String? = null) {
-        if (path != null) {
-            val channel = Channel<String>(Channel.UNLIMITED)  // Canal sin límite de buffer
-
-            // Lanzar una corutina para enviar rutas al canal
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    enqueueFiles(File(path), baseDirectory ?: "", channel)
-                } finally {
-                    channel.close()  // Cerrar el canal cuando haya terminado de enviar datos
-                }
-            }
-
-            // Lanzar corutinas consumidoras para procesar archivos
-            repeat(CONSUMER_COUNT) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    for (filePath in channel) {
-                        processFile(filePath)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun enqueueFiles(file: File, baseDir: String, channel: Channel<String>) {
-        if (file.isDirectory) {
-            // Encolar archivos en el directorio recursivamente
-            file.listFiles()?.forEach { subFile ->
-                enqueueFiles(subFile, baseDir, channel)
-            }
-        } else {
-            // Enviar ruta del archivo al canal
-            channel.trySend(file.absolutePath).isSuccess
-        }
-    }
-
-    private suspend fun processFile(filePath: String) {
-        if (AudioFileType().verify(filePath)) {
-            val uri = if (AudioFileType().verify(filePath)) {
-                getUriFromFile(File(filePath), requireContext())
-            } else {
-                getUriFromFile(File(filePath), requireContext())
-            }
-            operationsMutex.withLock {
-                val realPathFromFile = getRealPathFromURI(uri!!, requireContext())
-                val parentDir = getParentDirectories(uri.path.toString())
-                val metadata = fetchFileMetadata(requireContext(), realPathFromFile!!)
-
-
-                Log.e("ITEM-FILE  ->", filePath)
-                Log.e("ITEM-FILE  ->", uri.toString())
-                Log.e("ITEM-FILE  ->", realPathFromFile.toString())
-                Log.e("ITEM-FILE  ->", parentDir ?: "")
-
-
-                // Guardar en el ViewModel si es necesario
-                withContext(Dispatchers.Main) {
-                    mainViewModel.saveNewSong(
-                        SongEntity(
-                            pathLocation = realPathFromFile,
-                            parentDirectory = parentDir ?: "",
-                            description = metadata.title,
-                            duration = metadata.songLength,
-                            bitrate = metadata.bitRate,
-                            artist = metadata.artist!!,
-                            album = metadata.album!!,
-                            genre = metadata.genre!!,
-                            timestamp = Date().time
-                        )
-                    )
-                }
-            }
-        }
-    }
-    private fun getUriFromFile(file: File, context: Context): Uri {
-        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-    }
-
     private fun setUpListeners()= with(bind){
         this?.let {
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }
-            // val chooseFileIntent = Intent(Intent.ACTION_GET_CONTENT).apply{
-            //     type = "audio/*"
-            // }
+
             btnAdd.setOnClickListener {
                 checkPermissions(
                     requireContext(),
@@ -384,10 +279,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     )
                 ) { isGranted, permissionsList ->
                     if (isGranted) {
-                       // val mimeTypes = arrayOf("audio/*")
-                       // launcherOpenMultipleDocs.launch(mimeTypes)
-
-                        launcherFilePickerActivity.launch(Unit)
+                       launcherFilePickerActivity.launch(Unit)
 
                     } else {
                         permissionsList.forEach { permission ->

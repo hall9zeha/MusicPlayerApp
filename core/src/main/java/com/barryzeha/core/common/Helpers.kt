@@ -22,6 +22,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.FileProvider
 import com.barryzeha.core.model.entities.AudioMetadata
 
 import com.barryzeha.core.model.entities.MusicState
@@ -284,4 +285,7 @@ fun getStorageIdentifier(path: String): String? {
 
     // Si no se encuentra ninguna coincidencia, retornar null
     return null
+}
+fun getUriFromFile(file: File, context: Context): Uri {
+    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 }
