@@ -57,6 +57,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _deletedRow:MutableLiveData<Int> = MutableLiveData()
     val deletedRow:LiveData<Int> = _deletedRow
 
+    private var _deleteAllRows:SingleMutableLiveData<Int> = SingleMutableLiveData()
+    val deleteAllRows:LiveData<Int> = _deleteAllRows
+
     private var _songById:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
@@ -129,6 +132,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun deleteSong(songEntity: SongEntity){
       launch {
             _deletedRow.value = repository.deleteSong(songEntity.id)
+        }
+    }
+    fun deleteAllSongs(){
+        launch {
+            _deleteAllRows.value = repository.deleteAllSongs()
         }
     }
     fun getSongById(idSong:Long){

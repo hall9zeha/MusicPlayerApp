@@ -16,5 +16,7 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="delete_all">Eliminar lista</string>
+    <string name="delete_all_msg">Realmente quiere eliminar toda la lista?</string>
 
 </resources>

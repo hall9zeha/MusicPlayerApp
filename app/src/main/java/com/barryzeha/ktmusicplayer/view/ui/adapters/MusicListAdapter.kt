@@ -189,7 +189,12 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
         */
     }
-
+    fun removeAll(){
+        val currentList = currentList.toMutableList()
+        currentList.clear()
+        submitList(currentList)
+        originalList=currentList
+    }
     private fun shouldRemoveHeaderForSong(song:SongEntity):Int{
         val position = currentList.indexOf(song)
         val aboveItem = currentList[position - 1]

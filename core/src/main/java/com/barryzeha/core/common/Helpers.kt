@@ -23,9 +23,11 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.FileProvider
+import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
 
 import com.barryzeha.core.model.entities.MusicState
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
@@ -288,4 +290,20 @@ fun getStorageIdentifier(path: String): String? {
 }
 fun getUriFromFile(file: File, context: Context): Uri {
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+}
+fun showDialog(context:Context,titleRes:Int, msgRes:Int, block:()->Unit){
+    val dialog= MaterialAlertDialogBuilder(context).apply {
+        setTitle(titleRes)
+        setMessage(msgRes)
+        setPositiveButton(
+            R.string.accept
+        ) { dialog, _ ->
+            block()
+        }
+        setNegativeButton(R.string.cancel) { dialog, _ ->
+            dialog.dismiss()
+        }
+    }
+    dialog.show()
+
 }

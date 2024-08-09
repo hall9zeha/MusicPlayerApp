@@ -59,4 +59,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
     fun clearIdSongInPrefs(){
         myPreferences.edit().remove(ID_SONG).apply()
     }
+    fun clearCurrentPosition(){
+        myPreferences.edit().remove(CURRENT_POSITION).apply()
+    }
 }

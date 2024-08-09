@@ -187,6 +187,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 mainViewModel.fetchAllSongFromMain()
             }
         }
+        mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteAllRows->
+            if(deleteAllRows>0){
+                songLists.clear()
+                setNumberOfTrack()
+            }
+        }
     }
 
     override fun play() {
@@ -316,7 +322,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
     private fun setNumberOfTrack(){
         bind?.tvNumberSong?.text =
-        String.format("#%s/%s", mPrefs.currentPosition, songLists.count())
+        String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, songLists.count())
     }
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
@@ -328,8 +334,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             btnMainPlay.setOnClickListener {
                 if (songLists.size > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
-                        musicPlayerService?.startPlayer(getSongOfList(currentSelectedPosition),mPrefs.currentPosition.toInt())
-                        btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
+                        getSongOfList(currentSelectedPosition)?.let{song->
+                            musicPlayerService?.startPlayer(song,mPrefs.currentPosition.toInt())
+                            btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
+                        }
+
+
                     } else {
                         if (isPlaying) {
                             musicPlayerService?.pauseExoPlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
@@ -351,7 +361,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 if (currentSelectedPosition < songLists.size - 1) {
                       musicPlayerService?.nextSong()
                 } else {
-                    musicPlayerService?.startPlayer(getSongOfList(0),0)
+                    getSongOfList(1)?.let{song->
+                        musicPlayerService?.startPlayer(song,1)
+                    }
+
                 }
             }
             mainSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -436,12 +449,19 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     }
 
-    private fun getSongOfList(position:Int): SongEntity{
+    private fun getSongOfList(position:Int): SongEntity?{
+        if(mPrefs.currentPosition>-1) {
+            mPrefs.currentPosition = position.toLong()
+            mainViewModel.setCurrentPosition(position)
+            val song = songLists[position]
+            return song
+        }else{
+            mPrefs.currentPosition = 1
+            mainViewModel.setCurrentPosition(0)
+            val song = songLists[0]
+            return song
+       }
 
-        mPrefs.currentPosition = position.toLong()
-        mainViewModel.setCurrentPosition(position)
-        val song = songLists[position]
-        return song
     }
     private fun updateService(){
         serviceConnection?.let{

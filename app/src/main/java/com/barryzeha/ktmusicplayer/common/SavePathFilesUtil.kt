@@ -27,68 +27,72 @@ import java.io.File
 private  const  val CONSUMER_COUNT = 4
 private val operationsMutex = Mutex()
 
-fun processSongPaths(path:String?=null,
-                     baseDirectory: String? = null,
-                     fileProcessed:(realPathFromFile:String,parentDir:String,audioMetaData:AudioMetadata)->Unit){
-    if (path != null) {
-        val channel = Channel<String>(Channel.UNLIMITED)  // Canal sin límite de buffer
+// Función para procesar múltiples rutas de directorios de forma secuencial
+fun processSongPaths(
+    paths: List<String>,  // Lista de directorios a procesar
+    fileProcessed: (realPathFromFile: String, parentDir: String, audioMetaData: AudioMetadata) -> Unit
+) {
+    val channel = Channel<File>(Channel.UNLIMITED)  // Canal sin límite de buffer
 
-        // Lanzar una corutina para enviar rutas al canal
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                enqueueFiles(File(path), baseDirectory ?: "", channel)
-            } finally {
-                channel.close()  // Cerrar el canal cuando haya terminado de enviar datos
+    // Corutina para encolar archivos en el canal
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            // Encolar archivos de todos los directorios
+            paths.forEach { path ->
+                enqueueFiles(File(path), channel)
             }
+        } finally {
+            channel.close()  // Cerrar el canal cuando haya terminado de enviar datos
         }
+    }
 
-        // Lanzar corutinas consumidoras para procesar archivos
-        repeat(CONSUMER_COUNT) {
-            CoroutineScope(Dispatchers.IO).launch {
-                for (filePath in channel) {
-                    processFile(filePath, MyApp.context,fileProcessed)
-                }
-            }
+    // Corutina única para procesar archivos secuencialmente
+    CoroutineScope(Dispatchers.IO).launch {
+        for (file in channel) {
+            processFile(file, MyApp.context, fileProcessed)
+
         }
     }
 }
-private fun enqueueFiles(file: File, baseDir: String, channel: Channel<String>) {
+
+private fun enqueueFiles(file: File, channel: Channel<File>) {
     if (file.isDirectory) {
         // Encolar archivos en el directorio recursivamente
         file.listFiles()?.forEach { subFile ->
-            enqueueFiles(subFile, baseDir, channel)
+            enqueueFiles(subFile, channel)
         }
     } else {
-        // Enviar ruta del archivo al canal
-        channel.trySend(file.absolutePath).isSuccess
+        // Enviar archivo al canal
+        channel.trySend(file).isSuccess
     }
 }
 
 private suspend fun processFile(
-    filePath: String,
+    file: File,
     context: Context,
     fileProcessed: (realPathFromFile: String, parentDir: String, audioMetaData: AudioMetadata) -> Unit
-) {
-    if (AudioFileType().verify(filePath)) {
-        val uri = if (AudioFileType().verify(filePath)) {
-            getUriFromFile(File(filePath), context)
-        } else {
-            getUriFromFile(File(filePath), context)
-        }
+){
+    if (AudioFileType().verify(file.absolutePath)) {
+        val uri = getUriFromFile(file, context)
         operationsMutex.withLock {
             val realPathFromFile = getRealPathFromURI(uri!!, context)
             val parentDir = getParentDirectories(uri.path.toString())
             val metadata = fetchFileMetadata(context, realPathFromFile!!)
 
-           /* Log.e("ITEM-FILE  ->", filePath)
+
+        /* Log.e("ITEM-FILE  ->", filePath)
             Log.e("ITEM-FILE  ->", uri.toString())
             Log.e("ITEM-FILE  ->", realPathFromFile.toString())
-            Log.e("ITEM-FILE  ->", parentDir ?: "")*/
+            Log.e("ITEM-FILE  ->", parentDir ?: "")
 
-            // Guardar en el ViewModel si es necesario
+         */
+         // Guardar en el ViewModel si es necesario
             withContext(Dispatchers.Main) {
                 fileProcessed(realPathFromFile,parentDir,metadata)
             }
         }
+
     }
+
 }
+

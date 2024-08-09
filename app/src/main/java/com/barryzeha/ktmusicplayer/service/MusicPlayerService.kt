@@ -519,6 +519,14 @@ class MusicPlayerService : Service(){
             songsList.remove(song)
         }
     }
+    fun clearPlayList(){
+        mediaItemList.clear()
+        songsList.clear()
+        exoPlayer.clearMediaItems()
+        exoPlayer.release()
+        currentMusicState=MusicState()
+        _songController?.currentTrack(currentMusicState)
+    }
     fun unregisterController(){
         _songController=null
     }

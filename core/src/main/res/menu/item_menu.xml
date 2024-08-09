@@ -5,4 +5,8 @@
         android:title="@string/delete_title"
         app:showAsAction="ifRoom"
         />
+    <item android:id="@+id/deleteAllItem"
+        android:title="@string/delete_all"
+        app:showAsAction="ifRoom"/>
+
 </menu>

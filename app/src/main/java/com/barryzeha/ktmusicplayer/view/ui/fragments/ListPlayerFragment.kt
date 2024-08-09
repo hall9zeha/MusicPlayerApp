@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -15,8 +16,10 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
@@ -31,6 +34,7 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
+import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -44,6 +48,7 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -114,8 +119,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()){paths->
-            paths.forEach {path->
-                processSongPaths(path=path){ realPathFromFile, parentDir, audioMetaData ->
+            //paths.forEach {path->
+                processSongPaths(paths){ realPathFromFile, parentDir, audioMetaData ->
                     mainViewModel.saveNewSong(
                         SongEntity(
                             pathLocation = realPathFromFile,
@@ -131,7 +136,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     )
                 }
 
-            }
+            //}
         }
     }
     private fun activityResultForPermission(){
@@ -218,6 +223,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 musicPlayerService?.removeMediaItem(song)
                 setNumberOfTrack()
                 if(song.id == mPrefs.idSong) mPrefs.clearIdSongInPrefs()
+            }
+        }
+        mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteRows->
+            if(deleteRows>0){
+                adapter.removeAll()
+                mPrefs.clearIdSongInPrefs()
+                mPrefs.clearCurrentPosition()
+                setNumberOfTrack()
+                musicPlayerService?.clearPlayList()
             }
         }
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
@@ -492,7 +506,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 return song
             }
         }else{
-            getSongOfAdapter(mPrefs.currentPosition)
+            // En la posición 1 porque primero tendremos un item header en la posición 0
+            val song = adapter.getSongByPosition(1)
+
+            song?.let{
+                val pos =  adapter.getPositionByItem(it)
+                mainViewModel.setCurrentPosition(pos!!)
+                mPrefs.currentPosition = pos.toLong()
+                bind?.rvSongs?.scrollToPosition(pos)
+                return song
+            }
         }
         return null
     }
@@ -574,16 +597,29 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {
         val popupMenu = PopupMenu(activity,view)
         popupMenu.menuInflater.inflate(coreRes.menu.item_menu,popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener {
-            mainViewModel.deleteSong(selectedSong)
-            this.song=selectedSong
+        popupMenu.setOnMenuItemClickListener {item->
+            when(item.itemId){
+                coreRes.id.deleteItem->{
+                    mainViewModel.deleteSong(selectedSong)
+                    this.song=selectedSong
+
+                }
+                coreRes.id.deleteAllItem->{
+                    showDialog(requireContext(),R.string.delete_all,
+                        R.string.delete_all_msg){
+                    adapter.removeAll()
+                    mainViewModel.deleteAllSongs()
+                    }
+                }
+            }
             true
         }
         popupMenu.show()
     }
+
     private fun setNumberOfTrack(){
         bind?.seekbarControl?.tvNumberSong?.text =
-            String.format("#%s/%s", mPrefs.currentPosition, adapter.getSongItemCount())
+            String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, adapter.getSongItemCount())
     }
    private fun updateService(){
         serviceConnection?.let{
