@@ -217,6 +217,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 adapter.remove(song)
                 musicPlayerService?.removeMediaItem(song)
                 setNumberOfTrack()
+                if(song.id == mPrefs.idSong) mPrefs.clearIdSongInPrefs()
             }
         }
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->

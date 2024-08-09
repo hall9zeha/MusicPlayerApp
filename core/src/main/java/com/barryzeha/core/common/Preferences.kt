@@ -56,4 +56,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
         get()=myPreferences.getInt(CURRENT_VIEW,-1)
         set(value)=myPreferences.edit().putInt(CURRENT_VIEW,value).apply()
 
+    fun clearIdSongInPrefs(){
+        myPreferences.edit().remove(ID_SONG).apply()
+    }
 }

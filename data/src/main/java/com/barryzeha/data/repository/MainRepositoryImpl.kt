@@ -46,6 +46,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
         dao.deleteSong(idSong)
     }
 
+    override suspend fun deleteAllSongs(): Int = withContext(Dispatchers.IO) {
+        dao.deleteAllSongs()
+    }
+
     // SongState
     override suspend fun fetchSongState(): List<SongStateWithDetail> = withContext(Dispatchers.IO){
         dao.fetchSongState()
