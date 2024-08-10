@@ -45,14 +45,13 @@ fun processSongPaths(
             channel.close()  // Cerrar el canal cuando haya terminado de enviar datos
         }
     }
-
     // Corutina única para procesar archivos secuencialmente
-    CoroutineScope(Dispatchers.IO).launch {
-        for (file in channel) {
-            processFile(file, MyApp.context, fileProcessed)
 
+        CoroutineScope(Dispatchers.IO).launch {
+            for (file in channel) {
+                processFile(file, MyApp.context, fileProcessed)
+            }
         }
-    }
 }
 
 private fun enqueueFiles(file: File, channel: Channel<File>) {

@@ -202,8 +202,10 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             if(position<currentList.size-1 && currentList[position +1] is String){
                 position - 1
 
-            }else{
+            }else if (position>=currentList.size-1){
                 position -1
+            }else{
+                -1
             }
         }
         else if(aboveItem is String && position==currentList.size-1) position - 1

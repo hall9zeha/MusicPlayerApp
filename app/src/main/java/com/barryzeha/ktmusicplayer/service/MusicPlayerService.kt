@@ -523,7 +523,7 @@ class MusicPlayerService : Service(){
         mediaItemList.clear()
         songsList.clear()
         exoPlayer.clearMediaItems()
-        exoPlayer.release()
+        //exoPlayer.release()
         currentMusicState=MusicState()
         _songController?.currentTrack(currentMusicState)
     }
