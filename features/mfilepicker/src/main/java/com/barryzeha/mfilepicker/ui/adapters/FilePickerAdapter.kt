@@ -5,10 +5,15 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.databinding.FilePickerItemBinding
 import com.barryzeha.mfilepicker.entities.FileItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -20,16 +25,29 @@ import com.barryzeha.mfilepicker.entities.FileItem
 class FilePickerAdapter(private val onItemClick:(position:Int,item:FileItem)->Unit, private val onCheckboxClick:(position:Int,item:FileItem)->Unit): RecyclerView.Adapter<FilePickerAdapter.FilePickerViewHolder>(){
     private lateinit var context:Context
     private var listItems:MutableList<FileItem> = mutableListOf()
+    private var listItemsSelected:MutableList<FileItem> = arrayListOf()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilePickerViewHolder {
         context= parent.context
         val itemView = LayoutInflater.from(context).inflate(R.layout.file_picker_item,parent,false)
         return FilePickerViewHolder(itemView)
     }
 
+    override fun onBindViewHolder(
+        holder: FilePickerViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        when(val latestPayload = payloads.lastOrNull()){
+            is CheckboxChangePayload.isCheckedChk-> holder.bindCheckBox(latestPayload.isChecked)
+            else ->onBindViewHolder(holder,position)
+        }
+
+    }
     override fun onBindViewHolder(holder: FilePickerViewHolder, position: Int) {
         val item = listItems[position]
        
         holder.bind.tvFileDescription.text = item.fileName
+        holder.bind.chkSelected.isChecked = item.getIsChecked()
         if(item.isDir){
             holder.bind.ivFileType.setImageResource(R.drawable.ic_folder)
         }else{
@@ -39,8 +57,12 @@ class FilePickerAdapter(private val onItemClick:(position:Int,item:FileItem)->Un
             onItemClick(position,item)
         }
         holder.bind.chkSelected.setOnCheckedChangeListener { buttonView, isChecked ->
-            onCheckboxClick(position,item.copy(isChecked = isChecked))
+            //onCheckboxClick(position,item.copy(isChecked = isChecked))
         }
+        holder.bind.chkSelected.setOnClickListener{view->
+           onCheckboxClick(position,item.copy(isChecked = (view as CheckBox).isChecked))
+        }
+
     }
 
     override fun getItemCount() = listItems.size
@@ -53,7 +75,25 @@ class FilePickerAdapter(private val onItemClick:(position:Int,item:FileItem)->Un
             }
         }
     }
-
+    fun selectAllItemsChecked(isChecked:Boolean){
+        CoroutineScope(Dispatchers.IO).launch {
+            listItems.forEachIndexed { index, item ->
+                if (item.getIsChecked() != isChecked) {
+                    listItems[index] = item.copy(isChecked = isChecked)
+                    listItemsSelected.add(item)
+                    withContext(Dispatchers.Main) {
+                        notifyItemChanged(index,CheckboxChangePayload.isCheckedChk(isChecked))
+                    }
+                }
+            }
+        }
+    }
+    fun getSelectedItems():List<FileItem>{
+       return listItemsSelected
+    }
+    fun clearItemsSelected(){
+        listItemsSelected.clear()
+    }
     @SuppressLint("NotifyDataSetChanged")
     fun clear(){
         listItems.clear()
@@ -62,6 +102,11 @@ class FilePickerAdapter(private val onItemClick:(position:Int,item:FileItem)->Un
     inner class FilePickerViewHolder(itemView:View):RecyclerView.ViewHolder(itemView) {
 
         val bind:FilePickerItemBinding = FilePickerItemBinding.bind(itemView)
-
+        internal fun bindCheckBox(isChecked:Boolean){
+            bind.chkSelected.isChecked = isChecked
+        }
+    }
+    private sealed interface CheckboxChangePayload{
+        data class isCheckedChk(val isChecked: Boolean):CheckboxChangePayload
     }
 }

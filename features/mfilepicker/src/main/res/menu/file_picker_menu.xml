@@ -4,5 +4,9 @@
     <item android:id="@+id/itemConfirm"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_check"
-        android:title=""/>
+        android:title="Confirm"/>
+    <item android:id="@+id/itemSelectAll"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_select_all"
+        android:title="Select all"/>
 </menu>

@@ -38,8 +38,10 @@ class FilePickerActivity : AppCompatActivity() {
     private var  fileList:MutableList<FileItem> = mutableListOf()
     private lateinit var rootDirectory:File
     private var listTreeOfNav:MutableList<Pair<Int,File>> = arrayListOf()
-    private val selectedItemsList:MutableList<FileItem> = arrayListOf()
+    private var selectedItemsList:MutableList<FileItem> = arrayListOf()
     private var toolbarMenu:Menu?=null
+    private var isSelectedAll:Boolean=false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bind = ActivityFilePickerBinding.inflate(layoutInflater)
@@ -149,6 +151,7 @@ class FilePickerActivity : AppCompatActivity() {
         }
         if(selectedItemsList.size>0) toolbarMenu?.getItem(0)?.setVisible(true)
         else toolbarMenu?.getItem(0)?.setVisible(false)
+        Log.e("FILE-PATH", selectedItemsList.size.toString() )
     }
     private fun checkIfRootDir(directory: File):Boolean{
         val internalRoot = File("/").canonicalFile
@@ -195,6 +198,22 @@ class FilePickerActivity : AppCompatActivity() {
                         saveNavigationTree(listTreeOfNav)
 
                         finish()
+
+                    }
+                    R.id.itemSelectAll->{
+                        if(!isSelectedAll) {
+                            isSelectedAll=true
+                            toolbarMenu?.getItem(1)?.setIcon(com.barryzeha.core.R.drawable.ic_deselected_all)
+                            selectedItemsList=pickerAdapter.getSelectedItems().toMutableList()
+                        }else{
+                            isSelectedAll=false
+                            toolbarMenu?.getItem(1)?.setIcon(com.barryzeha.core.R.drawable.ic_select_all)
+                            selectedItemsList.clear()
+                            pickerAdapter.clearItemsSelected()
+
+                        }
+                        toolbarMenu?.getItem(0)?.setVisible(isSelectedAll)
+                        pickerAdapter.selectAllItemsChecked(isSelectedAll)
 
                     }
                 }
