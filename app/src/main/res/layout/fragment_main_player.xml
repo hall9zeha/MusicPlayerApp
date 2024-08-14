@@ -23,6 +23,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginStart="8dp"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnMainEq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetLeft="0dp"
+        android:insetBottom="0dp"
+        app:iconSize="24dp"
+        app:iconPadding="0dp"
+        app:iconTint="@color/controls_colors"
+        style="@style/Widget.Material3.Button.IconButton"
+        app:icon="@drawable/ic_tune"
+        app:iconGravity="textStart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginEnd="8dp"/>
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardCover"
         android:layout_width="0dp"

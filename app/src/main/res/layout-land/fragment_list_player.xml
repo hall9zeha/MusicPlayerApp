@@ -149,7 +149,7 @@
         android:layout_height="48dp"
         app:layout_constraintTop_toBottomOf="@id/ivCover"
         app:layout_constraintStart_toStartOf="parent"
-       app:layout_constraintEnd_toStartOf="@id/guideLine"
+        app:layout_constraintEnd_toStartOf="@id/guideLine"
         app:layout_constraintBottom_toTopOf="@id/seekbarControl">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAdd"
@@ -171,42 +171,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="8dp"/>
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnShuffle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/ic_shuffle"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconSize="18dp"
-            app:cornerRadius="0dp"
-            app:iconTint="@color/controls_colors"
-            android:clickable="true"
-            android:focusable="true"
-            style="@style/Widget.Material3.Button.IconButton"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnAdd"
-            android:layout_marginStart="4dp"
-            />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRepeat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/ic_repeat_all"
-            app:iconGravity="textStart"
-            app:iconPadding="0dp"
-            app:iconSize="18dp"
-            app:cornerRadius="0dp"
-            app:iconTint="@color/controls_colors"
-            android:clickable="true"
-            android:focusable="true"
-            style="@style/Widget.Material3.Button.IconButton"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnShuffle"
-            android:layout_marginStart="4dp"
-            />
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnFavorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -221,7 +185,7 @@
             style="@style/Widget.Material3.Button.IconButton"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnRepeat"
+            app:layout_constraintStart_toEndOf="@id/btnAdd"
             android:layout_marginStart="4dp"
             />
         <com.google.android.material.button.MaterialButton
@@ -240,6 +204,23 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/btnFavorite"
+            android:layout_marginStart="4dp"
+            />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/ic_more_vert"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="18dp"
+            app:iconTint="@color/controls_colors"
+            android:clickable="true"
+            android:focusable="true"
+            style="@style/Widget.Material3.Button.IconButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnSearch"
             android:layout_marginStart="4dp"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
