@@ -369,50 +369,50 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     seekbarControl.loadSeekBar.progress = userSelectPosition
                 }
             })
-            btnRepeat.setOnClickListener {
+            bottomPlayerControls.btnRepeat.setOnClickListener {
 
                 when (mPrefs.songMode) {
                     SongMode.RepeatOne.ordinal -> {
                         //  Third: deactivate modes
-                        btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        btnRepeat.backgroundTintList=
+                        bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                        bottomPlayerControls.btnRepeat.backgroundTintList=
                             ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
-                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
                         mPrefs.songMode = CLEAR_MODE
                     }
                     SongMode.RepeatAll.ordinal -> {
                         // Second: repeat one
-                        btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
                         mPrefs.songMode = REPEAT_ONE
 
                     }
                     else -> {
                         // First: active repeat All
-                        btnRepeat.backgroundTintList=
+                        bottomPlayerControls.btnRepeat.backgroundTintList=
                             ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
-                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
                         mPrefs.songMode= REPEAT_ALL
                     }
                 }
 
             }
-            btnShuffle.setOnClickListener {
+            bottomPlayerControls.btnShuffle.setOnClickListener {
                 when(mPrefs.songMode){
                     SongMode.Shuffle.ordinal->{
-                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
                         mPrefs.songMode= CLEAR_MODE
                     }
                     else->{
-                        btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                         mPrefs.songMode= SHUFFLE
-                        btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                        bottomPlayerControls.btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
                         )
                     }
                 }
@@ -545,30 +545,30 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             when (mPrefs.songMode) {
                 SongMode.RepeatOne.ordinal -> {
 
-                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                    btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
+                    bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
+                    bottomPlayerControls.btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
                         requireContext(),
                         coreRes.color.controls_colors
                     )?.withAlpha(128)
                 }
                 SongMode.RepeatAll.ordinal -> {
-                    btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
+                    bottomPlayerControls.btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
                         requireContext(),
                         coreRes.color.controls_colors
                     )?.withAlpha(128)
                 }
                 SongMode.Shuffle.ordinal ->{
-                    btnShuffle.backgroundTintList = ContextCompat.getColorStateList(
+                    bottomPlayerControls.btnShuffle.backgroundTintList = ContextCompat.getColorStateList(
                         requireContext(),
                         coreRes.color.controls_colors
                     )?.withAlpha(128)
                 }
                 else -> {
-                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                    btnRepeat.backgroundTintList = ColorStateList.valueOf(
+                    bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                    bottomPlayerControls.btnRepeat.backgroundTintList = ColorStateList.valueOf(
                         mColorList(requireContext()).getColor(5, 6)
                     )
-                    btnShuffle.backgroundTintList = ColorStateList.valueOf(
+                    bottomPlayerControls.btnShuffle.backgroundTintList = ColorStateList.valueOf(
                         mColorList(requireContext()).getColor(5, 6)
                     )
 

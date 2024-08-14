@@ -4,7 +4,23 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnShuffle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_shuffle"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="20dp"
+        app:iconTint="@color/controls_colors"
+        android:clickable="true"
+        android:focusable="true"
+        style="@style/Widget.Material3.Button.IconButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnPrevious"
 
+        />
     <com.google.android.material.button.MaterialButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,7 +37,7 @@
         app:layout_constraintEnd_toStartOf="@id/btnPlay"
         app:layout_constraintTop_toTopOf="@id/btnPlay"
         app:layout_constraintBottom_toBottomOf="@id/btnPlay"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="8dp"
         />
     <com.google.android.material.button.MaterialButton
         android:layout_width="wrap_content"
@@ -58,6 +74,23 @@
         app:layout_constraintStart_toEndOf="@id/btnPlay"
         app:layout_constraintTop_toTopOf="@id/btnPlay"
         app:layout_constraintBottom_toBottomOf="@id/btnPlay"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="8dp"
+        />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRepeat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_repeat_all"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="20dp"
+        app:iconTint="@color/controls_colors"
+        android:clickable="true"
+        android:focusable="true"
+        style="@style/Widget.Material3.Button.IconButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnNext"
+
         />
 </androidx.constraintlayout.widget.ConstraintLayout>
