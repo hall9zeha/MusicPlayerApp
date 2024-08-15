@@ -280,6 +280,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
 
     private fun setUpListeners()= with(bind){
+        var clicked=false
         this?.let {
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
@@ -451,33 +452,43 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 }
             })
+            btnSelect?.setOnClickListener{
+
+                if(clicked){
+                    adapter.showMultipleSelection(false)
+                    clicked=false
+                }else{
+                    adapter.showMultipleSelection(true)
+                    clicked=true
+                }
+            }
         }
     }
     private fun showOrHideSearchbar()=with(bind){
         this?.let{
             if(!isFiltering){
-
-                btnMenu?.visibility=View.GONE
-                btnFilter?.visibility=View.GONE
-                tvPlayListName?.visibility=View.GONE
-                tilSearch?.visibility=View.VISIBLE
-                btnClose?.visibility=View.VISIBLE
+                visibleOrGoneViews(false)
                 btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
-                searchBar?.visibility=View.VISIBLE
                 isFiltering=true
                 showKeyboard(true)
             }else {
+                visibleOrGoneViews(true)
                 edtSearch?.setText("")
-                btnSearch.backgroundTintList =
-                    ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
+                btnSearch.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
                 isFiltering = false
                 showKeyboard(false)
-                tilSearch?.visibility=View.GONE
-                btnClose?.visibility=View.GONE
-                btnMenu?.visibility=View.VISIBLE
-                btnFilter?.visibility=View.VISIBLE
-                tvPlayListName?.visibility=View.VISIBLE
             }
+        }
+    }
+    private fun visibleOrGoneViews(isVisible:Boolean)=with(bind){
+        this?.let {
+            tilSearch?.visibility = if(isVisible)View.GONE else View.VISIBLE
+            btnClose?.visibility = if(isVisible)View.GONE else View.VISIBLE
+
+            btnMenu?.visibility = if(isVisible)View.VISIBLE else View.GONE
+            btnFilter?.visibility = if(isVisible)View.VISIBLE else View.GONE
+            btnMainEq?.visibility = if(isVisible)View.VISIBLE else View.GONE
+            tvPlayListName?.visibility = if(isVisible)View.VISIBLE else View.GONE
         }
     }
     private fun showKeyboard(show:Boolean){

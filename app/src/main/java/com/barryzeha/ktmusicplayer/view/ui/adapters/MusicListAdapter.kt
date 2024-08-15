@@ -63,7 +63,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
              when (val latestPayload = payloads.lastOrNull()) {
-                is SongChangePayload.BackgroundColor -> (holder as MViewHolder).bindBackgroundColor(latestPayload.color)
+                is ItemSongChangePayload.BackgroundColor -> (holder as MViewHolder).bindBackgroundColor(latestPayload.color)
+                is ItemSongChangePayload.CheckBoxVisible -> (holder as MViewHolder).bindCheckboxVisible(latestPayload.isVisible)
                 else -> onBindViewHolder(holder, position)
             }
 
@@ -113,6 +114,18 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     override fun getItemViewType(position: Int): Int {
         return if(getItem(position) is SongEntity) SONG_ITEM else HEADER_ITEM
     }
+    fun showMultipleSelection(visibility:Boolean){
+        val currentList = currentList.toMutableList()
+       CoroutineScope(Dispatchers.IO).launch{
+            currentList.forEachIndexed{index, item->
+                if(item is SongEntity){
+                   withContext(Dispatchers.Main){
+                       notifyItemChanged(index,ItemSongChangePayload.CheckBoxVisible(visibility))
+                    }
+                }
+            }
+        }
+    }
     @SuppressLint("ResourceType")
     fun changeBackgroundColorSelectedItem(position: Int=0, songId:Long){
         // obtenemos la posición del item por su id, ya que tenemos dos tipos de vistas en el recyclerview
@@ -131,7 +144,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
                 }
                 notifyItemChanged(
                     selectedPos,
-                    SongChangePayload.BackgroundColor(
+                    ItemSongChangePayload.BackgroundColor(
                         mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
                     )
                 )
@@ -277,7 +290,9 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         internal  fun bindBackgroundColor(color: Int) {
             bind.root.setBackgroundColor(color)
         }
-
+        internal fun bindCheckboxVisible(isVisible: Boolean){
+            bind.chkItemSong.visibility=if(isVisible)View.VISIBLE else View.GONE
+        }
     }
     inner class HeaderViewHolder(v:View):StickyViewHolder(v){
         val bind = ListItemHeaderBinding.bind(v)
@@ -319,9 +334,11 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
             return if(oldItem is SongEntity && newItem is SongEntity)(oldItem as SongEntity) == (newItem as SongEntity) else false
         }
+
     }
-    private sealed interface SongChangePayload{
-        data class BackgroundColor(val color:Int):SongChangePayload
+    private sealed interface ItemSongChangePayload{
+        data class BackgroundColor(val color:Int):ItemSongChangePayload
+        data class CheckBoxVisible(val isVisible:Boolean):ItemSongChangePayload
     }
 
 

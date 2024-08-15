@@ -25,6 +25,7 @@ data class SongEntity(
     val bitrate:String?="",
     val format:String?="",
     val favorite:Boolean=false,
+
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
