@@ -114,7 +114,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         return if(getItem(position) is SongEntity) SONG_ITEM else HEADER_ITEM
     }
     @SuppressLint("ResourceType")
-    fun changeBackgroundColorSelectedItem(position: Int, songId:Long){
+    fun changeBackgroundColorSelectedItem(position: Int=0, songId:Long){
         // obtenemos la posición del item por su id, ya que tenemos dos tipos de vistas en el recyclerview
         // solo debemos cambiar de color a items SongEntity
         val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
@@ -231,12 +231,18 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
     }
     // Obtener la posición numerada solo de items SongEntity sin contar itemHeaders
-    fun getPositionByItem(item: Any): Int {
-        return originalList.indexOf(item) // Index in filteredList
+    fun getPositionByItem(item: Any): Pair<Int,Int> {
+        val positionNumbered = originalList.indexOf(item) // Index in filteredList
             .let { index -> originalList
                 .take(index + 1)
                 .count { it is SongEntity } // Count SongEntity items up to the current index
             }
+        val realPosition=if (originalList.isNotEmpty()) {
+            originalList.indexOf(item)
+        } else {
+            null
+        }
+        return Pair(positionNumbered,realPosition!!)
     }
     fun getSongById(idSong:Long):SongEntity?{
         return originalList.filterIsInstance<SongEntity>().find { idSong == it.id }

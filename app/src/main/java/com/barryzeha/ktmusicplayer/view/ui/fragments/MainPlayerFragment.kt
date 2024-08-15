@@ -335,7 +335,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 if (songLists.size > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
                         getSongOfList(currentSelectedPosition)?.let{song->
-                            musicPlayerService?.startPlayer(song,mPrefs.currentPosition.toInt())
+                            musicPlayerService?.startPlayer(song)
                             btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                         }
 
@@ -362,7 +362,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                       musicPlayerService?.nextSong()
                 } else {
                     getSongOfList(1)?.let{song->
-                        musicPlayerService?.startPlayer(song,1)
+                        musicPlayerService?.startPlayer(song)
                     }
 
                 }

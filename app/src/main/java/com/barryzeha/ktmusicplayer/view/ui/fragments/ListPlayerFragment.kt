@@ -213,7 +213,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
             currentSelectedPosition = positionSelected
             positionSelected?.let{
-                adapter.changeBackgroundColorSelectedItem(positionSelected, mPrefs.idSong)
+                adapter.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
 
             }
         }
@@ -311,7 +311,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) getSongOfAdapter(
                         mPrefs.idSong
                     )?.let { song ->
-                        musicPlayerService?.startPlayer(song,currentSelectedPosition)
+                        musicPlayerService?.startPlayer(song)
                     }
                     else {
                         if (isPlaying) {
@@ -341,7 +341,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     }
                 else {
                     getSongOfAdapter(0)?.let { song ->
-                        musicPlayerService?.startPlayer(song,currentSelectedPosition)
+                        musicPlayerService?.startPlayer(song)
 
                     }
                 }
@@ -500,9 +500,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             val song = adapter.getSongById(idSong)
             song?.let {
                 val pos =  adapter.getPositionByItem(it)
-                mainViewModel.setCurrentPosition(pos!!)
-                mPrefs.currentPosition = pos.toLong()
-                bind?.rvSongs?.scrollToPosition(pos)
+                mainViewModel.setCurrentPosition(pos!!.second)
+                mPrefs.currentPosition = pos.first.toLong()
+                bind?.rvSongs?.scrollToPosition(pos.second)
                 return song
             }
         }else{
@@ -511,9 +511,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             song?.let{
                 val pos =  adapter.getPositionByItem(it)
-                mainViewModel.setCurrentPosition(pos!!)
-                mPrefs.currentPosition = pos.toLong()
-                bind?.rvSongs?.scrollToPosition(pos)
+                mainViewModel.setCurrentPosition(pos!!.second)
+                mPrefs.currentPosition = pos.first.toLong()
+                bind?.rvSongs?.scrollToPosition(pos.second)
                 return song
             }
         }
@@ -578,18 +578,20 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun onItemClick(position:Int,song: SongEntity){
         if(!isFiltering) {
-            musicPlayerService?.startPlayer(song, position)
+            musicPlayerService?.startPlayer(song)
             mPrefs.idSong = song.id
             adapter.getPositionByItem(song)?.let {pos->
-                mPrefs.currentPosition=pos.toLong()
+                //mPrefs.currentPosition=pos.first.toLong()
+                mainViewModel.setCurrentPosition(pos.first)
+
             }
-            mainViewModel.setCurrentPosition(position)
+
         }else{
             adapter.getPositionByItem(song)?.let {pos->
-                musicPlayerService?.startPlayer(song,pos)
+                musicPlayerService?.startPlayer(song)
                 mPrefs.idSong = song.id
-                mainViewModel.setCurrentPosition(pos)
-                mPrefs.currentPosition=pos.toLong()
+                //mPrefs.currentPosition=pos.first.toLong()
+                mainViewModel.setCurrentPosition(pos.first)
             }
         }
 
@@ -706,7 +708,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         val itemSong = adapter.getSongById(mPrefs.idSong)
         itemSong?.let{
             val position = adapter.getPositionByItem(itemSong)
-            bind?.rvSongs?.scrollToPosition(position!! )
+            bind?.rvSongs?.scrollToPosition(position.second )
         }
         if(mPrefs.controlFromNotify){
             try {

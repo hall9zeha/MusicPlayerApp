@@ -298,7 +298,7 @@ class MusicPlayerService : Service(){
     private fun nextOrPrevTRack(position:Int){
         if(_songController==null){
             if(songsList.isNotEmpty()) {
-                startPlayer(songsList[position],position)
+                startPlayer(songsList[position])
                 mPrefs.currentPosition = position.toLong()
             }
             mPrefs.nextOrPrevFromNotify=true
@@ -397,7 +397,7 @@ class MusicPlayerService : Service(){
     private fun findMediaItemIndexById(mediaItems:List<MediaItem>, mediaItemId:String):Int{
         return mediaItems.indexOfFirst { it.mediaId == mediaItemId }
     }
-    private fun initExoPlayer(song:SongEntity,position:Int){
+    private fun initExoPlayer(song:SongEntity){
         songEntity=song
         exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,song.id.toString()),0)
         exoPlayer.prepare()
@@ -530,14 +530,14 @@ class MusicPlayerService : Service(){
     fun unregisterController(){
         _songController=null
     }
-    fun startPlayer(song:SongEntity, position:Int){
+    fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
             if(mPrefs.isPlaying){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información  de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
-            initExoPlayer(song,position)
+            initExoPlayer(song)
         }
 
     }
@@ -557,17 +557,13 @@ class MusicPlayerService : Service(){
 
     }
     fun nextSong(){
-        if(exoPlayer.isPlaying){
-            exoPlayer.seekToNext()
-        }
+        exoPlayer.seekToNext()
     }
     fun prevSong(){
-        if(exoPlayer.isPlaying){
-            exoPlayer.seekToPrevious()
+        exoPlayer.seekToPrevious()
             //exoPlayer.seekToPrevious()
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
-        }
     }
     fun setExoPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
