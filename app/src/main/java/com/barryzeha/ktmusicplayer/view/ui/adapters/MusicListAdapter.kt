@@ -220,22 +220,23 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         return itemSong
     }
     fun getSongByPosition(position: Int): SongEntity?{
-        return if(currentList.isNotEmpty()){
-            if(currentList[position] is SongEntity) {
-                currentList[position] as SongEntity
+        return if(originalList.isNotEmpty()){
+            if(originalList[position] is SongEntity) {
+                originalList[position] as SongEntity
             }else{
-                currentList[position + 1] as SongEntity
+                originalList[position + 1] as SongEntity
             }
         }else{
             null
         }
     }
-    fun getPositionByItem(songItem:SongEntity):Int?{
-        return if(originalList.isNotEmpty()){
-            originalList.indexOf(songItem)
-        }else{
-            null
-        }
+    // Obtener la posición numerada solo de items SongEntity sin contar itemHeaders
+    fun getPositionByItem(item: Any): Int {
+        return originalList.indexOf(item) // Index in filteredList
+            .let { index -> originalList
+                .take(index + 1)
+                .count { it is SongEntity } // Count SongEntity items up to the current index
+            }
     }
     fun getSongById(idSong:Long):SongEntity?{
         return originalList.filterIsInstance<SongEntity>().find { idSong == it.id }
@@ -281,13 +282,10 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
     // Filter
     private val searchFilter:Filter = object:Filter(){
         override fun performFiltering(input: CharSequence?): FilterResults {
-            val filteredList = if(input.toString().isEmpty()){
+            val filteredList = if (input.toString().isEmpty()) {
                 originalList
-            }else{
-                /*originalList.filter{it as SongEntity
-                    it.description.toString().lowercase().contains(input!!)}*/
+            } else {
                 originalList.filter { item ->
-                    // Verifica si el item es una instancia de SongEntity
                     if (item is SongEntity) {
                         item.description.toString().lowercase().contains(input!!)
                     } else {
@@ -295,13 +293,13 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
                     }
                 }
             }
-            return FilterResults().apply { values=filteredList }
+            return FilterResults().apply { values = filteredList }
         }
 
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
             @Suppress("UNCHECKED_CAST")
             submitList(results?.values as? List<Any> ?: emptyList())
-            //submitList((results?.values is SongEntity) as ArrayList<SongEntity>)
+
         }
     }
     override fun getFilter(): Filter {
