@@ -46,6 +46,7 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
+import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -193,7 +194,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                                 itemList.add(item.parentDirectory.toString())
                                 itemList.add(item)
                             }
-                        temp=   item.parentDirectory.toString()
+                        temp = item.parentDirectory.toString()
                     }
 
                     adapter.addAll(itemList)
@@ -237,6 +238,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
+        }
+        mainViewModel.orderBySelection.observe(viewLifecycleOwner){selection->
+            Toast.makeText(activity, "Selected: $selection", Toast.LENGTH_SHORT).show()
         }
     }
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
@@ -461,6 +465,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     adapter.showMultipleSelection(true)
                     clicked=true
                 }
+            }
+            btnFilter?.setOnClickListener{
+                OrderByDialog().show(parentFragmentManager,OrderByDialog::class.simpleName)
             }
         }
     }

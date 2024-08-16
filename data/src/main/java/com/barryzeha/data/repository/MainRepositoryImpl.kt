@@ -3,6 +3,9 @@ package com.barryzeha.data.repository
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.media3.exoplayer.ExoPlayer
+import com.barryzeha.core.common.BY_ALBUM
+import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
@@ -28,6 +31,15 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
     // Room database
     override suspend fun fetchAllSongs(): List<SongEntity> = withContext(Dispatchers.IO){
         dao.fetchAllSongs()
+    }
+
+    override suspend fun fetchAllSongsBy(field: Int): List<SongEntity> = withContext(Dispatchers.IO){
+        when(field){
+            BY_ALBUM-> dao.fetchAllSongByAlbum()
+            BY_ARTIST-> dao.fetchAllSongByArtist()
+            BY_GENRE-> dao.fetchAllSongByGenre()
+            else->dao.fetchAllSongs()
+        }
     }
 
     override suspend fun fetchSongById(idSong: Long): SongEntity = withContext(Dispatchers.IO){

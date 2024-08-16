@@ -24,6 +24,19 @@ interface  SongDao {
     @Transaction
     @Query("select * from SongEntity")
     suspend fun fetchAllSongs():List<SongEntity>
+
+    @Transaction
+    @Query("select * from SongEntity order by album ASC")
+    suspend fun fetchAllSongByAlbum():List<SongEntity>
+
+    @Transaction
+    @Query("select * from SongEntity order by genre ASC")
+    suspend fun fetchAllSongByGenre():List<SongEntity>
+
+    @Transaction
+    @Query("select * from SongEntity order by artist ASC")
+    suspend fun fetchAllSongByArtist():List<SongEntity>
+
     @Transaction
     @Query("select * from SongEntity where id = :idSong")
     suspend fun fetchSongById(idSong:Long): SongEntity

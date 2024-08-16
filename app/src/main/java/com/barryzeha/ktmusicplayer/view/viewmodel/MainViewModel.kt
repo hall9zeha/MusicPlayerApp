@@ -42,6 +42,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
     val songState:LiveData<List<SongStateWithDetail>> = _songState
 
+    private var _orderBySelection:MutableLiveData<Int> = MutableLiveData()
+    val orderBySelection:LiveData<Int> = _orderBySelection
+
     private var _allSongFromMain:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongFromMain:LiveData<List<SongEntity>> = _allSongFromMain
 
@@ -89,6 +92,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
           _allSongs.value=repository.fetchAllSongs()
          }
     }
+    fun fetchAllSongsBy(field:Int){
+        launch{
+            _allSongs.value=repository.fetchAllSongsBy(field)
+        }
+    }
     fun fetchAllSongFromMain(){
         launch {
             _allSongFromMain.value=repository.fetchAllSongs()
@@ -101,6 +109,10 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
         }
     }
     //*************************************
+
+    fun setOrderListBy(selection:Int){
+        launch { _orderBySelection.value=selection }
+    }
     fun saveNewSong(songEntity: SongEntity){
         launch {
             val idInserted=repository.saveNewSong(songEntity)
