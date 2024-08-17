@@ -5,14 +5,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import com.barryzeha.core.common.BY_ALBUM
+import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_GENRE
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.ktmusicplayer.databinding.OrderByDialogLayoutBinding
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
 /**
@@ -23,7 +30,10 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class OrderByDialog:DialogFragment() {
-  private var _bind:OrderByDialogLayoutBinding?=null
+    @Inject
+    lateinit var mPrefs:MyPreferences
+
+    private var _bind:OrderByDialogLayoutBinding?=null
     private val mainViewModel:MainViewModel by activityViewModels()
     private var dialogView:View?=null
     private var rbSelectedPosition =0
@@ -63,8 +73,17 @@ class OrderByDialog:DialogFragment() {
 
     }
     private fun setUpListeners(){
+        val sortedOption = mPrefs.playListSort
         dialogView?.let {
+
             _bind = OrderByDialogLayoutBinding.bind(dialogView!!)
+
+            when(sortedOption){
+                BY_ALBUM->(_bind?.radioGroup?.getChildAt(1) as RadioButton).isChecked=true
+                BY_ARTIST->(_bind?.radioGroup?.getChildAt(2) as RadioButton).isChecked=true
+                BY_GENRE->(_bind?.radioGroup?.getChildAt(3) as RadioButton).isChecked=true
+                else->(_bind?.radioGroup?.getChildAt(0) as RadioButton).isChecked=true
+            }
             _bind?.radioGroup?.setOnCheckedChangeListener { group, checkedId ->
                 val selectedRadioButton = view?.findViewById<RadioButton>(checkedId)
                 val selectedText = selectedRadioButton?.text.toString()

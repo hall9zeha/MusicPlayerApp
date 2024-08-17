@@ -42,6 +42,7 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.processSongPaths
+import com.barryzeha.ktmusicplayer.common.sortPlayList
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
@@ -180,30 +181,18 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
-            if(itemList.isNotEmpty()) itemList.clear()
-            if (songList.isNotEmpty()) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    // TODO descomentar cuando se haya mejorado la selección de item en la lista a través del id
-                    // o tipo de objeto no de su posición, porque al haber agregado un header colisiona con las posiciones de
-                    // la lista de reproducción de exoplayer
-                    var temp=""
-                    songList.forEach { item->
-                        if(temp==item.parentDirectory.toString()){
-                                itemList.add(item)
-                            }else{
-                                itemList.add(item.parentDirectory.toString())
-                                itemList.add(item)
-                            }
-                        temp = item.parentDirectory.toString()
-                    }
+            sortPlayList(mPrefs.playListSort, songList,
+                {result->
+                adapter.addAll(result)},
+                {
+                setNumberOfTrack()
+                })
 
-                    adapter.addAll(itemList)
-                    withContext(Dispatchers.Main) {
-                        //bind?.rvSongs?.addItemDecoration(StickyHeaderItemDecoration())
-                        setNumberOfTrack()
-                    }
-                }
-            }
+        }
+        mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
+            adapter.removeAll()
+            mPrefs.playListSort = selectedSort
+            mainViewModel.fetchAllSongsBy(selectedSort)
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
@@ -239,9 +228,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
         }
-        mainViewModel.orderBySelection.observe(viewLifecycleOwner){selection->
-            Toast.makeText(activity, "Selected: $selection", Toast.LENGTH_SHORT).show()
-        }
+
     }
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {

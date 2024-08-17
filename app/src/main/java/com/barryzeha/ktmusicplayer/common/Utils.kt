@@ -11,10 +11,18 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.barryzeha.core.R
+import com.barryzeha.core.common.BY_ALBUM
+import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.SongEntity
 
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -143,4 +151,41 @@ fun cancelPersistentNotify(context:Context){
     notificationManager.notify(NOTIFICATION_ID,builder.build())
     notificationManager.cancelAll()
 
+}
+fun sortPlayList(sortedOption:Int,songList:List<SongEntity>,result:(songListSorted:MutableList<Any>)->Unit, mainScope:()->Unit){
+    if (songList.isNotEmpty()) {
+        val itemList:MutableList<Any> = arrayListOf()
+        CoroutineScope(Dispatchers.IO).launch {
+            var temp=""
+            songList.forEach { item->
+                var headerContent=""
+                headerContent = when(sortedOption){
+                    BY_ALBUM->{
+                        item.album.toString()
+                    }
+
+                    BY_ARTIST->{
+                        item.artist.toString()
+                    }
+
+                    BY_GENRE->{
+                        item.genre.toString()
+                    }
+
+                    else-> item.parentDirectory.toString()
+                }
+                if(temp==headerContent){
+                    itemList.add(item)
+                }else{
+                    itemList.add(headerContent)
+                    itemList.add(item)
+                }
+                temp = headerContent
+            }
+            result(itemList)
+            withContext(Dispatchers.Main){
+                mainScope()
+            }
+        }
+    }
 }
