@@ -625,6 +625,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
 
     private fun setNumberOfTrack(){
+        val itemSong = adapter.getSongById(mPrefs.idSong)
+        itemSong?.let{
+            val (numberedPos, realPos) = adapter.getPositionByItem(itemSong)
+            mPrefs.currentPosition = numberedPos.toLong()
+            adapter.changeBackgroundColorSelectedItem(realPos,mPrefs.idSong)
+            bind?.rvSongs?.scrollToPosition(realPos)
+        }
         bind?.seekbarControl?.tvNumberSong?.text =
             String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, adapter.getSongItemCount())
     }
