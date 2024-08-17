@@ -152,28 +152,20 @@ fun cancelPersistentNotify(context:Context){
     notificationManager.cancelAll()
 
 }
-fun sortPlayList(sortedOption:Int,songList:List<SongEntity>,result:(songListSorted:MutableList<Any>)->Unit, mainScope:()->Unit){
+fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSorted:MutableList<Any>)->Unit, mainScopeBlock:()->Unit){
     if (songList.isNotEmpty()) {
         val itemList:MutableList<Any> = arrayListOf()
+        val headerContentExtractor: (SongEntity) -> String = when (sortedOption) {
+            BY_ALBUM -> { item -> item.album }
+            BY_ARTIST -> { item -> item.artist }
+            BY_GENRE -> { item -> item.genre }
+            else -> { item -> item.parentDirectory.toString() }
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             var temp=""
             songList.forEach { item->
-                var headerContent=""
-                headerContent = when(sortedOption){
-                    BY_ALBUM->{
-                        item.album.toString()
-                    }
-
-                    BY_ARTIST->{
-                        item.artist.toString()
-                    }
-
-                    BY_GENRE->{
-                        item.genre.toString()
-                    }
-
-                    else-> item.parentDirectory.toString()
-                }
+                val headerContent= headerContentExtractor(item)
                 if(temp==headerContent){
                     itemList.add(item)
                 }else{
@@ -184,7 +176,7 @@ fun sortPlayList(sortedOption:Int,songList:List<SongEntity>,result:(songListSort
             }
             result(itemList)
             withContext(Dispatchers.Main){
-                mainScope()
+                mainScopeBlock()
             }
         }
     }
