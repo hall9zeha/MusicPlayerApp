@@ -33,7 +33,7 @@ import kotlinx.coroutines.withContext
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(SongDiffCallback()), Filterable {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(CombinedDiffCallback(SongDiffCallback(), HeaderDiffCallback())), Filterable {
 //class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
     private val SONG_ITEM=0
     private val HEADER_ITEM=1
@@ -119,11 +119,14 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
        CoroutineScope(Dispatchers.IO).launch{
             currentList.forEachIndexed{index, item->
                 if(item is SongEntity){
-                   withContext(Dispatchers.Main){
+                    currentList[index]= item.copy(isSelectShow = visibility)
+                    withContext(Dispatchers.Main){
                        notifyItemChanged(index,ItemSongChangePayload.CheckBoxVisible(visibility))
                     }
                 }
             }
+           submitList(currentList)
+           originalList=currentList
         }
     }
     @SuppressLint("ResourceType")
@@ -257,6 +260,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
         return Pair(positionNumbered,realPosition!!)
     }
+
     fun getSongById(idSong:Long):SongEntity?{
         return originalList.filterIsInstance<SongEntity>().find { idSong == it.id }
     }
@@ -267,7 +271,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
                 CoroutineScope(Dispatchers.IO).launch {
                     val audioTag = fetchFileMetadata(context, song.pathLocation!!)
                     withContext(Dispatchers.Main) {
-
+                       chkItemSong.visibility=if(song.isSelectShow) View.VISIBLE else View.GONE
                         tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
                         tvSongDesc.text = String.format(
                             "%s. %s - %s",
@@ -322,23 +326,58 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
             submitList(results?.values as? List<Any> ?: emptyList())
 
         }
+
     }
     override fun getFilter(): Filter {
         return searchFilter
     }
-    private class SongDiffCallback:DiffUtil.ItemCallback<Any>(){
+
+    private class CombinedDiffCallback(
+        private val songDiffCallback: SongDiffCallback,
+        private val headerDiffCallback: HeaderDiffCallback
+    ) : DiffUtil.ItemCallback<Any>() {
         override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
-            return if(oldItem is SongEntity && newItem is SongEntity){((oldItem as SongEntity).id == (newItem as SongEntity).id)} else false
+            return when {
+                oldItem is SongEntity && newItem is SongEntity -> songDiffCallback.areItemsTheSame(oldItem, newItem)
+                oldItem is String && newItem is String -> headerDiffCallback.areItemsTheSame(oldItem, newItem)
+                else -> false
+            }
         }
 
         override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
-            return if(oldItem is SongEntity && newItem is SongEntity)(oldItem as SongEntity) == (newItem as SongEntity) else false
+            return when {
+                oldItem is SongEntity && newItem is SongEntity -> songDiffCallback.areContentsTheSame(oldItem, newItem)
+                oldItem is String && newItem is String -> headerDiffCallback.areContentsTheSame(oldItem, newItem)
+                else -> false
+            }
+        }
+    }
+    private class SongDiffCallback : DiffUtil.ItemCallback<SongEntity>() {
+        override fun areItemsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
+            return oldItem.id == newItem.id
         }
 
+        override fun areContentsTheSame(oldItem: SongEntity, newItem: SongEntity): Boolean {
+            return oldItem == newItem
+        }
     }
+
+    private class HeaderDiffCallback : DiffUtil.ItemCallback<String>() {
+        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+            return oldItem == newItem
+        }
+
+        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+            return oldItem == newItem
+        }
+    }
+
     private sealed interface ItemSongChangePayload{
         data class BackgroundColor(val color:Int):ItemSongChangePayload
         data class CheckBoxVisible(val isVisible:Boolean):ItemSongChangePayload
+    }
+    private sealed interface ItemHeaderChangePayload{
+        data class TextHeader(val text:String):ItemHeaderChangePayload
     }
 
 

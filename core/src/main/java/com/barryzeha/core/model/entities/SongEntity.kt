@@ -25,6 +25,10 @@ data class SongEntity(
     val bitrate:String?="",
     val format:String?="",
     val favorite:Boolean=false,
+    // Para mostrar y ocultar  el checkbox del item  en recyclerview con el modo selección múltiple
+    val isSelectShow:Boolean=false,
+    // Para saber qué items seleccionados debemos procesar para eliminar u otras acciones
+    val isChecked:Boolean=false
 
 ) {
     override fun equals(other: Any?): Boolean {
