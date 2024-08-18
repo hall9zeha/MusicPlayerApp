@@ -24,6 +24,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.barryzeha.core.common.BY_ALBUM
+import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
@@ -110,7 +113,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onViewCreated(view, savedInstanceState)
 
         bind = FragmentListPlayerBinding.bind(view)
-
+        setUpPlayListName()
         filePickerActivityResult()
         activityResultForPermission()
         initCheckPermission()
@@ -193,6 +196,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             adapter.removeAll()
             mPrefs.playListSort = selectedSort
             mainViewModel.fetchAllSongsBy(selectedSort)
+            setUpPlayListName()
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
@@ -229,6 +233,17 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
         }
 
+    }
+    private fun setUpPlayListName()=with(bind){
+        this?.let{
+            when(mPrefs.playListSort){
+                BY_ALBUM->tvPlayListName.text="Album"
+                BY_ARTIST->tvPlayListName.text="Artista"
+                BY_GENRE->tvPlayListName.text="Género"
+                else->tvPlayListName.text="Default"
+
+            }
+        }
     }
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {

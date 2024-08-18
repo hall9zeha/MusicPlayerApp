@@ -88,8 +88,7 @@ class OrderByDialog:DialogFragment() {
                 val selectedRadioButton = view?.findViewById<RadioButton>(checkedId)
                 val selectedText = selectedRadioButton?.text.toString()
                 rbSelectedPosition = selectedRadioButton?.tag.toString().toInt()
-                /*Toast.makeText(requireContext(), "Selected: $rbSelectedPosition", Toast.LENGTH_SHORT)
-                    .show()*/
+                
             }
         }
     }
