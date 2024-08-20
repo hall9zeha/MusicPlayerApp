@@ -289,7 +289,9 @@ class MusicPlayerService : Service(){
                 }
             }
             if(!songState.isNullOrEmpty()) {
-                setMusicStateSaved(songState[0])
+                val songEntity=songState[0].songEntity
+                if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
+
             }
             setUpExoplayerListener()
             playerListener?.let{listener->exoPlayer.addListener(listener)}

@@ -1,13 +1,9 @@
 package com.barryzeha.ktmusicplayer.view.viewmodel
 
 import android.content.ServiceConnection
-import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
@@ -19,11 +15,8 @@ import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -144,6 +137,16 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun deleteSong(songEntity: SongEntity){
       launch {
             _deletedRow.value = repository.deleteSong(songEntity.id)
+        }
+    }
+    fun deleteSong(itemList:List<SongEntity>){
+        launch {
+            val songIds:MutableList<Long> = arrayListOf()
+            itemList.forEach {item->
+                songIds.add(item.id)
+                Log.e("ITEM-FILE", item.id.toString() )
+            }
+            repository.deleteSong(songIds)
         }
     }
     fun deleteAllSongs(){

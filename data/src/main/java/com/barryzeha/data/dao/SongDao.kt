@@ -53,6 +53,10 @@ interface  SongDao {
     suspend fun deleteSong(idSong:Long):Int
 
     @Transaction
+    @Query("delete from SongEntity where id in (:ids)")
+    suspend fun deleteSong(ids:List<Long>):Int
+
+    @Transaction
     @Query("delete from SongEntity")
     suspend fun deleteAllSongs():Int
 

@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.DiffUtil
@@ -33,14 +34,15 @@ import kotlinx.coroutines.withContext
  * Copyright (c)  All rights reserved.
  **/
 
-class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(CombinedDiffCallback(SongDiffCallback(), HeaderDiffCallback())), Filterable {
+class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
+                       private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(CombinedDiffCallback(SongDiffCallback(), HeaderDiffCallback())), Filterable {
 //class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
     private val SONG_ITEM=0
     private val HEADER_ITEM=1
 
     private var originalList:MutableList<Any> = arrayListOf()
     //private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
-
+    private var itemListForDelete:MutableList<SongEntity> = arrayListOf()
     private var selectedPos = -1
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
@@ -205,12 +207,30 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
         }
         */
     }
+    // TODO arreglar la eliminación de los items en selección múltiple
+    // ahora usando remove() extrañamente se elimina uno cada vez al hacer click en el btn delete y no toda la lista
+    // como debe ser al estar dentro de un for
+    fun removeItemsForMultipleSelectedAction(){
+        val currentList=currentList.toMutableList()
+        CoroutineScope(Dispatchers.IO).launch {
+            itemListForDelete.forEach { item ->
+                if(currentList.contains(item))currentList.remove(item)
+            }
+            submitList(currentList)
+            itemListForDelete.clear()
+
+        }
+    }
     fun removeAll(){
         val currentList = currentList.toMutableList()
         currentList.clear()
         submitList(currentList)
         originalList=currentList
     }
+
+    fun getListItemsForDelete():List<SongEntity> = itemListForDelete
+    fun clearListItemsForDelete(){itemListForDelete.clear()}
+
     private fun shouldRemoveHeaderForSong(song:SongEntity):Int{
         val position = currentList.indexOf(song)
         val aboveItem = currentList[position - 1]
@@ -287,6 +307,13 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private 
                         //changeBackgroundColorSelectedItem(bindingAdapterPosition, song.id)
                         onItemClick(position, song)
 
+                    }
+                    chkItemSong.setOnClickListener {view->
+                        if((view as CheckBox).isChecked){
+                            itemListForDelete.add(song)
+                        }else{
+                            itemListForDelete.remove(song)
+                        }
                     }
                     ivOptions.setOnClickListener { onMenuItemClick(it, position, song) }
                 }

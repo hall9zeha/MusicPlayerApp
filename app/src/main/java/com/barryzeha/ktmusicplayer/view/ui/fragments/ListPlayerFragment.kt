@@ -3,7 +3,6 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.DialogInterface
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -16,10 +15,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
@@ -53,13 +50,11 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Date
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
@@ -98,7 +93,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
     private val itemList= mutableListOf<Any>()
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -427,13 +421,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             btnFavorite.setOnClickListener {
                 val song=getSongOfAdapter(mPrefs.idSong)
                 song?.let {
-                    if (!isFavorite) {
-                        mainViewModel.updateSong(song.copy(favorite = true))
-                        //isFavorite=true
-                    } else {
-                        mainViewModel.updateSong(song.copy(favorite = false))
-                        //isFavorite=false
-                    }
+                    if (!isFavorite) {mainViewModel.updateSong(song.copy(favorite = true))}
+                    else {mainViewModel.updateSong(song.copy(favorite = false)) }
                 }
             }
             btnSearch.setOnClickListener{
@@ -458,18 +447,28 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 }
             })
-            btnSelect?.setOnClickListener{
+            btnMultipleSelect?.setOnClickListener{
 
                 if(clicked){
                     adapter.showMultipleSelection(false)
+                    btnMultipleSelect.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
                     clicked=false
+                    visibleOrGoneBottomActions(true)
+                    adapter.clearListItemsForDelete()
                 }else{
                     adapter.showMultipleSelection(true)
+                   btnMultipleSelect.backgroundTintList=
+                        ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                     clicked=true
+                    visibleOrGoneBottomActions(false)
                 }
             }
             btnFilter?.setOnClickListener{
                 OrderByDialog().show(parentFragmentManager,OrderByDialog::class.simpleName)
+            }
+            btnDelete?.setOnClickListener {
+               // mainViewModel.deleteSong(adapter.getListItemsForDelete())
+               adapter.removeItemsForMultipleSelectedAction()
             }
         }
     }
@@ -500,6 +499,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             tvPlayListName?.visibility = if(isVisible)View.VISIBLE else View.GONE
         }
     }
+    private fun visibleOrGoneBottomActions(isVisible:Boolean)=with(bind){
+        this?.let{
+            btnAdd.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
+            btnFavorite.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
+            btnSearch.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
+            btnMore.visibility = if(isVisible) View.VISIBLE else View.INVISIBLE
+
+            btnDelete?.visibility = if(isVisible)View.GONE else View.VISIBLE
+        }
+    }
     private fun showKeyboard(show:Boolean){
         val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
         if(show) {
@@ -516,26 +525,19 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
 
     private fun getSongOfAdapter(idSong: Long):SongEntity?{
-        if(idSong>-1){
-            val song = adapter.getSongById(idSong)
-            song?.let {
-                val pos =  adapter.getPositionByItem(it)
-                mainViewModel.setCurrentPosition(pos!!.second)
-                mPrefs.currentPosition = pos.first.toLong()
-                bind?.rvSongs?.scrollToPosition(pos.second)
-                return song
-            }
+        var song:SongEntity?=null
+        song = if(idSong>-1){
+            adapter.getSongById(idSong)
         }else{
             // En la posición 1 porque primero tendremos un item header en la posición 0
-            val song = adapter.getSongByPosition(1)
-
-            song?.let{
-                val pos =  adapter.getPositionByItem(it)
-                mainViewModel.setCurrentPosition(pos!!.second)
-                mPrefs.currentPosition = pos.first.toLong()
-                bind?.rvSongs?.scrollToPosition(pos.second)
-                return song
-            }
+            adapter.getSongByPosition(1)
+        }
+        song?.let{
+            val pos =  adapter.getPositionByItem(it)
+            mainViewModel.setCurrentPosition(pos!!.second)
+            mPrefs.currentPosition = pos.first.toLong()
+            bind?.rvSongs?.scrollToPosition(pos.second)
+            return song
         }
         return null
     }
