@@ -209,7 +209,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(deletedRow>0) song?.let{song->
                 adapter.remove(song)
                 musicPlayerService?.removeMediaItem(song)
-                setNumberOfTrack()
+                setNumberOfTrack(scrollToPosition = false)
                 if(song.id == mPrefs.idSong) mPrefs.clearIdSongInPrefs()
             }
         }
@@ -467,7 +467,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 OrderByDialog().show(parentFragmentManager,OrderByDialog::class.simpleName)
             }
             btnDelete?.setOnClickListener {
-               // mainViewModel.deleteSong(adapter.getListItemsForDelete())
+               //mainViewModel.deleteSong(adapter.getListItemsForDelete())
+
                adapter.removeItemsForMultipleSelectedAction()
             }
         }
@@ -641,13 +642,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         popupMenu.show()
     }
 
-    private fun setNumberOfTrack(){
+    private fun setNumberOfTrack(scrollToPosition:Boolean=true){
         val itemSong = adapter.getSongById(mPrefs.idSong)
         itemSong?.let{
             val (numberedPos, realPos) = adapter.getPositionByItem(itemSong)
             mPrefs.currentPosition = numberedPos.toLong()
             adapter.changeBackgroundColorSelectedItem(realPos,mPrefs.idSong)
-            bind?.rvSongs?.scrollToPosition(realPos)
+            if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
         bind?.seekbarControl?.tvNumberSong?.text =
             String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, adapter.getSongItemCount())

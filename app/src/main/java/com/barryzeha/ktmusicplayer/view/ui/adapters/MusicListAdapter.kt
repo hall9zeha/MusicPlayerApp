@@ -207,20 +207,41 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         }
         */
     }
-    // TODO arreglar la eliminación de los items en selección múltiple
-    // ahora usando remove() extrañamente se elimina uno cada vez al hacer click en el btn delete y no toda la lista
-    // como debe ser al estar dentro de un for
-    fun removeItemsForMultipleSelectedAction(){
-        val currentList=currentList.toMutableList()
-        CoroutineScope(Dispatchers.IO).launch {
-            itemListForDelete.forEach { item ->
-                if(currentList.contains(item))currentList.remove(item)
-            }
-            submitList(currentList)
-            itemListForDelete.clear()
 
+    fun removeItemsForMultipleSelectedAction() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val currentList = currentList.toMutableList()
+            val headersToRemove = mutableSetOf<Int>()  // Para almacenar posiciones de encabezados a eliminar
+
+            itemListForDelete.forEach { song ->
+                val position = currentList.indexOf(song)
+                if (position != -1) {
+                    // Primero, elimina la canción
+                    currentList.removeAt(position)
+
+                    // Luego, revisa si hay un encabezado asociado
+
+                    val headerPos = shouldRemoveHeaderForSong(position, currentList)
+                    if (headerPos != -1) {
+                        headersToRemove.add(headerPos)  // Marca el encabezado para eliminación
+                    }
+                }
+            }
+
+            // Ahora elimina los encabezados marcados, de arriba hacia abajo
+            val sortedHeadersToRemove = headersToRemove.sortedDescending()
+            sortedHeadersToRemove.forEach { headerPos ->
+                if (headerPos >= 0 && headerPos < currentList.size) {
+                    currentList.removeAt(headerPos)
+                    Log.e("HEADER-POS", "REMOVER POSITION -> $headerPos")
+                }
+            }
+
+            submitList(currentList)
+            originalList = currentList
         }
     }
+
     fun removeAll(){
         val currentList = currentList.toMutableList()
         currentList.clear()
@@ -230,6 +251,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
 
     fun getListItemsForDelete():List<SongEntity> = itemListForDelete
     fun clearListItemsForDelete(){itemListForDelete.clear()}
+
 
     private fun shouldRemoveHeaderForSong(song:SongEntity):Int{
         val position = currentList.indexOf(song)
@@ -247,6 +269,23 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         else if(aboveItem is String && position==currentList.size-1) position - 1
         else -1
     }
+    private fun shouldRemoveHeaderForSong(songPosition: Int, list: List<Any>):Int{
+        val position = songPosition
+        val aboveItem = list[position - 1]
+        return if(aboveItem is String ) {
+            if(position<list.size-1 && list[position +1] is String){
+                position - 1
+
+            }else if (position>=list.size-1){
+                position -1
+            }else{
+                -1
+            }
+        }
+        else if(aboveItem is String && position==list.size-1) position - 1
+        else -1
+    }
+
     fun getSongItemCount():Int{
         var itemSong = 0
         originalList.forEach { it ->
@@ -298,10 +337,12 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                             (position), audioTag.title,
                             audioTag.artist
                         )
+                        chkItemSong.isChecked = song.isChecked
                         tvDuration.text = audioTag.songLengthFormatted
                         tvFileFormat.text =
                             String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
                     }
+
                     root.setOnClickListener {
                         // La marcación del item se hará cuando se lance current track en nuestra interface
                         //changeBackgroundColorSelectedItem(bindingAdapterPosition, song.id)
