@@ -521,6 +521,11 @@ class MusicPlayerService : Service(){
             songsList.remove(song)
         }
     }
+    fun removeMediaItems(list: List<SongEntity>){
+        list.forEach { song->
+            removeMediaItem(song)
+        }
+    }
     fun clearPlayList(){
         mediaItemList.clear()
         songsList.clear()

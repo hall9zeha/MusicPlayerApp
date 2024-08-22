@@ -467,9 +467,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 OrderByDialog().show(parentFragmentManager,OrderByDialog::class.simpleName)
             }
             btnDelete?.setOnClickListener {
-               //mainViewModel.deleteSong(adapter.getListItemsForDelete())
-
-               adapter.removeItemsForMultipleSelectedAction()
+                val listForDeleted = adapter.getListItemsForDelete().toList()
+                mainViewModel.deleteSong(listForDeleted)
+                musicPlayerService?.removeMediaItems(listForDeleted)
+                adapter.removeItemsForMultipleSelectedAction()
             }
         }
     }
