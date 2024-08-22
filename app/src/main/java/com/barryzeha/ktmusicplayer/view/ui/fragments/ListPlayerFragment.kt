@@ -55,7 +55,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Date
+import java.util.logging.Handler
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
@@ -101,19 +103,21 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         bind = FragmentListPlayerBinding.bind(view)
+        setUpAdapter()
+        setUpObservers()
         setUpPlayListName()
         filePickerActivityResult()
         activityResultForPermission()
         initCheckPermission()
-        setUpAdapter()
-        setUpObservers()
         setUpListeners()
+
     }
 
     private fun filePickerActivityResult(){
@@ -146,6 +150,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun setUpAdapter(){
+
         adapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
         bind?.rvSongs?.apply {
             setHasFixedSize(true)
@@ -178,17 +183,22 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
-            sortPlayList(mPrefs.playListSort, songList,
-                {result->
-                adapter.addAll(result)},
-                {
-                setNumberOfTrack()
-                })
+            //TODO arreglar: sino traemos a toda la lista desde la base de datos nuevamente
+            // al rotar la pantalla las vistas del adaptador se muestran unos segundos y luego
+            // se borran, parece haber concurrencia en la creación del adaptador y la lista guardada
+            // en el viewModel
+              sortPlayList(mPrefs.playListSortOption, songList,
+                    { result ->
+                        adapter.addAll(result)
+                    },
+                    {
+                        setNumberOfTrack()
+                    })
 
         }
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
-            mPrefs.playListSort = selectedSort
+            mPrefs.playListSortOption = selectedSort
             mainViewModel.fetchAllSongsBy(selectedSort)
             setUpPlayListName()
         }
@@ -230,7 +240,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun setUpPlayListName()=with(bind){
         this?.let{
-            when(mPrefs.playListSort){
+            when(mPrefs.playListSortOption){
                 BY_ALBUM->tvPlayListName.text="Album"
                 BY_ARTIST->tvPlayListName.text="Artista"
                 BY_GENRE->tvPlayListName.text="Género"
@@ -735,11 +745,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
         adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(),mPrefs.idSong)
-
         val itemSong = adapter.getSongById(mPrefs.idSong)
         itemSong?.let{
             val position = adapter.getPositionByItem(itemSong)
-            bind?.rvSongs?.scrollToPosition(position.second )
+            bind?.rvSongs?.scrollToPosition(position.second)
         }
         if(mPrefs.controlFromNotify){
             try {

@@ -5,10 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.RadioButton
-import android.widget.Toast
-import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.barryzeha.core.common.BY_ALBUM
@@ -73,7 +70,7 @@ class OrderByDialog:DialogFragment() {
 
     }
     private fun setUpListeners(){
-        val sortedOption = mPrefs.playListSort
+        val sortedOption = mPrefs.playListSortOption
         dialogView?.let {
 
             _bind = OrderByDialogLayoutBinding.bind(dialogView!!)

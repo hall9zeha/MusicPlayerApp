@@ -81,6 +81,20 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+       /* if(holder is MViewHolder) {
+            try {
+                if (selectedPos == position) {
+                    (holder as MViewHolder).bind.root.setBackgroundColor(
+                        mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+                    )
+                } else {
+                    (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
+                }
+
+            } finally {
+                mColorList(context).recycle()
+            }
+        }*/
         if(holder is MViewHolder) {
             try {
                 if (selectedPos == position) {
@@ -94,15 +108,12 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             } finally {
                 mColorList(context).recycle()
             }
-        }
-        if(holder is MViewHolder) {
             val songPosition = getSongPositionOnlySongItem(position)
             holder.onBind(songPosition, getItem(position) as SongEntity)
         }else if(holder is HeaderViewHolder){
             holder.onBind(getItem(position) as String)
         }
-        //holder.onBind(position, songList[position])
-        //holder.onBind(position, asyncListDiffer.currentList[position])
+
     }
     private fun getSongPositionOnlySongItem(position: Int): Int {
         var count = 0
@@ -158,7 +169,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     }
     fun addAll(songs:List<Any>){
         this.originalList=songs.toMutableList()
-        submitList(originalList)
+        submitList(songs)
         //asyncListDiffer.submitList(songs)
        /* songs.forEach {
             add(it)
@@ -247,6 +258,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         currentList.clear()
         submitList(currentList)
         originalList=currentList
+
     }
 
     fun getListItemsForDelete():List<SongEntity> = itemListForDelete
@@ -330,18 +342,23 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 CoroutineScope(Dispatchers.IO).launch {
                     val audioTag = fetchFileMetadata(context, song.pathLocation!!)
                     withContext(Dispatchers.Main) {
-                       chkItemSong.visibility=if(song.isSelectShow) View.VISIBLE else View.GONE
-                        tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
-                        tvSongDesc.text = String.format(
-                            "%s. %s - %s",
-                            (position), audioTag.title,
-                            audioTag.artist
-                        )
-                        chkItemSong.isChecked = song.isChecked
-                        tvDuration.text = audioTag.songLengthFormatted
-                        tvFileFormat.text =
-                            String.format("::%s", song.pathLocation?.substringAfterLast(".", "NA"))
-                    }
+                        audioTag?.let {
+                            chkItemSong.visibility = if (song.isSelectShow) View.VISIBLE else View.GONE
+                            tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
+                            tvSongDesc.text = String.format(
+                                "%s. %s - %s",
+                                (position), audioTag.title,
+                                audioTag.artist
+                            )
+                            chkItemSong.isChecked = song.isChecked
+                            tvDuration.text = audioTag.songLengthFormatted
+                            tvFileFormat.text =
+                                String.format(
+                                    "::%s",
+                                    song.pathLocation?.substringAfterLast(".", "NA")
+                                )
+
+                        }}
 
                     root.setOnClickListener {
                         // La marcación del item se hará cuando se lance current track en nuestra interface

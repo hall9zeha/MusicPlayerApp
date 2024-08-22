@@ -87,7 +87,9 @@ private suspend fun processFile(
          */
          // Guardar en el ViewModel si es necesario
             withContext(Dispatchers.Main) {
-                fileProcessed(realPathFromFile,parentDir,metadata)
+                metadata?.let {
+                    fileProcessed(realPathFromFile, parentDir, metadata)
+                }
             }
         }
 

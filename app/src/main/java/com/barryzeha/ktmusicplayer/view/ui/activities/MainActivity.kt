@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        if(savedInstanceState==null)mainViewModel.fetchAllSong()
         setUpViewPager()
         setUpObservers()
         setUpListeners()
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
     }
 
     private fun setUpObservers(){
+
         mainViewModel.fetchSongState()
         mainViewModel.musicState.observe(this){
             //Log.e("MAIN-ACTIVITY", it.toString() )

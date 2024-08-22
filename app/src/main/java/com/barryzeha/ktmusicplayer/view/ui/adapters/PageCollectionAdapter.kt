@@ -20,8 +20,7 @@ class PageCollectionAdapter(mainViewModel: MainViewModel,fragment:FragmentActivi
 
     override fun getItemCount(): Int = listOfTitles.size
     init {
-        mainViewModel.fetchAllSong()
-
+       // mainViewModel.fetchAllSong()
     }
     override fun createFragment(position: Int): Fragment {
         return when(position){

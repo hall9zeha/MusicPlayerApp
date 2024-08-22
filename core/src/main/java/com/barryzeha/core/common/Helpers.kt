@@ -74,10 +74,9 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 
 }
 
- fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata{
-    val metadata = AudioFileIO.read(File(pathFile))
-    val tag = metadata.tag
-    val nameFile=metadata.file.name.substringBeforeLast(".")
+ fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata?{
+    val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
+
     // retrieve covert art of song file uncomment if you want implement,
     /*val coverArtData = try{
         tag.firstArtwork.binaryData
@@ -85,24 +84,27 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
         null
     }
     val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
-
+    metadata?.let{
+        val tag = metadata?.tag
+        val nameFile=metadata?.file?.name?.substringBeforeLast(".")
     return AudioMetadata(
-        artist=try{if(tag.getFirst(FieldKey.ARTIST).isNullOrEmpty())"Artist unknown" else tag.getFirst(FieldKey.ARTIST) } catch(ex:Exception){"Artist Unknown" },
-        album=try{if(tag.getFirst(FieldKey.ALBUM).isNullOrEmpty())"Album unknown" else tag.getFirst(FieldKey.ALBUM) }catch(ex:Exception){"Album Unknown"},
-        genre=try{tag.getFirst(FieldKey.GENRE)}catch(ex:Exception){"Unknown"},
-        title=try{if(tag.getFirst(FieldKey.TITLE).isNullOrEmpty())nameFile else tag.getFirst(FieldKey.TITLE)}catch(ex:Exception){nameFile},
-        comment=try{tag.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"No comment"},
-        year=try{tag.getFirst(FieldKey.YEAR)}catch(ex:Exception){"Unknown year"},
-        track=try{tag.getFirst(FieldKey.TRACK)}catch(ex:Exception){"Unknown"},
-        discNumber=try{tag.getFirst(FieldKey.DISC_NO)}catch(ex:Exception){"Unknown"},
-        composer=try{tag.getFirst(FieldKey.COMPOSER)}catch(ex:Exception){"Unknown"},
-        artistSort = try{tag.getFirst(FieldKey.ARTIST_SORT)}catch(ex:Exception){""},
+        artist=try{if(tag?.getFirst(FieldKey.ARTIST).isNullOrEmpty())"Artist unknown" else tag?.getFirst(FieldKey.ARTIST) } catch(ex:Exception){"Artist Unknown" },
+        album=try{if(tag?.getFirst(FieldKey.ALBUM).isNullOrEmpty())"Album unknown" else tag?.getFirst(FieldKey.ALBUM) }catch(ex:Exception){"Album Unknown"},
+        genre=try{tag?.getFirst(FieldKey.GENRE)}catch(ex:Exception){"Unknown"},
+        title=try{if(tag?.getFirst(FieldKey.TITLE).isNullOrEmpty())nameFile else tag?.getFirst(FieldKey.TITLE)}catch(ex:Exception){nameFile},
+        comment=try{tag?.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"No comment"},
+        year=try{tag?.getFirst(FieldKey.YEAR)}catch(ex:Exception){"Unknown year"},
+        track=try{tag?.getFirst(FieldKey.TRACK)}catch(ex:Exception){"Unknown"},
+        discNumber=try{tag?.getFirst(FieldKey.DISC_NO)}catch(ex:Exception){"Unknown"},
+        composer=try{tag?.getFirst(FieldKey.COMPOSER)}catch(ex:Exception){"Unknown"},
+        artistSort = try{tag?.getFirst(FieldKey.ARTIST_SORT)}catch(ex:Exception){""},
         bitRate = try{metadata.audioHeader.bitRate}catch(ex:Exception){""},
         songLengthFormatted = try{getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong())}catch(ex:Exception){"0"},
         songLength = try{(metadata.audioHeader.trackLength * 1000).toLong()}catch(ex:Exception){0},
         format = try{metadata.audioHeader.format}catch (ex:Exception){"unknown"},
         //coverArt = bitmapCoverArt
-    )
+    ) }
+     return null
 }
 fun getTimeOfSong(duration:Long):String{
     return String.format(
@@ -185,13 +187,16 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
         //val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
         //val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
         val bitmap = getBitmap(context,mmr.embeddedPicture,isForNotify)!!
-        return MusicState(
-            title = metadata.title!!,
-            artist = metadata.artist!!,
-            album = metadata.album!!,
-            duration = metadata.songLength,
-            albumArt = bitmap
-        )
+        metadata?.let {
+            return MusicState(
+                title = metadata?.title!!,
+                artist = metadata?.artist!!,
+                album = metadata?.album!!,
+                duration = metadata.songLength,
+                albumArt = bitmap
+            )
+        }
+        return null
     }
     return MusicState(
         artist = "Unknown",
