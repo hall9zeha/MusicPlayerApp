@@ -152,7 +152,7 @@ fun cancelPersistentNotify(context:Context){
     notificationManager.cancelAll()
 
 }
-fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSorted:MutableList<Any>)->Unit, mainScopeBlock:()->Unit){
+fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSorted:MutableList<Any>)->Unit){
     if (songList.isNotEmpty()) {
         val itemList:MutableList<Any> = arrayListOf()
         val headerContentExtractor: (SongEntity) -> String = when (sortedOption) {
@@ -174,9 +174,9 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
                 }
                 temp = headerContent
             }
-            result(itemList)
+
             withContext(Dispatchers.Main){
-                mainScopeBlock()
+                result(itemList)
             }
         }
     }

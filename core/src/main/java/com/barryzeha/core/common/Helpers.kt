@@ -90,7 +90,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
     return AudioMetadata(
         artist=try{if(tag?.getFirst(FieldKey.ARTIST).isNullOrEmpty())"Artist unknown" else tag?.getFirst(FieldKey.ARTIST) } catch(ex:Exception){"Artist Unknown" },
         album=try{if(tag?.getFirst(FieldKey.ALBUM).isNullOrEmpty())"Album unknown" else tag?.getFirst(FieldKey.ALBUM) }catch(ex:Exception){"Album Unknown"},
-        genre=try{tag?.getFirst(FieldKey.GENRE)}catch(ex:Exception){"Unknown"},
+        genre=try{if(tag?.getFirst(FieldKey.GENRE).isNullOrEmpty())"Unknown genre" else  tag?.getFirst(FieldKey.GENRE)}catch(ex:Exception){"Genre Unknown"},
         title=try{if(tag?.getFirst(FieldKey.TITLE).isNullOrEmpty())nameFile else tag?.getFirst(FieldKey.TITLE)}catch(ex:Exception){nameFile},
         comment=try{tag?.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"No comment"},
         year=try{tag?.getFirst(FieldKey.YEAR)}catch(ex:Exception){"Unknown year"},

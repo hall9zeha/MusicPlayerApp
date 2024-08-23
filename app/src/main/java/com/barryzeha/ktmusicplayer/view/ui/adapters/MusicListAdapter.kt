@@ -338,7 +338,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     inner class MViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
-
                 CoroutineScope(Dispatchers.IO).launch {
                     val audioTag = fetchFileMetadata(context, song.pathLocation!!)
                     withContext(Dispatchers.Main) {
@@ -358,7 +357,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                                     song.pathLocation?.substringAfterLast(".", "NA")
                                 )
 
-                        }}
+                        }
+                    }
 
                     root.setOnClickListener {
                         // La marcación del item se hará cuando se lance current track en nuestra interface

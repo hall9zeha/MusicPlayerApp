@@ -183,19 +183,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
-            //TODO arreglar: sino traemos a toda la lista desde la base de datos nuevamente
-            // al rotar la pantalla las vistas del adaptador se muestran unos segundos y luego
-            // se borran, parece haber concurrencia en la creación del adaptador y la lista guardada
-            // en el viewModel
-              sortPlayList(mPrefs.playListSortOption, songList,
-                    { result ->
-                        adapter.addAll(result)
-                    },
-                    {
-                        setNumberOfTrack()
-                    })
-
+            // La actualización del adaptador debe ocurrir en el hilo principal siempre
+            // Dará problemas al recrearse la vista cuando rotemos la pantalla si no está en el
+            // hilo principal
+            sortPlayList(mPrefs.playListSortOption, songList
+            ) { result ->
+                adapter.addAll(result)
+                setNumberOfTrack()
+            }
         }
+
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
             mPrefs.playListSortOption = selectedSort
