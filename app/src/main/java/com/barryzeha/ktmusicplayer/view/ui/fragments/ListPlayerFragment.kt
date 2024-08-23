@@ -157,6 +157,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             setItemViewCacheSize(10)
             layoutManager = LinearLayoutManager(context)
             adapter = this@ListPlayerFragment.adapter
+            post {
+                setNumberOfTrack()
+            }
         }
     }
     private fun setUpObservers(){
@@ -189,7 +192,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
                 adapter.addAll(result)
-                setNumberOfTrack()
+                //setNumberOfTrack()
             }
         }
 

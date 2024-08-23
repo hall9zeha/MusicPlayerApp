@@ -19,9 +19,7 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 class PageCollectionAdapter(mainViewModel: MainViewModel,fragment:FragmentActivity, private val listOfTitles:List<String>):FragmentStateAdapter(fragment) {
 
     override fun getItemCount(): Int = listOfTitles.size
-    init {
-       // mainViewModel.fetchAllSong()
-    }
+
     override fun createFragment(position: Int): Fragment {
         return when(position){
             MAIN_FRAGMENT-> MainPlayerFragment()
