@@ -17,6 +17,7 @@ import android.widget.PopupMenu
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
@@ -289,28 +290,33 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         updateService()
     }
 
+
     private fun setUpListeners()= with(bind){
         var clicked=false
+
+        val permissionList:List<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            listOf(Manifest.permission.READ_MEDIA_AUDIO)
+        } else {
+            listOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO,)
+        }
         this?.let {
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }
-
             btnAdd.setOnClickListener {
                 checkPermissions(
                     requireContext(),
-                    listOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO
-                    )
+                    permissionList
                 ) { isGranted, permissionsList ->
                     if (isGranted) {
                        launcherFilePickerActivity.launch(Unit)
 
                     } else {
-                        permissionsList.forEach { permission ->
-                            if (!permission.second) {
-                                launcherPermission.launch(permission.first)
+                        permissionsList.forEach { (permission,granted)->
+                            if (!granted) {
+                                launcherPermission.launch(permission)
 
                             }
                         }
@@ -554,12 +560,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         return null
     }
     private fun initCheckPermission(){
-        val permissionList:MutableList<String> = mutableListOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.BLUETOOTH_CONNECT)
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            permissionList.add(Manifest.permission.POST_NOTIFICATIONS)
+        val permissionList:MutableList<String> =  if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            mutableListOf(Manifest.permission.POST_NOTIFICATIONS,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.READ_MEDIA_AUDIO)
+        }else{
+            mutableListOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.BLUETOOTH_CONNECT)
         }
         checkPermissions(requireContext(),permissionList){isGranted,permissions->
             if(isGranted) Log.e("GRANTED", "Completed granted" )

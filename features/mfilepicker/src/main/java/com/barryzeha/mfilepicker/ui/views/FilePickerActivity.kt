@@ -16,6 +16,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.common.Preferences
@@ -53,8 +55,8 @@ class FilePickerActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }*/
-
+        }
+        */
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setUpMenuProvider()
         setupAdapter()

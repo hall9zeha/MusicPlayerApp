@@ -98,6 +98,7 @@ class MusicPlayerService : Service(){
         mPrefs = MyApp.mPrefs
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
+
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
@@ -326,6 +327,13 @@ class MusicPlayerService : Service(){
                         )
                         .setActions(PlaybackState.ACTION_PLAY_PAUSE)
                         .setActions(PlaybackState.ACTION_SEEK_TO)
+                        //TODO implementar Controles que aparecen en android 14
+                        .setActions(PlaybackState.ACTION_SEEK_TO
+                                or PlaybackState.ACTION_PLAY
+                                or PlaybackState.ACTION_PAUSE
+                                or PlaybackState.ACTION_SKIP_TO_NEXT
+                                or PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+
                         .build()
                 )
                 mediaSession.setMetadata(
