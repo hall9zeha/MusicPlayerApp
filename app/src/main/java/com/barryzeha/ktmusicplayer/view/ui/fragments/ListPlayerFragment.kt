@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -15,6 +16,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -118,9 +120,26 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         activityResultForPermission()
         initCheckPermission()
         setUpListeners()
+        handleIntent(activity?.intent)
 
     }
+    private fun handleIntent(intent: Intent?){
+        intent?.let{
+            val requestCode = intent.getIntExtra("request_code",-1)
+            when(requestCode){
+                123->{
+                    CoroutineScope(Dispatchers.IO).launch {
+                        withContext(Dispatchers.Main) {
+                            delay(1000)
+                            mainViewModel.setCurrentTrack(currentMusicState)
+                        }
+                    }
 
+                }
+                else->{}
+            }
+        }
+    }
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()){paths->
             //paths.forEach {path->

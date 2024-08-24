@@ -13,9 +13,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
 import android.media.MediaMetadata
+import android.media.Rating
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Binder
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -28,6 +30,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.exoplayer.ExoPlayer
+import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.getSongMetadata
@@ -39,6 +42,7 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
@@ -164,9 +168,6 @@ class MusicPlayerService : Service(){
                     }
                 }
             }
-
-
-
         }
         val filter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
         registerReceiver(headsetReceiver,filter)
@@ -202,6 +203,60 @@ class MusicPlayerService : Service(){
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
                 exoPlayer.seekTo(pos)
+            }
+
+            override fun onPause() {
+                super.onPause()
+                _songController?.pause()
+                exoPlayer.pause()
+                if(_songController==null){
+                    mPrefs.nextOrPrevFromNotify=true
+                    mPrefs.controlFromNotify = true
+                    mPrefs.isPlaying = exoPlayer.isPlaying
+                }
+            }
+
+            override fun onPlay() {
+                super.onPlay()
+                _songController?.play()
+                playerListener?.let{exoPlayer.addListener(it)}
+                exoPlayer.play()
+                if(_songController==null){
+                    mPrefs.nextOrPrevFromNotify=true
+                    mPrefs.controlFromNotify = true
+                    mPrefs.isPlaying = exoPlayer.isPlaying
+                }
+            }
+
+            override fun onSkipToNext() {
+                super.onSkipToNext()
+                _songController?.next()
+                nextOrPrevTRack(mPrefs.currentPosition.toInt() +1)
+            }
+
+            override fun onSkipToPrevious() {
+                super.onSkipToPrevious()
+                _songController?.previous()
+                nextOrPrevTRack(mPrefs.currentPosition.toInt() -1)
+            }
+
+            override fun onStop() {
+                super.onStop()
+            }
+
+            override fun onCustomAction(action: String, extras: Bundle?) {
+                if(ACTION_CLOSE == action){
+                    exoPlayer.stop()
+                    exoPlayer.release()
+                    songHandler.removeCallbacks(songRunnable)
+
+                    // Remove notification of foreground service process
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                    _songController?.stop()
+                    // Close application
+                    _activity?.finish()
+                }
             }
 
         }
@@ -325,15 +380,23 @@ class MusicPlayerService : Service(){
                             newState.currentDuration,
                             1f
                         )
-                        .setActions(PlaybackState.ACTION_PLAY_PAUSE)
-                        .setActions(PlaybackState.ACTION_SEEK_TO)
+                       /* .setActions(PlaybackState.ACTION_PLAY_PAUSE)
+                        .setActions(PlaybackState.ACTION_SEEK_TO)*/
                         //TODO implementar Controles que aparecen en android 14
+
                         .setActions(PlaybackState.ACTION_SEEK_TO
                                 or PlaybackState.ACTION_PLAY
                                 or PlaybackState.ACTION_PAUSE
                                 or PlaybackState.ACTION_SKIP_TO_NEXT
-                                or PlaybackState.ACTION_SKIP_TO_PREVIOUS)
+                                or PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                                or PlaybackState.ACTION_STOP
+                          )
 
+                        .addCustomAction(PlaybackState.CustomAction.Builder(
+                            ACTION_CLOSE,
+                            ACTION_CLOSE,
+                            com.barryzeha.core.R.drawable.ic_close
+                        ).build())
                         .build()
                 )
                 mediaSession.setMetadata(
@@ -510,6 +573,7 @@ class MusicPlayerService : Service(){
         _songController=controller
 
     }
+
     fun setNewMediaItem(song:SongEntity){
         val newMediaItem = MediaItem.Builder()
             .setMediaId(song.id.toString())

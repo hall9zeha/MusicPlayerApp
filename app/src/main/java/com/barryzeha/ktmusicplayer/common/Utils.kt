@@ -53,8 +53,8 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     val pMainIntent = PendingIntent.getActivity(
         context,
         123,
-        Intent(context, MainActivity::class.java),
-        PendingIntent.FLAG_IMMUTABLE)
+        Intent(context, MainActivity::class.java).putExtra("request_code",123),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     val builder = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
         Notification.Builder(context, CHANNEL_ID)
