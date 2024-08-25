@@ -120,26 +120,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         activityResultForPermission()
         initCheckPermission()
         setUpListeners()
-        handleIntent(activity?.intent)
 
     }
-    private fun handleIntent(intent: Intent?){
-        intent?.let{
-            val requestCode = intent.getIntExtra("request_code",-1)
-            when(requestCode){
-                123->{
-                    CoroutineScope(Dispatchers.IO).launch {
-                        withContext(Dispatchers.Main) {
-                            delay(1000)
-                            mainViewModel.setCurrentTrack(currentMusicState)
-                        }
-                    }
 
-                }
-                else->{}
-            }
-        }
-    }
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()){paths->
             //paths.forEach {path->
@@ -212,7 +195,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
                 adapter.addAll(result)
-                //setNumberOfTrack()
+                setNumberOfTrack()
             }
         }
 

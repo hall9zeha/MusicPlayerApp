@@ -31,14 +31,15 @@
         app:layout_constraintStart_toEndOf="@id/ivFileType"
         app:layout_constraintBottom_toBottomOf="@id/ivFileType"
         app:layout_constraintEnd_toStartOf="@id/chkSelected"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="4dp"/>
     <CheckBox
         android:id="@+id/chkSelected"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:theme="@style/checkBoxStyle"
+
         android:button="@drawable/check_box_selector"
         app:layout_constraintStart_toEndOf="@id/tvFileDescription"
         app:layout_constraintTop_toTopOf="parent"

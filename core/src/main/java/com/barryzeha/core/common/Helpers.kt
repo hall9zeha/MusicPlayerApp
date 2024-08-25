@@ -207,7 +207,7 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
 fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):Bitmap?{
     return byteArray?.let {
         val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-        if (isForNotify) scaleBitmap(originalBitmap, 96, 96)
+        if (isForNotify) scaleBitmap(originalBitmap, 156, 156)
         else originalBitmap
     }?:run{
        BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))

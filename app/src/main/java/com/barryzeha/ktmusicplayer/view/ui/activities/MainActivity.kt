@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         setUpViewPager()
         setUpObservers()
         setUpListeners()
-        handleIntent(intent)
         //mOnBackPressedDispatcher()
     }
 
@@ -161,17 +160,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         })
     }*/
 
-    private fun handleIntent(intent:Intent?){
-        intent?.let{
-            val requestCode = intent.getIntExtra("request_code",-1)
-            when(requestCode){
-                123->{
 
-                }
-                else->{}
-            }
-        }
-    }
     override fun onStart() {
         super.onStart()
         startOrUpdateService(this,MusicPlayerService::class.java,this)
