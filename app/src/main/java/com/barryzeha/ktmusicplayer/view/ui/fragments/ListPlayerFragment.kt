@@ -244,10 +244,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun setUpPlayListName()=with(bind){
         this?.let{
             when(mPrefs.playListSortOption){
-                BY_ALBUM->tvPlayListName.text="Album"
-                BY_ARTIST->tvPlayListName.text="Artista"
-                BY_GENRE->tvPlayListName.text="Género"
-                else->tvPlayListName.text="Default"
+                BY_ALBUM->tvPlayListName.text=getString(coreRes.string.album)
+                BY_ARTIST->tvPlayListName.text=getString(coreRes.string.artist)
+                BY_GENRE->tvPlayListName.text=getString(coreRes.string.genre)
+                else->tvPlayListName.text=getString(coreRes.string.default_title)
 
             }
         }

@@ -14,4 +14,9 @@
     <string name="delete_all">Borrar lista</string>
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
+    <string name="default_title">Default</string>
+    <string name="album">Album</string>
+    <string name="artist">Artist</string>
+    <string name="genre">Genre</string>
+
 </resources>

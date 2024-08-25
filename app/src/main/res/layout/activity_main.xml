@@ -8,12 +8,14 @@
     android:layout_height="match_parent"
     tools:context=".view.ui.activities.MainActivity"
     android:fitsSystemWindows="true"
+    android:orientation="vertical"
     tools:openDrawer="start">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:fitsSystemWindows="true"
         >
          <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/mViewPager"
@@ -28,6 +30,8 @@
         android:id="@+id/navView"
         android:layout_gravity="start"
         app:menu="@menu/main_menu"
+        android:fitsSystemWindows="true"
+        android:paddingTop="24dp"
         />
     <!--app:headerLayout="@layout/header_view"-->
  </androidx.drawerlayout.widget.DrawerLayout>
