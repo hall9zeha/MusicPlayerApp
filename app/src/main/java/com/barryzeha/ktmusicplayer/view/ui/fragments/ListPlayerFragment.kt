@@ -198,7 +198,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 setNumberOfTrack()
             }
         }
-
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
             mPrefs.playListSortOption = selectedSort
