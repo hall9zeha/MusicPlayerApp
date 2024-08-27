@@ -124,26 +124,24 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
 
     private fun filePickerActivityResult(){
-        launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()){paths->
-            //paths.forEach {path->
-                processSongPaths(paths){ realPathFromFile, parentDir, audioMetaData ->
-                    mainViewModel.saveNewSong(
-                        SongEntity(
-                            pathLocation = realPathFromFile,
-                            parentDirectory = parentDir ?: "",
-                            description = audioMetaData.title,
-                            duration = audioMetaData.songLength,
-                            bitrate = audioMetaData.bitRate,
-                            artist = audioMetaData.artist!!,
-                            album = audioMetaData.album!!,
-                            genre = audioMetaData.genre!!,
-                            timestamp = Date().time
-                        )
-                    )
-                }
+        launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
 
-            //}
-        }
+           /* processSongPaths(paths) { song->
+                mainViewModel.saveNewSong(song
+                )
+            }*/
+            bind?.pbLoad?.visibility=View.VISIBLE
+            processSongPaths(paths){listFilesProcessed->
+                //adapter.addAll(listFilesProcessed)
+                CoroutineScope(Dispatchers.Main).launch {
+                    bind?.pbLoad?.isIndeterminate=false
+                }
+                mainViewModel.saveSongs(listFilesProcessed)
+
+            }
+
+            }
+
     }
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
@@ -179,6 +177,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
            setNumberOfTrack()
 
         }
+        mainViewModel.processedRegisterInfo.observe(viewLifecycleOwner){(size, count)->
+            bind?.pbLoad?.apply {
+                max=size
+                progress=count
+            }
+        }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
             if (statePlay) {
@@ -196,8 +200,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             ) { result ->
                 adapter.addAll(result)
                 setNumberOfTrack()
+                bind?.pbLoad?.visibility=View.GONE
+                bind?.pbLoad?.isIndeterminate=true
             }
         }
+       /* mainViewModel.songListRegisterSuccess.observe(viewLifecycleOwner){songIds->
+            Log.e("ITEM-FILE->Size", songIds.size.toString())
+            if(songIds.isNotEmpty()) {
+               mainViewModel.fetchAllSong()
+            }
+        }*/
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
             mPrefs.playListSortOption = selectedSort

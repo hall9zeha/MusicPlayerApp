@@ -6,6 +6,7 @@ import com.barryzeha.core.common.getParentDirectories
 import com.barryzeha.core.common.getRealPathFromURI
 import com.barryzeha.core.common.getUriFromFile
 import com.barryzeha.core.model.entities.AudioMetadata
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.mfilepicker.filetype.AudioFileType
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.Date
 
 
 /**
@@ -30,9 +32,12 @@ private val operationsMutex = Mutex()
 // Función para procesar múltiples rutas de directorios de forma secuencial
 fun processSongPaths(
     paths: List<String>,  // Lista de directorios a procesar
-    fileProcessed: (realPathFromFile: String, parentDir: String, audioMetaData: AudioMetadata) -> Unit
+    //fileProcessed: (song:SongEntity) -> Unit
+    filesProcessed:(List<SongEntity>)->Unit
 ) {
     val channel = Channel<File>(Channel.UNLIMITED)  // Canal sin límite de buffer
+
+    var listFilesProcessed:MutableList<SongEntity> = arrayListOf()
 
     // Corutina para encolar archivos en el canal
     CoroutineScope(Dispatchers.IO).launch {
@@ -46,11 +51,14 @@ fun processSongPaths(
         }
     }
     // Corutina única para procesar archivos secuencialmente
-
-        CoroutineScope(Dispatchers.IO).launch {
+     CoroutineScope(Dispatchers.IO).launch {
             for (file in channel) {
-                processFile(file, MyApp.context, fileProcessed)
+                //processFile(file, MyApp.context,fileProcessed)
+                processFile(file, MyApp.context)?.let{song->
+                    listFilesProcessed.add(song)
+                }
             }
+            filesProcessed(listFilesProcessed)
         }
 }
 
@@ -69,10 +77,11 @@ private fun enqueueFiles(file: File, channel: Channel<File>) {
 private suspend fun processFile(
     file: File,
     context: Context,
-    fileProcessed: (realPathFromFile: String, parentDir: String, audioMetaData: AudioMetadata) -> Unit
+    fileProcessed: (SongEntity) -> Unit
 ){
     if (AudioFileType().verify(file.absolutePath)) {
         val uri = getUriFromFile(file, context)
+
         operationsMutex.withLock {
             val realPathFromFile = getRealPathFromURI(uri!!, context)
             val parentDir = getParentDirectories(uri.path.toString())
@@ -85,15 +94,55 @@ private suspend fun processFile(
             Log.e("ITEM-FILE  ->", parentDir ?: "")
 
          */
+           val song = SongEntity(
+                pathLocation = realPathFromFile,
+                parentDirectory = parentDir ?: "",
+                description = metadata!!.title,
+                duration = metadata!!.songLength,
+                bitrate = metadata!!.bitRate,
+                artist = metadata!!.artist!!,
+                album = metadata!!.album!!,
+                genre = metadata!!.genre!!,
+                timestamp = Date().time
+            )
          // Guardar en el ViewModel si es necesario
             withContext(Dispatchers.Main) {
                 metadata?.let {
-                    fileProcessed(realPathFromFile, parentDir, metadata)
+                    fileProcessed(song)
                 }
             }
         }
 
     }
 
+}
+private suspend fun processFile(
+    file: File,
+    context: Context
+):SongEntity?{
+    if (AudioFileType().verify(file.absolutePath)) {
+        val uri = getUriFromFile(file, context)
+        operationsMutex.withLock {
+            val realPathFromFile = getRealPathFromURI(uri!!, context)
+            val parentDir = getParentDirectories(uri.path.toString())
+            val metadata = fetchFileMetadata(context, realPathFromFile!!)
+
+            return SongEntity(
+                pathLocation = realPathFromFile,
+                parentDirectory = parentDir ?: "",
+                description = metadata!!.title,
+                duration = metadata!!.songLength,
+                bitrate = metadata!!.bitRate,
+                artist = metadata!!.artist!!,
+                album = metadata!!.album!!,
+                genre = metadata!!.genre!!,
+                timestamp = Date().time
+            )
+
+
+        }
+
+    }
+    return null
 }
 

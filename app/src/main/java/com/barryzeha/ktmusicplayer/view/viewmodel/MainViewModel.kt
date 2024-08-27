@@ -15,8 +15,10 @@ import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -29,8 +31,12 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(private val repository:MainRepository):ScopedViewModel() {
 
+    private var countItemsInserted:Long=0
+    private var itemsListSize:Long=0
+
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
+
 
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
     val songState:LiveData<List<SongStateWithDetail>> = _songState
@@ -43,6 +49,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
 
     private var _registerRowInserted:MutableLiveData<Long> = MutableLiveData()
     val registerRowInserted:LiveData<Long> = _registerRowInserted
+
+    private var _songListRegisterSuccess:SingleMutableLiveData<LongArray> = SingleMutableLiveData()
+    val songListRegisterSuccess:LiveData<LongArray> = _songListRegisterSuccess
 
     private var _isFavorite:MutableLiveData<Boolean> = MutableLiveData()
     val isFavorite:LiveData<Boolean> = _isFavorite
@@ -77,6 +86,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _serviceInstance:MutableLiveData<Pair<ServiceConnection,MusicPlayerService>> = MutableLiveData()
     val serviceInstance:LiveData<Pair<ServiceConnection,MusicPlayerService>> = _serviceInstance
 
+    private var _processedRegistersInfo:SingleMutableLiveData<Pair<Int,Int>> = SingleMutableLiveData()
+    val processedRegisterInfo:LiveData<Pair<Int,Int>> = _processedRegistersInfo
+
     init{
         initScope()
     }
@@ -107,12 +119,35 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
         launch { _orderBySelection.value=selection }
     }
     fun saveNewSong(songEntity: SongEntity){
+
         launch {
             val idInserted=repository.saveNewSong(songEntity)
-            fetchAllSong()
             getSongById(idInserted)
+            countItemsInserted++
+            _processedRegistersInfo.value = Pair(itemsListSize.toInt(), countItemsInserted.toInt())
+
+            if(itemsListSize==countItemsInserted){
+                fetchAllSong()
+                countItemsInserted =0
+            }
+            Log.e("SAVE-NEW-SONG", "$itemsListSize --: $countItemsInserted" )
         }
     }
+
+    fun saveSongs(songList:List<SongEntity>){
+        itemsListSize=songList.size.toLong()
+        launch(Dispatchers.IO){
+
+                songList.forEach { song ->
+                    withContext(Dispatchers.Main){
+                        saveNewSong(song)
+                    }
+                }
+
+            //_songListRegisterSuccess.value=repository.saveSongs(songList)
+        }
+    }
+
     fun saveSongState(songState: SongState){
         launch {
              repository.saveSongState(songState)
@@ -144,7 +179,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             val songIds:MutableList<Long> = arrayListOf()
             itemList.forEach {item->
                 songIds.add(item.id)
-                Log.e("ITEM-FILE", item.id.toString() )
+
             }
             repository.deleteSong(songIds)
         }

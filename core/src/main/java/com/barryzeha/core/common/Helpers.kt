@@ -241,34 +241,34 @@ fun getParentDirectories(path: String): String {
 
     val storage= getStorageIdentifier(path)
 
-        Log.e("ITEM-FILE--:", storage.toString())
-        // Encontrar la posición del nombre del archivo (última '/' antes del nombre de archivo)
-        val lastIndex = path.lastIndexOf('/')
-        if (lastIndex == -1) {
-            return path.substringBeforeLast("/")  // Si no se encuentra '/', retornar el path completo
+    Log.e("STORAGE-POSITION--:", storage.toString())
+    // Encontrar la posición del nombre del archivo (última '/' antes del nombre de archivo)
+    val lastIndex = path.lastIndexOf('/')
+    if (lastIndex == -1) {
+        return path.substringBeforeLast("/")  // Si no se encuentra '/', retornar el path completo
+    }
+
+    // Encontrar la posición de '0' o '1' en el path
+    val primaryIndex = path.indexOf(storage.toString())
+    if (primaryIndex == -1) {
+        return path.substringBeforeLast("/")  // Si no se encuentra '0', retornar el path completo
+    }
+
+    // Encontrar el primer '/' después de 'primary'
+    val firstSlashAfterPrimary = path.indexOf('/', primaryIndex)
+    if (firstSlashAfterPrimary == -1 || firstSlashAfterPrimary >= lastIndex) {
+        return if (primaryIndex == -1) {
+            path.substringBeforeLast("/")
+        } else {
+            return path.substring(primaryIndex + storage.toString().length, lastIndex)
         }
 
-        // Encontrar la posición de '0' o '1' en el path
-        val primaryIndex = path.indexOf(storage.toString())
-        if (primaryIndex == -1) {
-            return path.substringBeforeLast("/")  // Si no se encuentra '0', retornar el path completo
-        }
+        // Si no se encuentra '/', retornar el path completo
+    }
 
-        // Encontrar el primer '/' después de 'primary'
-        val firstSlashAfterPrimary = path.indexOf('/', primaryIndex)
-        if (firstSlashAfterPrimary == -1 || firstSlashAfterPrimary >= lastIndex) {
-            return if (primaryIndex == -1) {
-                path.substringBeforeLast("/")
-            } else {
-                return path.substring(primaryIndex + storage.toString().length, lastIndex)
-            }
-
-            // Si no se encuentra '/', retornar el path completo
-        }
-
-        // Recortar el path desde el primer '/' después de '0' hasta el nombre del archivo
-        val directoriosRecortados = path.substring(firstSlashAfterPrimary + 1, lastIndex)
-        return directoriosRecortados
+    // Recortar el path desde el primer '/' después de '0' hasta el nombre del archivo
+    val directoriosRecortados = path.substring(firstSlashAfterPrimary + 1, lastIndex)
+    return directoriosRecortados
 
 }
 fun getStorageIdentifier(path: String): String? {

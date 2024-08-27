@@ -45,6 +45,10 @@ interface  SongDao {
     suspend fun saveNewSong(song: SongEntity):Long
 
     @Transaction
+    @Insert
+    suspend fun saveSongs(songList:List<SongEntity>):LongArray
+
+    @Transaction
     @Update
     suspend fun updateSong(song:SongEntity):Int
     @Transaction
