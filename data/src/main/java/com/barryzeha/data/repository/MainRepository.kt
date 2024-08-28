@@ -32,6 +32,4 @@ interface MainRepository {
     suspend fun saveSongState(songState: SongState):Long
     suspend fun updateSongState(songState: SongState):Int
 
-    // UI Flows
-    suspend fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer): Flow<Triple<Int,Int,String>>
 }

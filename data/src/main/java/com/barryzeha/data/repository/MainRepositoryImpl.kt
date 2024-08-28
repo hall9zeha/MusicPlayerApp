@@ -84,18 +84,6 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
         dao.updateSongState(songState)
     }
 
-    // UI Flows
-    override suspend fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer): Flow<Triple<Int,Int,String>> {
-        return flow{
-                while(true) {
-                    val isPlaying = withContext(Dispatchers.Main){ mediaPlayer.isPlaying}
-                    if(isPlaying) {
-                        val formattedTime= withContext(Dispatchers.Main){createTime(mediaPlayer.currentPosition)}
-                        emit(formattedTime)
-                        delay(1000)
-                    }
-                }
-            }.flowOn(Dispatchers.IO)
-        }
+
 
 }

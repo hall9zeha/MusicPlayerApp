@@ -3,7 +3,6 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -16,10 +15,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.PopupMenu
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
@@ -58,9 +55,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Date
-import java.util.logging.Handler
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
@@ -125,16 +119,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
-
             if(paths.isNotEmpty())bind?.pbLoad?.visibility=View.VISIBLE
-            processSongPaths(paths){listFilesProcessed->
-                //adapter.addAll(listFilesProcessed)
+            processSongPaths(paths ,{itemsCount->mainViewModel.setItemsCount(itemsCount)},{song->
                 CoroutineScope(Dispatchers.Main).launch {
                     bind?.pbLoad?.isIndeterminate=false
                 }
-                mainViewModel.saveSongs(listFilesProcessed)
+                mainViewModel.saveNewSong(song)
+
+            })
             }
-            }
+
     }
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
@@ -199,12 +193,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 bind?.pbLoad?.isIndeterminate=true
             }
         }
-       /* mainViewModel.songListRegisterSuccess.observe(viewLifecycleOwner){songIds->
-            Log.e("ITEM-FILE->Size", songIds.size.toString())
-            if(songIds.isNotEmpty()) {
-               mainViewModel.fetchAllSong()
-            }
-        }*/
+
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
             mPrefs.playListSortOption = selectedSort

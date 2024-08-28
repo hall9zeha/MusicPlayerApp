@@ -32,7 +32,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val repository:MainRepository):ScopedViewModel() {
 
     private var countItemsInserted:Long=0
-    private var itemsListSize:Long=0
+    private var itemsCount:Long=0
 
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
@@ -50,8 +50,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _registerRowInserted:MutableLiveData<Long> = MutableLiveData()
     val registerRowInserted:LiveData<Long> = _registerRowInserted
 
-    private var _songListRegisterSuccess:SingleMutableLiveData<LongArray> = SingleMutableLiveData()
-    val songListRegisterSuccess:LiveData<LongArray> = _songListRegisterSuccess
 
     private var _isFavorite:MutableLiveData<Boolean> = MutableLiveData()
     val isFavorite:LiveData<Boolean> = _isFavorite
@@ -68,8 +66,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _songById:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
-    private var _currentTimeOfSong:MutableLiveData<Triple<Int,Int,String>> = MutableLiveData()
-    val currentTimeOfSong:LiveData<Triple<Int,Int,String>> = _currentTimeOfSong
+
 
     private var _currentSongListPosition:MutableLiveData<Int> = MutableLiveData()
     val currentSongListPosition:LiveData<Int> = _currentSongListPosition
@@ -92,6 +89,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     init{
         initScope()
     }
+
+    fun setItemsCount(itemsCount:Int){
+        this.itemsCount = itemsCount.toLong()
+    }
+
     fun fetchAllSong(){
       launch{
           _allSongs.value=repository.fetchAllSongs()
@@ -124,18 +126,18 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
             countItemsInserted++
-            _processedRegistersInfo.value = Pair(itemsListSize.toInt(), countItemsInserted.toInt())
+            _processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
 
-            if(itemsListSize==countItemsInserted){
+            if(itemsCount==countItemsInserted){
                 fetchAllSong()
                 countItemsInserted =0
             }
-            Log.e("SAVE-NEW-SONG", "$itemsListSize --: $countItemsInserted" )
+            Log.e("SAVE-NEW-SONG", "$itemsCount --: $countItemsInserted" )
         }
     }
 
     fun saveSongs(songList:List<SongEntity>){
-        itemsListSize=songList.size.toLong()
+        itemsCount=songList.size.toLong()
         launch(Dispatchers.IO){
 
                 songList.forEach { song ->
@@ -144,7 +146,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
                     }
                 }
 
-            //_songListRegisterSuccess.value=repository.saveSongs(songList)
+
         }
     }
 
@@ -194,15 +196,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             _songById.value=repository.fetchSongById(idSong)
         }
     }
-    fun fetchCurrentTimeOfSong(mediaPlayer:ExoPlayer){
-       launch {
-            repository.fetchCurrentTimeOfSong(mediaPlayer)
-                .catch { Log.e("ERROR_FLOW",it.message.toString() ) }
-                .collect{_currentTimeOfSong.value = it}
-        }
-    }
 
-    // Temporal values, not insert with database
+    // Temporal values, not insert to database
     fun setCurrentPosition(position:Int){
         launch {
             _currentSongListPosition.value = position

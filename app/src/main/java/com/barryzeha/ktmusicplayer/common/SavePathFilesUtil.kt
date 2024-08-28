@@ -28,12 +28,13 @@ import java.util.Date
 
 private  const  val CONSUMER_COUNT = 4
 private val operationsMutex = Mutex()
-
+private var audioFileCount:Int=0
 // Función para procesar múltiples rutas de directorios de forma secuencial
 fun processSongPaths(
     paths: List<String>,  // Lista de directorios a procesar
-    //fileProcessed: (song:SongEntity) -> Unit
-    filesProcessed:(List<SongEntity>)->Unit
+    itemsCount:(itemsNum:Int)->Unit,
+    fileProcessed: (song:SongEntity) -> Unit
+    //filesProcessed:(List<SongEntity>)->Unit
 ) {
     val channel = Channel<File>(Channel.UNLIMITED)  // Canal sin límite de buffer
 
@@ -42,6 +43,12 @@ fun processSongPaths(
     // Corutina para encolar archivos en el canal
     CoroutineScope(Dispatchers.IO).launch {
         try {
+            // Contamos cuantos archivos de audio hay
+            paths.forEach { path ->
+                countAudioFile(File(path))
+            }
+            itemsCount(audioFileCount)
+
             // Encolar archivos de todos los directorios
             paths.forEach { path ->
                 enqueueFiles(File(path), channel)
@@ -53,12 +60,13 @@ fun processSongPaths(
     // Corutina única para procesar archivos secuencialmente
      CoroutineScope(Dispatchers.IO).launch {
             for (file in channel) {
-                //processFile(file, MyApp.context,fileProcessed)
-                processFile(file, MyApp.context)?.let{song->
+                processFile(file, MyApp.context,fileProcessed)
+                /*processFile(file, MyApp.context)?.let{song->
                     listFilesProcessed.add(song)
-                }
+                }*/
+
             }
-            filesProcessed(listFilesProcessed)
+            //filesProcessed(listFilesProcessed)
         }
 }
 
@@ -73,7 +81,15 @@ private fun enqueueFiles(file: File, channel: Channel<File>) {
         channel.trySend(file).isSuccess
     }
 }
-
+private fun countAudioFile(file: File) {
+    if (file.isDirectory) {
+        file.listFiles()?.forEach { subFile ->
+            countAudioFile(subFile)
+        }
+    } else {
+      audioFileCount++
+    }
+}
 private suspend fun processFile(
     file: File,
     context: Context,
@@ -83,20 +99,16 @@ private suspend fun processFile(
         val uri = getUriFromFile(file, context)
 
         operationsMutex.withLock {
-            val realPathFromFile = getRealPathFromURI(uri!!, context)
+            val realPathFromFile = getRealPathFromURI(uri, context)
             val parentDir = getParentDirectories(uri.path.toString())
             val metadata = fetchFileMetadata(context, realPathFromFile!!)
-
-
-        /* Log.e("ITEM-FILE  ->", filePath)
+         /*Log.e("ITEM-FILE  ->", filePath)
             Log.e("ITEM-FILE  ->", uri.toString())
             Log.e("ITEM-FILE  ->", realPathFromFile.toString())
-            Log.e("ITEM-FILE  ->", parentDir ?: "")
-
-         */
+            Log.e("ITEM-FILE  ->", parentDir ?: "")*/
            val song = SongEntity(
                 pathLocation = realPathFromFile,
-                parentDirectory = parentDir ?: "",
+                parentDirectory = parentDir,
                 description = metadata!!.title,
                 duration = metadata!!.songLength,
                 bitrate = metadata!!.bitRate,
@@ -115,7 +127,7 @@ private suspend fun processFile(
 
     }
 
-}
+}/*
 private suspend fun processFile(
     file: File,
     context: Context
@@ -123,26 +135,27 @@ private suspend fun processFile(
     if (AudioFileType().verify(file.absolutePath)) {
         val uri = getUriFromFile(file, context)
         operationsMutex.withLock {
-            val realPathFromFile = getRealPathFromURI(uri!!, context)
+            val realPathFromFile = getRealPathFromURI(uri, context)
             val parentDir = getParentDirectories(uri.path.toString())
             val metadata = fetchFileMetadata(context, realPathFromFile!!)
-
-            return SongEntity(
-                pathLocation = realPathFromFile,
-                parentDirectory = parentDir ?: "",
-                description = metadata!!.title,
-                duration = metadata!!.songLength,
-                bitrate = metadata!!.bitRate,
-                artist = metadata!!.artist!!,
-                album = metadata!!.album!!,
-                genre = metadata!!.genre!!,
-                timestamp = Date().time
-            )
-
-
+            metadata?.let {
+                return SongEntity(
+                    pathLocation = realPathFromFile,
+                    parentDirectory = parentDir,
+                    description = metadata.title,
+                    duration = metadata.songLength,
+                    bitrate = metadata.bitRate,
+                    artist = metadata.artist!!,
+                    album = metadata.album!!,
+                    genre = metadata.genre!!,
+                    timestamp = Date().time
+                )
+           }
         }
 
     }
     return null
 }
+*/
+
 
