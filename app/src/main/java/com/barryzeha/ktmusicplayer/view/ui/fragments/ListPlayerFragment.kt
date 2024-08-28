@@ -126,22 +126,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
 
-           /* processSongPaths(paths) { song->
-                mainViewModel.saveNewSong(song
-                )
-            }*/
-            bind?.pbLoad?.visibility=View.VISIBLE
+            if(paths.isNotEmpty())bind?.pbLoad?.visibility=View.VISIBLE
             processSongPaths(paths){listFilesProcessed->
                 //adapter.addAll(listFilesProcessed)
                 CoroutineScope(Dispatchers.Main).launch {
                     bind?.pbLoad?.isIndeterminate=false
                 }
                 mainViewModel.saveSongs(listFilesProcessed)
-
             }
-
             }
-
     }
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
@@ -181,6 +174,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bind?.pbLoad?.apply {
                 max=size
                 progress=count
+
+                setNumberOfTrack(itemCount = count)
             }
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
@@ -675,16 +670,18 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         popupMenu.show()
     }
 
-    private fun setNumberOfTrack(scrollToPosition:Boolean=true){
+    private fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){
         val itemSong = adapter.getSongById(mPrefs.idSong)
+
         itemSong?.let{
             val (numberedPos, realPos) = adapter.getPositionByItem(itemSong)
             mPrefs.currentPosition = numberedPos.toLong()
             adapter.changeBackgroundColorSelectedItem(realPos,mPrefs.idSong)
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
+
         bind?.seekbarControl?.tvNumberSong?.text =
-            String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, adapter.getSongItemCount())
+            String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, (adapter.getSongItemCount() + itemCount))
     }
    private fun updateService(){
         serviceConnection?.let{

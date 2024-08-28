@@ -85,25 +85,53 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
     }
     val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
     metadata?.let{
-        val tag = metadata?.tag
-        val nameFile=metadata?.file?.name?.substringBeforeLast(".")
-    return AudioMetadata(
-        artist=try{if(tag?.getFirst(FieldKey.ARTIST).isNullOrEmpty())"Artist unknown" else tag?.getFirst(FieldKey.ARTIST) } catch(ex:Exception){"Artist Unknown" },
-        album=try{if(tag?.getFirst(FieldKey.ALBUM).isNullOrEmpty())"Album unknown" else tag?.getFirst(FieldKey.ALBUM) }catch(ex:Exception){"Album Unknown"},
-        genre=try{if(tag?.getFirst(FieldKey.GENRE).isNullOrEmpty())"Unknown genre" else  tag?.getFirst(FieldKey.GENRE)}catch(ex:Exception){"Genre Unknown"},
-        title=try{if(tag?.getFirst(FieldKey.TITLE).isNullOrEmpty())nameFile else tag?.getFirst(FieldKey.TITLE)}catch(ex:Exception){nameFile},
-        comment=try{tag?.getFirst(FieldKey.COMMENT)}catch(ex:Exception){"No comment"},
-        year=try{tag?.getFirst(FieldKey.YEAR)}catch(ex:Exception){"Unknown year"},
-        track=try{tag?.getFirst(FieldKey.TRACK)}catch(ex:Exception){"Unknown"},
-        discNumber=try{tag?.getFirst(FieldKey.DISC_NO)}catch(ex:Exception){"Unknown"},
-        composer=try{tag?.getFirst(FieldKey.COMPOSER)}catch(ex:Exception){"Unknown"},
-        artistSort = try{tag?.getFirst(FieldKey.ARTIST_SORT)}catch(ex:Exception){""},
-        bitRate = try{metadata.audioHeader.bitRate}catch(ex:Exception){""},
-        songLengthFormatted = try{getTimeOfSong((metadata.audioHeader.trackLength * 1000).toLong())}catch(ex:Exception){"0"},
-        songLength = try{(metadata.audioHeader.trackLength * 1000).toLong()}catch(ex:Exception){0},
-        format = try{metadata.audioHeader.format}catch (ex:Exception){"unknown"},
-        //coverArt = bitmapCoverArt
-    ) }
+        val tag = metadata.tag
+        val nameFile=metadata.file.name.substringBeforeLast(".")
+
+        fun getTagField(fieldKey: FieldKey, defaultValue: String)=
+            try {
+                tag?.getFirst(fieldKey)?.takeIf { it.isNotEmpty() } ?: defaultValue
+            } catch (ex: Exception) {
+                defaultValue
+            }
+        // Extract metadata with default values
+        val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
+        val album = getTagField(FieldKey.ALBUM, "Album Unknown")
+        val genre = getTagField(FieldKey.GENRE, "Unknown Genre")
+        val title = getTagField(FieldKey.TITLE, nameFile)
+        val comment = getTagField(FieldKey.COMMENT, "No Comment")
+        val year = getTagField(FieldKey.YEAR, "Unknown Year")
+        val track = getTagField(FieldKey.TRACK, "Unknown")
+        val discNumber = getTagField(FieldKey.DISC_NO, "Unknown")
+        val composer = getTagField(FieldKey.COMPOSER, "Unknown")
+        val artistSort = getTagField(FieldKey.ARTIST_SORT, "")
+
+        // Extract audio header data with default values
+        val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
+        val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong() } catch (ex: Exception) { 0L }
+        val songLengthFormatted = try { getTimeOfSong(songLength) } catch (ex: Exception) { "0" }
+        val format = try { metadata.audioHeader.format } catch (ex: Exception) { "unknown" }
+
+        return AudioMetadata(
+            artist = artist,
+            album = album,
+            genre = genre,
+            title = title,
+            comment = comment,
+            year = year,
+            track = track,
+            discNumber = discNumber,
+            composer = composer,
+            artistSort = artistSort,
+            bitRate = bitRate,
+            songLengthFormatted = songLengthFormatted,
+            songLength = songLength,
+            format = format
+            //coverArt = bitmapCoverArt
+        )
+
+    }
+
      return null
 }
 fun getTimeOfSong(duration:Long):String{
