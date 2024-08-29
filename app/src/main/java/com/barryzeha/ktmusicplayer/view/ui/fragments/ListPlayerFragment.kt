@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -21,6 +22,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
+import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_GENRE
@@ -481,6 +484,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 mainViewModel.deleteSong(listForDeleted)
                 musicPlayerService?.removeMediaItems(listForDeleted)
                 adapter.removeItemsForMultipleSelectedAction()
+            }
+            btnMainEq?.setOnClickListener{
+                startActivity(Intent(activity, MainEqualizerActivity::class.java))
             }
         }
     }
