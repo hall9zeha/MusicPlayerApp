@@ -436,12 +436,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }
             }
             btnFavorite.setOnClickListener {
-                val song=songLists[mPrefs.currentPosition.toInt()]
+
                 if(!isFavorite){
-                    mainViewModel.updateSong(song.copy(favorite = true))
+                    mainViewModel.updateFavoriteSong(true,mPrefs.idSong)
                     //isFavorite=true
                 }else{
-                    mainViewModel.updateSong(song.copy(favorite=false))
+                    mainViewModel.updateFavoriteSong(false,mPrefs.idSong)
                     //isFavorite=false
                 }
             }

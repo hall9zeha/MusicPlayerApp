@@ -23,6 +23,7 @@ interface MainRepository {
     suspend fun saveNewSong(song: SongEntity):Long
     suspend fun saveSongs(songList:List<SongEntity>):LongArray
     suspend fun updateSong(song:SongEntity):Int
+    suspend fun updateFavoriteSong(isFavorite:Boolean, idSong:Long):Int
     suspend fun deleteSong(idSong:Long):Int
     suspend fun deleteSong(songIds:List<Long>):Int
     suspend fun deleteAllSongs():Int

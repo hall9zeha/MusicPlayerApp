@@ -58,6 +58,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
         dao.updateSong(song)
     }
 
+    override suspend fun updateFavoriteSong(isFavorite: Boolean, idSong: Long): Int = withContext(Dispatchers.IO){
+        dao.updateFavoriteSong(isFavorite,idSong)
+    }
+
     override suspend fun deleteSong(idSong: Long): Int= withContext(Dispatchers.IO) {
         dao.deleteSong(idSong)
     }

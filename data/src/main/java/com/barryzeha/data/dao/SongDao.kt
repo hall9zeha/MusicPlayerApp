@@ -51,7 +51,10 @@ interface  SongDao {
     @Transaction
     @Update
     suspend fun updateSong(song:SongEntity):Int
+
     @Transaction
+    @Query("update SongEntity set favorite=:isFavorite where id=:idSong")
+    suspend fun updateFavoriteSong(isFavorite:Boolean, idSong: Long):Int
 
     @Query("delete  from SongEntity where id = :idSong ")
     suspend fun deleteSong(idSong:Long):Int

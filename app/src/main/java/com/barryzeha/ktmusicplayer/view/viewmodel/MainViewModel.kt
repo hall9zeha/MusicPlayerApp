@@ -163,6 +163,14 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             }
         }
     }
+    fun updateFavoriteSong(isFavorite:Boolean,idSong:Long){
+        launch {
+            val rowUpdated=repository.updateFavoriteSong(isFavorite,idSong)
+            if(rowUpdated>0){
+                checkIfIsFavorite(idSong)
+            }
+        }
+    }
     fun checkIfIsFavorite(idSong:Long){
         launch{
             val entity = repository.fetchSongById(idSong)

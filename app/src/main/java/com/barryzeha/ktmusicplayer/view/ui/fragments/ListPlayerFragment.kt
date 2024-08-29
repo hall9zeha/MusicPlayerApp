@@ -432,11 +432,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 }
             }
             btnFavorite.setOnClickListener {
-                val song=getSongOfAdapter(mPrefs.idSong)
-                song?.let {
-                    if (!isFavorite) {mainViewModel.updateSong(song.copy(favorite = true))}
-                    else {mainViewModel.updateSong(song.copy(favorite = false)) }
-                }
+                 if (!isFavorite) {mainViewModel.updateFavoriteSong(true, mPrefs.idSong)}
+                 else {mainViewModel.updateFavoriteSong(false,mPrefs.idSong) }
             }
             btnSearch.setOnClickListener{
                showOrHideSearchbar()
