@@ -76,7 +76,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             frequencyHeaderTextview.gravity = Gravity.CENTER_HORIZONTAL
             frequencyHeaderTextview
                 .setText((mEq!!.getCenterFreq(equalizerBandIndex) / 1000).toString() + " Hz")
-            bind.main.addView(frequencyHeaderTextview)
+            bind.contentBands.addView(frequencyHeaderTextview)
 
             //            set up linear layout to contain each seekBar
             val seekBarRowLayout = LinearLayout(this)
@@ -171,9 +171,9 @@ class MainEqualizerActivity : AppCompatActivity() {
             // seekbar row layout settings. The layout is rotated at 270 so left=>bottom, Right=>top and so on
             val seekBarLayout = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+                ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            seekBarLayout.weight = 1f
+            //seekBarLayout.weight = 1f
             seekBarLayout.setMargins(5, 0, 5, 0)
             seekBarRowLayout.layoutParams = seekBarLayout
 
@@ -182,7 +182,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             seekBarRowLayout.addView(seekBar)
             seekBarRowLayout.addView(upperEqualizerBandLevelTextview)
 
-            bind.main.addView(seekBarRowLayout)
+            bind.contentBands.addView(seekBarRowLayout)
 
 
 
