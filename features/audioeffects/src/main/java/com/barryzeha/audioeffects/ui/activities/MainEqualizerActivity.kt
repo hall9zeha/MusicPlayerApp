@@ -19,11 +19,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.barryzeha.audioeffects.common.CUSTOM
+import com.barryzeha.audioeffects.common.Preferences
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
-
+@AndroidEntryPoint
 class MainEqualizerActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var mPrefs:Preferences
+
     private var mEq:Equalizer ?=null
     private var numberFrequencyBands: Short?=null
     private var lowerEqualizerBandLevel: Short?=null
@@ -63,7 +71,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         //        get the upper limit of the range in millibels
         upperEqualizerBandLevel = mEq!!.getBandLevelRange()[1]
     }
-    private fun createView(){
+    private fun createView(effectType:Int= CUSTOM){
         for (i in 0 until numberFrequencyBands!!) {
             val equalizerBandIndex = i.toShort()
 
@@ -125,8 +133,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             seekBar.max = upperEqualizerBandLevel!! - lowerEqualizerBandLevel!!
             //            set the progress for this seekBar
             val seek_id = i.toInt()
-            val progressBar: Int = 1500
-                /*properties.preferences.getInt("seek_$seek_id", 1500)*/
+            val progressBar: Int = mPrefs.getSeekBandValue(effectType,seek_id)
             //            Log.i("storedOld_seek_"+seek_id,":"+ progressBar);
             if (progressBar != 1500) {
                 seekBar.progress = progressBar
@@ -159,8 +166,8 @@ class MainEqualizerActivity : AppCompatActivity() {
 
                 override fun onStopTrackingTouch(seekBar: SeekBar) {
                     //not used
-                    /*properties.edit_preferences.putInt("seek_$seek_id", seekBar.progress).commit()
-                    properties.edit_preferences.putInt("position", 0).commit()*/
+                    mPrefs.setSeekBandValue(effectType,seek_id,seekBar.progress)
+                    //properties.edit_preferences.putInt("position", 0).commit()
                 }
             })
 
