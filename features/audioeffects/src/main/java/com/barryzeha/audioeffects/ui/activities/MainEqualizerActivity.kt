@@ -14,14 +14,19 @@ import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.barryzeha.audioeffects.common.BASS
 import com.barryzeha.audioeffects.common.CUSTOM
+import com.barryzeha.audioeffects.common.POP
 import com.barryzeha.audioeffects.common.Preferences
+import com.barryzeha.audioeffects.common.ROCK
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
+import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
@@ -50,6 +55,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
         setUpEqualizer()
         createView()
+        setUpListeners()
     }
     private fun setUpEqualizer(){
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -70,6 +76,20 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         //        get the upper limit of the range in millibels
         upperEqualizerBandLevel = mEq!!.getBandLevelRange()[1]
+    }
+    private fun setUpListeners(){
+        bind.chipGroupEffects.isSingleSelection=true
+        bind.chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
+            val chip = group.findViewById<Chip>(checkedIds[0])
+            when(group.indexOfChild(chip)){
+                CUSTOM->{bind.contentBands.removeAllViews(); createView(CUSTOM)}
+                ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
+                POP->{bind.contentBands.removeAllViews(); createView(POP)}
+                BASS->{bind.contentBands.removeAllViews(); createView(BASS)}
+
+            }
+
+        }
     }
     private fun createView(effectType:Int= CUSTOM){
         for (i in 0 until numberFrequencyBands!!) {

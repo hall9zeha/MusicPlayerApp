@@ -7,7 +7,7 @@ package com.barryzeha.audioeffects.common
  * Copyright (c)  All rights reserved.
  **/
 
-const val CUSTOM=1
-const val ROCK=2
-const val POP=3
-const val BASS=4
+const val CUSTOM=0
+const val ROCK=1
+const val POP=2
+const val BASS=3

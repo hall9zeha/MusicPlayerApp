@@ -22,21 +22,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/chipCustomEffect"
+            android:checkable="true"
             android:text="Custom"/>
         <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/chipRockEffect"
+            android:checkable="true"
             android:text="Rock"/>
         <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/chipPopEffect"
+            android:checkable="true"
             android:text="Pop"/>
         <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/chipBassEffect"
+            android:checkable="true"
             android:text="Bass"/>
     </com.google.android.material.chip.ChipGroup>
 <LinearLayout
