@@ -82,6 +82,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
+    private lateinit var launcherAudioEffectActivity:ActivityResultLauncher<Int>
     private var isPlaying = false
     private var isUserSeeking=false
     private var userSelectPosition=0
@@ -114,12 +115,17 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         setUpObservers()
         setUpPlayListName()
         filePickerActivityResult()
+        audioEffectActivityResult()
         activityResultForPermission()
         initCheckPermission()
         setUpListeners()
 
     }
+    private fun audioEffectActivityResult(){
+        launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){
 
+        }
+    }
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
             if(paths.isNotEmpty())bind?.pbLoad?.visibility=View.VISIBLE
@@ -486,7 +492,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 adapter.removeItemsForMultipleSelectedAction()
             }
             btnMainEq?.setOnClickListener{
-                startActivity(Intent(activity, MainEqualizerActivity::class.java))
+                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionId()!!)
+
             }
         }
     }

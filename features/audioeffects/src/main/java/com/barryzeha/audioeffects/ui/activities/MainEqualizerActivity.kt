@@ -2,6 +2,7 @@ package com.barryzeha.audioeffects.ui.activities
 
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
@@ -16,6 +17,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -43,6 +45,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     private var lowerEqualizerBandLevel: Short?=null
     private var upperEqualizerBandLevel: Short?=null
     private lateinit var bind:ActivityMainEqualizerBinding
+    private  var sessionId:Int?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,17 +57,27 @@ class MainEqualizerActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        handleIntent()
         setUpEqualizer()
         createView()
         setUpListeners()
+        sessionId?.let{
+            Log.e("NUM-BAND->Session", it.toString() )
+        }
+    }
+    private fun handleIntent(){
+        intent?.let{
+            sessionId=intent.getIntExtra("exoplayerSessionId",-1)
 
+        }
     }
     private fun setUpEqualizer(){
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val audioSessionId = audioManager.generateAudioSessionId()
-        //in On Create
-        mEq = Equalizer(0, audioSessionId)
-        mEq!!.setEnabled(true)
+
+        sessionId?.let{
+
+            mEq = Equalizer(1000, it)
+            mEq!!.setEnabled(true)
+        }
         Log.e("NUM-BAND", mEq!!.numberOfBands.toString() )
 
 // setup FX
@@ -232,5 +245,17 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         }
         //bind.main.rotation = 270F
+    }
+    // Por ahora no debe retornar nada
+    class MainEqualizerContract:ActivityResultContract<Int,Unit>(){
+        override fun createIntent(context: Context, sessionId: Int): Intent {
+                return Intent(context,MainEqualizerActivity::class.java).apply {
+                    putExtra("exoplayerSessionId",sessionId)
+                }
+        }
+
+        override fun parseResult(resultCode: Int, intent: Intent?) {
+            // Por ahora no debe retornar nada
+        }
     }
 }

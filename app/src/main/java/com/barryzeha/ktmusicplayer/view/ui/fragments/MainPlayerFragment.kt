@@ -10,9 +10,11 @@ import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
+import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
@@ -59,6 +61,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var currentMusicState = MusicState()
     private var songLists:MutableList<SongEntity> = arrayListOf()
     private var currentSelectedPosition=0
+
+    private val launcherAudioEffectActivity: ActivityResultLauncher<Int> = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
 
     private var isFavorite:Boolean = false
     private var serviceConnection:ServiceConnection?=null
@@ -444,6 +448,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     mainViewModel.updateFavoriteSong(false,mPrefs.idSong)
                     //isFavorite=false
                 }
+            }
+            btnMainEq?.setOnClickListener{
+                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionId()!!)
             }
         }
 

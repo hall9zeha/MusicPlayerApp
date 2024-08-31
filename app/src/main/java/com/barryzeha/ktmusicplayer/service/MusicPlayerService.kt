@@ -24,11 +24,13 @@ import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
@@ -626,6 +628,11 @@ class MusicPlayerService : Service(){
 
 
         }
+    }
+
+    @OptIn(UnstableApi::class)
+    fun getSessionId(): Int {
+        return exoPlayer.audioSessionId
     }
     fun playingExoPlayer(){
         if(!exoPlayer.isPlaying){
