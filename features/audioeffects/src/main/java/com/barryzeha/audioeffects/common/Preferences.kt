@@ -15,7 +15,9 @@ private const val SEEK_BAND = "_seekBand_"
 
 class Preferences @Inject constructor(private val ctx: Context) {
     private var mPreferences = ctx.getSharedPreferences(EFFECTS_PREFERENCES_FILE,Context.MODE_PRIVATE)
-
+    fun clearPreference(){
+        mPreferences.edit().clear().apply()
+    }
     fun setSeekBandValue(effectType:Int,seekId:Int,seekValue:Int){
         mPreferences.edit().putInt("$effectType$SEEK_BAND$seekId",seekValue).apply()
     }

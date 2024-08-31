@@ -25,6 +25,7 @@ import com.barryzeha.audioeffects.common.CUSTOM
 import com.barryzeha.audioeffects.common.POP
 import com.barryzeha.audioeffects.common.Preferences
 import com.barryzeha.audioeffects.common.ROCK
+import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,6 +57,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         setUpEqualizer()
         createView()
         setUpListeners()
+
     }
     private fun setUpEqualizer(){
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -76,11 +78,15 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         //        get the upper limit of the range in millibels
         upperEqualizerBandLevel = mEq!!.getBandLevelRange()[1]
+        Log.e("NUM-BAND->max", upperEqualizerBandLevel.toString() )
+        Log.e("NUM-BAND->low", lowerEqualizerBandLevel.toString() )
     }
     private fun setUpListeners(){
         bind.chipGroupEffects.isSingleSelection=true
         bind.chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
+            if(checkedIds.isNotEmpty()){
             val chip = group.findViewById<Chip>(checkedIds[0])
+
             when(group.indexOfChild(chip)){
                 CUSTOM->{bind.contentBands.removeAllViews(); createView(CUSTOM)}
                 ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
@@ -88,7 +94,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                 BASS->{bind.contentBands.removeAllViews(); createView(BASS)}
 
             }
-
+}
         }
     }
     private fun createView(effectType:Int= CUSTOM){
@@ -150,11 +156,13 @@ class MainEqualizerActivity : AppCompatActivity() {
             seekBar.setPadding(35, 15, 35, 15)
 
             seekBar.layoutParams = layoutParams
-            seekBar.max = upperEqualizerBandLevel!! - lowerEqualizerBandLevel!!
+            seekBar.max = (upperEqualizerBandLevel!!) - (lowerEqualizerBandLevel!!)
+
+
             //            set the progress for this seekBar
             val seek_id = i.toInt()
             val progressBar: Int = mPrefs.getSeekBandValue(effectType,seek_id)
-            //            Log.i("storedOld_seek_"+seek_id,":"+ progressBar);
+
             if (progressBar != 1500) {
                 seekBar.progress = progressBar
                 mEq?.setBandLevel(
@@ -162,11 +170,19 @@ class MainEqualizerActivity : AppCompatActivity() {
                     (progressBar + lowerEqualizerBandLevel!!).toShort()
                 )
             } else {
-                seekBar.progress = mEq!!.getBandLevel(equalizerBandIndex).toInt()
-                mEq?.setBandLevel(
+
+                    val bandValue = getEqualizerBandPreConfig(effectType, seek_id)
+                    //seekBar.progress = mEq!!.getBandLevel(equalizerBandIndex).toInt()
+                    seekBar.progress = bandValue
+                    /* mEq?.setBandLevel(
                     equalizerBandIndex,
                     (progressBar + lowerEqualizerBandLevel!!).toShort()
-                )
+                )*/
+                    mEq?.setBandLevel(
+                        equalizerBandIndex,
+                        (bandValue + lowerEqualizerBandLevel!!).toShort()
+                    )
+
             }
             //            change progress as its changed by moving the sliders
             seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
@@ -174,6 +190,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                     seekBar: SeekBar, progress: Int,
                     fromUser: Boolean
                 ) {
+
                     mEq?.setBandLevel(
                         equalizerBandIndex,
                         (progress + lowerEqualizerBandLevel!!).toShort()
