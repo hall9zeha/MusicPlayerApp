@@ -98,12 +98,19 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     }
     private fun setUpListeners(){
+        enableAndDisableViews(false)
+        bind.swEnableEffects.setOnCheckedChangeListener { buttonView, isChecked ->
+            if(isChecked){
+               enableAndDisableViews(true)
+            }else{
+               enableAndDisableViews(false)
+            }
+        }
         bind.chipGroupEffects.isSingleSelection=true
         bind.chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
             if(checkedIds.isNotEmpty()){
             val chip = group.findViewById<Chip>(checkedIds[0])
-
-            when(group.indexOfChild(chip)){
+                when(group.indexOfChild(chip)){
                 CUSTOM->{bind.contentBands.removeAllViews(); createView(CUSTOM)}
                 ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
                 POP->{bind.contentBands.removeAllViews(); createView(POP)}
@@ -117,6 +124,30 @@ class MainEqualizerActivity : AppCompatActivity() {
 
             }
 }
+        }
+        bind.btnResetEffects.setOnClickListener {
+            mPrefs.clearPreference()
+            bind.contentBands.removeAllViews()
+            createView()
+        }
+    }
+    private fun enableAndDisableViews(isEnable:Boolean){
+
+        for (i in 0 until bind.chipGroupEffects.childCount) {
+            val chip = bind.chipGroupEffects.getChildAt(i) as Chip
+            chip.isEnabled = isEnable
+        }
+        for(i in 0 until bind.contentBands.childCount){
+
+          val child = bind.contentBands.getChildAt(i)
+          child.isEnabled = isEnable
+            if(bind.contentBands.getChildAt(i)  is LinearLayout){
+                val ln = bind.contentBands.getChildAt(i) as LinearLayout
+                for(j in 0 until ln.childCount){
+                    val lnChild=ln.getChildAt(j)
+                    lnChild.isEnabled=isEnable
+                }
+            }
         }
     }
     private fun createView(effectType:Int= CUSTOM){

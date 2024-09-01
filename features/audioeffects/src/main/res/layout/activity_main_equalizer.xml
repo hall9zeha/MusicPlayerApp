@@ -123,4 +123,13 @@
     >
 
 </LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnResetEffects"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contentBands"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_margin="16dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
