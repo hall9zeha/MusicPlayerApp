@@ -22,6 +22,8 @@ private const val SONG_MODE = "songMode"
 private const val ID_SONG = "idSong"
 private const val CURRENT_VIEW = "currentView"
 private const val PLAY_LIST_SORT_OPTION="playListSortOption"
+
+
 class  MyPreferences @Inject constructor(private val context: Context){
     val gson = Gson()
     private var myPreferences = context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
@@ -59,6 +61,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var playListSortOption:Int
         get()=myPreferences.getInt(PLAY_LIST_SORT_OPTION,0)
         set(value)=myPreferences.edit().putInt(PLAY_LIST_SORT_OPTION,value).apply()
+
     fun clearIdSongInPrefs(){
         myPreferences.edit().remove(ID_SONG).apply()
     }

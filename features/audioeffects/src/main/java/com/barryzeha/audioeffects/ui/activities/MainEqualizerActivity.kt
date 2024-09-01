@@ -79,9 +79,8 @@ class MainEqualizerActivity : AppCompatActivity() {
     private fun setUpEqualizer(){
 
         sessionId?.let{
-
             mEq = Equalizer(1000, it)
-            mEq!!.setEnabled(true)
+
         }
 
 // setup FX
@@ -98,31 +97,39 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     }
     private fun setUpListeners(){
+        var swIsChecked=false
         enableAndDisableViews(false)
+        bind.swEnableEffects.isChecked = mPrefs.effectsIsEnabled
         bind.swEnableEffects.setOnCheckedChangeListener { buttonView, isChecked ->
             if(isChecked){
+                mEq!!.setEnabled(true)
+                swIsChecked = true
                enableAndDisableViews(true)
             }else{
+                mEq!!.setEnabled(false)
+                swIsChecked= false
                enableAndDisableViews(false)
             }
+        }
+        bind.btnApplyEffects.setOnClickListener {
+            mPrefs.effectsIsEnabled = swIsChecked
         }
         bind.chipGroupEffects.isSingleSelection=true
         bind.chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
             if(checkedIds.isNotEmpty()){
             val chip = group.findViewById<Chip>(checkedIds[0])
-                when(group.indexOfChild(chip)){
-                CUSTOM->{bind.contentBands.removeAllViews(); createView(CUSTOM)}
-                ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
-                POP->{bind.contentBands.removeAllViews(); createView(POP)}
-                BASS->{bind.contentBands.removeAllViews(); createView(BASS)}
-                FLAT->{bind.contentBands.removeAllViews(); createView(FLAT)}
-                JAZZ->{bind.contentBands.removeAllViews(); createView(JAZZ)}
-                CLASSICAL->{bind.contentBands.removeAllViews(); createView(CLASSICAL)}
-                HIP_HOP->{bind.contentBands.removeAllViews(); createView(HIP_HOP)}
-                ELECTRONIC->{bind.contentBands.removeAllViews(); createView(ELECTRONIC)}
-                FULL_SOUND->{bind.contentBands.removeAllViews(); createView(FULL_SOUND)}
-
-            }
+            when(group.indexOfChild(chip)){
+            CUSTOM->{bind.contentBands.removeAllViews(); createView(CUSTOM)}
+            ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
+            POP->{bind.contentBands.removeAllViews(); createView(POP)}
+            BASS->{bind.contentBands.removeAllViews(); createView(BASS)}
+            FLAT->{bind.contentBands.removeAllViews(); createView(FLAT)}
+            JAZZ->{bind.contentBands.removeAllViews(); createView(JAZZ)}
+            CLASSICAL->{bind.contentBands.removeAllViews(); createView(CLASSICAL)}
+            HIP_HOP->{bind.contentBands.removeAllViews(); createView(HIP_HOP)}
+            ELECTRONIC->{bind.contentBands.removeAllViews(); createView(ELECTRONIC)}
+            FULL_SOUND->{bind.contentBands.removeAllViews(); createView(FULL_SOUND)}
+        }
 }
         }
         bind.btnResetEffects.setOnClickListener {
@@ -138,14 +145,13 @@ class MainEqualizerActivity : AppCompatActivity() {
             chip.isEnabled = isEnable
         }
         for(i in 0 until bind.contentBands.childCount){
-
-          val child = bind.contentBands.getChildAt(i)
-          child.isEnabled = isEnable
-            if(bind.contentBands.getChildAt(i)  is LinearLayout){
+            val child = bind.contentBands.getChildAt(i)
+            child.isEnabled = isEnable
+            if (bind.contentBands.getChildAt(i) is LinearLayout) {
                 val ln = bind.contentBands.getChildAt(i) as LinearLayout
-                for(j in 0 until ln.childCount){
-                    val lnChild=ln.getChildAt(j)
-                    lnChild.isEnabled=isEnable
+                for (j in 0 until ln.childCount) {
+                    val lnChild = ln.getChildAt(j)
+                    lnChild.isEnabled = isEnable
                 }
             }
         }

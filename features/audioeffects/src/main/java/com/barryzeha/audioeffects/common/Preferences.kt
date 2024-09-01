@@ -12,6 +12,8 @@ import javax.inject.Inject
 
 private const val EFFECTS_PREFERENCES_FILE="effectsPreferencesFiles"
 private const val SEEK_BAND = "_seekBand_"
+private const val EFFECT_TYPE = "effectType"
+private const val ENABLE_EFFECTS="enableEffects"
 
 class Preferences @Inject constructor(private val ctx: Context) {
     private var mPreferences = ctx.getSharedPreferences(EFFECTS_PREFERENCES_FILE,Context.MODE_PRIVATE)
@@ -24,4 +26,11 @@ class Preferences @Inject constructor(private val ctx: Context) {
     fun getSeekBandValue(effectType: Int,seekId: Int):Int{
         return mPreferences.getInt("$effectType$SEEK_BAND$seekId",1500)
     }
+    var effectsIsEnabled:Boolean
+        get()=mPreferences.getBoolean(ENABLE_EFFECTS,false)
+        set(value)=mPreferences.edit().putBoolean(ENABLE_EFFECTS,value).apply()
+
+    var effectType:Int
+        get() = mPreferences.getInt(EFFECT_TYPE,0)
+        set(value)=mPreferences.edit().putInt(EFFECT_TYPE,value).apply()
 }
