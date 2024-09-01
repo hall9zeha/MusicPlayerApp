@@ -35,4 +35,5 @@ const val CLEAR_MODE = -1
 // Actions custom for media player notify
 
 const val ACTION_CLOSE = "Action close"
+const val EXOPLAYER_SESSION_ID_EXTRA="exoplayerSessionId"
 

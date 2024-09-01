@@ -48,6 +48,66 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
+   FLAT-> {
+    when (bandLevel) {
+     0 -> 1500  // 0 dB (60 Hz)
+     1 -> 1500  // 0 dB (230 Hz)
+     2 -> 1500  // 0 dB (910 Hz)
+     3 -> 1500  // 0 dB (3600 Hz)
+     4 -> 1500  // 0 dB (14000 Hz)
+     else -> 1500
+    }
+   }
+   JAZZ -> {
+    when (bandLevel) {
+     0 -> 1400  // -1 dB (60 Hz)
+     1 -> 1600  // +1 dB (230 Hz)
+     2 -> 1800  // +2 dB (910 Hz)
+     3 -> 1600  // +1 dB (3600 Hz)
+     4 -> 1400  // -1 dB (14000 Hz)
+     else -> 1500
+    }
+   }
+   CLASSICAL -> {
+    when (bandLevel) {
+     0 -> 1500  // 0 dB (60 Hz)
+     1 -> 1600  // +1 dB (230 Hz)
+     2 -> 1700  // +2 dB (910 Hz)
+     3 -> 1600  // +1 dB (3600 Hz)
+     4 -> 1500  // 0 dB (14000 Hz)
+     else -> 1500
+    }
+   }
+   HIP_HOP -> {
+    when (bandLevel) {
+     0 -> 2000  // +2 dB (60 Hz)
+     1 -> 2200  // +3 dB (230 Hz)
+     2 -> 1800  // +1 dB (910 Hz)
+     3 -> 1600  // +1 dB (3600 Hz)
+     4 -> 1300  // -1 dB (14000 Hz)
+     else -> 1500
+    }
+   }
+   ELECTRONIC -> {
+    when (bandLevel) {
+     0 -> 2100  // +3 dB (60 Hz)
+     1 -> 2300  // +4 dB (230 Hz)
+     2 -> 2000  // +2 dB (910 Hz)
+     3 -> 1600  // +1 dB (3600 Hz)
+     4 -> 1400  // -1 dB (14000 Hz)
+     else -> 1500
+    }
+   }
+   FULL_SOUND -> {
+    when (bandLevel) {
+     0 -> 2000  // +4 dB (60 Hz)
+     1 -> 1900  // +3 dB (230 Hz)
+     2 -> 1700  // +2 dB (910 Hz)
+     3 -> 1600  // +1 dB (3600 Hz)
+     4 -> 1500  // 0 dB (14000 Hz)
+     else -> 1500
+    }
+   }
    else->0
   }
 

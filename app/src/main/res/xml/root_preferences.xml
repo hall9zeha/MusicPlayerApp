@@ -5,6 +5,7 @@
         <SwitchPreferenceCompat
             app:key="themeKey"
             app:defaultValue="false"
+            app:widgetLayout="@layout/material_switch_layout"
             app:title="@string/themeMsg" />
 
 

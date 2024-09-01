@@ -8,16 +8,46 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/swEnableEffects"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="16dp"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnApplyEffects"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Apply"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_margin="16dp"/>
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/swEnableEffects"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        >
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chipGroupEffects"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:singleLine="true"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/swEnableEffects"
         android:layout_marginTop="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp">
+
+        >
         <com.google.android.material.chip.Chip
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,7 +72,44 @@
             android:id="@+id/chipBassEffect"
             android:checkable="true"
             android:text="Bass"/>
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chipFlatEffect"
+            android:checkable="true"
+            android:text="Flat"/>
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chipJazzEffect"
+            android:checkable="true"
+            android:text="Jazz"/>
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chipClassicalEffect"
+            android:checkable="true"
+            android:text="Classical"/>
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chipHipHopEffect"
+            android:checkable="true"
+            android:text="Hip Hop"/>
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chipElectronicEffect"
+            android:checkable="true"
+            android:text="Electronic"/>
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chipFullSoundEffect"
+            android:checkable="true"
+            android:text="Full Sound"/>
     </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
 <LinearLayout
 
     android:id="@+id/contentBands"
@@ -51,7 +118,7 @@
     android:layout_height="0dp"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/chipGroupEffects"
+    app:layout_constraintTop_toBottomOf="@id/horizontalScrollView"
     android:layout_marginTop="24dp"
     >
 

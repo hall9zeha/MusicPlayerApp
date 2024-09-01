@@ -23,12 +23,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.barryzeha.audioeffects.common.BASS
+import com.barryzeha.audioeffects.common.CLASSICAL
 import com.barryzeha.audioeffects.common.CUSTOM
+import com.barryzeha.audioeffects.common.ELECTRONIC
+import com.barryzeha.audioeffects.common.FLAT
+import com.barryzeha.audioeffects.common.FULL_SOUND
+import com.barryzeha.audioeffects.common.HIP_HOP
+import com.barryzeha.audioeffects.common.JAZZ
 import com.barryzeha.audioeffects.common.POP
 import com.barryzeha.audioeffects.common.Preferences
 import com.barryzeha.audioeffects.common.ROCK
 import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
+import com.barryzeha.core.common.EXOPLAYER_SESSION_ID_EXTRA
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -61,13 +68,11 @@ class MainEqualizerActivity : AppCompatActivity() {
         setUpEqualizer()
         createView()
         setUpListeners()
-        sessionId?.let{
-            Log.e("NUM-BAND->Session", it.toString() )
-        }
+        
     }
     private fun handleIntent(){
         intent?.let{
-            sessionId=intent.getIntExtra("exoplayerSessionId",-1)
+            sessionId=intent.getIntExtra(EXOPLAYER_SESSION_ID_EXTRA,-1)
 
         }
     }
@@ -78,7 +83,6 @@ class MainEqualizerActivity : AppCompatActivity() {
             mEq = Equalizer(1000, it)
             mEq!!.setEnabled(true)
         }
-        Log.e("NUM-BAND", mEq!!.numberOfBands.toString() )
 
 // setup FX
 
@@ -91,8 +95,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         //        get the upper limit of the range in millibels
         upperEqualizerBandLevel = mEq!!.getBandLevelRange()[1]
-        Log.e("NUM-BAND->max", upperEqualizerBandLevel.toString() )
-        Log.e("NUM-BAND->low", lowerEqualizerBandLevel.toString() )
+
     }
     private fun setUpListeners(){
         bind.chipGroupEffects.isSingleSelection=true
@@ -105,6 +108,12 @@ class MainEqualizerActivity : AppCompatActivity() {
                 ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
                 POP->{bind.contentBands.removeAllViews(); createView(POP)}
                 BASS->{bind.contentBands.removeAllViews(); createView(BASS)}
+                FLAT->{bind.contentBands.removeAllViews(); createView(FLAT)}
+                JAZZ->{bind.contentBands.removeAllViews(); createView(JAZZ)}
+                CLASSICAL->{bind.contentBands.removeAllViews(); createView(CLASSICAL)}
+                HIP_HOP->{bind.contentBands.removeAllViews(); createView(HIP_HOP)}
+                ELECTRONIC->{bind.contentBands.removeAllViews(); createView(ELECTRONIC)}
+                FULL_SOUND->{bind.contentBands.removeAllViews(); createView(FULL_SOUND)}
 
             }
 }
@@ -240,17 +249,14 @@ class MainEqualizerActivity : AppCompatActivity() {
             seekBarRowLayout.addView(upperEqualizerBandLevelTextview)
 
             bind.contentBands.addView(seekBarRowLayout)
-
-
-
-        }
+   }
         //bind.main.rotation = 270F
     }
     // Por ahora no debe retornar nada
     class MainEqualizerContract:ActivityResultContract<Int,Unit>(){
         override fun createIntent(context: Context, sessionId: Int): Intent {
                 return Intent(context,MainEqualizerActivity::class.java).apply {
-                    putExtra("exoplayerSessionId",sessionId)
+                    putExtra(EXOPLAYER_SESSION_ID_EXTRA,sessionId)
                 }
         }
 
