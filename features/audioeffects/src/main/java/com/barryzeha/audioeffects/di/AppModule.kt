@@ -1,7 +1,7 @@
 package com.barryzeha.audioeffects.di
 
 import android.content.Context
-import com.barryzeha.audioeffects.common.Preferences
+import com.barryzeha.audioeffects.common.EffectsPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,5 +21,5 @@ class AppModule {
 
  @Provides
  @Singleton
- fun preferencesProvides(context:Context):Preferences = Preferences(context)
+ fun preferencesProvides(context:Context):EffectsPreferences = EffectsPreferences(context)
 }

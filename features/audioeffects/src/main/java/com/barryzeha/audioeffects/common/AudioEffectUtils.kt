@@ -1,5 +1,7 @@
 package com.barryzeha.audioeffects.common
 
+import android.util.Log
+
 
 /**
  * Project KTMusicPlayer
@@ -111,4 +113,19 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
    else->0
   }
 
+}
+fun getEqualizerConfig(effectType:Int, numOfBand:Int, prefs:EffectsPreferences): List<Short>{
+ val listOfBands= arrayListOf<Short>()
+ val lowerEqualizerBandLevel = -1500
+ for(i in 0 until numOfBand){
+    val equalizerBandIndex=i
+    val bandValue = prefs.getSeekBandValue(effectType,equalizerBandIndex)
+    if(bandValue !=1500) {
+     listOfBands.add((bandValue + lowerEqualizerBandLevel).toShort())
+    }else{
+     val bandPresetValue = getEqualizerBandPreConfig(effectType, equalizerBandIndex)
+     listOfBands.add((bandPresetValue + lowerEqualizerBandLevel).toShort())
+    }
+ }
+ return listOfBands
 }

@@ -14,6 +14,7 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.Rating
+import android.media.audiofx.Equalizer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Binder
@@ -32,6 +33,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.barryzeha.audioeffects.common.EffectsPreferences
+import com.barryzeha.audioeffects.common.getEqualizerConfig
 import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
@@ -54,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.log
 import kotlin.system.exitProcess
 
 
@@ -68,6 +72,9 @@ class MusicPlayerService : Service(){
 
     @Inject
     lateinit var repository: MainRepository
+    @Inject
+    lateinit var effectsPrefs:EffectsPreferences
+
     private var songsList: MutableList<SongEntity> = mutableListOf()
 
     private lateinit var mediaSession: MediaSession
@@ -77,6 +84,7 @@ class MusicPlayerService : Service(){
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
+    private lateinit var mEq:Equalizer
 
     private var _songController: ServiceSongListener? = null
     val songController: ServiceSongListener get() = _songController!!
@@ -263,7 +271,27 @@ class MusicPlayerService : Service(){
 
         }
     }
+    private fun setUpEqualizer(sessionId:Int){
+        mEq = Equalizer(1000,sessionId)
+        mEq.setEnabled(true)
+        if(effectsPrefs.effectsIsEnabled){
+            CoroutineScope(Dispatchers.IO).launch {
+                val listOfBands = getEqualizerConfig(
+                    effectsPrefs.effectType,
+                    mEq.numberOfBands.toInt(),
+                    effectsPrefs
+                )
+                listOfBands.forEachIndexed { index, value ->
+                    mEq.setBandLevel(index.toShort(), value)
+                    Log.e("SESSION-ID", index.toString() + "--" + value.toString())
+                }
+            }
+        }
+        else{
+            mEq.setEnabled(false)
+        }
 
+    }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
@@ -322,9 +350,13 @@ class MusicPlayerService : Service(){
         }
         return START_NOT_STICKY
     }
+
+    @OptIn(UnstableApi::class)
     private fun setUpRepository(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
             .build()
+        setUpEqualizer(exoPlayer.audioSessionId)
+
         CoroutineScope(Dispatchers.Main).launch {
             val songs=repository.fetchAllSongs()
             songState=repository.fetchSongState()

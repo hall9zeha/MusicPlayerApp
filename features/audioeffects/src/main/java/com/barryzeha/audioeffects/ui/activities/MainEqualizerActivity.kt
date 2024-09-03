@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.media.AudioManager
 import android.media.audiofx.Equalizer
 import android.os.Bundle
 import android.util.Log
@@ -15,7 +14,6 @@ import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
@@ -31,12 +29,13 @@ import com.barryzeha.audioeffects.common.FULL_SOUND
 import com.barryzeha.audioeffects.common.HIP_HOP
 import com.barryzeha.audioeffects.common.JAZZ
 import com.barryzeha.audioeffects.common.POP
-import com.barryzeha.audioeffects.common.Preferences
+import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.ROCK
 import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.barryzeha.core.common.EXOPLAYER_SESSION_ID_EXTRA
 import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
@@ -45,7 +44,7 @@ import com.barryzeha.core.R as coreRes
 class MainEqualizerActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var mPrefs:Preferences
+    lateinit var mPrefs:EffectsPreferences
 
     private var mEq:Equalizer ?=null
     private var numberFrequencyBands: Short?=null
@@ -53,6 +52,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     private var upperEqualizerBandLevel: Short?=null
     private lateinit var bind:ActivityMainEqualizerBinding
     private  var sessionId:Int?=null
+    private var effectTypeForSave=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +66,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
         handleIntent()
         setUpEqualizer()
-        createView()
+        createView(mPrefs.effectType)
         setUpListeners()
         
     }
@@ -77,10 +77,8 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
     }
     private fun setUpEqualizer(){
-
         sessionId?.let{
             mEq = Equalizer(1000, it)
-
         }
 
 // setup FX
@@ -97,8 +95,8 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     }
     private fun setUpListeners(){
-        var swIsChecked=false
-        enableAndDisableViews(false)
+        var swIsChecked=mPrefs.effectsIsEnabled
+        enableAndDisableViews(mPrefs.effectsIsEnabled)
         bind.swEnableEffects.isChecked = mPrefs.effectsIsEnabled
         bind.swEnableEffects.setOnCheckedChangeListener { buttonView, isChecked ->
             if(isChecked){
@@ -113,6 +111,8 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
         bind.btnApplyEffects.setOnClickListener {
             mPrefs.effectsIsEnabled = swIsChecked
+            mPrefs.effectType = effectTypeForSave
+            Snackbar.make(bind.root,"Applied success", Snackbar.LENGTH_SHORT).show()
         }
         bind.chipGroupEffects.isSingleSelection=true
         bind.chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
@@ -135,10 +135,11 @@ class MainEqualizerActivity : AppCompatActivity() {
         bind.btnResetEffects.setOnClickListener {
             mPrefs.clearPreference()
             bind.contentBands.removeAllViews()
-            createView()
+            createView(mPrefs.effectType)
         }
     }
     private fun enableAndDisableViews(isEnable:Boolean){
+        bind.btnResetEffects.isEnabled=isEnable
 
         for (i in 0 until bind.chipGroupEffects.childCount) {
             val chip = bind.chipGroupEffects.getChildAt(i) as Chip
@@ -156,7 +157,8 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
         }
     }
-    private fun createView(effectType:Int= CUSTOM){
+    private fun createView(effectType:Int){
+        effectTypeForSave=effectType
         for (i in 0 until numberFrequencyBands!!) {
             val equalizerBandIndex = i.toShort()
 

@@ -15,7 +15,7 @@ private const val SEEK_BAND = "_seekBand_"
 private const val EFFECT_TYPE = "effectType"
 private const val ENABLE_EFFECTS="enableEffects"
 
-class Preferences @Inject constructor(private val ctx: Context) {
+class EffectsPreferences @Inject constructor(private val ctx: Context) {
     private var mPreferences = ctx.getSharedPreferences(EFFECTS_PREFERENCES_FILE,Context.MODE_PRIVATE)
     fun clearPreference(){
         mPreferences.edit().clear().apply()
