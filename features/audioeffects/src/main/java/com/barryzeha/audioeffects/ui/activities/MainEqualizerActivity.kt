@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.media.audiofx.Equalizer
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -24,12 +22,13 @@ import com.barryzeha.audioeffects.common.BASS
 import com.barryzeha.audioeffects.common.CLASSICAL
 import com.barryzeha.audioeffects.common.CUSTOM
 import com.barryzeha.audioeffects.common.ELECTRONIC
+import com.barryzeha.audioeffects.common.EffectsPreferences
+import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.FLAT
 import com.barryzeha.audioeffects.common.FULL_SOUND
 import com.barryzeha.audioeffects.common.HIP_HOP
 import com.barryzeha.audioeffects.common.JAZZ
 import com.barryzeha.audioeffects.common.POP
-import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.ROCK
 import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
@@ -46,7 +45,6 @@ class MainEqualizerActivity : AppCompatActivity() {
     @Inject
     lateinit var mPrefs:EffectsPreferences
 
-    private var mEq:Equalizer ?=null
     private var numberFrequencyBands: Short?=null
     private var lowerEqualizerBandLevel: Short?=null
     private var upperEqualizerBandLevel: Short?=null
@@ -78,20 +76,21 @@ class MainEqualizerActivity : AppCompatActivity() {
     }
     private fun setUpEqualizer(){
         sessionId?.let{
-            mEq = Equalizer(1000, it)
+           EqualizerManager.initEqualizer(it)
         }
 
-// setup FX
+        // setup FX
 
         bind.main.setPadding(0, 0, 0, 20)
         //        get number frequency bands supported by the equalizer engine
-        numberFrequencyBands = mEq!!.getNumberOfBands()
+        //numberFrequencyBands = mEq!!.getNumberOfBands()
+        numberFrequencyBands = EqualizerManager.mEq?.getNumberOfBands()
         //        get the level ranges to be used in setting the band level
 //        get lower limit of the range in milliBels
-        lowerEqualizerBandLevel = mEq!!.getBandLevelRange()[0]
+        lowerEqualizerBandLevel = EqualizerManager.mEq!!.getBandLevelRange()[0]
 
         //        get the upper limit of the range in millibels
-        upperEqualizerBandLevel = mEq!!.getBandLevelRange()[1]
+        upperEqualizerBandLevel = EqualizerManager.mEq!!.getBandLevelRange()[1]
 
     }
     private fun setUpListeners(){
@@ -100,11 +99,11 @@ class MainEqualizerActivity : AppCompatActivity() {
         bind.swEnableEffects.isChecked = mPrefs.effectsIsEnabled
         bind.swEnableEffects.setOnCheckedChangeListener { buttonView, isChecked ->
             if(isChecked){
-                mEq!!.setEnabled(true)
+                EqualizerManager.setEnabled(true)
                 swIsChecked = true
                enableAndDisableViews(true)
             }else{
-                mEq!!.setEnabled(false)
+                EqualizerManager.setEnabled(false)
                 swIsChecked= false
                enableAndDisableViews(false)
             }
@@ -170,7 +169,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             )
             frequencyHeaderTextview.gravity = Gravity.CENTER_HORIZONTAL
             frequencyHeaderTextview
-                .setText((mEq!!.getCenterFreq(equalizerBandIndex) / 1000).toString() + " Hz")
+                .setText((EqualizerManager.mEq!!.getCenterFreq(equalizerBandIndex) / 1000).toString() + " Hz")
             bind.contentBands.addView(frequencyHeaderTextview)
 
             //            set up linear layout to contain each seekBar
@@ -226,24 +225,13 @@ class MainEqualizerActivity : AppCompatActivity() {
 
             if (progressBar != 1500) {
                 seekBar.progress = progressBar
-                mEq?.setBandLevel(
-                    equalizerBandIndex,
-                    (progressBar + lowerEqualizerBandLevel!!).toShort()
-                )
+                EqualizerManager.setBand(equalizerBandIndex,(progressBar + lowerEqualizerBandLevel!!).toShort())
             } else {
 
                     val bandValue = getEqualizerBandPreConfig(effectType, seek_id)
-                    //seekBar.progress = mEq!!.getBandLevel(equalizerBandIndex).toInt()
-                    seekBar.progress = bandValue
-                    /* mEq?.setBandLevel(
-                    equalizerBandIndex,
-                    (progressBar + lowerEqualizerBandLevel!!).toShort()
-                )*/
-                    mEq?.setBandLevel(
-                        equalizerBandIndex,
-                        (bandValue + lowerEqualizerBandLevel!!).toShort()
-                    )
 
+                    seekBar.progress = bandValue
+                    EqualizerManager.setBand(equalizerBandIndex,(bandValue + lowerEqualizerBandLevel!!).toShort())
             }
             //            change progress as its changed by moving the sliders
             seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
@@ -251,11 +239,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                     seekBar: SeekBar, progress: Int,
                     fromUser: Boolean
                 ) {
-
-                    mEq?.setBandLevel(
-                        equalizerBandIndex,
-                        (progress + lowerEqualizerBandLevel!!).toShort()
-                    )
+                    EqualizerManager.setBand(equalizerBandIndex,(equalizerBandIndex + lowerEqualizerBandLevel!!).toShort())
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {

@@ -34,6 +34,7 @@ import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.audioeffects.common.EffectsPreferences
+import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.getEqualizerConfig
 import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
@@ -84,7 +85,7 @@ class MusicPlayerService : Service(){
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
-    private lateinit var mEq:Equalizer
+
 
     private var _songController: ServiceSongListener? = null
     val songController: ServiceSongListener get() = _songController!!
@@ -272,23 +273,24 @@ class MusicPlayerService : Service(){
         }
     }
     private fun setUpEqualizer(sessionId:Int){
-        mEq = Equalizer(1000,sessionId)
-        mEq.setEnabled(true)
+        EqualizerManager.initEqualizer(sessionId)
+        EqualizerManager.setEnabled(true)
         if(effectsPrefs.effectsIsEnabled){
             CoroutineScope(Dispatchers.IO).launch {
                 val listOfBands = getEqualizerConfig(
                     effectsPrefs.effectType,
-                    mEq.numberOfBands.toInt(),
+                    EqualizerManager.mEq!!.numberOfBands.toInt(),
                     effectsPrefs
                 )
                 listOfBands.forEachIndexed { index, value ->
-                    mEq.setBandLevel(index.toShort(), value)
+                    EqualizerManager.setBand(index.toShort(),value)
                     Log.e("SESSION-ID", index.toString() + "--" + value.toString())
                 }
             }
         }
         else{
-            mEq.setEnabled(false)
+            EqualizerManager.setEnabled(false)
+
         }
 
     }
