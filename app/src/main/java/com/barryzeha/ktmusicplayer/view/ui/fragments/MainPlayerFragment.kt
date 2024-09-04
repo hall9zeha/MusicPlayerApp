@@ -16,6 +16,8 @@ import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.CLEAR_MODE
+import com.barryzeha.core.common.COLOR_BACKGROUND
+import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
@@ -120,10 +122,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 else -> {
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                     btnRepeat.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(5, 6)
+                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                     )
                     btnShuffle.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(5, 6)
+                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                     )
 
                 }
@@ -399,16 +401,16 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         SongMode.RepeatOne.ordinal -> {
                             //  Third: deactivate modes
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                            btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                             )
-                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                             )
                             mPrefs.songMode = CLEAR_MODE
                         }
                         SongMode.RepeatAll.ordinal -> {
                             // Second: repeat one
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                             )
                             mPrefs.songMode = REPEAT_ONE
 
@@ -416,7 +418,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         else -> {
                             // First: active repeat All
                             btnRepeat.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
-                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                             )
                             mPrefs.songMode= REPEAT_ALL
                         }
@@ -426,14 +428,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             btnShuffle.setOnClickListener {
                 when(mPrefs.songMode){
                         SongMode.Shuffle.ordinal->{
-                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                         mPrefs.songMode= CLEAR_MODE
                     }
                     else->{
                         btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                         btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                         mPrefs.songMode= SHUFFLE
                     }

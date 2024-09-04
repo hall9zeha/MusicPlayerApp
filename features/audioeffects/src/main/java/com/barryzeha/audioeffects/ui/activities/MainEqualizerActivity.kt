@@ -32,7 +32,9 @@ import com.barryzeha.audioeffects.common.POP
 import com.barryzeha.audioeffects.common.ROCK
 import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
+import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.EXOPLAYER_SESSION_ID_EXTRA
+import com.barryzeha.core.common.mColorList
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -83,10 +85,10 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         bind.main.setPadding(0, 0, 0, 20)
         //        get number frequency bands supported by the equalizer engine
-        //numberFrequencyBands = mEq!!.getNumberOfBands()
+        //        numberFrequencyBands = mEq!!.getNumberOfBands()
         numberFrequencyBands = EqualizerManager.mEq?.getNumberOfBands()
         //        get the level ranges to be used in setting the band level
-//        get lower limit of the range in milliBels
+        //        get lower limit of the range in milliBels
         lowerEqualizerBandLevel = EqualizerManager.mEq!!.getBandLevelRange()[0]
 
         //        get the upper limit of the range in millibels
@@ -197,7 +199,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
 
             //            **********  the seekBar  **************
-//            set the layout parameters for the seekbar
+            //            set the layout parameters for the seekbar
             val layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT - 60,
                 120
@@ -208,8 +210,8 @@ class MainEqualizerActivity : AppCompatActivity() {
             val seekBar = SeekBar(this)
             //            give the seekBar an ID
             seekBar.id = i.toInt()
-            val realThemeColor = "#25d24d"
-            var seekbg = ColorDrawable(Color.parseColor(realThemeColor))
+
+            var seekbg = ColorDrawable(mColorList(this).getColor(COLOR_PRIMARY, COLOR_PRIMARY))
             seekbg.alpha = 90
             //            seekBar.setBackground(new ColorDrawable(Color.rgb(201, 224, 203)));
             seekBar.background = seekbg
@@ -273,7 +275,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
             bind.contentBands.addView(seekBarRowLayout)
    }
-        //bind.main.rotation = 270F
+        //  bind.main.rotation = 270F
     }
     // Por ahora no debe retornar nada
     class MainEqualizerContract:ActivityResultContract<Int,Unit>(){

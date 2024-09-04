@@ -46,6 +46,15 @@ import kotlin.math.min
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 private const val NOTIFICATION_ID = 202405
+
+const val TEXT_COLOR_PRIMARY_INVERSE_NO_DISABLE=0
+const val COLOR_PRIMARY=1
+const val COLOR_ACCENT = 2
+const val COLOR_ON_PRIMARY=3
+const val COLOR_SURFACE=4
+const val COLOR_BACKGROUND=5
+const val COLOR_TRANSPARENT=6
+
 val mmr = MediaMetadataRetriever()
 fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Boolean, List<Pair<String,Boolean>>) ->Unit){
     val permissionsGranted:MutableList<Pair<String,Boolean>> = mutableListOf()

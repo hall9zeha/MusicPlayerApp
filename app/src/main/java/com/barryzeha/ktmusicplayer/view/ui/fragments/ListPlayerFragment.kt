@@ -28,6 +28,8 @@ import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.CLEAR_MODE
+import com.barryzeha.core.common.COLOR_BACKGROUND
+import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
@@ -399,16 +401,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         //  Third: deactivate modes
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                         bottomPlayerControls.btnRepeat.backgroundTintList=
-                            ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                            ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                         mPrefs.songMode = CLEAR_MODE
                     }
                     SongMode.RepeatAll.ordinal -> {
                         // Second: repeat one
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                         mPrefs.songMode = REPEAT_ONE
 
@@ -417,7 +419,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         // First: active repeat All
                         bottomPlayerControls.btnRepeat.backgroundTintList=
                             ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                         mPrefs.songMode= REPEAT_ALL
                     }
@@ -427,7 +429,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bottomPlayerControls.btnShuffle.setOnClickListener {
                 when(mPrefs.songMode){
                     SongMode.Shuffle.ordinal->{
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                         mPrefs.songMode= CLEAR_MODE
                     }
@@ -435,7 +437,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         bottomPlayerControls.btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                         mPrefs.songMode= SHUFFLE
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        bottomPlayerControls.btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(5,6)
+                        bottomPlayerControls.btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                     }
                 }
@@ -470,7 +472,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 if(clicked){
                     adapter.showMultipleSelection(false)
-                    btnMultipleSelect.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
+                    btnMultipleSelect.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT))
                     clicked=false
                     visibleOrGoneBottomActions(true)
                     adapter.clearListItemsForDelete()
@@ -507,7 +509,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }else {
                 visibleOrGoneViews(true)
                 edtSearch?.setText("")
-                btnSearch.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(5, 6))
+                btnSearch.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT))
                 isFiltering = false
                 showKeyboard(false)
             }
@@ -616,10 +618,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 else -> {
                     bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                     bottomPlayerControls.btnRepeat.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(5, 6)
+                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                     )
                     bottomPlayerControls.btnShuffle.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(5, 6)
+                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                     )
 
                 }
