@@ -37,6 +37,11 @@ interface  SongDao {
     @Query("select * from SongEntity order by artist ASC")
     suspend fun fetchAllSongByArtist():List<SongEntity>
 
+    // boolean literal "TRUE" is "1" in room database register
+    @Transaction
+    @Query("select * from SongEntity where favorite=1")
+    suspend fun fetchAllFavorites():List<SongEntity>
+
     @Transaction
     @Query("select * from SongEntity where id = :idSong")
     suspend fun fetchSongById(idSong:Long): SongEntity

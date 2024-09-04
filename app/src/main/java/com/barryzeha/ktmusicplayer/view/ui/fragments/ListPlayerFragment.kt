@@ -78,9 +78,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var bind:FragmentListPlayerBinding? = null
 
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
-    private var uri:Uri?=null
-    private lateinit var adapter:MusicListAdapter
 
+    private lateinit var adapter:MusicListAdapter
 
     private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
@@ -97,8 +96,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
-    private val itemList= mutableListOf<Any>()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,7 +105,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
 
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -139,7 +135,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             })
             }
-
     }
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
@@ -400,18 +395,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     SongMode.RepeatOne.ordinal -> {
                         //  Third: deactivate modes
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        bottomPlayerControls.btnRepeat.backgroundTintList=
-                            ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
+                        bottomPlayerControls.btnRepeat.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+
                         mPrefs.songMode = CLEAR_MODE
                     }
                     SongMode.RepeatAll.ordinal -> {
                         // Second: repeat one
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
+                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         mPrefs.songMode = REPEAT_ONE
 
                     }
@@ -419,8 +411,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         // First: active repeat All
                         bottomPlayerControls.btnRepeat.backgroundTintList=
                             ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
+                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         mPrefs.songMode= REPEAT_ALL
                     }
                 }
@@ -429,16 +420,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bottomPlayerControls.btnShuffle.setOnClickListener {
                 when(mPrefs.songMode){
                     SongMode.Shuffle.ordinal->{
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
+                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         mPrefs.songMode= CLEAR_MODE
                     }
                     else->{
                         bottomPlayerControls.btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                         mPrefs.songMode= SHUFFLE
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        bottomPlayerControls.btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
+                        bottomPlayerControls.btnRepeat.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+
                     }
                 }
             }
@@ -472,14 +462,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 if(clicked){
                     adapter.showMultipleSelection(false)
-                    btnMultipleSelect.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT))
+                    btnMultipleSelect.backgroundTintList = getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                     clicked=false
                     visibleOrGoneBottomActions(true)
                     adapter.clearListItemsForDelete()
                 }else{
                     adapter.showMultipleSelection(true)
-                   btnMultipleSelect.backgroundTintList=
-                        ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                   btnMultipleSelect.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                     clicked=true
                     visibleOrGoneBottomActions(false)
                 }
@@ -499,6 +488,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
+    private fun getColorStateList(index:Int,defaultIndex:Int):ColorStateList{
+        return ColorStateList.valueOf(mColorList(requireContext()).getColor(index,defaultIndex))
+    }
     private fun showOrHideSearchbar()=with(bind){
         this?.let{
             if(!isFiltering){
@@ -509,7 +501,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }else {
                 visibleOrGoneViews(true)
                 edtSearch?.setText("")
-                btnSearch.backgroundTintList = ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT))
+                btnSearch.backgroundTintList = getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                 isFiltering = false
                 showKeyboard(false)
             }
@@ -629,24 +621,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun onItemClick(position:Int,song: SongEntity){
-        if(!isFiltering) {
+       adapter.getPositionByItem(song)?.let {pos->
             musicPlayerService?.startPlayer(song)
             mPrefs.idSong = song.id
-            adapter.getPositionByItem(song)?.let {pos->
-                //mPrefs.currentPosition=pos.first.toLong()
-                mainViewModel.setCurrentPosition(pos.first)
-
-            }
-
-        }else{
-            adapter.getPositionByItem(song)?.let {pos->
-                musicPlayerService?.startPlayer(song)
-                mPrefs.idSong = song.id
-                //mPrefs.currentPosition=pos.first.toLong()
-                mainViewModel.setCurrentPosition(pos.first)
-            }
+            mainViewModel.setCurrentPosition(pos.first)
         }
-
     }
     private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {
         val popupMenu = PopupMenu(activity,view)

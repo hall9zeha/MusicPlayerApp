@@ -593,9 +593,7 @@ class MusicPlayerService : Service(){
              }
 
          }
-
        return playerListener
-
     }
 
     override fun onBind(intent: Intent?): IBinder {
@@ -609,7 +607,6 @@ class MusicPlayerService : Service(){
         _songController=controller
 
     }
-
     fun setNewMediaItem(song:SongEntity){
         val newMediaItem = MediaItem.Builder()
             .setMediaId(song.id.toString())
@@ -630,7 +627,7 @@ class MusicPlayerService : Service(){
         }
     }
     fun removeMediaItems(list: List<SongEntity>){
-        list.forEach { song->
+       list.forEach { song->
             removeMediaItem(song)
         }
     }

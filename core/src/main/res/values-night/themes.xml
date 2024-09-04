@@ -49,4 +49,12 @@
         <item name="colorAccent">@color/controls_colors</item>
         <item name="colorControlNormal">@color/controls_colors</item>
     </style>
+    <style name="VinylShapeAppearance" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerFamilyBottomLeft">rounded</item>
+        <item name="cornerFamilyBottomRight">rounded</item>
+        <item name="cornerFamilyTopLeft">rounded</item>
+        <item name="cornerFamilyTopRight">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

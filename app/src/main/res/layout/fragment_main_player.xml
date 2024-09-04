@@ -53,15 +53,15 @@
         android:layout_marginTop="96dp"
         app:layout_constraintWidth_percent="0.72"
         app:layout_constraintDimensionRatio="H,1:1">
-
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivMusicCover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:src="@mipmap/ic_launcher"
-            android:scaleType="fitXY"
-            />
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="fitXY" />
+
     </com.google.android.material.card.MaterialCardView>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongDescription"
         android:layout_width="0dp"

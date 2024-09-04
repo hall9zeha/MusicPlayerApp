@@ -42,6 +42,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
         }
     }
 
+    override suspend fun fetchAllFavorites(): List<SongEntity>  = withContext(Dispatchers.IO){
+        dao.fetchAllFavorites()
+    }
+
     override suspend fun fetchSongById(idSong: Long): SongEntity = withContext(Dispatchers.IO){
         dao.fetchSongById(idSong)
     }
