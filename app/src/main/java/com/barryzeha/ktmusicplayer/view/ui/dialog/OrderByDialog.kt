@@ -10,6 +10,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.ktmusicplayer.databinding.OrderByDialogLayoutBinding
@@ -79,6 +80,7 @@ class OrderByDialog:DialogFragment() {
                 BY_ALBUM->(_bind?.radioGroup?.getChildAt(1) as RadioButton).isChecked=true
                 BY_ARTIST->(_bind?.radioGroup?.getChildAt(2) as RadioButton).isChecked=true
                 BY_GENRE->(_bind?.radioGroup?.getChildAt(3) as RadioButton).isChecked=true
+                BY_FAVORITE->(_bind?.radioGroup?.getChildAt(4) as RadioButton).isChecked=true
                 else->(_bind?.radioGroup?.getChildAt(0) as RadioButton).isChecked=true
             }
             _bind?.radioGroup?.setOnCheckedChangeListener { group, checkedId ->

@@ -41,5 +41,11 @@
             android:layout_height="wrap_content"
             android:tag="3"
             android:text="Genre"/>
+        <RadioButton
+            android:id="@+id/rgFavorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="4"
+            android:text="Favorite"/>
     </RadioGroup>
 </androidx.constraintlayout.widget.ConstraintLayout>

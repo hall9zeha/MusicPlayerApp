@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.model.entities.SongEntity
@@ -38,6 +39,7 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
             BY_ALBUM-> dao.fetchAllSongByAlbum()
             BY_ARTIST-> dao.fetchAllSongByArtist()
             BY_GENRE-> dao.fetchAllSongByGenre()
+            BY_FAVORITE->dao.fetchAllFavorites()
             else->dao.fetchAllSongs()
         }
     }

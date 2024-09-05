@@ -26,6 +26,7 @@ import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.COLOR_BACKGROUND
@@ -193,6 +194,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             // hilo principal
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
+
                 adapter.addAll(result)
                 setNumberOfTrack()
                 bind?.pbLoad?.visibility=View.GONE
@@ -205,6 +207,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             mPrefs.playListSortOption = selectedSort
             mainViewModel.fetchAllSongsBy(selectedSort)
             setUpPlayListName()
+            //Todo manejar correctamente la lista de canciones cuando se traiga solamente los favoritos
+            // volver a llenar la lista de reproducción u otra mejor opción
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
@@ -248,6 +252,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 BY_ALBUM->tvPlayListName.text=getString(coreRes.string.album)
                 BY_ARTIST->tvPlayListName.text=getString(coreRes.string.artist)
                 BY_GENRE->tvPlayListName.text=getString(coreRes.string.genre)
+                BY_FAVORITE->tvPlayListName.text=getString(coreRes.string.favorite)
                 else->tvPlayListName.text=getString(coreRes.string.default_title)
 
             }

@@ -631,6 +631,25 @@ class MusicPlayerService : Service(){
             removeMediaItem(song)
         }
     }
+    fun populatePlayList(songs:List<SongEntity>){
+        CoroutineScope(Dispatchers.IO).launch {
+            songs.forEach { s ->
+                if (!songsList.contains(s)) {
+                    songsList.add(s)
+                }
+                val mediaItem = MediaItem.Builder()
+                    .setMediaId(s.id.toString())
+                    .setUri(s.pathLocation.toString())
+                    .build()
+                mediaItemList.add(mediaItem)
+
+            }
+            withContext(Dispatchers.Main) {
+                exoPlayer.addMediaItems(mediaItemList)
+
+            }
+        }
+    }
     fun clearPlayList(){
         mediaItemList.clear()
         songsList.clear()

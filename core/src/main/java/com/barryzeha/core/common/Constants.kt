@@ -18,6 +18,7 @@ const val SETTINGS_FRAGMENT = 2
 const val BY_ALBUM = 1
 const val BY_ARTIST = 2
 const val BY_GENRE = 3
+const val BY_FAVORITE = 4
 
 const val READ_STORAGE_REQ_CODE = 123
 const val RECORD_AUDIO_REQ_CODE = 124
