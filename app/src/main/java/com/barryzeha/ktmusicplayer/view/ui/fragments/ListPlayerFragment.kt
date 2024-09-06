@@ -192,9 +192,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             // La actualización del adaptador debe ocurrir en el hilo principal siempre
             // Dará problemas al recrearse la vista cuando rotemos la pantalla si no está en el
             // hilo principal
+
+            //TODO ordenar la lista de media items nuevamente cada vez que hacemos un filtro
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
-
+                // Probando
+                musicPlayerService?.populatePlayList(songList)
+                // ************
                 adapter.addAll(result)
                 setNumberOfTrack()
                 bind?.pbLoad?.visibility=View.GONE
@@ -204,6 +208,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
+            // probando
+            musicPlayerService?.clearPlayList()
+            // ********
             mPrefs.playListSortOption = selectedSort
             mainViewModel.fetchAllSongsBy(selectedSort)
             setUpPlayListName()

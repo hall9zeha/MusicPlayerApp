@@ -85,7 +85,7 @@ class MusicPlayerService : Service(){
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
-
+    private var positionReset= -1
 
     private var _songController: ServiceSongListener? = null
     val songController: ServiceSongListener get() = _songController!!
@@ -519,8 +519,9 @@ class MusicPlayerService : Service(){
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
+                        val song=if(positionReset>-1) songsList[positionReset] else songEntity
                          // Set info currentSongEntity
-                         fetchSong(songEntity)?.let{
+                         fetchSong(song)?.let{
                              currentMusicState=it
                              // Para encontrar la posición del item en la lista de nuestra vista
                              // por su id
@@ -535,6 +536,7 @@ class MusicPlayerService : Service(){
                          }
                          executeOnceTime = true
                          mPrefs.isPlaying = exoPlayer.isPlaying
+                     positionReset=-1
 
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
@@ -608,13 +610,14 @@ class MusicPlayerService : Service(){
 
     }
     fun setNewMediaItem(song:SongEntity){
-        val newMediaItem = MediaItem.Builder()
-            .setMediaId(song.id.toString())
-            .setUri(song.pathLocation.toString())
-            .build()
-        mediaItemList.add(newMediaItem)
-        exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation.toString()))
-        if(!songsList.contains(song)) songsList.add(song)
+       if(!songsList.contains(song)){ songsList.add(song)
+            val newMediaItem = MediaItem.Builder()
+                .setMediaId(song.id.toString())
+                .setUri(song.pathLocation.toString())
+                .build()
+            mediaItemList.add(newMediaItem)
+            exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation.toString()))
+        }
     }
     fun removeMediaItem(song: SongEntity){
 
@@ -636,12 +639,13 @@ class MusicPlayerService : Service(){
             songs.forEach { s ->
                 if (!songsList.contains(s)) {
                     songsList.add(s)
+
+                    val mediaItem = MediaItem.Builder()
+                        .setMediaId(s.id.toString())
+                        .setUri(s.pathLocation.toString())
+                        .build()
+                    mediaItemList.add(mediaItem)
                 }
-                val mediaItem = MediaItem.Builder()
-                    .setMediaId(s.id.toString())
-                    .setUri(s.pathLocation.toString())
-                    .build()
-                mediaItemList.add(mediaItem)
 
             }
             withContext(Dispatchers.Main) {
@@ -657,6 +661,8 @@ class MusicPlayerService : Service(){
         //exoPlayer.release()
         currentMusicState=MusicState()
         _songController?.currentTrack(currentMusicState)
+        positionReset=0
+        executeOnceTime=false
     }
     fun unregisterController(){
         _songController=null
