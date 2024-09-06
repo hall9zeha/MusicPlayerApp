@@ -14,6 +14,7 @@ activity = "1.9.0"
 constraintlayout = "2.1.4"
 dagger-hilt-version = "2.51.1"
 fragment-version = "1.7.0"
+fast-scroll-version = "2.1.0"
 glide-version = "4.16.0"
 glide-compiler-version = "4.16.0"
 room_version = "2.6.1"
@@ -38,6 +39,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 dagger-hilt = {group = "com.google.dagger", name = "hilt-android", version.ref = "dagger-hilt-version"}
 dagger-hilt-compiler = {group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "dagger-hilt-version"}
+fast-scroll = {group = "io.github.l4digital", name ="fastscroll", version.ref ="fast-scroll-version"}
 glide = {group = "com.github.bumptech.glide", name = "glide", version.ref = "glide-version"}
 glide-compiler = {group ="com.github.bumptech.glide", name = "compiler", version.ref = "glide-compiler-version"}
 gson = {group="com.google.code.gson", name = "gson",version.ref="gson-version"}

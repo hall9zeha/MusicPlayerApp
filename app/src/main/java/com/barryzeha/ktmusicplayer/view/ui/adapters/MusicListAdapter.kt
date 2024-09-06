@@ -22,6 +22,7 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
 import com.barryzeha.ktmusicplayer.databinding.ListItemHeaderBinding
+import com.l4digital.fastscroll.FastScroller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,7 +36,7 @@ import kotlinx.coroutines.withContext
  **/
 
 class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
-                       private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(CombinedDiffCallback(SongDiffCallback(), HeaderDiffCallback())), Filterable {
+                       private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(CombinedDiffCallback(SongDiffCallback(), HeaderDiffCallback())), Filterable, FastScroller.SectionIndexer {
 //class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
     private val SONG_ITEM=0
     private val HEADER_ITEM=1
@@ -71,13 +72,15 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             }
 
     }
-   /* override fun getItemId(position: Int): Long {
+
+    /* override fun getItemId(position: Int): Long {
         if(currentList[position] is SongEntity) {
             return ((currentList[position] as SongEntity)).id
         }else{
             return 0
         }
     }*/
+    override fun getSectionText(position: Int) = if(getItem(position) is SongEntity) (getItem(position) as SongEntity).album else ""
 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

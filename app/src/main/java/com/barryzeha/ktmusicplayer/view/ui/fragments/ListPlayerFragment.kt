@@ -196,7 +196,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             //TODO ordenar la lista de media items nuevamente cada vez que hacemos un filtro
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
-                // Probando
+                // Probando nuevamente llenar la lista de mediaitems cusndo seleccionamos un filtro
                 musicPlayerService?.populatePlayList(songList)
                 // ************
                 adapter.addAll(result)
@@ -208,7 +208,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
-            // probando
+            // probando eliminar la lista de media items para cargar la lista nueva, ya que tendrá un orden distinto
             musicPlayerService?.clearPlayList()
             // ********
             mPrefs.playListSortOption = selectedSort

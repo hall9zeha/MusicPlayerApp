@@ -76,6 +76,9 @@ dependencies {
     implementation(libs.dagger.hilt)
     // Gson
     implementation(libs.gson)
+    // Fast scroll
+    implementation(libs.fast.scroll)
+
     // Modules
     implementation(project(":core"))
     implementation(project(":data"))
