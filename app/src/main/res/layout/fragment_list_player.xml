@@ -142,8 +142,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         tools:listitem="@layout/item_song"
-
-
+        app:bubbleSize="small"
+        app:bubbleTextSize="14sp"
+        app:handleColor="?attr/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/searchBar"
