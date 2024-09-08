@@ -360,7 +360,10 @@ class MusicPlayerService : Service(){
         setUpEqualizer(exoPlayer.audioSessionId)
 
         CoroutineScope(Dispatchers.Main).launch {
-            val songs=repository.fetchAllSongs()
+            // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
+            // si no hay algo seleccionado previamente solo devolverá la lista por defecto
+            val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
+
             songState=repository.fetchSongState()
             // TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {
