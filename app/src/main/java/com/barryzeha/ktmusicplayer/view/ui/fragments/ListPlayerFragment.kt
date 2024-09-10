@@ -196,13 +196,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             //TODO ordenar la lista de media items nuevamente cada vez que hacemos un filtro
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
-                // Probando nuevamente llenar la lista de mediaitems cusndo seleccionamos un filtro
-                musicPlayerService?.populatePlayList(songList)
+                // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro
+                if(!mPrefs.firstExecution)musicPlayerService?.populatePlayList(songList)
                 // ************
                 adapter.addAll(result)
                 setNumberOfTrack()
                 bind?.pbLoad?.visibility=View.GONE
                 bind?.pbLoad?.isIndeterminate=true
+                mPrefs.firstExecution=false
             }
         }
 
@@ -235,7 +236,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 adapter.remove(song)
                 musicPlayerService?.removeMediaItem(song)
                 setNumberOfTrack(scrollToPosition = false)
-                if(song.id == mPrefs.idSong) mPrefs.clearIdSongInPrefs()
+                if(song.id == mPrefs.idSong){
+                    mainViewModel.removeSongState(song.id)
+                    mPrefs.clearIdSongInPrefs()
+                }
             }
         }
         mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteRows->

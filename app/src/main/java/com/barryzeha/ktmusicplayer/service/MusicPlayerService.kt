@@ -113,6 +113,7 @@ class MusicPlayerService : Service(){
         mPrefs = MyApp.mPrefs
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
+        mPrefs.firstExecution=true
 
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
@@ -382,6 +383,7 @@ class MusicPlayerService : Service(){
                     exoPlayer.addMediaItems(mediaItemList)
                     //exoPlayer.addMediaItem(mediaItem)
                 }
+                Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
             }
             if(!songState.isNullOrEmpty()) {
                 val songEntity=songState[0].songEntity
@@ -509,9 +511,11 @@ class MusicPlayerService : Service(){
     private fun findMediaItemIndexById(mediaItems:List<MediaItem>, mediaItemId:String):Int{
         return mediaItems.indexOfFirst { it.mediaId == mediaItemId }
     }
+
     private fun initExoPlayer(song:SongEntity){
         songEntity=song
         exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,song.id.toString()),0)
+
         exoPlayer.prepare()
         exoPlayer.play()
 
@@ -625,6 +629,7 @@ class MusicPlayerService : Service(){
     fun removeMediaItem(song: SongEntity){
 
         val mediaItemIndex = findMediaItemIndexById(mediaItemList,song.id.toString())
+
         mediaItemList.removeAt(mediaItemIndex)
         if(songsList.contains(song)) {
             val index = songsList.indexOf(song)
@@ -648,13 +653,15 @@ class MusicPlayerService : Service(){
                         .setUri(s.pathLocation.toString())
                         .build()
                     mediaItemList.add(mediaItem)
+
+                    withContext(Dispatchers.Main) {
+                        exoPlayer.addMediaItem(mediaItem)
+
+                    }
                 }
-
             }
-            withContext(Dispatchers.Main) {
-                exoPlayer.addMediaItems(mediaItemList)
+            Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
 
-            }
         }
     }
     fun clearPlayList(){
@@ -745,7 +752,8 @@ class MusicPlayerService : Service(){
         //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
 
         //exoPlayer.seekTo(mPrefs.currentPosition.toInt(),songState.songState.currentPosition)
-        exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,mPrefs.idSong.toString()),songState.songState.currentPosition)
+        exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,song.id.toString()),songState.songState.currentPosition)
+
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false
         _songController?.currentTrack(currentMusicState)

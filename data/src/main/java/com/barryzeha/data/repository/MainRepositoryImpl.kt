@@ -94,6 +94,7 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
         dao.updateSongState(songState)
     }
 
-
-
+    override suspend fun deleteSongState(idSong: Long): Int= withContext(Dispatchers.IO) {
+        dao.deleteSongState(idSong)
+    }
 }

@@ -133,29 +133,19 @@
             android:layout_marginTop="8dp"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!--<androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvSongs"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        tools:listitem="@layout/item_song"
 
-
-        app:layout_constraintStart_toEndOf="@id/guideLine"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/searchBar"
-        app:layout_constraintBottom_toBottomOf="parent"/>-->
     <com.l4digital.fastscroll.FastScrollRecyclerView
         android:id="@+id/rvSongs"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         tools:listitem="@layout/item_song"
         app:bubbleSize="small"
         app:bubbleTextSize="14sp"
         app:handleColor="?attr/colorPrimary"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/guideLine"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/searchBar"
-        app:layout_constraintBottom_toTopOf="@id/bottomActionsMenu"/>
+        app:layout_constraintBottom_toBottomOf="parent"/>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomActionsMenu"
         android:layout_width="0dp"

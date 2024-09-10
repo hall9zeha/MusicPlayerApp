@@ -82,5 +82,7 @@ interface  SongDao {
     @Transaction
     @Update
     suspend fun updateSongState(songState: SongState):Int
-
+    @Transaction
+    @Query("delete from SongState where idSongState = :idSong")
+    suspend fun deleteSongState(idSong:Long):Int
 }

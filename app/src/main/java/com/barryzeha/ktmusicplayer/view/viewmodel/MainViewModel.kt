@@ -204,6 +204,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             _songById.value=repository.fetchSongById(idSong)
         }
     }
+    // for SongState
+    fun removeSongState(idSong: Long){
+        launch{
+            repository.deleteSongState(idSong)
+        }
+    }
+
 
     // Temporal values, not insert to database
     fun setCurrentPosition(position:Int){

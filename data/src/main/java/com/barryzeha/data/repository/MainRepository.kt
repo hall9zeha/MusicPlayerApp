@@ -33,5 +33,6 @@ interface MainRepository {
     suspend fun fetchSongState():List<SongStateWithDetail>
     suspend fun saveSongState(songState: SongState):Long
     suspend fun updateSongState(songState: SongState):Int
+    suspend fun deleteSongState(idSong:Long):Int
 
 }

@@ -2,12 +2,11 @@ package com.barryzeha.ktmusicplayer.common
 
 import android.content.Context
 import com.barryzeha.core.common.fetchFileMetadata
-import com.barryzeha.core.common.getParentDirectories
-import com.barryzeha.core.common.getRealPathFromURI
-import com.barryzeha.core.common.getUriFromFile
-import com.barryzeha.core.model.entities.AudioMetadata
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.mfilepicker.common.util.getParentDirectories
+import com.barryzeha.mfilepicker.common.util.getRealPathFromURI
+import com.barryzeha.mfilepicker.common.util.getUriFromFile
 import com.barryzeha.mfilepicker.filetype.AudioFileType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
