@@ -40,6 +40,7 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
+import com.barryzeha.core.common.runWhenReady
 import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
@@ -200,7 +201,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 if(!mPrefs.firstExecution)musicPlayerService?.populatePlayList(songList)
                 // ************
                 adapter.addAll(result)
-                setNumberOfTrack()
+                bind?.rvSongs?.runWhenReady {
+                    setNumberOfTrack()
+                }
+
                 bind?.pbLoad?.visibility=View.GONE
                 bind?.pbLoad?.isIndeterminate=true
                 mPrefs.firstExecution=false

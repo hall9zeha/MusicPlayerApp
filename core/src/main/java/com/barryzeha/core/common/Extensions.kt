@@ -7,7 +7,9 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.ImageView
+import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.MusicState
 import com.bumptech.glide.Glide
@@ -68,5 +70,15 @@ fun getPixels(dipValue:Int, context: Context):Int{
         dipValue.toFloat(),
         r.displayMetrics
     ).toInt()
+}
+
+fun RecyclerView.runWhenReady(action:()->Unit){
+    val globalLayoutListener = object: ViewTreeObserver.OnGlobalLayoutListener{
+        override fun onGlobalLayout() {
+            action()
+            viewTreeObserver.removeOnGlobalLayoutListener(this)
+        }
+    }
+    viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 }
 
