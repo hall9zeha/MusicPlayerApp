@@ -176,7 +176,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bind?.pbLoad?.apply {
                 max=size
                 progress=count
-
                 setNumberOfTrack(itemCount = count)
             }
         }

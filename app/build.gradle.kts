@@ -85,5 +85,6 @@ dependencies {
     implementation(project(":di"))
     implementation(project(":features:mfilepicker"))
     implementation(project(":features:audioeffects"))
+    implementation(project(":bass"))
 
 }

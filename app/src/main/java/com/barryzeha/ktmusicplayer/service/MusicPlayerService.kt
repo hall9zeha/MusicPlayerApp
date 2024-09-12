@@ -33,6 +33,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+
 import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.getEqualizerConfig
@@ -52,6 +53,7 @@ import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
+import com.un4seen.bass.BASS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -121,6 +123,7 @@ class MusicPlayerService : Service(){
         setUpRepository()
         initMusicStateLooper()
         setUpHeadsetAndBluetoothReceiver()
+
 
     }
     private fun setUpHeadsetAndBluetoothReceiver(){

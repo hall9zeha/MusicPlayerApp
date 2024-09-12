@@ -27,10 +27,10 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
 }
 
 dependencies{
-
 
     implementation(libs.media3.explorer)
     implementation(libs.media3.ui)
