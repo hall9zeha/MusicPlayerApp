@@ -29,6 +29,20 @@ android {
             )
         }
     }
+    flavorDimensions.add("version")
+    productFlavors {
+        create("exoplayer"){
+            dimension="version"
+            applicationId="com.barryzeha.ktmusicplayer.exoplayer"
+            manifestPlaceholders["appLabel"]="KTMusic Exo"
+        }
+        create("bass"){
+            dimension="version"
+            applicationId="com.barryzeha.ktmusicplayer.bass"
+            manifestPlaceholders["appLabel"]="KTMusic Bass"
+        }
+
+    }
   /*  packaging{
         resources {
             excludes += "META-INF/gradle/incremental.annotation.processors"
