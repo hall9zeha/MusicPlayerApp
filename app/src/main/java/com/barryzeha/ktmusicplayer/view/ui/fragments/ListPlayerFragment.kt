@@ -297,7 +297,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }
             mainViewModel.checkIfIsFavorite(musicState.idSong)
-
+            Log.e("BYTEE-ONCE", musicState.duration.toString() )
         }
     }
     private fun updateUI(musicState: MusicState){
@@ -310,6 +310,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bind?.seekbarControl?.loadSeekBar?.progress = musicState.currentDuration.toInt()
         //mainViewModel.saveStatePlaying(musicState.isPlaying)
         updateService()
+        Log.e("BYTEE", musicState.duration.toString() )
     }
 
 

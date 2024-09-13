@@ -53,6 +53,7 @@ import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
+import com.barryzeha.ktmusicplayer.utils.BassManager
 import com.un4seen.bass.BASS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -79,6 +80,9 @@ class MusicPlayerService : Service(){
     lateinit var effectsPrefs:EffectsPreferences
 
     private var songsList: MutableList<SongEntity> = mutableListOf()
+    private  var bassManager:BassManager?=null
+    private var mainChannel:Int=0
+    private var position:Long=0
 
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
@@ -112,6 +116,9 @@ class MusicPlayerService : Service(){
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
+
+        bassManager = BassManager().getInstance()
+
         mPrefs = MyApp.mPrefs
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
@@ -471,16 +478,16 @@ class MusicPlayerService : Service(){
     }
     private fun initMusicStateLooper(){
             songRunnable = Runnable {
-                if(exoPlayer.currentPosition>0) {
+               if(mainChannel != 0) {
                     currentMusicState = currentMusicState.copy(
-                        isPlaying = exoPlayer.isPlaying,
-                        currentDuration = exoPlayer.currentPosition,
-                        duration = exoPlayer.duration,
+                        isPlaying = mPrefs.isPlaying,
+                        currentDuration = bassManager?.getCurrentPosition(mainChannel)?:0,
+                        duration = bassManager?.getDuration(mainChannel)?:0,
                         latestPlayed = false
                     )
                 }
 
-                //if(exoPlayer.isPlaying) {
+                //if(exoPlayer.isPlaying) {T
                     _songController?.musicState(currentMusicState)
                     updateNotify()
                 //}
@@ -515,12 +522,26 @@ class MusicPlayerService : Service(){
         return mediaItems.indexOfFirst { it.mediaId == mediaItemId }
     }
 
-    private fun initExoPlayer(song:SongEntity){
-        songEntity=song
-        exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,song.id.toString()),0)
+    private fun play(song:SongEntity?){
 
-        exoPlayer.prepare()
-        exoPlayer.play()
+        // Cleaning a previous track if have anyone
+        BASS.BASS_StreamFree(mainChannel)
+        song?.let {
+            songEntity=it
+            mainChannel =BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+        }
+
+        if(mainChannel !=0){
+
+            BASS.BASS_ChannelSetAttribute(mainChannel, BASS.BASS_ATTRIB_VOL, 1F);
+            BASS.BASS_ChannelSetPosition(mainChannel, position, BASS.BASS_POS_BYTE);
+            BASS.BASS_ChannelPlay(mainChannel, false);
+            mPrefs.isPlaying=true
+            mPrefs.idSong=songEntity.id
+            currentMusicState = fetchSong(songEntity)?.copy(isPlaying = mPrefs.isPlaying)!!
+            _songController?.currentTrack(currentMusicState)
+        }
+
 
     }
 
@@ -687,16 +708,17 @@ class MusicPlayerService : Service(){
             // información  de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
-            initExoPlayer(song)
+            play(song)
+
+        //initExoPlayer(song)
         }
 
     }
     fun pauseExoPlayer(){
-        if(exoPlayer.isPlaying){
-            exoPlayer.pause()
+        mPrefs.isPlaying = false
+        position=bassManager?.getBytesPosition(mainChannel)?:0
+        BASS.BASS_ChannelPause(mainChannel)
 
-
-        }
     }
 
     @OptIn(UnstableApi::class)
@@ -704,11 +726,7 @@ class MusicPlayerService : Service(){
         return exoPlayer.audioSessionId
     }
     fun playingExoPlayer(){
-        if(!exoPlayer.isPlaying){
-            exoPlayer.prepare()
-            exoPlayer.play()
-            isFirstTime=false
-        }
+        play(null)
 
     }
     fun nextSong(){

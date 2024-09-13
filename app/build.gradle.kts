@@ -38,6 +38,7 @@ android {
         }
         create("bass"){
             dimension="version"
+
             applicationId="com.barryzeha.ktmusicplayer.bass"
             manifestPlaceholders["appLabel"]="KTMusic Bass"
         }
@@ -58,6 +59,7 @@ android {
     }
    buildFeatures{
         viewBinding= true
+        buildConfig=true
     }
 }
 
@@ -92,7 +94,6 @@ dependencies {
     implementation(libs.gson)
     // Fast scroll
     implementation(libs.fast.scroll)
-
     // Modules
     implementation(project(":core"))
     implementation(project(":data"))
