@@ -56,12 +56,12 @@ open class BassManager {
 
     }
     fun setSongStateSaved(channel:Int, position:Long){
+        mainChannel = channel
         val positionBytes = getCurrentPositionToBytes(position)
         BASS.BASS_ChannelSetPosition(channel, positionBytes, BASS.BASS_POS_BYTE);
-        mainChannel = channel
     }
     fun getCurrentPositionToBytes(position: Long):Long{
-        return BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, (position / 1000.0))
+        return BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, position / 1000.0)
     }
     fun setActiveChannel(channel:Int){
         mainChannel=channel

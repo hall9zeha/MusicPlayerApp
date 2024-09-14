@@ -382,7 +382,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 else {
                     getSongOfAdapter(0)?.let { song ->
                         musicPlayerService?.startPlayer(song)
-
                     }
                 }
             }

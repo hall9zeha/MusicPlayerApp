@@ -303,9 +303,7 @@ class MusicPlayerService : Service(){
 
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
-
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
                _songController?.pause()
@@ -379,9 +377,7 @@ class MusicPlayerService : Service(){
                     if (!songsList.contains(s)) {
                         songsList.add(s)
                     }
-
-
-                }
+               }
             }
             if(!songState.isNullOrEmpty()) {
                 val songEntity=songState[0].songEntity
@@ -410,7 +406,6 @@ class MusicPlayerService : Service(){
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
-
         currentMusicState?.let { newState ->
               mediaSession.setPlaybackState(
                     PlaybackState.Builder()
@@ -489,7 +484,6 @@ class MusicPlayerService : Service(){
     private fun setUpExoPlayerRepeatMode(){
         when(mPrefs.songMode){
             SongMode.RepeatAll.ordinal->{
-
                 exoPlayer.repeatMode=Player.REPEAT_MODE_ALL
             }
             SongMode.RepeatOne.ordinal->{
@@ -506,22 +500,27 @@ class MusicPlayerService : Service(){
 
         }
     }
-    private fun findMediaItemIndexById(mediaItems:List<MediaItem>, mediaItemId:String):Int{
-        return mediaItems.indexOfFirst { it.mediaId == mediaItemId }
+    private fun findItemSongIndexById(idSong:Long):Int?{
+        if(songsList.isNotEmpty()) {
+            return songsList.indexOfFirst{it.id == idSong}
+        }
+        return null
     }
 
     private fun play(song:SongEntity?){
-
         song?.let {
             BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
             // Cleaning a previous track if have anyone
             songEntity=it
             position=0
+            findItemSongIndexById(song.id)?.toLong()?.let{ pos->mPrefs.currentPosition=pos}
             mainChannel =BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
             bassManager?.setActiveChannel(mainChannel)
         }?:run{
+
             mainChannel = BASS.BASS_StreamCreateFile(songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
             bassManager?.setActiveChannel(mainChannel)
+
         }
         if(bassManager?.getActiveChannel() !=0){
             BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!, BASS.BASS_ATTRIB_VOL, 1F)
@@ -530,7 +529,12 @@ class MusicPlayerService : Service(){
             BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
             mPrefs.isPlaying=true
             mPrefs.idSong=songEntity.id
-            currentMusicState = fetchSong(songEntity)?.copy(isPlaying = mPrefs.isPlaying)!!
+            currentMusicState = fetchSong(songEntity)?.copy(
+                isPlaying = mPrefs.isPlaying,
+                idSong = songEntity.id,
+                currentPosition = mPrefs.currentPosition
+
+            )!!
 
         }
         song?.let{
@@ -587,8 +591,6 @@ class MusicPlayerService : Service(){
                     if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
                         if (songsList.isNotEmpty()) {
                             val song=songsList[newPosition.mediaItemIndex]
-
-
                             songEntity = song
                             fetchSong(song)?.let {songInfo->
                                 currentMusicState = songInfo.copy(
@@ -633,24 +635,11 @@ class MusicPlayerService : Service(){
 
     }
     fun setNewMediaItem(song:SongEntity){
-       if(!songsList.contains(song)){ songsList.add(song)
-            val newMediaItem = MediaItem.Builder()
-                .setMediaId(song.id.toString())
-                .setUri(song.pathLocation.toString())
-                .build()
-            mediaItemList.add(newMediaItem)
-            exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation.toString()))
-        }
+       if(!songsList.contains(song)){ songsList.add(song)}
     }
     fun removeMediaItem(song: SongEntity){
-
-        val mediaItemIndex = findMediaItemIndexById(mediaItemList,song.id.toString())
-
-        mediaItemList.removeAt(mediaItemIndex)
-        if(songsList.contains(song)) {
-            val index = songsList.indexOf(song)
-            exoPlayer.removeMediaItem(index)
-            songsList.remove(song)
+       if(songsList.contains(song)) {
+           songsList.remove(song)
         }
     }
     fun removeMediaItems(list: List<SongEntity>){
@@ -663,28 +652,13 @@ class MusicPlayerService : Service(){
             songs.forEach { s ->
                 if (!songsList.contains(s)) {
                     songsList.add(s)
-
-                    val mediaItem = MediaItem.Builder()
-                        .setMediaId(s.id.toString())
-                        .setUri(s.pathLocation.toString())
-                        .build()
-                    mediaItemList.add(mediaItem)
-
-                    withContext(Dispatchers.Main) {
-                        exoPlayer.addMediaItem(mediaItem)
-
-                    }
                 }
             }
-            Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
-
+            Log.e("ITEMS-MEDIA-S-POPULATE", songsList.size.toString())
         }
     }
     fun clearPlayList(){
-        mediaItemList.clear()
         songsList.clear()
-        exoPlayer.clearMediaItems()
-        //exoPlayer.release()
         currentMusicState=MusicState()
         _songController?.currentTrack(currentMusicState)
         positionReset=0
@@ -722,26 +696,28 @@ class MusicPlayerService : Service(){
 
     }
     fun nextSong(){
-        exoPlayer.seekToNext()
+        if(songsList.isNotEmpty()){
+            val song = songsList[mPrefs.currentPosition.toInt() + 1]
+            play(song)
+        }
     }
     fun prevSong(){
-        exoPlayer.seekToPrevious()
-            //exoPlayer.seekToPrevious()
-            // retrocede al principio de la pista hay que hacer click dos veces
-            // para que retroceda a la pista anterior
+        if(songsList.isNotEmpty()){
+            val song = songsList[mPrefs.currentPosition.toInt() -1]
+            play(song)
+        }
     }
     fun setPlayerProgress(progress:Long){
-        BASS.BASS_ChannelPause(bassManager?.getActiveChannel()!!)
         // Convierte el progreso en milisegundos a bytes
         val progressBytes = BASS.BASS_ChannelSeconds2Bytes(bassManager?.getActiveChannel()!!, progress / 1000.0)
 
-        // Ajusta la posición del canal
-        BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, progressBytes, BASS.BASS_POS_BYTE)
         updateTimer?.cancel()
         updateTimer = Timer()
         updateTimer?.schedule(object : TimerTask() {
             override fun run() {
-                BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!,false)
+                // Ajusta la posición del canal
+                BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, progressBytes, BASS.BASS_POS_BYTE)
+                position = progress
             }
         }, 15) // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
 
@@ -766,9 +742,12 @@ class MusicPlayerService : Service(){
             )
 
         }
-        position = songState.songState.currentPosition
+        position=songState.songState.currentPosition
         val channel = BASS.BASS_StreamCreateFile(songState.songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
-        bassManager?.setSongStateSaved(channel,position )
+        bassManager?.setSongStateSaved(channel,songState.songState.currentPosition )
+        findItemSongIndexById(songState.songEntity.id)?.toLong()?.let{
+            mPrefs.currentPosition=it
+        }
         _songController?.currentTrack(currentMusicState)
         // Al cargar la información de una pista guardada
         // se ejecutaba una primera vez el evento currentTRack de la interface
