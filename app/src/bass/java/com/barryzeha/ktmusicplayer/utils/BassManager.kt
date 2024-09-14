@@ -15,6 +15,7 @@ private const val SAMPLE48 = 48000
 private const val SAMPLE96 = 96000
 private const val SAMPLE192 = 192000
 private const val TAG = "BASS"
+private var mainChannel:Int?=0
 
 open class BassManager {
     private var instance: BassManager? = null
@@ -54,7 +55,21 @@ open class BassManager {
     private fun configure(){
 
     }
-    fun getCurrentPosition(channel: Int): Long {
+    fun setSongStateSaved(channel:Int, position:Long){
+        val positionBytes = getCurrentPositionToBytes(position)
+        BASS.BASS_ChannelSetPosition(channel, positionBytes, BASS.BASS_POS_BYTE);
+        mainChannel = channel
+    }
+    fun getCurrentPositionToBytes(position: Long):Long{
+        return BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, (position / 1000.0))
+    }
+    fun setActiveChannel(channel:Int){
+        mainChannel=channel
+    }
+    fun getActiveChannel():Int{
+        return mainChannel?:0
+    }
+    fun getCurrentPositionInSeconds(channel: Int): Long {
         return BASS.BASS_ChannelBytes2Seconds(channel, getBytesPosition(channel)).toLong() * 1000
     }
 

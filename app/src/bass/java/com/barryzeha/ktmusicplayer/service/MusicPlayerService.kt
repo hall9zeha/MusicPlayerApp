@@ -11,10 +11,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioManager
 import android.media.MediaMetadata
-import android.media.Rating
-import android.media.audiofx.Equalizer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Binder
@@ -24,7 +21,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
@@ -49,7 +45,6 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
-import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
@@ -60,8 +55,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Timer
+import java.util.TimerTask
 import javax.inject.Inject
-import kotlin.math.log
 import kotlin.system.exitProcess
 
 
@@ -83,6 +79,7 @@ class MusicPlayerService : Service(){
     private  var bassManager:BassManager?=null
     private var mainChannel:Int=0
     private var position:Long=0
+    private var updateTimer: Timer? = null
 
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
@@ -224,7 +221,7 @@ class MusicPlayerService : Service(){
             }
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
-                exoPlayer.seekTo(pos)
+                BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, pos, BASS.BASS_POS_BYTE);
             }
 
             override fun onPause() {
@@ -382,18 +379,9 @@ class MusicPlayerService : Service(){
                     if (!songsList.contains(s)) {
                         songsList.add(s)
                     }
-                    val mediaItem = MediaItem.Builder()
-                        .setMediaId(s.id.toString())
-                        .setUri(s.pathLocation.toString())
-                        .build()
-                    mediaItemList.add(mediaItem)
+
 
                 }
-                withContext(Dispatchers.Main) {
-                    exoPlayer.addMediaItems(mediaItemList)
-                    //exoPlayer.addMediaItem(mediaItem)
-                }
-                Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
             }
             if(!songState.isNullOrEmpty()) {
                 val songEntity=songState[0].songEntity
@@ -478,11 +466,11 @@ class MusicPlayerService : Service(){
     }
     private fun initMusicStateLooper(){
             songRunnable = Runnable {
-               if(mainChannel != 0) {
+               if(bassManager?.getActiveChannel() != 0) {
                     currentMusicState = currentMusicState.copy(
                         isPlaying = mPrefs.isPlaying,
-                        currentDuration = bassManager?.getCurrentPosition(mainChannel)?:0,
-                        duration = bassManager?.getDuration(mainChannel)?:0,
+                        currentDuration = bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0,
+                        duration = bassManager?.getDuration(bassManager?.getActiveChannel()!!)?:0,
                         latestPlayed = false
                     )
                 }
@@ -524,27 +512,31 @@ class MusicPlayerService : Service(){
 
     private fun play(song:SongEntity?){
 
-        // Cleaning a previous track if have anyone
-        BASS.BASS_StreamFree(mainChannel)
         song?.let {
+            BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
+            // Cleaning a previous track if have anyone
             songEntity=it
+            position=0
             mainChannel =BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+            bassManager?.setActiveChannel(mainChannel)
+        }?:run{
+            mainChannel = BASS.BASS_StreamCreateFile(songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+            bassManager?.setActiveChannel(mainChannel)
         }
-
-        if(mainChannel !=0){
-
-            BASS.BASS_ChannelSetAttribute(mainChannel, BASS.BASS_ATTRIB_VOL, 1F);
-            BASS.BASS_ChannelSetPosition(mainChannel, position, BASS.BASS_POS_BYTE);
-            BASS.BASS_ChannelPlay(mainChannel, false);
+        if(bassManager?.getActiveChannel() !=0){
+            BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!, BASS.BASS_ATTRIB_VOL, 1F)
+            // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
+            BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, bassManager?.getCurrentPositionToBytes(position)!!, BASS.BASS_POS_BYTE)
+            BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
             mPrefs.isPlaying=true
             mPrefs.idSong=songEntity.id
             currentMusicState = fetchSong(songEntity)?.copy(isPlaying = mPrefs.isPlaying)!!
+
+        }
+        song?.let{
             _songController?.currentTrack(currentMusicState)
         }
-
-
     }
-
     private fun setUpExoplayerListener():Player.Listener?{
          playerListener = object : Player.Listener {
              override fun onPlaybackStateChanged(playbackState: Int) {
@@ -716,7 +708,7 @@ class MusicPlayerService : Service(){
     }
     fun pauseExoPlayer(){
         mPrefs.isPlaying = false
-        position=bassManager?.getBytesPosition(mainChannel)?:0
+        position=bassManager?.getCurrentPositionInSeconds(mainChannel)?:0
         BASS.BASS_ChannelPause(mainChannel)
 
     }
@@ -738,8 +730,21 @@ class MusicPlayerService : Service(){
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
     }
-    fun setExoPlayerProgress(progress:Long){
-        exoPlayer.seekTo(progress)
+    fun setPlayerProgress(progress:Long){
+        BASS.BASS_ChannelPause(bassManager?.getActiveChannel()!!)
+        // Convierte el progreso en milisegundos a bytes
+        val progressBytes = BASS.BASS_ChannelSeconds2Bytes(bassManager?.getActiveChannel()!!, progress / 1000.0)
+
+        // Ajusta la posición del canal
+        BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, progressBytes, BASS.BASS_POS_BYTE)
+        updateTimer?.cancel()
+        updateTimer = Timer()
+        updateTimer?.schedule(object : TimerTask() {
+            override fun run() {
+                BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!,false)
+            }
+        }, 15) // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
+
     }
     fun setMusicList(){
         songs.forEach { s ->
@@ -751,7 +756,6 @@ class MusicPlayerService : Service(){
         }
     }
     private fun setMusicStateSaved(songState: SongStateWithDetail){
-
         val song=songState.songEntity
         songEntity = song
         // Set info currentSongEntity
@@ -762,21 +766,9 @@ class MusicPlayerService : Service(){
             )
 
         }
-
-        // Al agregar todos los items de la lista al inicio, no necesitamos agregar uno nuevo,
-        // lo necesitamos para la repetición de toda la lista
-        //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
-
-        // Cuando tenemos toda la lista de items desde el inicio, siempre comienza por el primer archivo de la lista
-        // entonces para iniciar por el item de una posición específica usamos lo siguiente:
-        //exoPlayer.seekToDefaultPosition(mPrefs.currentPosition.toInt())
-        //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
-
-        //exoPlayer.seekTo(mPrefs.currentPosition.toInt(),songState.songState.currentPosition)
-        exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,song.id.toString()),songState.songState.currentPosition)
-
-        exoPlayer.prepare()
-        exoPlayer.playWhenReady=false
+        position = songState.songState.currentPosition
+        val channel = BASS.BASS_StreamCreateFile(songState.songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+        bassManager?.setSongStateSaved(channel,position )
         _songController?.currentTrack(currentMusicState)
         // Al cargar la información de una pista guardada
         // se ejecutaba una primera vez el evento currentTRack de la interface

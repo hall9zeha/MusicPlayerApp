@@ -382,7 +382,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 ) {
                     if (fromUser) {
                         tvSongTimeRest.text = createTime(progress.toLong()).third
-                        musicPlayerService?.setExoPlayerProgress(progress.toLong())
+                        musicPlayerService?.setPlayerProgress(progress.toLong())
                         userSelectPosition = progress
                     }
                 }
