@@ -78,8 +78,9 @@ class MusicPlayerService : Service(){
     private var songsList: MutableList<SongEntity> = mutableListOf()
     private  var bassManager:BassManager?=null
     private var mainChannel:Int=0
-    private var position:Long=0
+    private var currentSongPosition:Long=0
     private var updateTimer: Timer? = null
+    private var indexOfSong:Long=0
 
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
@@ -512,8 +513,8 @@ class MusicPlayerService : Service(){
             BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
             // Cleaning a previous track if have anyone
             songEntity=it
-            position=0
-            findItemSongIndexById(song.id)?.toLong()?.let{ pos->mPrefs.currentPosition=pos}
+            currentSongPosition=0
+            findItemSongIndexById(song.id)?.toLong()?.let{ pos->indexOfSong=pos}
             mainChannel =BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
             bassManager?.setActiveChannel(mainChannel)
         }?:run{
@@ -525,15 +526,13 @@ class MusicPlayerService : Service(){
         if(bassManager?.getActiveChannel() !=0){
             BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!, BASS.BASS_ATTRIB_VOL, 1F)
             // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
-            BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, bassManager?.getCurrentPositionToBytes(position)!!, BASS.BASS_POS_BYTE)
+            BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, bassManager?.getCurrentPositionToBytes(currentSongPosition)!!, BASS.BASS_POS_BYTE)
             BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
             mPrefs.isPlaying=true
             mPrefs.idSong=songEntity.id
             currentMusicState = fetchSong(songEntity)?.copy(
                 isPlaying = mPrefs.isPlaying,
                 idSong = songEntity.id,
-                currentPosition = mPrefs.currentPosition
-
             )!!
 
         }
@@ -675,16 +674,12 @@ class MusicPlayerService : Service(){
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
             play(song)
-
-        //initExoPlayer(song)
         }
-
     }
     fun pauseExoPlayer(){
         mPrefs.isPlaying = false
-        position=bassManager?.getCurrentPositionInSeconds(mainChannel)?:0
+        currentSongPosition=bassManager?.getCurrentPositionInSeconds(mainChannel)?:0
         BASS.BASS_ChannelPause(mainChannel)
-
     }
 
     @OptIn(UnstableApi::class)
@@ -697,13 +692,14 @@ class MusicPlayerService : Service(){
     }
     fun nextSong(){
         if(songsList.isNotEmpty()){
-            val song = songsList[mPrefs.currentPosition.toInt() + 1]
+            val song = songsList[indexOfSong.toInt() + 1]
             play(song)
         }
+
     }
     fun prevSong(){
         if(songsList.isNotEmpty()){
-            val song = songsList[mPrefs.currentPosition.toInt() -1]
+            val song = songsList[indexOfSong.toInt() -1]
             play(song)
         }
     }
@@ -717,7 +713,7 @@ class MusicPlayerService : Service(){
             override fun run() {
                 // Ajusta la posición del canal
                 BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, progressBytes, BASS.BASS_POS_BYTE)
-                position = progress
+                currentSongPosition = progress
             }
         }, 15) // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
 
@@ -742,11 +738,11 @@ class MusicPlayerService : Service(){
             )
 
         }
-        position=songState.songState.currentPosition
+        currentSongPosition=songState.songState.currentPosition
         val channel = BASS.BASS_StreamCreateFile(songState.songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
         bassManager?.setSongStateSaved(channel,songState.songState.currentPosition )
         findItemSongIndexById(songState.songEntity.id)?.toLong()?.let{
-            mPrefs.currentPosition=it
+            indexOfSong=it
         }
         _songController?.currentTrack(currentMusicState)
         // Al cargar la información de una pista guardada

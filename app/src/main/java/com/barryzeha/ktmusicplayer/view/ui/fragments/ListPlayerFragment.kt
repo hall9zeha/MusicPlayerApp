@@ -287,7 +287,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
 
-            adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(), musicState.idSong)
+            adapter.changeBackgroundColorSelectedItem(musicState.idSong)
 
             activity?.let {
                 val songMetadata = getSongMetadata(requireActivity(), musicState.songPath)
@@ -557,7 +557,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             imm!!.hideSoftInputFromWindow(bind?.edtSearch?.windowToken,0)
             CoroutineScope(Dispatchers.Main).launch {
                 delay(1000)
-                adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(), mPrefs.idSong)
+                adapter.changeBackgroundColorSelectedItem( mPrefs.idSong)
             }
         }
     }
@@ -675,7 +675,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         itemSong?.let{
             val (numberedPos, realPos) = adapter.getPositionByItem(itemSong)
             mPrefs.currentPosition = numberedPos.toLong()
-            adapter.changeBackgroundColorSelectedItem(realPos,mPrefs.idSong)
+            adapter.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
 
@@ -762,7 +762,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         currentSelectedPosition = mPrefs.currentPosition.toInt()
-        adapter.changeBackgroundColorSelectedItem(mPrefs.currentPosition.toInt(),mPrefs.idSong)
+        adapter.changeBackgroundColorSelectedItem(mPrefs.idSong)
         val itemSong = adapter.getSongById(mPrefs.idSong)
         itemSong?.let{
             val position = adapter.getPositionByItem(itemSong)

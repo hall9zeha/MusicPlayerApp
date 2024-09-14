@@ -146,7 +146,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         }
     }
     @SuppressLint("ResourceType")
-    fun changeBackgroundColorSelectedItem(position: Int=0, songId:Long){
+    fun changeBackgroundColorSelectedItem(songId:Long){
         // obtenemos la posición del item por su id, ya que tenemos dos tipos de vistas en el recyclerview
         // solo debemos cambiar de color a items SongEntity
         val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
