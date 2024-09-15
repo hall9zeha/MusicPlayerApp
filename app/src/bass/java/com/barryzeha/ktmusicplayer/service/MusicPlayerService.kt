@@ -42,6 +42,7 @@ import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
+import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
@@ -692,16 +693,31 @@ class MusicPlayerService : Service(){
     }
     fun nextSong(){
         if(songsList.isNotEmpty()){
-            val song = songsList[indexOfSong.toInt() + 1]
-            play(song)
+            if(indexOfSong < songsList.size -1) {
+                val song = songsList[indexOfSong.toInt() + 1]
+                if(mPrefs.isPlaying)play(song)
+                else setMusicForPlayer(song)
+            }else{
+                val song = songsList[0]
+                if(mPrefs.isPlaying)play(song)
+                else setMusicForPlayer(song)
+            }
         }
 
     }
     fun prevSong(){
         if(songsList.isNotEmpty()){
-            val song = songsList[indexOfSong.toInt() -1]
-            play(song)
+            if(indexOfSong > 0) {
+                val song = songsList[indexOfSong.toInt() - 1]
+                if(mPrefs.isPlaying)play(song)
+                else setMusicForPlayer(song)
+            }
         }
+    }
+    private fun setMusicForPlayer(song: SongEntity){
+        val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
+        mPrefs.idSong = song.id
+        setMusicStateSaved(songState)
     }
     fun setPlayerProgress(progress:Long){
         // Convierte el progreso en milisegundos a bytes
