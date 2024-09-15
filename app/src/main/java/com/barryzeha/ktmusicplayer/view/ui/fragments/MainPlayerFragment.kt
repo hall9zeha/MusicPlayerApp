@@ -211,7 +211,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun pause() {
         super.pause()
         bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
-        musicPlayerService?.pauseExoPlayer()
+        musicPlayerService?.pausePlayer()
         mainViewModel.saveStatePlaying(false)
     }
 
@@ -348,7 +348,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
                     } else {
                         if (isPlaying) {
-                            musicPlayerService?.pauseExoPlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
+                            musicPlayerService?.pausePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                             mainViewModel.saveStatePlaying(false)
                         } else {
                             musicPlayerService?.playingExoPlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_pause)

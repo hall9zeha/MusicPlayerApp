@@ -1,5 +1,7 @@
 package com.barryzeha.ktmusicplayer.utils
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_INFO
@@ -14,18 +16,23 @@ private const val SAMPLE44 = 44100
 private const val SAMPLE48 = 48000
 private const val SAMPLE96 = 96000
 private const val SAMPLE192 = 192000
-private const val TAG = "BASS"
+private const val TAG = "BASS-MANAGER"
 private var mainChannel:Int?=0
+private val handler = Handler(Looper.getMainLooper())
+private var checkRunnable: Runnable? = null
 
 open class BassManager {
-    private var instance: BassManager? = null
 
+    private var instance: BassManager? = null
+    private  lateinit var playbackManager:PlaybackManager
     init {
         BASS.BASS_Init(-1, 44100, 0)
     }
-     fun getInstance():BassManager?{
+     fun getInstance(playbackManager: PlaybackManager):BassManager?{
         instance?.let{ return it}?:run{
+
             instance=BassManager()
+            this.playbackManager = playbackManager
             if (!BASS.BASS_Init(-1, SAMPLE192, BASS.BASS_DEVICE_FREQ)) {
                 Log.i(TAG, "Can't initialize device");
                 Log.i(TAG, "init with sample " + SAMPLE96 + "Hz");
@@ -55,6 +62,26 @@ open class BassManager {
     private fun configure(){
 
     }
+    fun startCheckingPlayback(){
+        stopRunnable()
+        checkRunnable = object:Runnable{
+            override fun run() {
+                if (BASS.BASS_ChannelIsActive(getActiveChannel()) == BASS.BASS_ACTIVE_STOPPED) {
+                    playbackManager?.onFinishPlayback()
+                }else{
+                    handler.postDelayed(this,500)
+                }
+
+            }
+        }
+        handler.post(checkRunnable!!)
+    }
+    private fun stopRunnable(){
+        checkRunnable?.let{
+            handler.removeCallbacks(it)
+            checkRunnable = null
+        }
+    }
     fun setSongStateSaved(channel:Int, position:Long){
         mainChannel = channel
         val positionBytes = getCurrentPositionToBytes(position)
@@ -83,5 +110,7 @@ open class BassManager {
     private fun getBytesTotal(channel: Int): Long {
         return BASS.BASS_ChannelGetLength(channel, BASS.BASS_POS_BYTE)
     }
-
+    interface PlaybackManager{
+        fun onFinishPlayback()
+    }
 }
