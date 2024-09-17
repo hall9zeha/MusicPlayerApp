@@ -23,7 +23,6 @@ import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
@@ -106,11 +105,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var musicState:MusicState?=null
     private lateinit var mPrefs:MyPreferences
     private var songEntity:SongEntity=SongEntity()
-    private lateinit var songMetaData:MusicState
-    private var playerListener:Player.Listener?=null
+
     private var isFirstTime=true
     private var songs:MutableList<SongEntity> = arrayListOf()
-    private var mediaItemList:MutableList<MediaItem> = arrayListOf()
+
     private var songState:List<SongStateWithDetail> = arrayListOf()
     private var headsetReceiver:BroadcastReceiver?=null
     private var bluetoothReceiver:BroadcastReceiver?=null
@@ -278,12 +276,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
             override fun onSkipToNext() {
                 super.onSkipToNext()
-                nextOrPrevTRack(NEXT)
+                nextOrPrevTrack(NEXT)
             }
 
             override fun onSkipToPrevious() {
                 super.onSkipToPrevious()
-                nextOrPrevTRack(PREVIOUS)
+                nextOrPrevTrack(PREVIOUS)
             }
 
             override fun onStop() {
@@ -354,10 +352,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
             }
             SongAction.Next -> {
-                nextOrPrevTRack(NEXT)
+                nextOrPrevTrack(NEXT)
             }
             SongAction.Previous -> {
-               nextOrPrevTRack(PREVIOUS)
+               nextOrPrevTrack(PREVIOUS)
             }
             SongAction.Close -> {
                 bassManager?.releasePlayback()
@@ -405,11 +403,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 val songEntity=songState[0].songEntity
                 if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
             }
-            setUpExoplayerListener()
-            playerListener?.let{listener->exoPlayer.addListener(listener)}
+
         }
     }
-    private fun nextOrPrevTRack(action:Int){
+    private fun nextOrPrevTrack(action:Int){
             if(songsList.isNotEmpty()) {
                 when(action){
                     NEXT->nextSong()
@@ -492,37 +489,15 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         latestPlayed = false
                     )
                 }
+                _songController?.musicState(currentMusicState)
+                updateNotify()
 
-                //if(exoPlayer.isPlaying) {T
-                    _songController?.musicState(currentMusicState)
-                    updateNotify()
-                //}
-                setUpExoPlayerRepeatMode()
-
-               songHandler.postDelayed(songRunnable, 500)
+              songHandler.postDelayed(songRunnable, 500)
             }
             songHandler.post(songRunnable)
 
     }
-    private fun setUpExoPlayerRepeatMode(){
-        when(mPrefs.songMode){
-            SongMode.RepeatAll.ordinal->{
-                exoPlayer.repeatMode=Player.REPEAT_MODE_ALL
-            }
-            SongMode.RepeatOne.ordinal->{
-                exoPlayer.repeatMode=Player.REPEAT_MODE_ONE
 
-            }
-            SongMode.Shuffle.ordinal->{
-                exoPlayer.shuffleModeEnabled = true
-            }
-            else->{
-                exoPlayer.repeatMode= REPEAT_MODE_OFF
-                exoPlayer.shuffleModeEnabled = false
-            }
-
-        }
-    }
     private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {
             return songsList.indexOfFirst{it.id == idSong}
@@ -530,124 +505,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         return null
     }
 
-    private fun play(song:SongEntity?){
 
-        if(songsList.isNotEmpty()) {
-            song?.let {
-                BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
-                // Cleaning a previous track if have anyone
-                songEntity = it
-                currentSongPosition = 0
-                findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
-                mainChannel = BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
-                bassManager?.setActiveChannel(mainChannel)
-
-            } ?: run {
-                mainChannel = BASS.BASS_StreamCreateFile(songEntity.pathLocation,0,0,BASS.BASS_SAMPLE_FLOAT)
-                bassManager?.setActiveChannel(mainChannel)
-
-            }
-            if (bassManager?.getActiveChannel() != 0) {
-                BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!,BASS.BASS_ATTRIB_VOL,1F)
-                // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
-                BASS.BASS_ChannelSetPosition( bassManager?.getActiveChannel()!!,bassManager?.getCurrentPositionToBytes(currentSongPosition)!!,BASS.BASS_POS_BYTE)
-                BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
-
-                bassManager?.startCheckingPlayback()
-                mPrefs.isPlaying = true
-                mPrefs.idSong = songEntity.id
-                currentMusicState = fetchSong(songEntity)?.copy(
-                    isPlaying = mPrefs.isPlaying,
-                    idSong = songEntity.id,
-                )!!
-
-            }
-            song?.let {
-                _songController?.currentTrack(currentMusicState)
-            }
-        }
-    }
-    private fun setUpExoplayerListener():Player.Listener?{
-         playerListener = object : Player.Listener {
-             override fun onPlaybackStateChanged(playbackState: Int) {
-                 super.onPlaybackStateChanged(playbackState)
-                 if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
-                        val song=if(positionReset>-1) songsList[positionReset] else songEntity
-                         // Set info currentSongEntity
-                         fetchSong(song)?.let{
-                             currentMusicState=it
-                             // Para encontrar la posición del item en la lista de nuestra vista
-                             // por su id
-                             mPrefs.idSong=it.idSong
-                         }
-                         // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-                         // información que de la pista en reproducción que no requiere cambios constantes
-                         // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
-                         if (!executeOnceTime) {
-                             _songController?.currentTrack(currentMusicState)
-
-                         }
-                         executeOnceTime = true
-                         mPrefs.isPlaying = exoPlayer.isPlaying
-                     positionReset=-1
-
-                 }
-                 if(playbackState == Player.STATE_ENDED  && _songController==null){
-                     if(mPrefs.currentPosition < songsList.size -1 ){
-                         nextOrPrevTRack((mPrefs.currentPosition + 1).toInt())
-
-                     }
-                 }
-                 else if (playbackState == Player.STATE_ENDED) {
-                     currentMusicState = currentMusicState.copy(
-                         isPlaying = false,
-                         latestPlayed = false
-                     )
-                     _songController?.currentTrack(currentMusicState)
-
-                 }
-
-             }
-             override fun onPositionDiscontinuity(
-                 oldPosition: Player.PositionInfo,
-                 newPosition: Player.PositionInfo,
-                 reason: Int
-             ) {
-                 super.onPositionDiscontinuity(oldPosition, newPosition, reason)
-                    if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
-                        if (songsList.isNotEmpty()) {
-                            val song=songsList[newPosition.mediaItemIndex]
-                            songEntity = song
-                            fetchSong(song)?.let {songInfo->
-                                currentMusicState = songInfo.copy(
-                                    isPlaying = exoPlayer.isPlaying,
-                                    currentPosition = newPosition.mediaItemIndex.toLong(),
-
-                                )
-                                _songController?.currentTrack(currentMusicState)
-                                // Para encontrar la posición del item en la lista de nuestra vista
-                                // por su id
-                                mPrefs.idSong = song.id
-                                mPrefs.currentPosition = newPosition.mediaItemIndex.toLong() +1
-                                if(_songController == null){
-                                    mPrefs.controlFromNotify = true
-                                    mPrefs.nextOrPrevFromNotify = true
-                                    mPrefs.isPlaying = exoPlayer.isPlaying
-                                    mPrefs.idSong = song.id
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-             }
-
-         }
-       return playerListener
-    }
 
     override fun onBind(intent: Intent?): IBinder {
         return binder
@@ -703,6 +561,43 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             play(song)
         }
     }
+    private fun play(song:SongEntity?){
+
+        if(songsList.isNotEmpty()) {
+            song?.let {
+                BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
+                // Cleaning a previous track if have anyone
+                songEntity = it
+                currentSongPosition = 0
+                findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
+                mainChannel = BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+                bassManager?.setActiveChannel(mainChannel)
+
+            } ?: run {
+                mainChannel = BASS.BASS_StreamCreateFile(songEntity.pathLocation,0,0,BASS.BASS_SAMPLE_FLOAT)
+                bassManager?.setActiveChannel(mainChannel)
+
+            }
+            if (bassManager?.getActiveChannel() != 0) {
+                BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!,BASS.BASS_ATTRIB_VOL,1F)
+                // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
+                BASS.BASS_ChannelSetPosition( bassManager?.getActiveChannel()!!,bassManager?.getCurrentPositionToBytes(currentSongPosition)!!,BASS.BASS_POS_BYTE)
+                BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
+
+                bassManager?.startCheckingPlayback()
+                mPrefs.isPlaying = true
+                mPrefs.idSong = songEntity.id
+                currentMusicState = fetchSong(songEntity)?.copy(
+                    isPlaying = mPrefs.isPlaying,
+                    idSong = songEntity.id,
+                )!!
+
+            }
+            song?.let {
+                _songController?.currentTrack(currentMusicState)
+            }
+        }
+    }
     fun pausePlayer(){
         mPrefs.isPlaying = false
         currentSongPosition=bassManager?.getCurrentPositionInSeconds(mainChannel)?:0
@@ -713,7 +608,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun getSessionId(): Int {
         return exoPlayer.audioSessionId
     }
-    fun playingExoPlayer(){
+    fun resumePlayer(){
         play(null)
 
     }
@@ -721,7 +616,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(songsList.isNotEmpty()){
             if(indexOfSong < songsList.size -1) {
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
-                else indexOfSong  + 1
+                else indexOfSong  += 1
 
                 val song = songsList[indexOfSong]
                 if(mPrefs.isPlaying)play(song)
@@ -745,7 +640,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(songsList.isNotEmpty()){
             if(indexOfSong > 0) {
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
-                else indexOfSong -1
+                else indexOfSong -=1
 
                 val song = songsList[indexOfSong]
                 if(mPrefs.isPlaying)play(song)
@@ -761,7 +656,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun setPlayerProgress(progress:Long){
         // Convierte el progreso en milisegundos a bytes
         val progressBytes = BASS.BASS_ChannelSeconds2Bytes(bassManager?.getActiveChannel()!!, progress / 1000.0)
-
         updateTimer?.cancel()
         updateTimer = Timer()
         updateTimer?.schedule(object : TimerTask() {
@@ -831,7 +725,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         unregisterReceiver(bluetoothReceiver)
         isForegroundService = false
         _songController?.stop()
-        mediaSession.release()
+        bassManager?.releasePlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
         super.onDestroy()

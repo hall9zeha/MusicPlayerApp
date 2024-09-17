@@ -362,7 +362,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             mainViewModel.saveStatePlaying(false)
 
                         } else {
-                            musicPlayerService?.playingExoPlayer(); bottomPlayerControls.btnPlay.setIconResource(
+                            musicPlayerService?.resumePlayer(); bottomPlayerControls.btnPlay.setIconResource(
                                 coreRes.drawable.ic_pause
                             )
                             mainViewModel.saveStatePlaying(true)
@@ -691,7 +691,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun play() {
         super.play()
         bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_pause)
-        musicPlayerService?.playingExoPlayer()
+        musicPlayerService?.resumePlayer()
         mainViewModel.saveStatePlaying(true)
     }
     override fun pause() {
