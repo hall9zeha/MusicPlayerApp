@@ -106,9 +106,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private lateinit var mPrefs:MyPreferences
     private var songEntity:SongEntity=SongEntity()
 
-    private var isFirstTime=true
     private var songs:MutableList<SongEntity> = arrayListOf()
-
     private var songState:List<SongStateWithDetail> = arrayListOf()
     private var headsetReceiver:BroadcastReceiver?=null
     private var bluetoothReceiver:BroadcastReceiver?=null
@@ -195,17 +193,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
         val filter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
         registerReceiver(headsetReceiver,filter)
-
         val bluetoothFilter = IntentFilter().apply {
-
             addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         }
-
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
-
     override fun onFinishPlayback() {
         if(indexOfSong<songsList.size -1){
             when(mPrefs.songMode){
@@ -216,16 +210,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 }
                 else->{if(indexOfSong == songsList.size-1)nextSong()}
             }
-
         }else{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}
                 SHUFFLE->{
-
                 }
                 else->{setMusicForPlayer(songsList[0])}
             }
-
         }
     }
 
@@ -273,26 +264,21 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     mPrefs.isPlaying = true
                 }
             }
-
             override fun onSkipToNext() {
                 super.onSkipToNext()
                 nextOrPrevTrack(NEXT)
             }
-
             override fun onSkipToPrevious() {
                 super.onSkipToPrevious()
                 nextOrPrevTrack(PREVIOUS)
             }
-
             override fun onStop() {
                 super.onStop()
             }
-
             override fun onCustomAction(action: String, extras: Bundle?) {
                 if(ACTION_CLOSE == action){
                     bassManager?.releasePlayback()
                     songHandler.removeCallbacks(songRunnable)
-
                     // Remove notification of foreground service process
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
@@ -301,7 +287,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     _activity?.finish()
                 }
             }
-
         }
     }
     private fun setUpEqualizer(sessionId:Int){
@@ -371,12 +356,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             SongAction.Nothing -> {}
         }
-        musicState?.let { newState ->
-            if (isForegroundService) {
-                //updateNotify()
-            }
-        }
-        return START_NOT_STICKY
+      return START_NOT_STICKY
     }
 
     @OptIn(UnstableApi::class)
@@ -436,8 +416,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         )
                        /* .setActions(PlaybackState.ACTION_PLAY_PAUSE)
                         .setActions(PlaybackState.ACTION_SEEK_TO)*/
-                        //TODO implementar Controles que aparecen en android 14
 
+                        // Los siguiente controles aparecerán en android 13 y 14
                         .setActions(PlaybackState.ACTION_SEEK_TO
                                 or PlaybackState.ACTION_PLAY
                                 or PlaybackState.ACTION_PAUSE
@@ -445,7 +425,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                 or PlaybackState.ACTION_SKIP_TO_PREVIOUS
                                 or PlaybackState.ACTION_STOP
                           )
-
                         .addCustomAction(PlaybackState.CustomAction.Builder(
                             ACTION_CLOSE,
                             ACTION_CLOSE,
@@ -504,10 +483,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
         return null
     }
-
-
-
-    override fun onBind(intent: Intent?): IBinder {
+   override fun onBind(intent: Intent?): IBinder {
         return binder
     }
     fun setActivity(activity:AppCompatActivity){

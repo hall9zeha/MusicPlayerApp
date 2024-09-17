@@ -104,7 +104,7 @@ open class BassManager {
         return BASS.BASS_ChannelBytes2Seconds(channel, getBytesTotal(channel)).toLong() * 1000
     }
 
-    fun getBytesPosition(channel:Int): Long {
+    private fun getBytesPosition(channel:Int): Long {
         return BASS.BASS_ChannelGetPosition(channel, BASS.BASS_POS_BYTE)
     }
     private fun getBytesTotal(channel: Int): Long {
