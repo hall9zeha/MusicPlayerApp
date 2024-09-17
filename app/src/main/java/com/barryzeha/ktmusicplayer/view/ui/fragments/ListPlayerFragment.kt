@@ -297,6 +297,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }
             mainViewModel.checkIfIsFavorite(musicState.idSong)
+            mainViewModel.saveStatePlaying(musicState.isPlaying)
             Log.e("BYTEE-ONCE", musicState.duration.toString() )
         }
     }

@@ -36,6 +36,9 @@ import com.barryzeha.audioeffects.common.getEqualizerConfig
 import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.REPEAT_ALL
+import com.barryzeha.core.common.REPEAT_ONE
+import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.ServiceSongListener
@@ -82,7 +85,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var mainChannel:Int=0
     private var currentSongPosition:Long=0
     private var updateTimer: Timer? = null
-    private var indexOfSong:Long=0
+    private var indexOfSong:Int=0
 
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
@@ -207,10 +210,24 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     override fun onFinishPlayback() {
         if(indexOfSong<songsList.size -1){
-            nextSong()
+            when(mPrefs.songMode){
+                REPEAT_ONE->{BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, true);}
+                SHUFFLE->{
+                    indexOfSong = (songsList.indices).random()
+                    play(songsList[indexOfSong])
+                }
+                else->{if(indexOfSong == songsList.size-1)nextSong()}
+            }
+
         }else{
-            val song = songsList[0]
-            setMusicForPlayer(song)
+            when(mPrefs.songMode){
+                REPEAT_ALL->{ play(songsList[0])}
+                SHUFFLE->{
+
+                }
+                else->{setMusicForPlayer(songsList[0])}
+            }
+
         }
     }
 
@@ -275,8 +292,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
             override fun onCustomAction(action: String, extras: Bundle?) {
                 if(ACTION_CLOSE == action){
-                    exoPlayer.stop()
-                    exoPlayer.release()
+                    bassManager?.releasePlayback()
                     songHandler.removeCallbacks(songRunnable)
 
                     // Remove notification of foreground service process
@@ -344,8 +360,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                nextOrPrevTRack(PREVIOUS)
             }
             SongAction.Close -> {
-                exoPlayer.stop()
-                exoPlayer.release()
+                bassManager?.releasePlayback()
                 songHandler.removeCallbacks(songRunnable)
 
                 // Remove notification of foreground service process
@@ -516,36 +531,40 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
 
     private fun play(song:SongEntity?){
-        song?.let {
-            BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
-            // Cleaning a previous track if have anyone
-            songEntity=it
-            currentSongPosition=0
-            findItemSongIndexById(song.id)?.toLong()?.let{ pos->indexOfSong=pos}
-            mainChannel =BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
-            bassManager?.setActiveChannel(mainChannel)
-        }?:run{
 
-            mainChannel = BASS.BASS_StreamCreateFile(songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
-            bassManager?.setActiveChannel(mainChannel)
+        if(songsList.isNotEmpty()) {
+            song?.let {
+                BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
+                // Cleaning a previous track if have anyone
+                songEntity = it
+                currentSongPosition = 0
+                findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
+                mainChannel = BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+                bassManager?.setActiveChannel(mainChannel)
 
-        }
-        if(bassManager?.getActiveChannel() !=0){
-            BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!, BASS.BASS_ATTRIB_VOL, 1F)
-            // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
-            BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, bassManager?.getCurrentPositionToBytes(currentSongPosition)!!, BASS.BASS_POS_BYTE)
-            BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
-            bassManager?.startCheckingPlayback()
-            mPrefs.isPlaying=true
-            mPrefs.idSong=songEntity.id
-            currentMusicState = fetchSong(songEntity)?.copy(
-                isPlaying = mPrefs.isPlaying,
-                idSong = songEntity.id,
-            )!!
+            } ?: run {
+                mainChannel = BASS.BASS_StreamCreateFile(songEntity.pathLocation,0,0,BASS.BASS_SAMPLE_FLOAT)
+                bassManager?.setActiveChannel(mainChannel)
 
-        }
-        song?.let{
-            _songController?.currentTrack(currentMusicState)
+            }
+            if (bassManager?.getActiveChannel() != 0) {
+                BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!,BASS.BASS_ATTRIB_VOL,1F)
+                // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
+                BASS.BASS_ChannelSetPosition( bassManager?.getActiveChannel()!!,bassManager?.getCurrentPositionToBytes(currentSongPosition)!!,BASS.BASS_POS_BYTE)
+                BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
+
+                bassManager?.startCheckingPlayback()
+                mPrefs.isPlaying = true
+                mPrefs.idSong = songEntity.id
+                currentMusicState = fetchSong(songEntity)?.copy(
+                    isPlaying = mPrefs.isPlaying,
+                    idSong = songEntity.id,
+                )!!
+
+            }
+            song?.let {
+                _songController?.currentTrack(currentMusicState)
+            }
         }
     }
     private fun setUpExoplayerListener():Player.Listener?{
@@ -701,13 +720,23 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun nextSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong < songsList.size -1) {
-                val song = songsList[indexOfSong.toInt() + 1]
+                if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
+                else indexOfSong  + 1
+
+                val song = songsList[indexOfSong]
                 if(mPrefs.isPlaying)play(song)
                 else setMusicForPlayer(song)
             }else{
-                val song = songsList[0]
-                if(mPrefs.isPlaying)play(song)
-                else setMusicForPlayer(song)
+                if(mPrefs.songMode == SHUFFLE){
+                    indexOfSong = (songsList.indices).random()
+                    if(mPrefs.isPlaying)play(songsList[indexOfSong])
+                    else setMusicForPlayer(songsList[indexOfSong])
+                }
+                else {
+                    indexOfSong = 0
+                    setMusicForPlayer(songsList[indexOfSong])
+                }
+
             }
         }
 
@@ -715,7 +744,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun prevSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong > 0) {
-                val song = songsList[indexOfSong.toInt() - 1]
+                if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
+                else indexOfSong -1
+
+                val song = songsList[indexOfSong]
                 if(mPrefs.isPlaying)play(song)
                 else setMusicForPlayer(song)
             }
@@ -764,7 +796,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         currentSongPosition=songState.songState.currentPosition
         val channel = BASS.BASS_StreamCreateFile(songState.songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
         bassManager?.setSongStateSaved(channel,songState.songState.currentPosition )
-        findItemSongIndexById(songState.songEntity.id)?.toLong()?.let{
+        findItemSongIndexById(songState.songEntity.id)?.let{
             indexOfSong=it
         }
         _songController?.currentTrack(currentMusicState)

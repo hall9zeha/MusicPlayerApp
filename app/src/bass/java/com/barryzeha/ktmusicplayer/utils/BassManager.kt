@@ -110,6 +110,11 @@ open class BassManager {
     private fun getBytesTotal(channel: Int): Long {
         return BASS.BASS_ChannelGetLength(channel, BASS.BASS_POS_BYTE)
     }
+    fun releasePlayback(){
+        BASS.BASS_ChannelStop(getActiveChannel())
+        BASS.BASS_Free()
+        instance=null
+    }
     interface PlaybackManager{
         fun onFinishPlayback()
     }

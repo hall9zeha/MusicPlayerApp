@@ -308,6 +308,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
+            mainViewModel.saveStatePlaying(musicState.isPlaying)
             updateService()
         }
 
