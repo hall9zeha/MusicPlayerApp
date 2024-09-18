@@ -242,6 +242,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
             override fun onPause() {
                 super.onPause()
+                mPrefs.isPlaying=false
                 if(_songController !=null)_songController?.pause()
                 else pausePlayer()
                 checkIfPhoneIsLock()
@@ -304,9 +305,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
-               if(_songController != null) _songController?.pause()
-               else pausePlayer()
-               checkIfPhoneIsLock()
+                mPrefs.isPlaying=false
+                if(_songController != null) _songController?.pause()
+                else pausePlayer()
+                checkIfPhoneIsLock()
             }
             SongAction.Resume -> {
                 if(_songController !=null)_songController?.play()
@@ -512,7 +514,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(_songController==null){
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
-            mPrefs.isPlaying = false
+
         }
     }
     fun startPlayer(song:SongEntity){
