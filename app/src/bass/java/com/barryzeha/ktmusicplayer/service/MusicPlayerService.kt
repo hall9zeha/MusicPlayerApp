@@ -24,8 +24,6 @@ import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 
@@ -43,7 +41,6 @@ import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
-import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
@@ -201,21 +198,21 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
     override fun onFinishPlayback() {
-        if(indexOfSong<songsList.size -1){
+        if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
             when(mPrefs.songMode){
                 REPEAT_ONE->{BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, true);}
                 SHUFFLE->{
                     indexOfSong = (songsList.indices).random()
                     play(songsList[indexOfSong])
                 }
-                else->{if(indexOfSong == songsList.size-1)nextSong()}
+                else->{nextSong()}
             }
         }else{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}
                 SHUFFLE->{
                 }
-                else->{setMusicForPlayer(songsList[0])}
+                else->{if(songsList.isNotEmpty())setMusicForPlayer(songsList[0])}
             }
         }
     }
@@ -247,22 +244,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 super.onPause()
                 if(_songController !=null)_songController?.pause()
                 else pausePlayer()
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = false
-                }
+                checkIfPhoneIsLock()
             }
 
             override fun onPlay() {
                 super.onPlay()
                 if(_songController !=null)_songController?.play()
                 else play(null)
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = true
-                }
+                checkIfPhoneIsLock()
             }
             override fun onSkipToNext() {
                 super.onSkipToNext()
@@ -317,20 +306,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             SongAction.Pause -> {
                if(_songController != null) _songController?.pause()
                else pausePlayer()
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = false
-                }
+               checkIfPhoneIsLock()
             }
             SongAction.Resume -> {
                 if(_songController !=null)_songController?.play()
                 else play(null)
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = true
-                }
+                checkIfPhoneIsLock()
             }
             SongAction.Stop -> {
                 _songController?.stop()
@@ -521,11 +502,18 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         songsList.clear()
         currentMusicState=MusicState()
         _songController?.currentTrack(currentMusicState)
-        positionReset=0
+        bassManager?.clearBassChannel()
         executeOnceTime=false
     }
     fun unregisterController(){
         _songController=null
+    }
+    private fun checkIfPhoneIsLock(){
+        if(_songController==null){
+            mPrefs.nextOrPrevFromNotify=true
+            mPrefs.controlFromNotify = true
+            mPrefs.isPlaying = false
+        }
     }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
@@ -590,7 +578,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun nextSong(){
         if(songsList.isNotEmpty()){
-            if(indexOfSong < songsList.size -1) {
+            if(indexOfSong < songsList.size) {
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
                 else indexOfSong  += 1
 
@@ -609,6 +597,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 }
 
             }
+            checkIfPhoneIsLock()
         }
 
     }
@@ -621,7 +610,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 val song = songsList[indexOfSong]
                 if(mPrefs.isPlaying)play(song)
                 else setMusicForPlayer(song)
+                checkIfPhoneIsLock()
             }
+
         }
     }
     private fun setMusicForPlayer(song: SongEntity){

@@ -1,10 +1,14 @@
 package com.barryzeha.ktmusicplayer.utils
 
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.barryzeha.ktmusicplayer.MyApp
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_INFO
+import java.io.File
 
 
 /**
@@ -57,6 +61,15 @@ open class BassManager {
                 Log.i(TAG, "freq :" + info.freq)
             }
         }
+
+        val nativeDir =MyApp.context.applicationInfo.nativeLibraryDir
+        val pluginsList = File(nativeDir).list { dir, name -> name.matches("libbass.+\\.so".toRegex()) }
+        pluginsList?.forEach { plugin->
+             BASS.BASS_PluginLoad(plugin,0)
+            Log.e("NATIVE-LIB", plugin )
+         }
+         Log.e("NATIVE-LIB", pluginsList.size.toString())
+         Log.e("NATIVE-LIB", nativeDir)
         return instance
     }
     private fun configure(){
@@ -88,7 +101,7 @@ open class BassManager {
         BASS.BASS_ChannelSetPosition(channel, positionBytes, BASS.BASS_POS_BYTE);
     }
     fun getCurrentPositionToBytes(position: Long):Long{
-        return BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, position / 1000.0)
+        return if(mainChannel!=null)BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, position / 1000.0)else 0L
     }
     fun setActiveChannel(channel:Int){
         mainChannel=channel
@@ -97,11 +110,11 @@ open class BassManager {
         return mainChannel?:0
     }
     fun getCurrentPositionInSeconds(channel: Int): Long {
-        return BASS.BASS_ChannelBytes2Seconds(channel, getBytesPosition(channel)).toLong() * 1000
+        return if(getActiveChannel() !=0)BASS.BASS_ChannelBytes2Seconds(channel, getBytesPosition(channel)).toLong() * 1000 else 0
     }
 
     fun getDuration(channel: Int): Long {
-        return BASS.BASS_ChannelBytes2Seconds(channel, getBytesTotal(channel)).toLong() * 1000
+        return if(getActiveChannel()!=0)BASS.BASS_ChannelBytes2Seconds(channel, getBytesTotal(channel)).toLong() * 1000 else 0
     }
 
     private fun getBytesPosition(channel:Int): Long {
@@ -112,9 +125,17 @@ open class BassManager {
     }
     fun releasePlayback(){
         BASS.BASS_ChannelStop(getActiveChannel())
+        BASS.BASS_PluginFree(0)
         BASS.BASS_Free()
         instance=null
     }
+
+    fun clearBassChannel() {
+        mainChannel = null
+        BASS.BASS_StreamFree(getActiveChannel())
+        BASS.BASS_ChannelSetPosition( getActiveChannel(),getCurrentPositionToBytes(0),BASS.BASS_POS_BYTE)
+    }
+
     interface PlaybackManager{
         fun onFinishPlayback()
     }

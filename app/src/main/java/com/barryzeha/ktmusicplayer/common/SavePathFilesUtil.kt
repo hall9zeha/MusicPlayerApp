@@ -5,8 +5,6 @@ import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.mfilepicker.common.util.getParentDirectories
-import com.barryzeha.mfilepicker.common.util.getRealPathFromURI
-import com.barryzeha.mfilepicker.common.util.getUriFromFile
 import com.barryzeha.mfilepicker.filetype.AudioFileType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +34,7 @@ fun processSongPaths(
     //filesProcessed:(List<SongEntity>)->Unit
 ) {
     val channel = Channel<File>(Channel.UNLIMITED)  // Canal sin límite de buffer
-
+    audioFileCount=0
     var listFilesProcessed:MutableList<SongEntity> = arrayListOf()
 
     // Corutina para encolar archivos en el canal
@@ -95,11 +93,9 @@ private suspend fun processFile(
     fileProcessed: (SongEntity) -> Unit
 ){
     if (AudioFileType().verify(file.absolutePath)) {
-        val uri = getUriFromFile(file, context)
-
         operationsMutex.withLock {
-            val realPathFromFile = getRealPathFromURI(uri, context)
-            val parentDir = getParentDirectories(uri.path.toString())
+            val realPathFromFile = file.absolutePath
+            val parentDir = getParentDirectories(file.path.toString())
             val metadata = fetchFileMetadata(context, realPathFromFile!!)
          /*Log.e("ITEM-FILE  ->", filePath)
             Log.e("ITEM-FILE  ->", uri.toString())

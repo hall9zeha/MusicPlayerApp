@@ -125,14 +125,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
         launch {
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
-            countItemsInserted++
-            _processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
-
-            if(itemsCount==countItemsInserted){
-                fetchAllSong()
-                countItemsInserted =0
-            }
-            Log.e("SAVE-NEW-SONG", "$itemsCount --: $countItemsInserted" )
+           _processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
+           Log.e("SAVE-NEW-SONG", "$itemsCount --: $countItemsInserted" )
         }
     }
 
@@ -202,6 +196,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun getSongById(idSong:Long){
         launch {
             _songById.value=repository.fetchSongById(idSong)
+            countItemsInserted++
+            if(itemsCount==countItemsInserted || itemsCount== countItemsInserted-1){
+                fetchAllSong()
+                itemsCount=0
+                countItemsInserted =0
+            }
+            Log.e("SAVE-NEW-SONG", "$itemsCount --: $countItemsInserted" )
         }
     }
     // for SongState

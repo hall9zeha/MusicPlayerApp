@@ -128,6 +128,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
+
             if(paths.isNotEmpty())bind?.pbLoad?.visibility=View.VISIBLE
             processSongPaths(paths ,{itemsCount->mainViewModel.setItemsCount(itemsCount)},{song->
                 CoroutineScope(Dispatchers.Main).launch {
