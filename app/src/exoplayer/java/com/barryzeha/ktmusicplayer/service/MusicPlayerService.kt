@@ -691,7 +691,7 @@ class MusicPlayerService : Service(){
         }
 
     }
-    fun pauseExoPlayer(){
+    fun pausePlayer(){
         if(exoPlayer.isPlaying){
             exoPlayer.pause()
 
@@ -703,7 +703,7 @@ class MusicPlayerService : Service(){
     fun getSessionId(): Int {
         return exoPlayer.audioSessionId
     }
-    fun playingExoPlayer(){
+    fun resumePlayer(){
         if(!exoPlayer.isPlaying){
             exoPlayer.prepare()
             exoPlayer.play()
@@ -720,7 +720,7 @@ class MusicPlayerService : Service(){
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
     }
-    fun setExoPlayerProgress(progress:Long){
+    fun setPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
     }
     fun setMusicList(){
