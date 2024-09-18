@@ -205,15 +205,18 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     indexOfSong = (songsList.indices).random()
                     play(songsList[indexOfSong])
                 }
-                else->{nextSong()}
+                else->{if(mPrefs.isPlaying)nextSong()}
             }
+
         }else{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}
                 SHUFFLE->{
                 }
-                else->{if(songsList.isNotEmpty())setMusicForPlayer(songsList[0])}
+                else->{if(songsList.isNotEmpty())setMusicForPlayer(songsList[0])
+                }
             }
+
         }
     }
 
@@ -514,7 +517,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(_songController==null){
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
-
         }
     }
     fun startPlayer(song:SongEntity){
@@ -580,7 +582,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun nextSong(){
         if(songsList.isNotEmpty()){
-            if(indexOfSong < songsList.size) {
+            if(indexOfSong < songsList.size - 1 ) {
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
                 else indexOfSong  += 1
 
@@ -595,7 +597,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 }
                 else {
                     indexOfSong = 0
-                    setMusicForPlayer(songsList[indexOfSong])
+                    if(mPrefs.songMode== REPEAT_ALL)play(songsList[indexOfSong])
+                    else {
+                        if (mPrefs.isPlaying) play(songsList[indexOfSong])
+                        else  setMusicForPlayer(songsList[indexOfSong])
+
+                    }
+
                 }
 
             }
@@ -636,15 +644,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }, 15) // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
 
     }
-    fun setMusicList(){
-        songs.forEach { s ->
-            if (!songsList.contains(s)) {
-                songsList.add(s)
-                exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
-            }
 
-        }
-    }
     private fun setMusicStateSaved(songState: SongStateWithDetail){
         val song=songState.songEntity
         songEntity = song
@@ -662,6 +662,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         findItemSongIndexById(songState.songEntity.id)?.let{
             indexOfSong=it
         }
+        Log.e("NUEVO", song.description.toString() )
+        Log.e("NUEVO", indexOfSong.toString() )
         _songController?.currentTrack(currentMusicState)
         // Al cargar la información de una pista guardada
         // se ejecutaba una primera vez el evento currentTRack de la interface
