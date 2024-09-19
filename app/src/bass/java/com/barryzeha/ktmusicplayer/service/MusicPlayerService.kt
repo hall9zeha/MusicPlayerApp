@@ -200,12 +200,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     override fun onFinishPlayback() {
         if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
             when(mPrefs.songMode){
-                REPEAT_ONE->{BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, true);}
+                REPEAT_ONE->{
+                    BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, true);}
                 SHUFFLE->{
                     indexOfSong = (songsList.indices).random()
                     play(songsList[indexOfSong])
                 }
-                else->{if(mPrefs.isPlaying)nextSong()}
+                else->{
+                    if(mPrefs.isPlaying)nextSong()}
             }
 
         }else{

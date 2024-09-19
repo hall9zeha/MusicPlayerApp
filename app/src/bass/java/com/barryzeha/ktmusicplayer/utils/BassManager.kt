@@ -81,10 +81,9 @@ open class BassManager {
             override fun run() {
                 if (BASS.BASS_ChannelIsActive(getActiveChannel()) == BASS.BASS_ACTIVE_STOPPED) {
                     playbackManager?.onFinishPlayback()
-                }else{
-                    handler.postDelayed(this,500)
+                    Log.e("ON-REPEAT->", "ON FINISH" )
                 }
-
+                handler.postDelayed(this,500)
             }
         }
         handler.post(checkRunnable!!)
@@ -127,6 +126,7 @@ open class BassManager {
         BASS.BASS_ChannelStop(getActiveChannel())
         BASS.BASS_PluginFree(0)
         BASS.BASS_Free()
+        stopRunnable()
         instance=null
     }
 
