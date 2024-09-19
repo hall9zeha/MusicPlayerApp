@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.R
@@ -36,11 +38,22 @@ fun <T> Context.isServiceRunning(service:Class<T>):Boolean{
         .any{it.service.className == service.name}
 }
 
-fun ImageView.loadImage(bitmap:Bitmap)=
+fun ImageView.loadImage(bitmap:Bitmap) {
+    val slideAnimation = TranslateAnimation(
+        Animation.RELATIVE_TO_PARENT, -1f, // Desde fuera de la pantalla a la izquierda
+        Animation.RELATIVE_TO_PARENT, 0f,  // Hasta su posición original
+        Animation.RELATIVE_TO_PARENT, 0f,  // Sin cambio en la altura
+        Animation.RELATIVE_TO_PARENT, 0f   // Sin cambio en la altura
+    )
+    slideAnimation.duration = 200 // Duración de la animación en milisegundos
+    slideAnimation.fillAfter = true // Mantiene la posición final después de la animación
+
     Glide.with(this.context)
         .load(bitmap)
         .fitCenter()
         .into(this)
+    this.startAnimation(slideAnimation)
+}
 // El placeholder solo se usa para la carátula del fragmento principal
 fun ImageView.loadImage(resource:Int)=
     Glide.with(this.context)
