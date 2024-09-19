@@ -11,10 +11,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioManager
 import android.media.MediaMetadata
-import android.media.Rating
-import android.media.audiofx.Equalizer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Binder
@@ -24,7 +21,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
@@ -33,7 +29,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-
 import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.getEqualizerConfig
@@ -41,26 +36,23 @@ import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.getSongMetadata
-import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.ServiceSongListener
+import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
-import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
-import com.un4seen.bass.BASS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.math.log
 import kotlin.system.exitProcess
 
 

@@ -503,7 +503,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun clearPlayList(){
         songsList.clear()
-        currentMusicState=MusicState()
         _songController?.currentTrack(currentMusicState)
         bassManager?.clearBassChannel()
         executeOnceTime=false
@@ -564,9 +563,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         bassManager?.channelPause()
     }
 
-    @OptIn(UnstableApi::class)
     fun getSessionId(): Int {
-        return exoPlayer.audioSessionId
+        return 0
     }
     fun resumePlayer(){
         play(null)
@@ -643,8 +641,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         findItemSongIndexById(songState.songEntity.id)?.let{
             indexOfSong=it
         }
-        Log.e("NUEVO", song.description.toString() )
-        Log.e("NUEVO", indexOfSong.toString() )
         _songController?.currentTrack(currentMusicState)
         // Al cargar la información de una pista guardada
         // se ejecutaba una primera vez el evento currentTRack de la interface

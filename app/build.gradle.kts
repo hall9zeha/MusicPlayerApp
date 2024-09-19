@@ -44,6 +44,7 @@ android {
         }
 
     }
+
   /*  packaging{
         resources {
             excludes += "META-INF/gradle/incremental.annotation.processors"
@@ -62,7 +63,7 @@ android {
         buildConfig=true
     }
 }
-
+val bassImplementation by configurations
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -100,6 +101,8 @@ dependencies {
     implementation(project(":di"))
     implementation(project(":features:mfilepicker"))
     implementation(project(":features:audioeffects"))
-    implementation(project(":bass"))
+    // Only bass flavor implementation
+    bassImplementation(project(":bass"))
+
 
 }

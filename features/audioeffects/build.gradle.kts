@@ -25,6 +25,21 @@ android {
             )
         }
     }
+    // Hemos creado dos versiones de nuestro módulo de efectos, para las versiones de exoplayer y bass
+    // en nuestro módulo App, deben llevar el mismo nombre de dimensión que nuestras versiones definidas en App gradle: flavorDimensions.add("version")
+    // y el mismo nombre de productFlavors: create("exoplayer") y  create("bass").
+    // Al hacer esto, los sabores de nuestro módulo audioeffects  se vincularán automáticamente a los sabores de nuestro módulo principal App.
+    flavorDimensions.add("version")
+    productFlavors{
+        create("exoplayer"){
+            dimension = "version"
+        }
+        create("bass") {
+            dimension = "version"
+        }
+
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
