@@ -9,6 +9,8 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_INFO
 import java.io.File
+import java.util.Timer
+import java.util.TimerTask
 
 
 /**
@@ -24,6 +26,7 @@ private const val TAG = "BASS-MANAGER"
 private var mainChannel:Int?=0
 private val handler = Handler(Looper.getMainLooper())
 private var checkRunnable: Runnable? = null
+private var updateTimer: Timer? = null
 
 open class BassManager {
 
@@ -98,6 +101,32 @@ open class BassManager {
         mainChannel = channel
         val positionBytes = getCurrentPositionToBytes(position)
         BASS.BASS_ChannelSetPosition(channel, positionBytes, BASS.BASS_POS_BYTE);
+    }
+    fun streamCreateFile(filePath:String){
+        mainChannel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+    }
+    fun channelPlay(currentSongPosition:Long){
+        BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)
+        // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
+        BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(currentSongPosition),BASS.BASS_POS_BYTE)
+        BASS.BASS_ChannelPlay(getActiveChannel()!!, false)
+    }
+    fun channelPause(){
+        BASS.BASS_ChannelPause(getActiveChannel())
+    }
+    fun setChannelProgress(progress:Long, currentProgress:(Long)->Unit){
+
+        val progressBytes = BASS.BASS_ChannelSeconds2Bytes(getActiveChannel(), progress / 1000.0)
+        updateTimer?.cancel()
+        updateTimer = Timer()
+        updateTimer?.schedule(object : TimerTask() {
+            override fun run() {
+                // Ajusta la posición del canal
+                BASS.BASS_ChannelSetPosition(getActiveChannel(), progressBytes, BASS.BASS_POS_BYTE)
+                currentProgress(progress)
+            }
+        }, 15) // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
+
     }
     fun getCurrentPositionToBytes(position: Long):Long{
         return if(mainChannel!=null)BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, position / 1000.0)else 0L

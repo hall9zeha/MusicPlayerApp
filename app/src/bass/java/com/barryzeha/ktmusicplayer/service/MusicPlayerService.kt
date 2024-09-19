@@ -80,7 +80,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private  var bassManager:BassManager?=null
     private var mainChannel:Int=0
     private var currentSongPosition:Long=0
-    private var updateTimer: Timer? = null
     private var indexOfSong:Int=0
 
     private lateinit var mediaSession: MediaSession
@@ -90,7 +89,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
-    private var positionReset= -1
 
     private var _songController: ServiceSongListener? = null
     val songController: ServiceSongListener get() = _songController!!
@@ -213,8 +211,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }else{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}
-                SHUFFLE->{
-                }
                 else->{if(songsList.isNotEmpty())setMusicForPlayer(songsList[0])
                 }
             }
@@ -540,21 +536,15 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 songEntity = it
                 currentSongPosition = 0
                 findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
-                mainChannel = BASS.BASS_StreamCreateFile(it.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
-                bassManager?.setActiveChannel(mainChannel)
+                bassManager?.streamCreateFile(it.pathLocation!!)
 
             } ?: run {
-                mainChannel = BASS.BASS_StreamCreateFile(songEntity.pathLocation,0,0,BASS.BASS_SAMPLE_FLOAT)
-                bassManager?.setActiveChannel(mainChannel)
-
+                bassManager?.streamCreateFile(songEntity.pathLocation!!)
             }
             if (bassManager?.getActiveChannel() != 0) {
-                BASS.BASS_ChannelSetAttribute(bassManager?.getActiveChannel()!!,BASS.BASS_ATTRIB_VOL,1F)
-                // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
-                BASS.BASS_ChannelSetPosition( bassManager?.getActiveChannel()!!,bassManager?.getCurrentPositionToBytes(currentSongPosition)!!,BASS.BASS_POS_BYTE)
-                BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, false);
-
+                bassManager?.channelPlay(currentSongPosition)
                 bassManager?.startCheckingPlayback()
+
                 mPrefs.isPlaying = true
                 mPrefs.idSong = songEntity.id
                 currentMusicState = fetchSong(songEntity)?.copy(
@@ -570,8 +560,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun pausePlayer(){
         mPrefs.isPlaying = false
-        currentSongPosition=bassManager?.getCurrentPositionInSeconds(mainChannel)?:0
-        BASS.BASS_ChannelPause(mainChannel)
+        currentSongPosition=bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0
+        bassManager?.channelPause()
     }
 
     @OptIn(UnstableApi::class)
@@ -633,18 +623,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         setMusicStateSaved(songState)
     }
     fun setPlayerProgress(progress:Long){
-        // Convierte el progreso en milisegundos a bytes
-        val progressBytes = BASS.BASS_ChannelSeconds2Bytes(bassManager?.getActiveChannel()!!, progress / 1000.0)
-        updateTimer?.cancel()
-        updateTimer = Timer()
-        updateTimer?.schedule(object : TimerTask() {
-            override fun run() {
-                // Ajusta la posición del canal
-                BASS.BASS_ChannelSetPosition(bassManager?.getActiveChannel()!!, progressBytes, BASS.BASS_POS_BYTE)
-                currentSongPosition = progress
-            }
-        }, 15) // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
-
+       bassManager?.setChannelProgress(progress){currentSongPosition=it}
     }
 
     private fun setMusicStateSaved(songState: SongStateWithDetail){
