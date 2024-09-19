@@ -8,14 +8,11 @@ plugins {
 android {
     namespace = "com.barryzeha.audioeffects"
     compileSdk = 34
-
     defaultConfig {
         minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -37,9 +34,7 @@ android {
         create("bass") {
             dimension = "version"
         }
-
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -51,7 +46,7 @@ android {
         viewBinding = true
     }
 }
-
+val bassImplementation by configurations
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -69,4 +64,7 @@ dependencies {
 
     // Modules
     implementation(project(":core"))
+
+    // Only bass module implementation
+    bassImplementation(project(":bass"))
 }

@@ -77,40 +77,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     }
     private fun setUpListeners(){
-        var swIsChecked=mPrefs.effectsIsEnabled
-        enableAndDisableViews(mPrefs.effectsIsEnabled)
-        bind.swEnableEffects.isChecked = mPrefs.effectsIsEnabled
-        bind.swEnableEffects.setOnCheckedChangeListener { buttonView, isChecked ->
-            if(isChecked){
 
-            }else{
-
-            }
-        }
-        bind.btnApplyEffects.setOnClickListener {
-
-        }
-        bind.chipGroupEffects.isSingleSelection=true
-        bind.chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
-            if(checkedIds.isNotEmpty()){
-            val chip = group.findViewById<Chip>(checkedIds[0])
-            when(group.indexOfChild(chip)){
-            CUSTOM->{bind.contentBands.removeAllViews(); createView(CUSTOM)}
-            ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
-            POP->{bind.contentBands.removeAllViews(); createView(POP)}
-            BASS->{bind.contentBands.removeAllViews(); createView(BASS)}
-            FLAT->{bind.contentBands.removeAllViews(); createView(FLAT)}
-            JAZZ->{bind.contentBands.removeAllViews(); createView(JAZZ)}
-            CLASSICAL->{bind.contentBands.removeAllViews(); createView(CLASSICAL)}
-            HIP_HOP->{bind.contentBands.removeAllViews(); createView(HIP_HOP)}
-            ELECTRONIC->{bind.contentBands.removeAllViews(); createView(ELECTRONIC)}
-            FULL_SOUND->{bind.contentBands.removeAllViews(); createView(FULL_SOUND)}
-        }
-}
-        }
-        bind.btnResetEffects.setOnClickListener {
-
-        }
     }
     private fun enableAndDisableViews(isEnable:Boolean){
 

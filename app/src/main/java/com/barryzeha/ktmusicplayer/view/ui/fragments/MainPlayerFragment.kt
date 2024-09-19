@@ -167,7 +167,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
             if (statePlay) {
-                isPlaying = true
                 bind?.btnMainPlay?.setIconResource(com.barryzeha.core.R.drawable.ic_pause)
             }else{
                 bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
@@ -308,7 +307,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
-            mainViewModel.saveStatePlaying(musicState.isPlaying)
+            mainViewModel.saveStatePlaying(mPrefs.isPlaying)
             updateService()
         }
 

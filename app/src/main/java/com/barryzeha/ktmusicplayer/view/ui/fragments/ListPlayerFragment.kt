@@ -181,11 +181,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
             if (statePlay) {
-                isPlaying = true
+                //isPlaying = true
                 bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_pause)
             }else{
                 bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
             }
+
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
             // La actualización del adaptador debe ocurrir en el hilo principal siempre
@@ -296,8 +297,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }
             mainViewModel.checkIfIsFavorite(musicState.idSong)
-            mainViewModel.saveStatePlaying(musicState.isPlaying)
-            Log.e("BYTEE-ONCE", musicState.duration.toString() )
+            mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+
         }
     }
     private fun updateUI(musicState: MusicState){
@@ -310,7 +311,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bind?.seekbarControl?.loadSeekBar?.progress = musicState.currentDuration.toInt()
         //mainViewModel.saveStatePlaying(musicState.isPlaying)
         updateService()
-        Log.e("BYTEE", musicState.duration.toString() )
+
     }
 
 
@@ -355,15 +356,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     }
                     else {
                         if (isPlaying) {
-                            musicPlayerService?.pausePlayer(); bottomPlayerControls.btnPlay.setIconResource(
-                                coreRes.drawable.ic_play
-                            )
+                            musicPlayerService?.pausePlayer()
                             mainViewModel.saveStatePlaying(false)
 
                         } else {
-                            musicPlayerService?.resumePlayer(); bottomPlayerControls.btnPlay.setIconResource(
-                                coreRes.drawable.ic_pause
-                            )
+                            musicPlayerService?.resumePlayer()
                             mainViewModel.saveStatePlaying(true)
                         }
                     }
@@ -732,6 +729,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
                     mainViewModel.saveStatePlaying(false)
                     mainViewModel.setCurrentTrack(musicState)
+
                 }
                 else if(!musicState.latestPlayed && mPrefs.songMode == SongMode.Shuffle.ordinal){
                     mainViewModel.setCurrentTrack(musicState)

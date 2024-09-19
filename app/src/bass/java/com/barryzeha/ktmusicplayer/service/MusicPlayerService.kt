@@ -536,9 +536,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 currentSongPosition = 0
                 findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
                 bassManager?.streamCreateFile(it.pathLocation!!)
-
+                executeOnceTime=true
             } ?: run {
                 bassManager?.streamCreateFile(songEntity.pathLocation!!)
+                executeOnceTime=false
             }
             if (bassManager?.getActiveChannel() != 0) {
                 bassManager?.channelPlay(currentSongPosition)
@@ -549,11 +550,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 currentMusicState = fetchSong(songEntity)?.copy(
                     isPlaying = mPrefs.isPlaying,
                     idSong = songEntity.id,
+                    latestPlayed = false
                 )!!
 
             }
             song?.let {
-                _songController?.currentTrack(currentMusicState)
+                if(executeOnceTime)_songController?.currentTrack(currentMusicState)
+
             }
         }
     }
