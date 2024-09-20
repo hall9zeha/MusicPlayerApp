@@ -1,7 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.annotation.SuppressLint
-import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -9,7 +8,6 @@ import android.os.IBinder
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -18,7 +16,6 @@ import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.COLOR_BACKGROUND
 import com.barryzeha.core.common.COLOR_TRANSPARENT
-import com.barryzeha.core.common.DEFAULT_DIRECTION
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
@@ -29,12 +26,10 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
-import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -453,7 +448,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }
             }
             btnMainEq?.setOnClickListener{
-                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionId()!!)
+                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }
         }
 

@@ -1,9 +1,5 @@
 package com.barryzeha.core.common
 
-import android.provider.Settings
-import androidx.core.content.ContextCompat.getString
-import com.barryzeha.core.R
-
 
 /**
  * Project KTMusicPlayer
@@ -36,7 +32,8 @@ const val CLEAR_MODE = -1
 // Actions custom for media player notify
 
 const val ACTION_CLOSE = "Action close"
-const val EXOPLAYER_SESSION_ID_EXTRA="exoplayerSessionId"
+const val CHANNEL_OR_SESSION_ID_EXTRA="channelOrSessionId"
+
 
 // For animation in the album cover art when make next or prev action
 const val NEXT =0

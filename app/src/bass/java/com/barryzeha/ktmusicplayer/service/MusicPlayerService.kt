@@ -23,7 +23,6 @@ import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 
@@ -58,8 +57,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Timer
-import java.util.TimerTask
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -570,8 +567,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         bassManager?.channelPause()
     }
 
-    fun getSessionId(): Int {
-        return 0
+    fun getSessionOrChannelId(): Int {
+        return bassManager?.getActiveChannel()!!
     }
     fun resumePlayer(){
         play(null)

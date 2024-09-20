@@ -499,7 +499,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 adapter.removeItemsForMultipleSelectedAction()
             }
             btnMainEq?.setOnClickListener{
-                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionId()!!)
+                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
 
             }
         }
