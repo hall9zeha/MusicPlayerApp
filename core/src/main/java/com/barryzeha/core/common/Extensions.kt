@@ -38,14 +38,20 @@ fun <T> Context.isServiceRunning(service:Class<T>):Boolean{
         .any{it.service.className == service.name}
 }
 
-fun ImageView.loadImage(bitmap:Bitmap) {
+fun ImageView.loadImage(bitmap:Bitmap, animDirection:Int=-1) {
+    var direction =0f
+    when (animDirection){
+        NEXT->direction=1f
+        PREVIOUS->direction= -1f
+        DEFAULT_DIRECTION->direction=0f
+    }
     val slideAnimation = TranslateAnimation(
-        Animation.RELATIVE_TO_PARENT, -1f, // Desde fuera de la pantalla a la izquierda
+        Animation.RELATIVE_TO_PARENT, direction, // Desde fuera de la pantalla a la izquierda
         Animation.RELATIVE_TO_PARENT, 0f,  // Hasta su posición original
         Animation.RELATIVE_TO_PARENT, 0f,  // Sin cambio en la altura
         Animation.RELATIVE_TO_PARENT, 0f   // Sin cambio en la altura
     )
-    slideAnimation.duration = 200 // Duración de la animación en milisegundos
+    slideAnimation.duration = 300 // Duración de la animación en milisegundos
     slideAnimation.fillAfter = true // Mantiene la posición final después de la animación
 
     Glide.with(this.context)

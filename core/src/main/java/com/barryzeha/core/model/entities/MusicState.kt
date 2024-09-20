@@ -23,6 +23,7 @@ data class MusicState(
     val duration: Long = 0,
     val songPath: String = "",
     val currentPosition:Long=0L,
-    val latestPlayed:Boolean=false
+    val latestPlayed:Boolean=false,
+    val nextOrPrev:Int=-1
 
 ) : Parcelable

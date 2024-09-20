@@ -31,8 +31,11 @@ import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.getEqualizerConfig
 import com.barryzeha.core.common.ACTION_CLOSE
+import com.barryzeha.core.common.DEFAULT_DIRECTION
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.NEXT
+import com.barryzeha.core.common.PREVIOUS
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
@@ -69,8 +72,8 @@ import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MusicPlayerService : Service(),BassManager.PlaybackManager{
-    private val NEXT =0
-    private val PREVIOUS =1
+
+
     @Inject
     lateinit var repository: MainRepository
     @Inject
@@ -106,6 +109,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var headsetReceiver:BroadcastReceiver?=null
     private var bluetoothReceiver:BroadcastReceiver?=null
     private var bluetoothIsConnect:Boolean = false
+    private var nextOrPrevAnimValue=-1
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -292,7 +296,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 )
                 listOfBands.forEachIndexed { index, value ->
                     EqualizerManager.setBand(index.toShort(),value)
-                    Log.e("SESSION-ID", index.toString() + "--" + value.toString())
                 }
             }
         }
@@ -550,7 +553,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 currentMusicState = fetchSong(songEntity)?.copy(
                     isPlaying = mPrefs.isPlaying,
                     idSong = songEntity.id,
-                    latestPlayed = false
+                    latestPlayed = false,
+                    nextOrPrev = nextOrPrevAnimValue
                 )!!
 
             }
@@ -582,25 +586,27 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 if(mPrefs.songMode == SHUFFLE){indexOfSong = (songsList.indices).random()}
                 else indexOfSong = 0
             }
+            nextOrPrevAnimValue = NEXT
             setOrPlaySong(indexOfSong)
             checkIfPhoneIsLock()
         }
 
-    }
-    private fun setOrPlaySong(indexOfSong:Int){
-        if (mPrefs.isPlaying) play(songsList[indexOfSong])
-        else  setMusicForPlayer(songsList[indexOfSong])
     }
     fun prevSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong > 0) {
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
                 else indexOfSong -=1
+                nextOrPrevAnimValue = PREVIOUS
                 setOrPlaySong(indexOfSong)
                 checkIfPhoneIsLock()
             }
 
         }
+    }
+    private fun setOrPlaySong(indexOfSong:Int){
+        if (mPrefs.isPlaying) play(songsList[indexOfSong])
+        else  setMusicForPlayer(songsList[indexOfSong])
     }
     private fun setMusicForPlayer(song: SongEntity){
         val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
@@ -618,7 +624,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         fetchSong(song)?.let{musicState->
             currentMusicState = musicState.copy(
                 currentDuration = songState.songState.currentPosition,
-                latestPlayed = true
+                latestPlayed = true,
+                nextOrPrev = DEFAULT_DIRECTION
             )
 
         }

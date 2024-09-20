@@ -18,6 +18,7 @@ import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.COLOR_BACKGROUND
 import com.barryzeha.core.common.COLOR_TRANSPARENT
+import com.barryzeha.core.common.DEFAULT_DIRECTION
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
@@ -298,15 +299,15 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     private fun updateUIOnceTime(musicState: MusicState)=with(bind){
         this?.let {
-            currentMusicState = musicState
             val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
             tvSongAlbum.text = musicState.album
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
-            ivMusicCover.loadImage(albumArt!!)
+            ivMusicCover.loadImage(albumArt!!,musicState.nextOrPrev)
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
+            currentMusicState = musicState
             mainViewModel.saveStatePlaying(mPrefs.isPlaying)
             updateService()
         }

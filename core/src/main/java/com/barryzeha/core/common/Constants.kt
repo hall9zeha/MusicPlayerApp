@@ -38,3 +38,7 @@ const val CLEAR_MODE = -1
 const val ACTION_CLOSE = "Action close"
 const val EXOPLAYER_SESSION_ID_EXTRA="exoplayerSessionId"
 
+// For animation in the album cover art when make next or prev action
+const val NEXT =0
+const val PREVIOUS =1
+const val DEFAULT_DIRECTION = 2
