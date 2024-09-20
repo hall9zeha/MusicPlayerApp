@@ -578,41 +578,25 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             if(indexOfSong < songsList.size - 1 ) {
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
                 else indexOfSong  += 1
-
-                val song = songsList[indexOfSong]
-                if(mPrefs.isPlaying)play(song)
-                else setMusicForPlayer(song)
             }else{
-                if(mPrefs.songMode == SHUFFLE){
-                    indexOfSong = (songsList.indices).random()
-                    if(mPrefs.isPlaying)play(songsList[indexOfSong])
-                    else setMusicForPlayer(songsList[indexOfSong])
-                }
-                else {
-                    indexOfSong = 0
-                    if(mPrefs.songMode== REPEAT_ALL)play(songsList[indexOfSong])
-                    else {
-                        if (mPrefs.isPlaying) play(songsList[indexOfSong])
-                        else  setMusicForPlayer(songsList[indexOfSong])
-
-                    }
-
-                }
-
+                if(mPrefs.songMode == SHUFFLE){indexOfSong = (songsList.indices).random()}
+                else indexOfSong = 0
             }
+            setOrPlaySong(indexOfSong)
             checkIfPhoneIsLock()
         }
 
+    }
+    private fun setOrPlaySong(indexOfSong:Int){
+        if (mPrefs.isPlaying) play(songsList[indexOfSong])
+        else  setMusicForPlayer(songsList[indexOfSong])
     }
     fun prevSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong > 0) {
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
                 else indexOfSong -=1
-
-                val song = songsList[indexOfSong]
-                if(mPrefs.isPlaying)play(song)
-                else setMusicForPlayer(song)
+                setOrPlaySong(indexOfSong)
                 checkIfPhoneIsLock()
             }
 
