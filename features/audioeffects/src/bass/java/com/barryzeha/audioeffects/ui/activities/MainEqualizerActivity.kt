@@ -3,6 +3,9 @@ package com.barryzeha.audioeffects.ui.activities
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.LinearLayout
@@ -11,7 +14,9 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
@@ -124,6 +129,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     private fun enableAndDisableViews(isEnable:Boolean){
 
     }
+
     private fun createView(effectType:Int){
         val layoutParams0 = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -137,7 +143,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply {
             gravity = Gravity.CENTER
-            topMargin = 24
+            topMargin = 8
             bottomMargin = 24
         }
 
@@ -151,12 +157,14 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         val frequencies = arrayOf("125 Hz", "1 kHz", "8 kHz", "16 kHz", "32 kHz", "64 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz", "")
         fxArray.forEachIndexed{ i, e->
-           val seekBar = SeekBar(this@MainEqualizerActivity)
+           val seekBar = CustomSeekBar(this@MainEqualizerActivity)
             seekBar.apply {
                 id=i
                 tag=i
                 max=20
                 progress=10
+                thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
+                progressDrawable=ColorDrawable(Color.TRANSPARENT)
                 setOnSeekBarChangeListener(osbcl)
             }
             val textView = TextView(this@MainEqualizerActivity)
@@ -173,6 +181,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             tag = fxArray.size-1
             max = 20
             progress = 0
+            thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
             layoutParams = layoutParams1
             setOnSeekBarChangeListener(osbcl)
         }
@@ -191,6 +200,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             tag = 11
             max = 20
             progress = 10
+            thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
             layoutParams = layoutParams1
             setOnSeekBarChangeListener(osbcl)
         }
