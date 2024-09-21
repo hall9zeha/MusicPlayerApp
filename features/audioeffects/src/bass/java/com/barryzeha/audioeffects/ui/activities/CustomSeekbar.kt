@@ -26,13 +26,13 @@ class  CustomSeekBar @JvmOverloads constructor(
 
  private var rect: Rect = Rect()
  private var paint: Paint = Paint()
- private var seekbarHeight: Int = 6
+ private var seekbarHeight: Int = 12
 
  @Synchronized
  override fun onDraw(canvas: Canvas) {
   // for seek bar line
   rect[0 + 40, height / 2 - seekbarHeight / 2, width - 40] = height / 2 + seekbarHeight / 2
-  paint.color = Color.LTGRAY
+  paint.color = Color.DKGRAY
   canvas.drawRect(rect, paint)
 
   //for right side
