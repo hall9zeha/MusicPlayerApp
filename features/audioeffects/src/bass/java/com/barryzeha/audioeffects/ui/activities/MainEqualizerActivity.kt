@@ -69,6 +69,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         setUpEqualizer()
         createView(mPrefs.effectType)
         setUpListeners()
+        enableAndDisableViews(mPrefs.effectsIsEnabled)
         
     }
     private fun handleIntent(){
@@ -82,6 +83,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     }
 
     private fun setUpListeners()=with(bind){
+        if(mPrefs.effectsIsEnabled) output.performClick()
         output.setOnClickListener { outputClicked() }
         chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
             if(checkedIds.isNotEmpty()){
@@ -147,11 +149,15 @@ class MainEqualizerActivity : AppCompatActivity() {
         // remove reverb effect
         BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
         if (bind.output.isChecked) {
+            enableAndDisableViews(true)
             fxchan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
             chan=channelIntent
+            mPrefs.effectsIsEnabled = true
         } else {
+            enableAndDisableViews(false)
             fxchan=0
             chan=0
+            mPrefs.effectsIsEnabled = false
         }
         setupFX()
     }
@@ -172,10 +178,21 @@ class MainEqualizerActivity : AppCompatActivity() {
         setupFX()
     }
     private fun enableAndDisableViews(isEnable:Boolean){
+        bind.btnResetEffects.isEnabled=isEnable
+        for (i in 0 until bind.chipGroupEffects.childCount) {
+            val chip = bind.chipGroupEffects.getChildAt(i) as Chip
+            chip.isEnabled = isEnable
+        }
+        for(i in 0 until bind.lnContentBands.childCount){
+            val child = bind.lnContentBands.getChildAt(i)
+            child.isEnabled = isEnable
 
+        }
     }
 
     private fun createView(effectType:Int){
+        if(mPrefs.effectsIsEnabled) mPrefs.effectType = effectType
+
         val layoutParams0 = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -205,13 +222,13 @@ class MainEqualizerActivity : AppCompatActivity() {
         val frequencies = arrayOf("125 Hz", "1 kHz", "8 kHz", "16 kHz", "32 kHz", "64 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz", "")
         for(i in 0 until fxArray.size-1){
             val seekId=i
-
+            val seekProgress= mPrefs.getSeekBandValue(effectType,seekId)
            val seekBar = CustomSeekBar(this@MainEqualizerActivity)
             seekBar.apply {
                 id=seekId
                 tag=seekId
                 max=20
-                progress= getEqualizerBandPreConfig(effectType,seekId)
+                progress= if(seekProgress != 20) seekProgress else getEqualizerBandPreConfig(effectType,seekId)
                 thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
                 progressDrawable=ColorDrawable(Color.TRANSPARENT)
                 setOnSeekBarChangeListener(osbcl)

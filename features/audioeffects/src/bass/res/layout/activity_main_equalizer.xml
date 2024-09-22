@@ -12,13 +12,33 @@
         android:layout_width="fill_parent"
         android:orientation="vertical" android:padding="10dp"
         android:layout_height="fill_parent">
+       <androidx.constraintlayout.widget.ConstraintLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:orientation="horizontal">
+           <CheckBox
+               android:id="@+id/output"
+               android:layout_width="wrap_content"
+               android:text="Enable effects"
+               android:layout_height="wrap_content"
+               app:layout_constraintStart_toStartOf="parent"
+               app:layout_constraintTop_toTopOf="parent"
+               app:layout_constraintBottom_toBottomOf="parent"
+               />
+           <com.google.android.material.button.MaterialButton
+               android:id="@+id/btnResetEffects"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="Reset"
+               android:layout_gravity="end"
+               android:layout_margin="16dp"
+               style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintTop_toTopOf="parent"
+               app:layout_constraintBottom_toBottomOf="parent"
+               />
+       </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-        <CheckBox
-            android:id="@+id/output"
-            android:layout_width="wrap_content"
-            android:text="Apply effects to final output instead of file"
-            android:layout_height="wrap_content" />
         <HorizontalScrollView
             android:id="@+id/horizontalScrollView"
             android:layout_width="match_parent"
