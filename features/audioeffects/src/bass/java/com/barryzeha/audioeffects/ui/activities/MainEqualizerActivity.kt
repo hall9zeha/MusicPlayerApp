@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.LinearLayout
@@ -14,16 +13,28 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
+import com.barryzeha.audioeffects.common.BASS_PRESET
+import com.barryzeha.audioeffects.common.CLASSICAL_PRESET
+import com.barryzeha.audioeffects.common.CUSTOM_PRESET
+import com.barryzeha.audioeffects.common.ELECTRONIC_PRESET
 import com.barryzeha.core.R as coreRes
 import com.barryzeha.audioeffects.common.EffectsPreferences
+import com.barryzeha.audioeffects.common.FLAT_PRESET
+import com.barryzeha.audioeffects.common.FULL_BASS_AND_TREBLE_PRESET
+import com.barryzeha.audioeffects.common.FULL_SOUND_PRESET
+import com.barryzeha.audioeffects.common.HIP_HOP_PRESET
+import com.barryzeha.audioeffects.common.JAZZ_PRESET
+import com.barryzeha.audioeffects.common.POP_PRESET
+import com.barryzeha.audioeffects.common.ROCK_PRESET
+import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.barryzeha.core.common.CHANNEL_OR_SESSION_ID_EXTRA
+import com.google.android.material.chip.Chip
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_DX8_PARAMEQ
 import dagger.hilt.android.AndroidEntryPoint
@@ -71,7 +82,25 @@ class MainEqualizerActivity : AppCompatActivity() {
     }
 
     private fun setUpListeners()=with(bind){
-        bind.output.setOnClickListener { outputClicked() }
+        output.setOnClickListener { outputClicked() }
+        chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
+            if(checkedIds.isNotEmpty()){
+            val chip = group.findViewById<Chip>(checkedIds[0])
+            when(group.indexOfChild(chip)){
+            CUSTOM_PRESET->{lnContentBands.removeAllViews(); createView(CUSTOM_PRESET)}
+            ROCK_PRESET->{lnContentBands.removeAllViews(); createView(ROCK_PRESET)}
+            POP_PRESET->{lnContentBands.removeAllViews(); createView(POP_PRESET)}
+            BASS_PRESET->{lnContentBands.removeAllViews(); createView(BASS_PRESET)}
+            FLAT_PRESET->{lnContentBands.removeAllViews(); createView(FLAT_PRESET)}
+            JAZZ_PRESET->{lnContentBands.removeAllViews(); createView(JAZZ_PRESET)}
+            CLASSICAL_PRESET->{lnContentBands.removeAllViews(); createView(CLASSICAL_PRESET)}
+            HIP_HOP_PRESET->{lnContentBands.removeAllViews(); createView(HIP_HOP_PRESET)}
+            ELECTRONIC_PRESET->{lnContentBands.removeAllViews(); createView(ELECTRONIC_PRESET)}
+            FULL_SOUND_PRESET->{lnContentBands.removeAllViews(); createView(FULL_SOUND_PRESET)}
+            FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews(); createView(
+                FULL_BASS_AND_TREBLE_PRESET)}
+        }
+        }}
 
     }
     private fun updateFX(sb: SeekBar){
@@ -102,11 +131,11 @@ class MainEqualizerActivity : AppCompatActivity() {
             p.fBandwidth = 18f
             p.fCenter = (125f * Math.pow(2.0, (i - 1).toDouble())).toFloat() // Frecuencias centradas
             BASS.BASS_FXSetParameters(fxArray[i], p)
-            val childView= bind.lnContent[i]
+            val childView= bind.lnContentBands[i]
             if(childView is SeekBar)updateFX(childView)
         }
         fxArray[fxArray.size-1] = BASS.BASS_ChannelSetFX(ch, BASS.BASS_FX_DX8_REVERB, 0)
-        updateFX(bind.lnContent.findViewById(coreRes.id.reverb))
+        updateFX(bind.lnContentBands.findViewById(coreRes.id.reverb))
 
     }
    private  fun outputClicked() {
@@ -144,25 +173,29 @@ class MainEqualizerActivity : AppCompatActivity() {
         ).apply {
             gravity = Gravity.CENTER
             topMargin = 8
-            bottomMargin = 24
+            bottomMargin = 8
         }
-
         val osbcl: OnSeekBarChangeListener = object : OnSeekBarChangeListener {
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                mPrefs.setSeekBandValue(effectType,seekBar.id,seekBar.progress)
+            }
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 updateFX(seekBar)
             }
         }
 
+
         val frequencies = arrayOf("125 Hz", "1 kHz", "8 kHz", "16 kHz", "32 kHz", "64 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz", "")
-        fxArray.forEachIndexed{ i, e->
+        for(i in 0 until fxArray.size-1){
+            val seekId=i
+
            val seekBar = CustomSeekBar(this@MainEqualizerActivity)
             seekBar.apply {
-                id=i
-                tag=i
+                id=seekId
+                tag=seekId
                 max=20
-                progress=10
+                progress= getEqualizerBandPreConfig(effectType,seekId)
                 thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
                 progressDrawable=ColorDrawable(Color.TRANSPARENT)
                 setOnSeekBarChangeListener(osbcl)
@@ -172,8 +205,9 @@ class MainEqualizerActivity : AppCompatActivity() {
             textView.gravity = Gravity.CENTER // Centrar el texto
             textView.layoutParams=layoutParams0
             textView.text=frequencies[i]
-            bind.lnContent.addView(seekBar)
-            bind.lnContent.addView(textView)
+            textView.textSize = 12f
+            bind.lnContentBands.addView(seekBar)
+            bind.lnContentBands.addView(textView)
         }
 
         val reverbSeekBar = SeekBar(this@MainEqualizerActivity).apply {
@@ -182,7 +216,14 @@ class MainEqualizerActivity : AppCompatActivity() {
             max = 20
             progress = 0
             thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
-            layoutParams = layoutParams1
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+                topMargin = 16
+                bottomMargin = 8
+            }
             setOnSeekBarChangeListener(osbcl)
         }
         val reverbTextView = TextView(this@MainEqualizerActivity).apply {
@@ -191,8 +232,8 @@ class MainEqualizerActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
         }
 
-        bind.lnContent.addView(reverbSeekBar)
-        bind.lnContent.addView(reverbTextView)
+        bind.lnContentBands.addView(reverbSeekBar)
+        bind.lnContentBands.addView(reverbTextView)
 
         // Agregar SeekBar para volumen
         val volumeSeekBar = SeekBar(this@MainEqualizerActivity).apply {
@@ -217,8 +258,8 @@ class MainEqualizerActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
         }
 
-        bind.lnContent.addView(volumeSeekBar)
-        bind.lnContent.addView(volumeTextView)
+        bind.lnContentBands.addView(volumeSeekBar)
+        bind.lnContentBands.addView(volumeTextView)
     }
 
     // Por ahora no debe retornar nada

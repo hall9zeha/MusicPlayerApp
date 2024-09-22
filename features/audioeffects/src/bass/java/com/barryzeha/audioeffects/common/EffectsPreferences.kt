@@ -10,7 +10,7 @@ import javax.inject.Inject
  * Copyright (c)  All rights reserved.
  **/
 
-private const val EFFECTS_PREFERENCES_FILE="effectsPreferencesFiles"
+private const val EFFECTS_PREFERENCES_FILE="bassEffectsPreferencesFiles"
 private const val SEEK_BAND = "_seekBand_"
 private const val EFFECT_TYPE = "effectType"
 private const val ENABLE_EFFECTS="enableEffects"

@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    android:id="@+id/main"
+<androidx.core.widget.NestedScrollView android:id="@+id/main"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" android:fillViewport="true" xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="fill_parent"
+    android:fillViewport="true"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
     <LinearLayout
-        android:id="@+id/lnContent"
+        android:id="@+id/lnContentMain"
         android:layout_width="fill_parent"
         android:orientation="vertical" android:padding="10dp"
         android:layout_height="fill_parent">
@@ -15,5 +19,105 @@
             android:layout_width="wrap_content"
             android:text="Apply effects to final output instead of file"
             android:layout_height="wrap_content" />
+        <HorizontalScrollView
+            android:id="@+id/horizontalScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            >
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupEffects"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:singleLine="true"
+                android:orientation="horizontal"
+                app:singleSelection="true"
+                android:layout_marginTop="4dp"
+                >
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipCustomEffect"
+                    android:checkable="true"
+                    android:text="Custom"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipRockEffect"
+                    android:checkable="true"
+                    android:text="Rock"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipPopEffect"
+                    android:checkable="true"
+                    android:text="Pop"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipBassEffect"
+                    android:checkable="true"
+                    android:text="Bass"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipFlatEffect"
+                    android:checkable="true"
+                    android:text="Flat"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipJazzEffect"
+                    android:checkable="true"
+                    android:text="Jazz"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipClassicalEffect"
+                    android:checkable="true"
+                    android:text="Classical"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipHipHopEffect"
+                    android:checkable="true"
+                    android:text="Hip Hop"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipElectronicEffect"
+                    android:checkable="true"
+                    android:text="Electronic"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipFullSoundEffect"
+                    android:checkable="true"
+                    android:text="Full Sound"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipFullBassAndTrebleEffect"
+                    android:checkable="true"
+                    android:text="Full bass &amp; Treble"/>
+
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+    <LinearLayout
+        android:id="@+id/lnContentBands"
+        android:layout_width="fill_parent"
+        android:orientation="vertical" android:padding="10dp"
+        android:layout_height="fill_parent"/>
+    <LinearLayout
+        android:id="@+id/lnContentBottom"
+        android:layout_width="fill_parent"
+        android:orientation="vertical" android:padding="10dp"
+        android:layout_height="fill_parent"/>
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
