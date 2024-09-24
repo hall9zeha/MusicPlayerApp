@@ -35,7 +35,10 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
         get() = mPreferences.getInt(EFFECT_TYPE,0)
         set(value)=mPreferences.edit().putInt(EFFECT_TYPE,value).apply()
 
-    var reverb:Int
-        get() = mPreferences.getInt(REVERB,0)
-        set(value)=mPreferences.edit().putInt(REVERB,value).apply()
+    fun getReverbSeekBandValue(effectType: Int,seekId: Int):Int{
+        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",0)
+    }
+    fun getVolumeSeekBandValue(effectType: Int,seekId: Int):Int{
+        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",10)
+    }
 }

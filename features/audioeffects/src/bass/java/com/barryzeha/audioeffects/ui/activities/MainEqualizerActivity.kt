@@ -84,6 +84,21 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     private fun setUpListeners()=with(bind){
         if(mPrefs.effectsIsEnabled) output.performClick()
+        if(mPrefs.effectsIsEnabled){
+            when(mPrefs.effectType){
+                CUSTOM_PRESET->{chipGroupFocused(CUSTOM_PRESET)}
+                ROCK_PRESET->{chipGroupFocused(ROCK_PRESET)}
+                POP_PRESET->{chipGroupFocused(POP_PRESET)}
+                BASS_PRESET->{chipGroupFocused(BASS_PRESET)}
+                FLAT_PRESET->{chipGroupFocused(FLAT_PRESET)}
+                JAZZ_PRESET->{chipGroupFocused(JAZZ_PRESET)}
+                CLASSICAL_PRESET->{chipGroupFocused(CLASSICAL_PRESET)}
+                HIP_HOP_PRESET->{chipGroupFocused(HIP_HOP_PRESET)}
+                ELECTRONIC_PRESET->{chipGroupFocused(ELECTRONIC_PRESET)}
+                FULL_SOUND_PRESET->{chipGroupFocused(FULL_SOUND_PRESET)}
+                FULL_BASS_AND_TREBLE_PRESET->{chipGroupFocused(FULL_BASS_AND_TREBLE_PRESET)}
+            }
+        }
         output.setOnClickListener { outputClicked() }
         chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
             if(checkedIds.isNotEmpty()){
@@ -103,6 +118,22 @@ class MainEqualizerActivity : AppCompatActivity() {
                 FULL_BASS_AND_TREBLE_PRESET);setEffect()}
         }
         }}
+        btnResetEffects.setOnClickListener{
+            mPrefs.clearPreference()
+            lnContentBands.removeAllViews()
+            createView(CUSTOM_PRESET)
+            setEffect()
+        }
+
+    }
+    private fun chipGroupFocused(effectType:Int){
+        val chip = bind.chipGroupEffects[effectType]
+        bind.horizontalScrollView.post {
+            bind.horizontalScrollView.scrollTo(chip.left,0)
+            chip.isSelected=true
+            chip.requestFocus()
+
+        }
 
     }
     private fun updateFX(sb: SeekBar){
@@ -242,12 +273,12 @@ class MainEqualizerActivity : AppCompatActivity() {
             bind.lnContentBands.addView(seekBar)
             bind.lnContentBands.addView(textView)
         }
-
+        val reverbProgress = mPrefs.getReverbSeekBandValue(effectType, coreRes.id.reverb)
         val reverbSeekBar = SeekBar(this@MainEqualizerActivity).apply {
             id = coreRes.id.reverb
             tag = fxArray.size-1
             max = 20
-            progress = 0
+            progress = if(reverbProgress !=0) reverbProgress else 0
             thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -269,11 +300,13 @@ class MainEqualizerActivity : AppCompatActivity() {
         bind.lnContentBands.addView(reverbTextView)
 
         // Agregar SeekBar para volumen
+
+        val volumeProgress = mPrefs.getVolumeSeekBandValue(effectType,coreRes.id.volume)
         val volumeSeekBar = SeekBar(this@MainEqualizerActivity).apply {
             id = coreRes.id.volume
             tag = 11
             max = 20
-            progress = 10
+            progress = if(volumeProgress !=10) volumeProgress else 10
             thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
             layoutParams = layoutParams1
             setOnSeekBarChangeListener(osbcl)

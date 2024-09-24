@@ -282,24 +282,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     private fun setUpEqualizer(sessionId:Int){
-        EqualizerManager.initEqualizer(sessionId)
-        EqualizerManager.setEnabled(true)
-        if(effectsPrefs.effectsIsEnabled){
-            CoroutineScope(Dispatchers.IO).launch {
-                val listOfBands = getEqualizerConfig(
-                    effectsPrefs.effectType,
-                    EqualizerManager.mEq!!.numberOfBands.toInt(),
-                    effectsPrefs
-                )
-                listOfBands.forEachIndexed { index, value ->
-                    EqualizerManager.setBand(index.toShort(),value)
-                }
-            }
-        }
-        else{
-            EqualizerManager.setEnabled(false)
-
-        }
 
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

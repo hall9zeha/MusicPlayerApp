@@ -10,6 +10,7 @@ import android.media.audiofx.Equalizer
  **/
 
 object EqualizerManager {
+ // For exoplayer
  var mEq: Equalizer? = null
 
  fun initEqualizer(sessionId: Int) {
@@ -28,5 +29,6 @@ object EqualizerManager {
   mEq?.release()
   mEq = null
  }
+
 
 }
