@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.forEach
 import androidx.core.view.get
 import com.barryzeha.audioeffects.common.BASS_PRESET
 import com.barryzeha.audioeffects.common.CLASSICAL_PRESET
@@ -66,11 +67,11 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
 
         handleIntent()
-        setUpEqualizer()
         createView(mPrefs.effectType)
-        setUpListeners()
         enableAndDisableViews(mPrefs.effectsIsEnabled)
-        
+        setUpListeners()
+        setUpEqualizer()
+
     }
     private fun handleIntent(){
         intent?.let{
@@ -78,8 +79,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
     }
     private fun setUpEqualizer(){
-
-
+        outputClicked()
     }
 
     private fun setUpListeners()=with(bind){
@@ -99,9 +99,15 @@ class MainEqualizerActivity : AppCompatActivity() {
                 FULL_BASS_AND_TREBLE_PRESET->{chipGroupFocused(FULL_BASS_AND_TREBLE_PRESET)}
             }
         }
-        output.setOnClickListener { outputClicked() }
+        output.setOnClickListener {
+            outputClicked()  }
+
         chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
+            // Al hacer click en otro chip quitar la selección y el focus si ya tenemos un efecto guardado en preferencias
+
+            chipGroupEffects.forEach {v->v.clearFocus();v.isSelected=false }
             if(checkedIds.isNotEmpty()){
+
             val chip = group.findViewById<Chip>(checkedIds[0])
             when(group.indexOfChild(chip)){
             CUSTOM_PRESET->{lnContentBands.removeAllViews(); createView(CUSTOM_PRESET);setEffect()}
@@ -117,7 +123,9 @@ class MainEqualizerActivity : AppCompatActivity() {
             FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews(); createView(
                 FULL_BASS_AND_TREBLE_PRESET);setEffect()}
         }
-        }}
+        }
+
+        }
         btnResetEffects.setOnClickListener{
             mPrefs.clearPreference()
             lnContentBands.removeAllViews()
@@ -169,6 +177,8 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
         fxArray[fxArray.size-1] = BASS.BASS_ChannelSetFX(ch, BASS.BASS_FX_DX8_REVERB, 0)
         updateFX(bind.lnContentBands.findViewById(coreRes.id.reverb))
+        val volumeValue=mPrefs.getVolumeSeekBandValue(mPrefs.effectType,coreRes.id.volume)
+        BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f);
 
     }
    private  fun outputClicked() {
@@ -184,11 +194,15 @@ class MainEqualizerActivity : AppCompatActivity() {
             fxchan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
             chan=channelIntent
             mPrefs.effectsIsEnabled = true
+            chipGroupFocused(mPrefs.effectType)
         } else {
             enableAndDisableViews(false)
             fxchan=0
             chan=0
             mPrefs.effectsIsEnabled = false
+            bind.chipGroupEffects.forEach { v->
+                v.clearFocus()
+            }
         }
         setupFX()
     }

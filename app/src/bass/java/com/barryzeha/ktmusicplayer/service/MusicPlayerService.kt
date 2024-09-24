@@ -24,11 +24,8 @@ import android.view.KeyEvent
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-
 import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
-import com.barryzeha.audioeffects.common.getEqualizerConfig
 import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.DEFAULT_DIRECTION
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
@@ -39,8 +36,8 @@ import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.getSongMetadata
-import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.ServiceSongListener
+import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
@@ -88,7 +85,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private lateinit var mediaPlayerNotify:Notification
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
-    private lateinit var exoPlayer:ExoPlayer
 
     private var _songController: ServiceSongListener? = null
     val songController: ServiceSongListener get() = _songController!!
@@ -136,10 +132,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 if(action != null && action == Intent.ACTION_HEADSET_PLUG){
                     val state = intent.getIntExtra("state",-1)
                     if(state==0){
-                        if(exoPlayer.isPlaying) {
-                            exoPlayer.pause()
+                        if(mPrefs.isPlaying) {
+                            bassManager?.channelPause()
                             _songController?.pause()
-                            _songController?.musicState(currentMusicState.copy(isPlaying = exoPlayer.isPlaying))
+                            _songController?.musicState(currentMusicState.copy(isPlaying = mPrefs.isPlaying))
                         }
                         Log.e("HEADSET_STATE","disconnect")
 
@@ -171,8 +167,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                 BluetoothAdapter.STATE_OFF -> {
                                     Log.d("BLUETOOTH_STATE", "Bluetooth disconnected")
                                     // Aquí puedes agregar la lógica cuando se desconecta el Bluetooth
-                                    if (exoPlayer.isPlaying) {
-                                        exoPlayer.pause()
+                                    if (mPrefs.isPlaying) {
+                                        bassManager?.channelPause()
                                         _songController?.pause()
                                         _songController?.musicState(currentMusicState.copy(isPlaying = false))
                                     }
@@ -281,8 +277,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
         }
     }
-    private fun setUpEqualizer(sessionId:Int){
-
+    private fun setUpEqualizer(channel:Int?){
+        channel?.let {chan->
+            EqualizerManager.initEqualizer(chan, effectsPrefs)
+        }
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
@@ -327,11 +325,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     @OptIn(UnstableApi::class)
     private fun setUpRepository(){
-        exoPlayer = ExoPlayer.Builder(applicationContext)
-            .build()
-        setUpEqualizer(exoPlayer.audioSessionId)
-
-        CoroutineScope(Dispatchers.Main).launch {
+       CoroutineScope(Dispatchers.Main).launch {
             // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
             // si no hay algo seleccionado previamente solo devolverá la lista por defecto
             val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
@@ -349,7 +343,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 val songEntity=songState[0].songEntity
                 if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
             }
-
+            setUpEqualizer(bassManager?.getActiveChannel())
         }
     }
     private fun nextOrPrevTrack(action:Int){
@@ -536,6 +530,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     nextOrPrev = nextOrPrevAnimValue
                 )!!
 
+                //TODO mejorar la aplicación del equalizador al canal, por ahora funciona pero
+                // realizar una refactorización
+                EqualizerManager.initEqualizer(bassManager?.getActiveChannel()!!,effectsPrefs)
+                //EqualizerManager.applyEq()
             }
             song?.let {
                 if(executeOnceTime)_songController?.currentTrack(currentMusicState)
@@ -628,7 +626,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!
         return MusicState(
             idSong = song.id,
-            isPlaying = exoPlayer.isPlaying,
+            isPlaying = mPrefs.isPlaying,
             title = songMetadata.title,
             artist = songMetadata.artist,
             album = songMetadata.album,
