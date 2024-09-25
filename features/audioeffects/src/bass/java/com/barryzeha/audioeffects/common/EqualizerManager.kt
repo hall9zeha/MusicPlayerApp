@@ -1,9 +1,5 @@
 package com.barryzeha.audioeffects.common
 
-import android.util.Log
-import android.widget.SeekBar
-import androidx.core.view.get
-import com.barryzeha.core.R
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_DX8_PARAMEQ
 import com.barryzeha.core.R as coreRes
@@ -20,7 +16,7 @@ private var mPrefs:EffectsPreferences?=null
 object EqualizerManager {
 
  // For bass
- fun initEqualizer(channel:Int, prefs:EffectsPreferences){
+ fun applyEqualizer(channel:Int, prefs:EffectsPreferences){
    chan=channel
      mPrefs=prefs
    if(prefs.effectsIsEnabled){
@@ -83,22 +79,7 @@ object EqualizerManager {
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 10f);
 
     }
-    fun applyEq(){
-        mPrefs?.let {prefs->
-            for (i in 0 until fxArray.size - 1) {
-                val seekId = i
-                val eqValue = prefs.getSeekBandValue(prefs.effectType, seekId)
-                // Si no hay cambios en los valores de una banda de equalizador en preferencias cargar los valores predefinidos
-                val bandValue =
-                    if (eqValue != 20) eqValue else getEqualizerBandPreConfig(prefs.effectType, seekId)
-                updateFX(i, bandValue)
-            }
-            val reverbValue = prefs.getReverbSeekBandValue(prefs.effectType, coreRes.id.reverb)
-            updateFX(fxArray.size - 1, reverbValue)
-            val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
-            updateFX(11, volumeValue)
-        }
-    }
+
  fun release() {
 
  }

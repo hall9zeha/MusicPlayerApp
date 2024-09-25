@@ -79,7 +79,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
     }
     private fun setUpEqualizer(){
-        outputClicked()
+        enableOrDisableEffects()
     }
 
     private fun setUpListeners()=with(bind){
@@ -100,7 +100,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
         }
         output.setOnClickListener {
-            outputClicked()  }
+            enableOrDisableEffects()  }
 
         chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
             // Al hacer click en otro chip quitar la selección y el focus si ya tenemos un efecto guardado en preferencias
@@ -181,7 +181,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f);
 
     }
-   private  fun outputClicked() {
+   private  fun enableOrDisableEffects() {
 
         val ch = if (fxchan != 0) fxchan else chan
         for (i in fxArray.indices) {

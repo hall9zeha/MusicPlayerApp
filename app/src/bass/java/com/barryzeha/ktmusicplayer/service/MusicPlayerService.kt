@@ -279,7 +279,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     private fun setUpEqualizer(channel:Int?){
         channel?.let {chan->
-            EqualizerManager.initEqualizer(chan, effectsPrefs)
+            EqualizerManager.applyEqualizer(chan, effectsPrefs)
         }
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -530,10 +530,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     nextOrPrev = nextOrPrevAnimValue
                 )!!
 
-                //TODO mejorar la aplicación del equalizador al canal, por ahora funciona pero
-                // realizar una refactorización
-                EqualizerManager.initEqualizer(bassManager?.getActiveChannel()!!,effectsPrefs)
-                //EqualizerManager.applyEq()
+                EqualizerManager.applyEqualizer(bassManager?.getActiveChannel()!!,effectsPrefs)
+
             }
             song?.let {
                 if(executeOnceTime)_songController?.currentTrack(currentMusicState)
