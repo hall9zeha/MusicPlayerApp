@@ -360,6 +360,21 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                                     song.pathLocation?.substringAfterLast(".", "NA")
                                 )
 
+                        }?:run{
+                            chkItemSong.visibility = if (song.isSelectShow) View.VISIBLE else View.GONE
+                            tvBitrate.text = String.format("%s::kbps", song.bitrate)
+                            tvSongDesc.text = String.format(
+                                "%s. %s - %s",
+                                (position), song?.description,
+                                song?.artist
+                            )
+                            chkItemSong.isChecked = song.isChecked
+                            tvDuration.text = "0:00"
+                            tvFileFormat.text =
+                                String.format(
+                                    "::%s",
+                                    song.pathLocation?.substringAfterLast(".", "NA")
+                                )
                         }
                     }
 

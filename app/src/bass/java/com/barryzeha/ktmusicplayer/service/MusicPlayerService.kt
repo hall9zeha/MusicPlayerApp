@@ -36,6 +36,7 @@ import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.getSongMetadata
+import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
@@ -48,6 +49,7 @@ import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import com.barryzeha.ktmusicplayer.utils.BassManager
+import com.google.android.material.snackbar.Snackbar
 import com.un4seen.bass.BASS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -532,6 +534,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
                 EqualizerManager.applyEqualizer(bassManager?.getActiveChannel()!!,effectsPrefs)
 
+            }else{
+                _activity?.showSnackBar(_activity?.findViewById(android.R.id.content)!!,"Can't player this file, will be deleted or error format", Snackbar.LENGTH_LONG)
             }
             song?.let {
                 if(executeOnceTime)_songController?.currentTrack(currentMusicState)
