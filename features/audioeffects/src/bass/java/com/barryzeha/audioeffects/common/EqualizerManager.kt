@@ -1,5 +1,6 @@
 package com.barryzeha.audioeffects.common
 
+import android.util.Log
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_DX8_PARAMEQ
 import com.barryzeha.core.R as coreRes
@@ -13,25 +14,30 @@ private val fxArray:IntArray = IntArray(11)
 private var chan=0
 private var fxChan=0
 private var mPrefs:EffectsPreferences?=null
+private var channelIntent=0
 object EqualizerManager {
 
  // For bass
  fun applyEqualizer(channel:Int, prefs:EffectsPreferences){
-   chan=channel
+     channelIntent=channel
+     chan= channelIntent
      mPrefs=prefs
    if(prefs.effectsIsEnabled){
+       setEffect(prefs.effectsIsEnabled)
       setUpEqValues(prefs)
+   }else{
+       enableOrDisableEffects(false){}
    }
  }
 
-    private fun setUpEqValues(prefs: EffectsPreferences) {
-        setupFX(prefs)
+
+    fun setUpEqValues(prefs: EffectsPreferences) {
+        setupFX(){}
         for (i in 0 until fxArray.size - 1) {
             val seekId = i
             val eqValue = prefs.getSeekBandValue(prefs.effectType, seekId)
             // Si no hay cambios en los valores de una banda de equalizador en preferencias cargar los valores predefinidos
-            val bandValue =
-                if (eqValue != 20) eqValue else getEqualizerBandPreConfig(prefs.effectType, seekId)
+            val bandValue = if (eqValue != 20) eqValue else getEqualizerBandPreConfig(prefs.effectType, seekId)
             updateFX(i, bandValue)
         }
         val reverbValue = prefs.getReverbSeekBandValue(prefs.effectType, coreRes.id.reverb)
@@ -41,7 +47,7 @@ object EqualizerManager {
 
     }
 
-    private fun setupFX(prefs: EffectsPreferences) {
+    fun setupFX(fxIndex:(index:Int)->Unit) {
         // setup the effects
 
         for (i in fxArray.indices - 1) {
@@ -53,16 +59,19 @@ object EqualizerManager {
             p.fCenter =
                 (125f * Math.pow(2.0, (i - 1).toDouble())).toFloat() // Frecuencias centradas
             BASS.BASS_FXSetParameters(fxArray[i], p)
-
+            // Enviamos el índice donde lo necesitemos
+            fxIndex(i)
         }
         fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_REVERB, 0)
         updateFX(fxArray.size - 1, fxArray[fxArray.size - 1])
-        val volumeValue=prefs.getVolumeSeekBandValue(prefs.effectType,coreRes.id.volume)
-        BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f);
+        mPrefs?.let {prefs->
+            val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
+            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f);
+        }
 
     }
 
-    private fun updateFX(index: Int, value: Int) {
+    fun updateFX(index: Int, value: Int) {
         val n = index
         val v = value;
         if (n < fxArray.size - 1) { // EQ
@@ -79,10 +88,46 @@ object EqualizerManager {
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 10f);
 
     }
+    fun setEffect(isEnable: Boolean){
+        val ch = if (fxChan != 0) fxChan else chan
+        for (i in fxArray.indices) {
+            BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+        }
+        // remove reverb effect
+        BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
+        if (isEnable) {
+            fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
+            Log.e("FX-CHAN", fxChan.toString() )
+            Log.e("FX-CHAN->", chan.toString() )
+        } else {
+            fxChan=0
 
- fun release() {
+        }
 
- }
+    }
+    fun enableOrDisableEffects(isEnable:Boolean,setEnabled:(isEnable:Boolean)->Unit){
+        val ch = if (fxChan != 0) fxChan else chan
+        for (i in fxArray.indices) {
+            BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+        }
+        // remove reverb effect
+        BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
+        if (isEnable) {
+            fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
+            chan=channelIntent
+            mPrefs?.effectsIsEnabled = true
+            setEnabled(true)
+
+        } else {
+
+            fxChan=0
+            chan=0
+            mPrefs?.effectsIsEnabled = false
+            setEnabled(false)
+
+        }
+    }
+
 
 
 }

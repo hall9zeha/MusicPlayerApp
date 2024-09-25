@@ -25,6 +25,7 @@ import com.barryzeha.audioeffects.common.CUSTOM_PRESET
 import com.barryzeha.audioeffects.common.ELECTRONIC_PRESET
 import com.barryzeha.core.R as coreRes
 import com.barryzeha.audioeffects.common.EffectsPreferences
+import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.FLAT_PRESET
 import com.barryzeha.audioeffects.common.FULL_BASS_AND_TREBLE_PRESET
 import com.barryzeha.audioeffects.common.FULL_SOUND_PRESET
@@ -36,8 +37,6 @@ import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.barryzeha.core.common.CHANNEL_OR_SESSION_ID_EXTRA
 import com.google.android.material.chip.Chip
-import com.un4seen.bass.BASS
-import com.un4seen.bass.BASS.BASS_DX8_PARAMEQ
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -144,83 +143,42 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
 
     }
-    private fun updateFX(sb: SeekBar){
-            val  v = sb.progress;
-            val n = Integer.parseInt(sb.tag.toString())
-            if (n < fxArray.size -1) { // EQ
-                val p:BASS.BASS_DX8_PARAMEQ = BASS.BASS_DX8_PARAMEQ()
-                BASS.BASS_FXGetParameters(fxArray[n], p);
-                p.fGain = (v - 10).toFloat()
-                BASS.BASS_FXSetParameters(fxArray[n], p);
-            } else if (n == fxArray.size -1) { // reverb
-                val p:BASS.BASS_DX8_REVERB  = BASS.BASS_DX8_REVERB()
-                BASS.BASS_FXGetParameters(fxArray[n], p);
-                p.fReverbMix = (if(v != 0)  (Math.log(v / 20.0) * 20).toFloat() else (-96).toFloat())
-                BASS.BASS_FXSetParameters(fxArray[n], p);
-            } else // volume
-                BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 10f);
 
-    }
-    private fun setupFX() {
-        // setup the effects
-        val ch: Int =if (fxchan != 0) fxchan else chan // set on output stream if enabled, else file stream
-        for (i in fxArray.indices-1) {
-
-            fxArray[i] = BASS.BASS_ChannelSetFX(ch, BASS.BASS_FX_DX8_PARAMEQ, 0)
-            val p = BASS_DX8_PARAMEQ()
-            p.fGain = 0f
-            p.fBandwidth = 18f
-            p.fCenter = (125f * Math.pow(2.0, (i - 1).toDouble())).toFloat() // Frecuencias centradas
-            BASS.BASS_FXSetParameters(fxArray[i], p)
-            val childView= bind.lnContentBands[i]
-            if(childView is SeekBar)updateFX(childView)
-        }
-        fxArray[fxArray.size-1] = BASS.BASS_ChannelSetFX(ch, BASS.BASS_FX_DX8_REVERB, 0)
-        updateFX(bind.lnContentBands.findViewById(coreRes.id.reverb))
-        val volumeValue=mPrefs.getVolumeSeekBandValue(mPrefs.effectType,coreRes.id.volume)
-        BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f);
-
-    }
    private  fun enableOrDisableEffects() {
 
-        val ch = if (fxchan != 0) fxchan else chan
-        for (i in fxArray.indices) {
-            BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
-        }
-        // remove reverb effect
-        BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
-        if (bind.output.isChecked) {
-            enableAndDisableViews(true)
-            fxchan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
-            chan=channelIntent
-            mPrefs.effectsIsEnabled = true
-            chipGroupFocused(mPrefs.effectType)
-        } else {
-            enableAndDisableViews(false)
-            fxchan=0
-            chan=0
-            mPrefs.effectsIsEnabled = false
-            bind.chipGroupEffects.forEach { v->
-                v.clearFocus()
+        EqualizerManager.enableOrDisableEffects(bind.output.isChecked){isEnable ->
+            if(isEnable){
+                enableAndDisableViews(true)
+                chipGroupFocused(mPrefs.effectType)
+            }else{
+                enableAndDisableViews(false)
+                bind.chipGroupEffects.forEach { v->
+                    v.clearFocus()
+                }
             }
         }
-        setupFX()
+        EqualizerManager.setupFX { fxIndex->
+            val childView= bind.lnContentBands[fxIndex]
+            if(childView is SeekBar)
+                EqualizerManager.updateFX(childView.tag.toString().toInt(),childView.progress)
+                //updateFX(childView)
+        }
+        val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
+        EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
+        //setupFX()
     }
     private fun setEffect(){
-        val ch = if (fxchan != 0) fxchan else chan
-        for (i in fxArray.indices) {
-            BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
-        }
-        // remove reverb effect
-        BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
-        if (bind.output.isChecked) {
-            fxchan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
 
-        } else {
-            fxchan=0
-
+        EqualizerManager.setEffect(bind.output.isChecked)
+        EqualizerManager.setupFX { fxIndex->
+            val childView= bind.lnContentBands[fxIndex]
+            if(childView is SeekBar)
+                EqualizerManager.updateFX(childView.tag.toString().toInt(),childView.progress)
+                //updateFX(childView)
         }
-        setupFX()
+        val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
+        EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
+        //setupFX()
     }
     private fun enableAndDisableViews(isEnable:Boolean){
         bind.btnResetEffects.isEnabled=isEnable
@@ -259,10 +217,10 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                updateFX(seekBar)
+                EqualizerManager.updateFX(seekBar.tag.toString().toInt(),seekBar.progress)
+                //updateFX(seekBar)
             }
         }
-
 
         val frequencies = arrayOf("125 Hz", "1 kHz", "8 kHz", "16 kHz", "32 kHz", "64 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz", "")
         for(i in 0 until fxArray.size-1){

@@ -64,7 +64,7 @@ open class BassManager {
                 Log.i(TAG, "freq :" + info.freq)
             }
         }
-
+        configure()
         val nativeDir =MyApp.context.applicationInfo.nativeLibraryDir
         val pluginsList = File(nativeDir).list { dir, name -> name.matches("libbass.+\\.so".toRegex()) }
         pluginsList?.forEach { plugin->
@@ -76,7 +76,10 @@ open class BassManager {
         return instance
     }
     private fun configure(){
-
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_FLOATDSP, 1);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC, 3);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC_SAMPLE, 3);
     }
     fun startCheckingPlayback(){
         stopRunnable()
@@ -84,7 +87,7 @@ open class BassManager {
             override fun run() {
                 if (BASS.BASS_ChannelIsActive(getActiveChannel()) == BASS.BASS_ACTIVE_STOPPED) {
                     playbackManager?.onFinishPlayback()
-                    Log.e("ON-REPEAT->", "ON FINISH" )
+
                 }
                 handler.postDelayed(this,500)
             }
