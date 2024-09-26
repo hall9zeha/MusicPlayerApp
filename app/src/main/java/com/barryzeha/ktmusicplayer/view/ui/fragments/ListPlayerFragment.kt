@@ -213,7 +213,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             adapter.removeAll()
             // probando eliminar la lista de media items para cargar la lista nueva, ya que tendrá un orden distinto
-            musicPlayerService?.clearPlayList()
+            musicPlayerService?.clearPlayList(true)
             // ********
             mPrefs.playListSortOption = selectedSort
             mainViewModel.fetchAllSongsBy(selectedSort)
@@ -251,7 +251,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 mPrefs.clearIdSongInPrefs()
                 mPrefs.clearCurrentPosition()
                 setNumberOfTrack()
-                musicPlayerService?.clearPlayList()
+                musicPlayerService?.clearPlayList(false)
             }
         }
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->

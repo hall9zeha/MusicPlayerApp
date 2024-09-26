@@ -476,13 +476,19 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     songsList.add(s)
                 }
             }
-            Log.e("ITEMS-MEDIA-S-POPULATE", songsList.size.toString())
         }
     }
-    fun clearPlayList(){
+    fun clearPlayList(isSort:Boolean){
         songsList.clear()
         _songController?.currentTrack(currentMusicState)
-        bassManager?.clearBassChannel()
+        // Cuando no es para ordenar la lista sera para eliminar
+        if(!isSort){
+            mPrefs.isPlaying=false
+            _songController?.currentTrack(MusicState())
+            bassManager?.setSongStateSaved(0,0)
+            bassManager?.clearBassChannel()
+        }
+        //bassManager?.clearBassChannel()
         executeOnceTime=false
     }
     fun unregisterController(){
