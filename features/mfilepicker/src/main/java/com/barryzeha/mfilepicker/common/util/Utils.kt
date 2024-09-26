@@ -25,7 +25,7 @@ fun getParentDirectories(path: String): String {
     //val name = Path(path).parent.name
     val file = File(path)
     val parentDir = file.parentFile?.name
-    val regex = Regex("^(cd\\d*|disc\\d*)$", RegexOption.IGNORE_CASE)
+    val regex = Regex("^\\s*(cd\\s*\\d*|disc\\s*\\d*)$", RegexOption.IGNORE_CASE)
     if(parentDir !=null) {
         if (regex.matches(parentDir)) {
             val absolutePath = file.absolutePath
