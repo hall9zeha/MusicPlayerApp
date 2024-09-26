@@ -10,6 +10,8 @@ import com.barryzeha.core.model.entities.AudioMetadata
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import kotlin.io.path.Path
+import kotlin.io.path.name
 
 
 /**
@@ -19,41 +21,29 @@ import java.io.InputStream
  **/
 
 fun getParentDirectories(path: String): String {
-    /*  val emulatedRegex = "emulated/(\\d+)/".toRegex()
-      val emulatedMatchResult = emulatedRegex.find(path)
-
-      val storage=   emulatedMatchResult?.groups?.get(1)?.value ?:""*/
-
-    val storage= getStorageIdentifier(path)
-
-    Log.e("STORAGE-POSITION--:", storage.toString())
-    // Encontrar la posición del nombre del archivo (última '/' antes del nombre de archivo)
-    val lastIndex = path.lastIndexOf('/')
-    if (lastIndex == -1) {
-        return path.substringBeforeLast("/")  // Si no se encuentra '/', retornar el path completo
-    }
-
-    // Encontrar la posición de '0' o '1' en el path
-    val primaryIndex = path.indexOf(storage.toString())
-    if (primaryIndex == -1) {
-        return path.substringBeforeLast("/")  // Si no se encuentra '0', retornar el path completo
-    }
-
-    // Encontrar el primer '/' después de 'primary'
-    val firstSlashAfterPrimary = path.indexOf('/', primaryIndex)
-    if (firstSlashAfterPrimary == -1 || firstSlashAfterPrimary >= lastIndex) {
-        return if (primaryIndex == -1) {
-            path.substringBeforeLast("/")
-        } else {
-            return path.substring(primaryIndex + storage.toString().length, lastIndex)
+    //val storage= getStorageIdentifier(path)
+    //val name = Path(path).parent.name
+    val file = File(path)
+    val parentDir = file.parentFile?.name
+    val regex = Regex("^(cd\\d*|disc\\d*)$", RegexOption.IGNORE_CASE)
+    if(parentDir !=null) {
+        if (regex.matches(parentDir)) {
+            val absolutePath = file.absolutePath
+            val pathParts = absolutePath.split('/').filter { it.isNotEmpty() }
+            if (pathParts.size >= 2) {
+                val lastDir=pathParts[pathParts.size -2]
+                val beforeLastDir = pathParts[pathParts.size-3]
+                Log.e("PARENT-NAME->", "$beforeLastDir/$lastDir")
+                return  "$beforeLastDir/$lastDir"
+            }else{
+                Log.e("PARENT-NAME->",pathParts[pathParts.size -2] )
+                return parentDir
+            }
+        }else{
+            return parentDir
         }
-
-        // Si no se encuentra '/', retornar el path completo
     }
-
-    // Recortar el path desde el primer '/' después de '0' hasta el nombre del archivo
-    val directoriosRecortados = path.substring(firstSlashAfterPrimary + 1, lastIndex)
-    return directoriosRecortados
+    return ""
 
 }
 fun getStorageIdentifier(path: String): String? {

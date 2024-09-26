@@ -118,7 +118,8 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         musicService = binder.getService()
         musicService?.setActivity(this)
         serviceSongListener?.onServiceConnected(this,service)
-        registerSongListener(serviceSongListener!!)
+        serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
+
         mainViewModel.setServiceInstance(this,musicService!!)
     }
     override fun onServiceDisconnected(name: ComponentName?) {

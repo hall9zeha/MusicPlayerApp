@@ -365,8 +365,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                             tvBitrate.text = String.format("%s::kbps", song.bitrate)
                             tvSongDesc.text = String.format(
                                 "%s. %s - %s",
-                                (position), song?.description,
-                                song?.artist
+                                (position), song.description,
+                                song.artist
                             )
                             chkItemSong.isChecked = song.isChecked
                             tvDuration.text = "0:00"
