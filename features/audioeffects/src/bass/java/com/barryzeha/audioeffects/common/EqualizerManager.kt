@@ -90,13 +90,19 @@ object EqualizerManager {
     }
     fun setEffect(isEnable: Boolean){
         val ch = if (fxChan != 0) fxChan else chan
-        for (i in fxArray.indices) {
+        for (i in fxArray.indices -1) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+            //TODO había que limpiar el canal principal también, realizar más pruebas
+            // al iniciar desde el servicio el efecto no se aplica por borrar el canal principal
+            BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
+
         }
         // remove reverb effect
         BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
+        BASS.BASS_ChannelRemoveFX(chan, fxArray[fxArray.size-1])
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
+            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, mPrefs?.getVolumeSeekBandValue(mPrefs?.effectType!!, coreRes.id.volume)!!.toInt() / 10f)
             Log.e("FX-CHAN", fxChan.toString() )
             Log.e("FX-CHAN->", chan.toString() )
         } else {
@@ -107,11 +113,15 @@ object EqualizerManager {
     }
     fun enableOrDisableEffects(isEnable:Boolean,setEnabled:(isEnable:Boolean)->Unit){
         val ch = if (fxChan != 0) fxChan else chan
-        for (i in fxArray.indices) {
+        for (i in fxArray.indices -1) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+            BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
+
         }
         // remove reverb effect
         BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
+        BASS.BASS_ChannelRemoveFX(chan, fxArray[fxArray.size-1])
+
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
             chan=channelIntent
@@ -123,6 +133,7 @@ object EqualizerManager {
             fxChan=0
             chan=0
             mPrefs?.effectsIsEnabled = false
+            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, 1f)
             setEnabled(false)
 
         }

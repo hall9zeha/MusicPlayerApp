@@ -109,18 +109,52 @@ class MainEqualizerActivity : AppCompatActivity() {
 
             val chip = group.findViewById<Chip>(checkedIds[0])
             when(group.indexOfChild(chip)){
-            CUSTOM_PRESET->{lnContentBands.removeAllViews(); createView(CUSTOM_PRESET);setEffect()}
-            ROCK_PRESET->{lnContentBands.removeAllViews(); createView(ROCK_PRESET);setEffect()}
-            POP_PRESET->{lnContentBands.removeAllViews(); createView(POP_PRESET);setEffect()}
-            BASS_PRESET->{lnContentBands.removeAllViews(); createView(BASS_PRESET);setEffect()}
-            FLAT_PRESET->{lnContentBands.removeAllViews(); createView(FLAT_PRESET);setEffect()}
-            JAZZ_PRESET->{lnContentBands.removeAllViews(); createView(JAZZ_PRESET);setEffect()}
-            CLASSICAL_PRESET->{lnContentBands.removeAllViews(); createView(CLASSICAL_PRESET);setEffect()}
-            HIP_HOP_PRESET->{lnContentBands.removeAllViews(); createView(HIP_HOP_PRESET);setEffect()}
-            ELECTRONIC_PRESET->{lnContentBands.removeAllViews(); createView(ELECTRONIC_PRESET);setEffect()}
-            FULL_SOUND_PRESET->{lnContentBands.removeAllViews(); createView(FULL_SOUND_PRESET);setEffect()}
-            FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews(); createView(
-                FULL_BASS_AND_TREBLE_PRESET);setEffect()}
+            CUSTOM_PRESET->{lnContentBands.removeAllViews(); createView(CUSTOM_PRESET)
+
+                setEffect()
+            }
+            ROCK_PRESET->{lnContentBands.removeAllViews(); createView(ROCK_PRESET)
+
+                setEffect()
+            }
+            POP_PRESET->{lnContentBands.removeAllViews(); createView(POP_PRESET)
+
+                setEffect()
+            }
+            BASS_PRESET->{lnContentBands.removeAllViews(); createView(BASS_PRESET)
+
+                setEffect()
+            }
+            FLAT_PRESET->{lnContentBands.removeAllViews(); createView(FLAT_PRESET)
+
+                setEffect()
+            }
+            JAZZ_PRESET->{lnContentBands.removeAllViews(); createView(JAZZ_PRESET)
+
+                setEffect()
+            }
+            CLASSICAL_PRESET->{lnContentBands.removeAllViews(); createView(CLASSICAL_PRESET)
+
+                setEffect()
+            }
+            HIP_HOP_PRESET->{lnContentBands.removeAllViews(); createView(HIP_HOP_PRESET)
+
+                setEffect()
+            }
+            ELECTRONIC_PRESET->{lnContentBands.removeAllViews(); createView(ELECTRONIC_PRESET)
+
+                setEffect()
+            }
+            FULL_SOUND_PRESET->{lnContentBands.removeAllViews(); createView(FULL_SOUND_PRESET)
+
+                setEffect()
+            }
+            FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews();createView(
+                FULL_BASS_AND_TREBLE_PRESET)
+
+
+                setEffect()
+            }
         }
         }
 
@@ -165,7 +199,6 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
         EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
-        //setupFX()
     }
     private fun setEffect(){
 
@@ -178,7 +211,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
         EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
-        //setupFX()
+
     }
     private fun enableAndDisableViews(isEnable:Boolean){
         bind.btnResetEffects.isEnabled=isEnable

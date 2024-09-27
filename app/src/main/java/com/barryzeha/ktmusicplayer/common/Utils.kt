@@ -199,7 +199,7 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
     }
 }
 fun onMenuItem(onItemClick:Boolean=true,activity:Activity, view:View,deleteItem:()->Unit, deleteAllItems:()->Unit){
-    val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater) // Asegúrate de que este layout tenga el diseño que deseas
+    val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
 
     val popupWindow = PopupWindow(popupView.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     if (!onItemClick) popupView.btnDeleteItem.visibility = View.GONE
@@ -214,20 +214,18 @@ fun onMenuItem(onItemClick:Boolean=true,activity:Activity, view:View,deleteItem:
         }
         popupWindow.dismiss()
     }
-    // Mostrar el popup sobre el botón
+
     popupWindow.isFocusable = true
 
     popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(activity,com.barryzeha.ktmusicplayer.R.drawable.popup_window_background))
 
-    // Posiciona el popup sobre el botón
     val location = IntArray(2)
     view.getLocationOnScreen(location)
-    // Mostrar el PopupWindow en la posición deseada
+
     popupView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
     popupWindow.width = LinearLayout.LayoutParams.WRAP_CONTENT
     popupWindow.height = View.MeasureSpec.makeMeasureSpec(popupView.root.measuredHeight, View.MeasureSpec.UNSPECIFIED)
 
-    // Mostrar el PopupWindow
     popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, location[0], location[1] - popupWindow.height - 16)
 
 }
