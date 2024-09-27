@@ -18,5 +18,6 @@
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="delete_all">Eliminar lista</string>
     <string name="delete_all_msg">Realmente quiere eliminar toda la lista?</string>
+    <string name="delete_song">Delete song</string>
 
 </resources>

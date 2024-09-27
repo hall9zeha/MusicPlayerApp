@@ -46,6 +46,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.onMenuItem
 import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.common.sortPlayList
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
@@ -502,6 +503,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
 
             }
+            btnMore?.setOnClickListener{view->
+                onMenuItem(onItemClick=false,requireActivity(),view,{
+                    // Delete item callback
+
+                },{
+                    // Delete all items callback
+                    adapter.removeAll()
+                    mainViewModel.deleteAllSongs()
+                })
+            }
         }
     }
     private fun getColorStateList(index:Int,defaultIndex:Int):ColorStateList{
@@ -644,26 +655,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {
-        val popupMenu = PopupMenu(activity,view)
-        popupMenu.menuInflater.inflate(coreRes.menu.item_menu,popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener {item->
-            when(item.itemId){
-                coreRes.id.deleteItem->{
-                    mainViewModel.deleteSong(selectedSong)
-                    this.song=selectedSong
+        onMenuItem(true,requireActivity(),view,{
+            // Delete item callback
+            mainViewModel.deleteSong(selectedSong)
+            this.song=selectedSong
+        },{
+            // Delete all items callback
+            adapter.removeAll()
+            mainViewModel.deleteAllSongs()
+        })
 
-                }
-                coreRes.id.deleteAllItem->{
-                    showDialog(requireContext(),R.string.delete_all,
-                        R.string.delete_all_msg){
-                    adapter.removeAll()
-                    mainViewModel.deleteAllSongs()
-                    }
-                }
-            }
-            true
-        }
-        popupMenu.show()
     }
 
     private fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){

@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.common
 
+import android.app.Activity
 import com.barryzeha.ktmusicplayer.br.MusicPlayerBroadcast
 import android.app.Notification
 import android.app.NotificationChannel
@@ -7,22 +8,36 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.PopupMenu
+import android.widget.PopupWindow
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+import androidx.core.view.get
 import com.barryzeha.core.R
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_GENRE
+import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.databinding.WindowPopupMenuBinding
 
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 
 /**
@@ -182,4 +197,37 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
             }
         }
     }
+}
+fun onMenuItem(onItemClick:Boolean=true,activity:Activity, view:View,deleteItem:()->Unit, deleteAllItems:()->Unit){
+    val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater) // Asegúrate de que este layout tenga el diseño que deseas
+
+    val popupWindow = PopupWindow(popupView.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    if (!onItemClick) popupView.btnDeleteItem.visibility = View.GONE
+    popupView.btnDeleteItem.setOnClickListener {
+        deleteItem()
+        popupWindow.dismiss()
+    }
+    popupView.btnDeleteAll.setOnClickListener {
+        showDialog(activity, com.barryzeha.ktmusicplayer.R.string.delete_all,
+            com.barryzeha.ktmusicplayer.R.string.delete_all_msg) {
+            deleteAllItems()
+        }
+        popupWindow.dismiss()
+    }
+    // Mostrar el popup sobre el botón
+    popupWindow.isFocusable = true
+
+    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(activity,com.barryzeha.ktmusicplayer.R.drawable.popup_window_background))
+
+    // Posiciona el popup sobre el botón
+    val location = IntArray(2)
+    view.getLocationOnScreen(location)
+    // Mostrar el PopupWindow en la posición deseada
+    popupView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+    popupWindow.width = LinearLayout.LayoutParams.WRAP_CONTENT
+    popupWindow.height = View.MeasureSpec.makeMeasureSpec(popupView.root.measuredHeight, View.MeasureSpec.UNSPECIFIED)
+
+    // Mostrar el PopupWindow
+    popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, location[0], location[1] - popupWindow.height - 16)
+
 }
