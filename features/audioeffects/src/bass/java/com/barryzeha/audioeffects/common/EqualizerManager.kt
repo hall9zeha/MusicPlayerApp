@@ -3,6 +3,10 @@ package com.barryzeha.audioeffects.common
 import android.util.Log
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_DX8_PARAMEQ
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.barryzeha.core.R as coreRes
 
 /**
@@ -23,46 +27,53 @@ object EqualizerManager {
      chan= channelIntent
      mPrefs=prefs
    if(prefs.effectsIsEnabled){
-       setEffect(prefs.effectsIsEnabled)
-      setUpEqValues(prefs)
+       setEffect(true)
+       setUpEqValues(prefs)
+
    }else{
        enableOrDisableEffects(false){}
    }
  }
 
 
-    fun setUpEqValues(prefs: EffectsPreferences) {
-        setupFX(){}
-        for (i in 0 until fxArray.size - 1) {
-            val seekId = i
-            val eqValue = prefs.getSeekBandValue(prefs.effectType, seekId)
-            // Si no hay cambios en los valores de una banda de equalizador en preferencias cargar los valores predefinidos
-            val bandValue = if (eqValue != 20) eqValue else getEqualizerBandPreConfig(prefs.effectType, seekId)
-            updateFX(i, bandValue)
-        }
-        val reverbValue = prefs.getReverbSeekBandValue(prefs.effectType, coreRes.id.reverb)
-        updateFX(fxArray.size - 1, reverbValue)
-        val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
-        updateFX(11, volumeValue)
+    private fun setUpEqValues(prefs: EffectsPreferences) {
+
+            setupFX() { seekId ->
+                val eqValue = prefs.getSeekBandValue(prefs.effectType, seekId)
+
+                // Si no hay cambios en los valores de una banda de equalizador en preferencias cargar los valores predefinidos
+                val bandValue = if (eqValue != 20) eqValue else getEqualizerBandPreConfig(
+                    prefs.effectType,
+                    seekId
+                )
+                Log.e("PRESET-VAL--Main", bandValue.toString() )
+                updateFX(seekId, bandValue)
+            }
+            val reverbValue = prefs.getReverbSeekBandValue(prefs.effectType, coreRes.id.reverb)
+            updateFX(fxArray.size - 1, reverbValue)
+            val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
+            updateFX(11, volumeValue)
+
 
     }
 
     fun setupFX(fxIndex:(index:Int)->Unit) {
         // setup the effects
-
-        for (i in fxArray.indices - 1) {
-
+        val chan = if(fxChan !=0) fxChan else chan
+        for (i in 0 until  fxArray.size - 1) {
             fxArray[i] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_PARAMEQ, 0)
             val p = BASS_DX8_PARAMEQ()
             p.fGain = 0f
             p.fBandwidth = 18f
             p.fCenter =
                 (125f * Math.pow(2.0, (i - 1).toDouble())).toFloat() // Frecuencias centradas
+
             BASS.BASS_FXSetParameters(fxArray[i], p)
             // Enviamos el índice donde lo necesitemos
             fxIndex(i)
         }
         fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_REVERB, 0)
+
         updateFX(fxArray.size - 1, fxArray[fxArray.size - 1])
         mPrefs?.let {prefs->
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
@@ -90,19 +101,14 @@ object EqualizerManager {
     }
     fun setEffect(isEnable: Boolean){
         val ch = if (fxChan != 0) fxChan else chan
-        for (i in fxArray.indices -1) {
+        for (i in fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
-            //TODO había que limpiar el canal principal también, realizar más pruebas
-            // al iniciar desde el servicio el efecto no se aplica por borrar el canal principal
-            BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
-
+            //TODO ya es funcional correctamente, hacer más pruebas
+            //BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
         }
-        // remove reverb effect
-        BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
-        BASS.BASS_ChannelRemoveFX(chan, fxArray[fxArray.size-1])
+
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, mPrefs?.getVolumeSeekBandValue(mPrefs?.effectType!!, coreRes.id.volume)!!.toInt() / 10f)
             Log.e("FX-CHAN", fxChan.toString() )
             Log.e("FX-CHAN->", chan.toString() )
         } else {
@@ -113,15 +119,11 @@ object EqualizerManager {
     }
     fun enableOrDisableEffects(isEnable:Boolean,setEnabled:(isEnable:Boolean)->Unit){
         val ch = if (fxChan != 0) fxChan else chan
-        for (i in fxArray.indices -1) {
+        for (i in  fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
-            BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
+            //BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
 
         }
-        // remove reverb effect
-        BASS.BASS_ChannelRemoveFX(ch, fxArray[fxArray.size-1])
-        BASS.BASS_ChannelRemoveFX(chan, fxArray[fxArray.size-1])
-
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
             chan=channelIntent

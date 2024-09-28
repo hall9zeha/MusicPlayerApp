@@ -281,7 +281,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     private fun setUpEqualizer(channel:Int?){
         channel?.let {chan->
-            EqualizerManager.applyEqualizer(chan, effectsPrefs)
+            //EqualizerManager.applyEqualizer()
         }
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -345,7 +345,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 val songEntity=songState[0].songEntity
                 if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
             }
-            setUpEqualizer(bassManager?.getActiveChannel())
+
         }
     }
     private fun nextOrPrevTrack(action:Int){

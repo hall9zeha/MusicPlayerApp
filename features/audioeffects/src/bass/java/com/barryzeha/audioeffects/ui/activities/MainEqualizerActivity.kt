@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -50,8 +51,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     private lateinit var bind:ActivityMainEqualizerBinding
     private val fxArray:IntArray = IntArray(11)
-    private var fxchan: Int = 0
-    private var chan:Int=0
+
     private var channelIntent=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,7 +114,6 @@ class MainEqualizerActivity : AppCompatActivity() {
                 setEffect()
             }
             ROCK_PRESET->{lnContentBands.removeAllViews(); createView(ROCK_PRESET)
-
                 setEffect()
             }
             POP_PRESET->{lnContentBands.removeAllViews(); createView(POP_PRESET)
@@ -192,10 +191,14 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
         }
         EqualizerManager.setupFX { fxIndex->
-            val childView= bind.lnContentBands[fxIndex]
-            if(childView is SeekBar)
-                EqualizerManager.updateFX(childView.tag.toString().toInt(),childView.progress)
+            //TODO ya que tenemos en el mismo linear layout tanto textviews como seekbars
+            //buscarlos por el index no nos devolverá todos los seekbar que tenemos, entonces los buscamos por su tag
+            val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
+            if(childView is SeekBar) {
+                EqualizerManager.updateFX(childView.tag.toString().toInt(), childView.progress)
+                Log.e("PRESET-VAL--util", childView.progress.toString())
                 //updateFX(childView)
+            }
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
         EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
@@ -204,7 +207,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         EqualizerManager.setEffect(bind.output.isChecked)
         EqualizerManager.setupFX { fxIndex->
-            val childView= bind.lnContentBands[fxIndex]
+            val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
             if(childView is SeekBar)
                 EqualizerManager.updateFX(childView.tag.toString().toInt(),childView.progress)
                 //updateFX(childView)
