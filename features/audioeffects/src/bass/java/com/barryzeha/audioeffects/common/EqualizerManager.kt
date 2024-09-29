@@ -67,7 +67,7 @@ object EqualizerManager {
             p.fBandwidth = 18f
             p.fCenter =
                 (125f * Math.pow(2.0, (i - 1).toDouble())).toFloat() // Frecuencias centradas
-
+            Log.e("FX-CENTER", p.fCenter.toString() )
             BASS.BASS_FXSetParameters(fxArray[i], p)
             // Enviamos el índice donde lo necesitemos
             fxIndex(i)
@@ -113,9 +113,7 @@ object EqualizerManager {
             Log.e("FX-CHAN->", chan.toString() )
         } else {
             fxChan=0
-
         }
-
     }
     fun enableOrDisableEffects(isEnable:Boolean,setEnabled:(isEnable:Boolean)->Unit){
         val ch = if (fxChan != 0) fxChan else chan
