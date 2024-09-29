@@ -74,8 +74,8 @@ private fun enqueueFiles(file: File, channel: Channel<File>) {
             enqueueFiles(subFile, channel)
         }
     } else {
-        // Enviar archivo al canal
-        channel.trySend(file).isSuccess
+            // Enviar archivo al canal
+            channel.trySend(file).isSuccess
     }
 }
 private fun countAudioFile(file: File) {
@@ -84,7 +84,8 @@ private fun countAudioFile(file: File) {
             countAudioFile(subFile)
         }
     } else {
-      audioFileCount++
+        //Comprobamos que sea un archivo de audio
+        if(AudioFileType().verify(file.name))audioFileCount++
     }
 }
 private suspend fun processFile(
