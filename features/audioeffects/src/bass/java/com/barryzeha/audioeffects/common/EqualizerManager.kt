@@ -29,15 +29,11 @@ object EqualizerManager {
    if(prefs.effectsIsEnabled){
        setEffect(true)
        setUpEqValues(prefs)
-
    }else{
-       enableOrDisableEffects(false){}
+       //enableOrDisableEffects(false){}
    }
  }
-
-
-    private fun setUpEqValues(prefs: EffectsPreferences) {
-
+ private fun setUpEqValues(prefs: EffectsPreferences) {
             setupFX() { seekId ->
                 val eqValue = prefs.getSeekBandValue(prefs.effectType, seekId)
 
@@ -53,8 +49,6 @@ object EqualizerManager {
             updateFX(fxArray.size - 1, reverbValue)
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
             updateFX(11, volumeValue)
-
-
     }
 
     fun setupFX(fxIndex:(index:Int)->Unit) {
@@ -73,13 +67,11 @@ object EqualizerManager {
             fxIndex(i)
         }
         fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_REVERB, 0)
-
         updateFX(fxArray.size - 1, fxArray[fxArray.size - 1])
         mPrefs?.let {prefs->
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f);
         }
-
     }
 
     fun updateFX(index: Int, value: Int) {
@@ -138,7 +130,5 @@ object EqualizerManager {
 
         }
     }
-
-
 
 }

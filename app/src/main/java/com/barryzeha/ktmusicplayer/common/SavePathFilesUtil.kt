@@ -31,7 +31,6 @@ fun processSongPaths(
     paths: List<String>,  // Lista de directorios a procesar
     itemsCount:(itemsNum:Int)->Unit,
     fileProcessed: (song:SongEntity) -> Unit
-    //filesProcessed:(List<SongEntity>)->Unit
 ) {
     val channel = Channel<File>(Channel.UNLIMITED)  // Canal sin límite de buffer
     audioFileCount=0
@@ -58,13 +57,8 @@ fun processSongPaths(
      CoroutineScope(Dispatchers.IO).launch {
             for (file in channel) {
                 processFile(file, MyApp.context,fileProcessed)
-                /*processFile(file, MyApp.context)?.let{song->
-                    listFilesProcessed.add(song)
-                }*/
-
-            }
-            //filesProcessed(listFilesProcessed)
-        }
+                }
+           }
 }
 
 private fun enqueueFiles(file: File, channel: Channel<File>) {
@@ -123,35 +117,5 @@ private suspend fun processFile(
 
     }
 
-}/*
-private suspend fun processFile(
-    file: File,
-    context: Context
-):SongEntity?{
-    if (AudioFileType().verify(file.absolutePath)) {
-        val uri = getUriFromFile(file, context)
-        operationsMutex.withLock {
-            val realPathFromFile = getRealPathFromURI(uri, context)
-            val parentDir = getParentDirectories(uri.path.toString())
-            val metadata = fetchFileMetadata(context, realPathFromFile!!)
-            metadata?.let {
-                return SongEntity(
-                    pathLocation = realPathFromFile,
-                    parentDirectory = parentDir,
-                    description = metadata.title,
-                    duration = metadata.songLength,
-                    bitrate = metadata.bitRate,
-                    artist = metadata.artist!!,
-                    album = metadata.album!!,
-                    genre = metadata.genre!!,
-                    timestamp = Date().time
-                )
-           }
-        }
-
-    }
-    return null
 }
-*/
-
 
