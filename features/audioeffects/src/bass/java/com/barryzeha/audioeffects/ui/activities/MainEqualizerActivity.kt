@@ -191,13 +191,12 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
         }
         EqualizerManager.setupFX { fxIndex->
-            //TODO ya que tenemos en el mismo linear layout tanto textviews como seekbars
+            //Ya que tenemos en el mismo linear layout tanto textviews como seekbars
             //buscarlos por el index no nos devolverá todos los seekbar que tenemos, entonces los buscamos por su tag
             val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
             if(childView is SeekBar) {
                 EqualizerManager.updateFX(childView.tag.toString().toInt(), childView.progress)
-                Log.e("PRESET-VAL--util", childView.progress.toString())
-                //updateFX(childView)
+
             }
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
@@ -210,7 +209,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
             if(childView is SeekBar)
                 EqualizerManager.updateFX(childView.tag.toString().toInt(),childView.progress)
-                //updateFX(childView)
+
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
         EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
@@ -258,7 +257,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
         }
 
-        val frequencies = arrayOf("125 Hz", "1 kHz", "8 kHz", "16 kHz", "32 kHz", "64 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz", "")
+        val frequencies = arrayOf("32 Hz", "64 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz", "16 kHz", "")
         for(i in 0 until fxArray.size-1){
             val seekId=i
             val seekProgress= mPrefs.getSeekBandValue(effectType,seekId)
