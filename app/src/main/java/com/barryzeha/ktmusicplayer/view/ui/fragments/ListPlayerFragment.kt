@@ -73,15 +73,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     @Inject
     lateinit var mPrefs:MyPreferences
-
     private var param1: String? = null
     private var param2: String? = null
     private var bind:FragmentListPlayerBinding? = null
-
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
-
     private lateinit var adapter:MusicListAdapter
-
     private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private lateinit var launcherAudioEffectActivity:ActivityResultLauncher<Int>
@@ -90,11 +86,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var userSelectPosition=0
     private var serviceConnection:ServiceConnection?=null
     private  var currentSelectedPosition:Int =0
-
     private var currentMusicState = MusicState()
     private var song:SongEntity?=null
     private var musicPlayerService: MusicPlayerService?=null
-
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
 
@@ -478,7 +472,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 }
             })
             btnMultipleSelect?.setOnClickListener{
-
                 if(clicked){
                     adapter.showMultipleSelection(false)
                     btnMultipleSelect.backgroundTintList = getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)

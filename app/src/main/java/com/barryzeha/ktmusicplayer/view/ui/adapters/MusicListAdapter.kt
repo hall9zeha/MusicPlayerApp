@@ -37,12 +37,12 @@ import kotlinx.coroutines.withContext
 
 class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                        private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): ListAdapter<Any, RecyclerView.ViewHolder>(CombinedDiffCallback(SongDiffCallback(), HeaderDiffCallback())), Filterable, FastScroller.SectionIndexer {
-//class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,private val onMenuItemClick:(view:View,Int,SongEntity)->Unit): RecyclerView.Adapter<MusicListAdapter.MViewHolder>(){
+
     private val SONG_ITEM=0
     private val HEADER_ITEM=1
 
     private var originalList:MutableList<Any> = arrayListOf()
-    //private val asyncListDiffer = AsyncListDiffer(this,SongDiffCallback())
+    private var songEntityIndices = mutableListOf<Int>()
     private var itemListForDelete:MutableList<SongEntity> = arrayListOf()
     private var selectedPos = -1
     private var lastSelectedPos = -1
@@ -60,44 +60,18 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             val itemViewHeader = LayoutInflater.from(parent.context).inflate(R.layout.list_item_header,parent,false)
             HeaderViewHolder(itemViewHeader)
         }
-
-
     }
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
              when (val latestPayload = payloads.lastOrNull()) {
                 is ItemSongChangePayload.BackgroundColor -> (holder as MViewHolder).bindBackgroundColor(latestPayload.color)
                 is ItemSongChangePayload.CheckBoxVisible -> (holder as MViewHolder).bindCheckboxVisible(latestPayload.isVisible)
                 else -> onBindViewHolder(holder, position)
             }
-
     }
-
-    /* override fun getItemId(position: Int): Long {
-        if(currentList[position] is SongEntity) {
-            return ((currentList[position] as SongEntity)).id
-        }else{
-            return 0
-        }
-    }*/
     override fun getSectionText(position: Int) = if(getItem(position) is SongEntity) (getItem(position) as SongEntity).album else ""
 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-       /* if(holder is MViewHolder) {
-            try {
-                if (selectedPos == position) {
-                    (holder as MViewHolder).bind.root.setBackgroundColor(
-                        mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
-                    )
-                } else {
-                    (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
-                }
-
-            } finally {
-                mColorList(context).recycle()
-            }
-        }*/
         if(holder is MViewHolder) {
             try {
                 if (selectedPos == position) {
@@ -107,16 +81,28 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 } else {
                     (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
                 }
-
             } finally {
                 mColorList(context).recycle()
             }
-            val songPosition = getSongPositionOnlySongItem(position)
+            //val songPosition = getSongPositionOnlySongItem(position)
+            val songPosition = getOriginalPosition(getItem(position))
             holder.onBind(songPosition, getItem(position) as SongEntity)
         }else if(holder is HeaderViewHolder){
             holder.onBind(getItem(position) as String)
         }
 
+    }
+    // Esta función también nos mostrará la numeración original incluso mientras filtramos
+    // la lista al buscar un canción
+    private fun getOriginalPosition(item: Any): Int {
+        // Encuentra la posición del ítem en la lista original
+        val itemPos = originalList.indexOf(item)
+        // Si el ítem está en la lista original y es un SongEntity
+        if (itemPos != -1 && originalList[itemPos] is SongEntity) {
+            // Busca la posición en la lista de índices
+            return songEntityIndices.indexOf(itemPos) + 1
+        }
+        return 0 // Retorna 0 si no se encuentra o no es un SongEntity
     }
     private fun getSongPositionOnlySongItem(position: Int): Int {
         var count = 0
@@ -153,7 +139,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
 
             songItem?.let {
                 val position = originalList.indexOf(songItem)
-                //selectedPos = position
                 selectedPos = originalList.indexOf(songItem)
                 if (lastSelectedPos == -1) {
                     lastSelectedPos = selectedPos
@@ -170,32 +155,26 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             }
 
     }
+    private fun setUpSongEntitiesIndices(){
+        songEntityIndices.clear()
+        for(i in originalList.indices){
+            if(originalList[i] is SongEntity){
+                songEntityIndices.add(i)
+            }
+        }
+    }
     fun addAll(songs:List<Any>){
         this.originalList=songs.toMutableList()
+        setUpSongEntitiesIndices()
         submitList(songs)
-        //asyncListDiffer.submitList(songs)
-       /* songs.forEach {
-            add(it)
-        }*/
+
     }
     // Al usar DiffUtils o asyncListDiffer para agregar mas de un item a la vez a veces solo ingresa el último
     // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
     // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo, parece poco eficiente,
     // pero diff util está diseñado para manejarlo, aún así seguiremos averiguando más.
-    fun add(song: SongEntity) {
-        /*val updateList = asyncListDiffer.currentList.toMutableList()
-        if (!updateList.contains(song)) {
-            updateList.add(song)
-            asyncListDiffer.submitList(updateList.toList())
-        }*/
-        /*if (!songList.contains(song)) {
-            songList.add(song)
-            notifyItemInserted(songList.size - 1)
 
-            }*/
-     }
     fun remove(song:SongEntity){
-        //val currentList=asyncListDiffer.currentList.toMutableList()
         val currentList=currentList.toMutableList()
         if(currentList.contains(song)){
             val position = currentList.indexOf(song)
@@ -213,13 +192,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             originalList = currentList
 
         }
-        /*
-        if(songList.contains(song)){
-            val position = songList.indexOf(song)
-            songList.removeAt(position)
-            notifyItemRemoved(position)
-        }
-        */
+
     }
 
     fun removeItemsForMultipleSelectedAction() {
@@ -263,10 +236,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         originalList=currentList
 
     }
-
     fun getListItemsForDelete():List<SongEntity> = itemListForDelete
     fun clearListItemsForDelete(){itemListForDelete.clear()}
-
 
     private fun shouldRemoveHeaderForSong(song:SongEntity):Int{
         val position = currentList.indexOf(song)
@@ -369,7 +340,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                                 song.artist
                             )
                             chkItemSong.isChecked = song.isChecked
-                            tvDuration.text = "0:00"
+                            tvDuration.text = "00:00"
                             tvFileFormat.text =
                                 String.format(
                                     "::%s",
