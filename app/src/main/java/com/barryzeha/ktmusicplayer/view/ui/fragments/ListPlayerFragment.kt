@@ -238,12 +238,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.deletedRow.observe(viewLifecycleOwner){deletedRow->
             if(deletedRow>0) song?.let{song->
                 adapter.remove(song)
-                musicPlayerService?.removeMediaItem(song)
-                setNumberOfTrack(scrollToPosition = false)
                 if(song.id == mPrefs.idSong){
                     mainViewModel.removeSongState(song.id)
                     mPrefs.clearIdSongInPrefs()
+                    //Si eliminamos la pista que está en reproducción, pasamos a la siguiente
+                    musicPlayerService?.nextSong()
                 }
+                musicPlayerService?.removeMediaItem(song)
+                setNumberOfTrack(scrollToPosition = false)
             }
         }
         mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteRows->

@@ -480,13 +480,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun clearPlayList(isSort:Boolean){
         songsList.clear()
-        _songController?.currentTrack(currentMusicState)
         // Cuando no es para ordenar la lista sera para eliminar
         if(!isSort){
             mPrefs.isPlaying=false
             _songController?.currentTrack(MusicState())
             bassManager?.setSongStateSaved(0,0)
             bassManager?.clearBassChannel()
+        }else{
+            _songController?.currentTrack(currentMusicState)
         }
         //bassManager?.clearBassChannel()
         executeOnceTime=false
