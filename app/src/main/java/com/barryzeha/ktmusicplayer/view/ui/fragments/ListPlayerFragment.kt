@@ -169,7 +169,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
             updateUIOnceTime(currentTRack)
-           setNumberOfTrack()
+            setNumberOfTrack(scrollToPosition = false)
 
         }
         mainViewModel.processedRegisterInfo.observe(viewLifecycleOwner){(size, count)->
@@ -757,18 +757,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         musicPlayerService = null
     }
 
+    override fun onPause() {
+        super.onPause()
+        setNumberOfTrack()
+    }
     override fun onResume() {
         super.onResume()
         checkPreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
-        currentSelectedPosition = mPrefs.currentPosition.toInt()
-        adapter.changeBackgroundColorSelectedItem(mPrefs.idSong)
-        val itemSong = adapter.getSongById(mPrefs.idSong)
-        itemSong?.let{
-            val position = adapter.getPositionByItem(itemSong)
-            bind?.rvSongs?.scrollToPosition(position.second)
-        }
+        setNumberOfTrack()
         if(mPrefs.controlFromNotify){
             try {
                 //val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
