@@ -10,14 +10,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.common.Preferences
@@ -34,12 +30,12 @@ import javax.inject.Inject
 class FilePickerActivity : AppCompatActivity() {
     @Inject
     lateinit var mPrefs:Preferences
-
+    private var storagePaths = mutableListOf<File>()
     private lateinit var bind:ActivityFilePickerBinding
     private lateinit var pickerAdapter:FilePickerAdapter
     private var  fileList:MutableList<FileItem> = mutableListOf()
     private lateinit var rootDirectory:File
-    private var listTreeOfNav:MutableList<Pair<Int,File>> = arrayListOf()
+    private var listTreeOfNav:MutableList<Pair<Int,File?>> = arrayListOf()
     private var selectedItemsList:MutableList<FileItem> = arrayListOf()
     private var toolbarMenu:Menu?=null
     private var isSelectedAll:Boolean=false
@@ -62,18 +58,38 @@ class FilePickerActivity : AppCompatActivity() {
         setupAdapter()
         rootDirectory = Environment.getExternalStorageDirectory()
 
+        storagePaths.add(rootDirectory)
+
+        // Listar todos los volúmenes de almacenamiento, esto nos listará los directorios correspondientes a nuestra app
+        // filesDir tanto externos como internos, pero solo queremos el path de la tarjeta DS si esta existe.
+        // por eso cortaremos el path manteniendo la dirección a la memoria SD ejm: /storage/4566-4556/
+        val externalStorageVolumes = getExternalFilesDirs(null)
+        if(externalStorageVolumes.size>1) {
+            val sdCardStorage = externalStorageVolumes[1]
+            sdCardStorage?.let { filePath ->
+                val cutPath = filePath.path.substringBefore("Android")
+                storagePaths.add(File(cutPath))
+            }
+        }
+
         if(mPrefs.lastDirs?.isNotEmpty()!!){
-            val lastDirsVisited:MutableList<String> = arrayListOf()
+            val lastDirsVisited:MutableList<String?> = arrayListOf()
             lastDirsVisited.addAll(mPrefs.lastDirs!!)
 
             val lastDir= File(lastDirsVisited[lastDirsVisited.size-1])
             for( i in 0 until  lastDirsVisited.size  - 1 ){
-                listTreeOfNav.add(Pair(0,File(lastDirsVisited[i])))
+                lastDirsVisited[i]?.let{
+                    listTreeOfNav.add(Pair(0,File(lastDirsVisited[i])))
+                }?:run{
+                    listTreeOfNav.add(Pair(0,null))
+                }
             }
-
-            loadFiles(directory = lastDir)
+            val savedDirs= arrayListOf(lastDir)
+            //loadFiles(directory = lastDir)
+            loadFiles(dirs=savedDirs)
         }else {
-            loadFiles(directory = rootDirectory)
+            //loadFiles(directory = rootDirectory)
+            loadFiles(dirs=storagePaths)
         }
     }
     private fun setupAdapter(){
@@ -85,59 +101,88 @@ class FilePickerActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadFiles(position:Int =0 ,directory:File){
+    private fun loadFiles(position:Int =0 ,/*directory:File*/ dirs:List<File?>){
         fileList.clear()
-        listTreeOfNav.add(Pair(position,directory))
-        // Para mostrar la nueva lista desde el inicio cuando navegamos en los directorios
-        // internos
-        if(listTreeOfNav[listTreeOfNav.size-1].first > listTreeOfNav.size-1){
-            bind.rvFilePicker.scrollToPosition(0)
-        }
-        val files = directory.listFiles()
+        if(dirs.size>1){
+            setTitle(applicationInfo.nonLocalizedLabel.toString())
+            listTreeOfNav.add(Pair(position, null))
+            dirs.forEach { file ->
+                file?.let {
+                    if (file.isDirectory) {
+                        fileList.add(
+                            FileItem(
+                                filePath = file.absolutePath,
+                                fileName = file.name,
+                                uri = Uri.fromFile(file),
+                                isDir = file.isDirectory
+                            )
+                        )
+                    }
 
-        if(files != null){
-            //
-            if(checkIfRootDir(directory))setTitle(directory.parent)
-            else setTitle(directory.name)
+                    pickerAdapter.addAll(fileList)
 
-            val filesList = files.sortedBy { it.name.lowercase() }
-           filesList.forEach { file->
+                }
+            }
+        }else {
+            val directory = dirs[0]
 
-               if(file.isDirectory) {
-                   fileList.add(
-                       FileItem(
-                           filePath=file.absolutePath,
-                           fileName = file.name,
-                           uri = Uri.fromFile(file),
-                           isDir = file.isDirectory
-                       )
-                   )
-               }
-           }
-            filesList.forEach { file->
-                if(file.isFile){
-                    var type:FileType?=null
-                    if(AudioFileType().verify(file.name)){
-                        type=AudioFileType()
-                        fileList.add(FileItem(
-                            filePath=file.absolutePath,
-                            fileName = file.name,
-                            uri = Uri.fromFile(file),
-                            isDir = file.isDirectory,
-                            fileType = type))
+            listTreeOfNav.add(Pair(position, directory))
+            // Para mostrar la nueva lista desde el inicio cuando navegamos en los directorios
+            // internos
+            if (listTreeOfNav[listTreeOfNav.size - 1].first > listTreeOfNav.size - 1) {
+                bind.rvFilePicker.scrollToPosition(0)
+            }
+            val files = directory?.listFiles()
+
+            if (files != null) {
+                //
+                if (checkIfRootDir(directory)) setTitle(directory.parent)
+                else setTitle(directory.name)
+
+                val filesList = files.sortedBy { it.name.lowercase() }
+                filesList.forEach { file ->
+
+                    if (file.isDirectory) {
+                        fileList.add(
+                            FileItem(
+                                filePath = file.absolutePath,
+                                fileName = file.name,
+                                uri = Uri.fromFile(file),
+                                isDir = file.isDirectory
+                            )
+                        )
+                    }
+                }
+                filesList.forEach { file ->
+                    if (file.isFile) {
+                        var type: FileType? = null
+                        if (AudioFileType().verify(file.name)) {
+                            type = AudioFileType()
+                            fileList.add(
+                                FileItem(
+                                    filePath = file.absolutePath,
+                                    fileName = file.name,
+                                    uri = Uri.fromFile(file),
+                                    isDir = file.isDirectory,
+                                    fileType = type
+                                )
+                            )
+                        }
                     }
                 }
             }
+            pickerAdapter.addAll(fileList)
         }
-        pickerAdapter.addAll(fileList)
 
     }
     private fun onItemClick(position:Int,item:FileItem){
         val file = File(item.filePath.toString())
-        Log.e("FILE-PATH", item.filePath.toString() )
+
         if(item.isDir) {
             pickerAdapter.clear()
-            loadFiles(position,file)
+            val paths = listOf(file)
+            //loadFiles(position,file)
+            loadFiles(position,paths)
             toolbarMenu?.getItem(0)?.setVisible(false)
             selectedItemsList.clear()
         }
@@ -153,7 +198,7 @@ class FilePickerActivity : AppCompatActivity() {
         }
         if(selectedItemsList.size>0) toolbarMenu?.getItem(0)?.setVisible(true)
         else toolbarMenu?.getItem(0)?.setVisible(false)
-        Log.e("FILE-PATH", selectedItemsList.size.toString() )
+
     }
     private fun checkIfRootDir(directory: File):Boolean{
         val internalRoot = File("/").canonicalFile
@@ -223,19 +268,29 @@ class FilePickerActivity : AppCompatActivity() {
             }
         })
     }
-    private fun saveNavigationTree(listOfNavigation:List<Pair<Int,File>>){
-        val listOfDirPath:ArrayList<String> = arrayListOf()
+    private fun saveNavigationTree(listOfNavigation:List<Pair<Int,File?>>){
+        val listOfDirPath:ArrayList<String?> = arrayListOf()
         listOfNavigation.forEach { pair->
-            Log.e("FILE-PATH", pair.second.absolutePath.toString())
-            listOfDirPath.add(pair.second.absolutePath)
+            val (_,directory) = pair
+            directory?.let {
+               listOfDirPath.add(directory.absolutePath)
+            }?:run{
+                listOfDirPath.add(null)
+            }
         }
         mPrefs.lastDirs = listOfDirPath
     }
 
-    private fun navigationDirList(dirList:MutableList<Pair<Int,File>>){
+    private fun navigationDirList(dirList:MutableList<Pair<Int,File?>>){
         pickerAdapter.clear()
-
-        loadFiles(directory = dirList[(dirList.size-1)-1].second)
+        val (_,directory) = dirList[dirList.size-2]
+        val navPaths = arrayListOf(directory)
+        if(directory==null){
+            loadFiles(dirs=storagePaths)
+        }else{
+            loadFiles(dirs=navPaths)
+        }
+        //loadFiles(directory = dirList[(dirList.size-1)-1].second)
 
         // Para volver a mostrar la posición del directorio padre cuando naveguemos hacia atrás
         bind.rvFilePicker.scrollToPosition(dirList[(dirList.size - 1) - 1].first)

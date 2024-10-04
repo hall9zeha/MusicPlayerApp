@@ -20,8 +20,8 @@ class Preferences @Inject constructor(private val context:Context){
         myPreferences = context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
         myPreferences.edit().clear().apply()
     }
-    var lastDirs: ArrayList<String>?
-        get():ArrayList<String>? {
+    var lastDirs: ArrayList<String?>?
+        get():ArrayList<String?>? {
             val listJson = myPreferences.getString(LAST_DIRS_SELECTED, null)
             val type = object : TypeToken<ArrayList<String>>() {}.type
             return gson.fromJson(listJson, type) ?: ArrayList()
