@@ -17,6 +17,7 @@ data class FileItem(
  var fileType:FileType?=null,
  var uri:Uri?=null,
  var isDir:Boolean=false,
+ var storageType:Int=-1
 
 ){
  fun getIsChecked():Boolean = isChecked

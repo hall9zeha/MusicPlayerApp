@@ -19,7 +19,9 @@ import kotlin.io.path.name
  * Created by Barry Zea H. on 10/9/24.
  * Copyright (c)  All rights reserved.
  **/
-
+const val ROOT_STORAGE=0
+const val SD_STORAGE=1
+const val COMMON_DIR=-1
 fun getParentDirectories(path: String): String {
     //val storage= getStorageIdentifier(path)
     //val name = Path(path).parent.name

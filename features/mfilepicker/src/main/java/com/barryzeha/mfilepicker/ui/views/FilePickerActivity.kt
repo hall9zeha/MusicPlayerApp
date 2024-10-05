@@ -17,6 +17,9 @@ import androidx.core.view.MenuProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.common.Preferences
+import com.barryzeha.mfilepicker.common.util.COMMON_DIR
+import com.barryzeha.mfilepicker.common.util.ROOT_STORAGE
+import com.barryzeha.mfilepicker.common.util.SD_STORAGE
 import com.barryzeha.mfilepicker.databinding.ActivityFilePickerBinding
 import com.barryzeha.mfilepicker.entities.FileItem
 import com.barryzeha.mfilepicker.filetype.AudioFileType
@@ -107,6 +110,7 @@ class FilePickerActivity : AppCompatActivity() {
             setTitle(applicationInfo.nonLocalizedLabel.toString())
             listTreeOfNav.add(Pair(position, null))
             dirs.forEach { file ->
+                val storageType=if(file?.name== ROOT_STORAGE.toString()) ROOT_STORAGE else SD_STORAGE
                 file?.let {
                     if (file.isDirectory) {
                         fileList.add(
@@ -114,7 +118,8 @@ class FilePickerActivity : AppCompatActivity() {
                                 filePath = file.absolutePath,
                                 fileName = file.path,
                                 uri = Uri.fromFile(file),
-                                isDir = file.isDirectory
+                                isDir = file.isDirectory,
+                                storageType = storageType
                             )
                         )
                     }
@@ -146,7 +151,8 @@ class FilePickerActivity : AppCompatActivity() {
                                 filePath = file.absolutePath,
                                 fileName = file.name,
                                 uri = Uri.fromFile(file),
-                                isDir = file.isDirectory
+                                isDir = file.isDirectory,
+                                storageType= COMMON_DIR
                             )
                         )
                     }

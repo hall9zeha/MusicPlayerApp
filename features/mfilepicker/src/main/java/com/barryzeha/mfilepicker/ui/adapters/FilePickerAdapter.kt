@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.mfilepicker.R
+import com.barryzeha.mfilepicker.common.util.COMMON_DIR
+import com.barryzeha.mfilepicker.common.util.ROOT_STORAGE
+import com.barryzeha.mfilepicker.common.util.SD_STORAGE
 import com.barryzeha.mfilepicker.databinding.FilePickerItemBinding
 import com.barryzeha.mfilepicker.entities.FileItem
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +52,13 @@ class FilePickerAdapter(private val onItemClick:(position:Int,item:FileItem)->Un
         holder.bind.tvFileDescription.text = item.fileName
         holder.bind.chkSelected.isChecked = item.getIsChecked()
         if(item.isDir){
-            holder.bind.ivFileType.setImageResource(R.drawable.ic_folder)
+            when(item.storageType){
+                COMMON_DIR->holder.bind.ivFileType.setImageResource(R.drawable.ic_folder)
+                ROOT_STORAGE->holder.bind.ivFileType.setImageResource(R.drawable.ic_main_storage)
+                SD_STORAGE->holder.bind.ivFileType.setImageResource(R.drawable.ic_sd_storage)
+
+            }
+
         }else{
             holder.bind.ivFileType.setImageResource(item.fileType?.fileIconResId?:R.drawable.ic_unknown_file)
         }
