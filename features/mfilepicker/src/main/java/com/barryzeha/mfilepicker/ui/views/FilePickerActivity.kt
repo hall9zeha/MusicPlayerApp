@@ -112,15 +112,13 @@ class FilePickerActivity : AppCompatActivity() {
                         fileList.add(
                             FileItem(
                                 filePath = file.absolutePath,
-                                fileName = file.name,
+                                fileName = file.path,
                                 uri = Uri.fromFile(file),
                                 isDir = file.isDirectory
                             )
                         )
                     }
-
                     pickerAdapter.addAll(fileList)
-
                 }
             }
         }else {
