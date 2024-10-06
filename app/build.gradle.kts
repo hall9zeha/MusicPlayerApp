@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.gson)
     // Fast scroll
     implementation(libs.fast.scroll)
+
     // Modules
     implementation(project(":core"))
     implementation(project(":data"))
