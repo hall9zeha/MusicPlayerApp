@@ -59,6 +59,10 @@ class FilePickerActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setUpMenuProvider()
         setupAdapter()
+        setUpLoadFiles()
+
+    }
+    private fun setUpLoadFiles(){
         rootDirectory = Environment.getExternalStorageDirectory()
 
         storagePaths.add(rootDirectory)
@@ -88,10 +92,8 @@ class FilePickerActivity : AppCompatActivity() {
                 }
             }
             val savedDirs= arrayListOf(lastDir)
-            //loadFiles(directory = lastDir)
-            loadFiles(dirs=savedDirs)
+            if(lastDir.exists())loadFiles(dirs=savedDirs)else loadFiles(dirs=storagePaths)
         }else {
-            //loadFiles(directory = rootDirectory)
             loadFiles(dirs=storagePaths)
         }
     }
