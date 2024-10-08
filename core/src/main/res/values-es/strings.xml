@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KTMusicPlayer</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sampleString">No hay canción reproduciéndose ahora</string>
+    <string name="artist_placeholder">Artista</string>
+    <string name="album_placeholder">Álbum</string>
+    <string name="delete_title">Eliminar</string>
+    <string name="list">Lista</string>
+    <string name="home">Inicio</string>
+    <string name="settings">Configuración</string>
+    <string name="themeSection">Tema</string>
+    <string name="themeMsg">Activar tema oscuro</string>
+
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="default_title">Default</string>
+    <string name="album">Álbum</string>
+    <string name="artist">Artista</string>
+    <string name="genre">Género</string>
+    <string name="favorite">Fovoritos</string>
+    <string name="soundEffects">Efectos de sonido</string>
+    <string name="delete_all">Eliminar  lista</string>
+    <string name="delete_song">Quitar de la lista</string>
+    <string name="delete_all_msg">Realmente quiere eliminar toda la lista?</string>
+    <string name="order_list_by">Ordenar lista por</string>
+
+</resources>

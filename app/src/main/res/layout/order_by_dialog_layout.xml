@@ -21,31 +21,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tag="0"
-            android:text="Default"
+            android:text="@string/default_title"
             />
         <RadioButton
             android:id="@+id/rgAlbum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tag="1"
-            android:text="Album"/>
+            android:text="@string/album"/>
         <RadioButton
             android:id="@+id/rgArtist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tag="2"
-            android:text="Artist"/>
+            android:text="@string/artist"/>
         <RadioButton
             android:id="@+id/rgGenre"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tag="3"
-            android:text="Genre"/>
+            android:text="@string/genre"/>
         <RadioButton
             android:id="@+id/rgFavorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:tag="4"
-            android:text="Favorite"/>
+            android:text="@string/favorite"/>
     </RadioGroup>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -208,8 +208,8 @@ fun onMenuItem(onItemClick:Boolean=true,activity:Activity, view:View,deleteItem:
         popupWindow.dismiss()
     }
     popupView.btnDeleteAll.setOnClickListener {
-        showDialog(activity, com.barryzeha.ktmusicplayer.R.string.delete_all,
-            com.barryzeha.ktmusicplayer.R.string.delete_all_msg) {
+        showDialog(activity, R.string.delete_all,
+            R.string.delete_all_msg) {
             deleteAllItems()
         }
         popupWindow.dismiss()

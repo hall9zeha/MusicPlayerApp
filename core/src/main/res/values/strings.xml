@@ -1,24 +1,27 @@
 <resources>
     <string name="app_name">KTMusicPlayer</string>
-
+    <string name="title_activity_settings">SettingsActivity</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sampleString">No tracks currently playing No tracks currently playing</string>
     <string name="artist_placeholder">Artist</string>
     <string name="album_placeholder">Album</string>
-    <string name="delete_title">Eliminar</string>
-    <string name="list">Lista</string>
-    <string name="home">Inicio</string>
-    <string name="settings">Configuración</string>
-    <string name="themeSection">Tema</string>
-    <string name="themeMsg">Activar tema oscuro</string>
-    <string name="delete_all">Borrar lista</string>
-    <string name="accept">Aceptar</string>
-    <string name="cancel">Cancelar</string>
+    <string name="delete_title">Delete</string>
+    <string name="list">List</string>
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+    <string name="themeSection">Theme</string>
+    <string name="themeMsg">Enable dark theme</string>
+    <string name="accept">Accept</string>
+    <string name="cancel">Cancel</string>
     <string name="default_title">Default</string>
     <string name="album">Album</string>
     <string name="artist">Artist</string>
     <string name="genre">Genre</string>
     <string name="favorite">Favorite</string>
-    <string name="soundEffects">Efectos de sonido</string>
+    <string name="soundEffects">Sound effects</string>
+    <string name="delete_all">Delete list</string>
+    <string name="delete_song">Remove from list</string>
+    <string name="delete_all_msg">Really wants to remove the entire list?</string>
+    <string name="order_list_by">Order list by</string>
 
 </resources>

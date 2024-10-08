@@ -12,7 +12,9 @@ import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
+import com.barryzeha.core.R as coreRes
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.OrderByDialogLayoutBinding
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,11 +40,11 @@ class OrderByDialog:DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = MaterialAlertDialogBuilder(requireContext()).apply {
             dialogView = onCreateView(LayoutInflater.from(requireContext()),null,savedInstanceState)
-            setTitle("Order list by")
-            setPositiveButton("Accept"){_,dialog->
+            setTitle(getString(coreRes.string.order_list_by))
+            setPositiveButton(coreRes.string.accept){_,dialog->
                 saveOrderOption()
             }
-            setNegativeButton("Cancel",null)
+            setNegativeButton(coreRes.string.cancel,null)
             setView(dialogView)
         }.create()
 
