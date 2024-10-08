@@ -19,5 +19,6 @@
     <string name="artist">Artist</string>
     <string name="genre">Genre</string>
     <string name="favorite">Favorite</string>
+    <string name="soundEffects">Efectos de sonido</string>
 
 </resources>

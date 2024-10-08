@@ -12,6 +12,11 @@
         android:title="@string/list"
         android:checkable="true"
         />
+    <item android:id="@+id/equalizer"
+        android:icon="@drawable/ic_tune"
+        android:title="@string/soundEffects"
+        android:checkable="true"
+        />
     <item android:id="@+id/settings"
         android:icon="@drawable/ic_settings"
         android:title="@string/settings"

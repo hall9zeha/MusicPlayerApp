@@ -18,6 +18,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import androidx.viewpager2.widget.ViewPager2
+import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.MAIN_FRAGMENT
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
     internal lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
+    private val launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
 
     @Inject
     lateinit var mPrefs:MyPreferences
@@ -107,6 +109,12 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
                 coreRes.id.settings->{
                     startActivity(Intent(this, SettingsActivity::class.java))
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                }
+                coreRes.id.equalizer->{
+                    musicService?.let{service->
+                        bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                        launcherAudioEffectActivity.launch(service.getSessionOrChannelId())
+                   }
                 }
             }
             true
