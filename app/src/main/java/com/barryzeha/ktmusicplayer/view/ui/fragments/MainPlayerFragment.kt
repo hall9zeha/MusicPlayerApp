@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
@@ -26,6 +27,7 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
+import com.barryzeha.core.components.AlbumCoverView
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
@@ -129,7 +131,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
     private fun setUpObservers(){
-        bind?.ivMusicCover?.loadImage(coreRes.drawable.placeholder_cover)
+        //bind?.ivMusicCover?.loadImage(coreRes.drawable.placeholder_cover)
+        (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
             serviceConnection= instance.first
@@ -298,7 +301,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongAlbum.text = musicState.album
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
-            ivMusicCover.loadImage(albumArt!!,musicState.nextOrPrev)
+            //ivMusicCover.loadImage(albumArt!!,musicState.nextOrPrev)
+            (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
@@ -346,9 +350,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         if (isPlaying) {
                             musicPlayerService?.pausePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                             mainViewModel.saveStatePlaying(false)
+                            //(bind?.ivMusicCover as AlbumCoverView).stop()
                         } else {
                             musicPlayerService?.resumePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                             mainViewModel.saveStatePlaying(true)
+                            //(bind?.ivMusicCover as AlbumCoverView).start()
+
                         }
                     }
 
