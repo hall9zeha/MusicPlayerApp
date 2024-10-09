@@ -125,15 +125,15 @@ open class BassManager {
     fun setChannelProgress(progress:Long, currentProgress:(Long)->Unit){
 
         val progressBytes = BASS.BASS_ChannelSeconds2Bytes(getActiveChannel(), progress / 1000.0)
-        updateTimer?.cancel()
+        /*updateTimer?.cancel()
         updateTimer = Timer()
         updateTimer?.schedule(object : TimerTask() {
-            override fun run() {
+            override fun run() {*/
                 // Ajusta la posición del canal
-                BASS.BASS_ChannelSetPosition(getActiveChannel(), progressBytes, BASS.BASS_POS_BYTE)
-                currentProgress(progress)
-            }
-        }, 15) // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
+        BASS.BASS_ChannelSetPosition(getActiveChannel(), progressBytes, BASS.BASS_POS_BYTE)
+        currentProgress(progress)
+          /*  }
+        }, 100) */// Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
 
     }
     fun getCurrentPositionToBytes(position: Long):Long{

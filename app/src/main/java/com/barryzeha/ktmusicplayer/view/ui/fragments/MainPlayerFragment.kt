@@ -332,18 +332,21 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         CoroutineScope(Dispatchers.IO).launch {
         if(songId != null && songId >-1) {
                 val song = ListPlayerFragment.listAdapter?.getSongById(songId.toLong())
-                val (itemNumOnList,_) = ListPlayerFragment.listAdapter?.getPositionByItem(song as SongEntity)?:Pair(0,0)
-            withContext(Dispatchers.Main) {
-                bind?.tvNumberSong?.text = String.format(
-                    "#%s/%s",
-                    if (mPrefs.currentPosition > -1) itemNumOnList else 0,
-                    songLists.count()
-                )
+            song?.let {
+               val (itemNumOnList, _) = ListPlayerFragment.listAdapter?.getPositionByItem(song as SongEntity)
+                    ?: Pair(0, 0)
+                withContext(Dispatchers.Main) {
+                    bind?.tvNumberSong?.text = String.format(
+                        "#%s/%s",
+                        if (mPrefs.currentPosition > -1) itemNumOnList else 0,
+                        songLists.count()
+                    )
+                }
             }
-
         }
         }
     }
+
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
         this?.let {
@@ -399,7 +402,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 ) {
                     if (fromUser) {
                         tvSongTimeRest.text = createTime(progress.toLong()).third
-                        //musicPlayerService?.setPlayerProgress(progress.toLong())
                         userSelectPosition = progress
                     }
                 }
@@ -407,7 +409,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
                 }
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
                     musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
                     mainSeekBar.progress = userSelectPosition
 

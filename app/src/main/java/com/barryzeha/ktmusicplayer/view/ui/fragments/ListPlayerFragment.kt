@@ -392,7 +392,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 ) {
                     if (fromUser) {
                         seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
-                        //musicPlayerService?.setPlayerProgress(progress.toLong())
                         userSelectPosition = progress
                     }
                 }
