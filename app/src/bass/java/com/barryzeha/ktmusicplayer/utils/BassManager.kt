@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_INFO
@@ -27,6 +28,7 @@ private var mainChannel:Int?=0
 private val handler = Handler(Looper.getMainLooper())
 private var checkRunnable: Runnable? = null
 private var updateTimer: Timer? = null
+private var idSong:Long?=null
 
 open class BassManager {
 
@@ -105,8 +107,11 @@ open class BassManager {
         val positionBytes = getCurrentPositionToBytes(position)
         BASS.BASS_ChannelSetPosition(channel, positionBytes, BASS.BASS_POS_BYTE);
     }
-    fun streamCreateFile(filePath:String){
-        mainChannel = BASS.BASS_StreamCreateFile(filePath, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+    fun streamCreateFile(song:SongEntity){
+        if(idSong != song.id) {
+            mainChannel = BASS.BASS_StreamCreateFile(song.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+        }
+        idSong=song.id
     }
     fun channelPlay(currentSongPosition:Long){
         BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)

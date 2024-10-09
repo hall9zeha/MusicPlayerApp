@@ -399,15 +399,16 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 ) {
                     if (fromUser) {
                         tvSongTimeRest.text = createTime(progress.toLong()).third
-                        musicPlayerService?.setPlayerProgress(progress.toLong())
+                        //musicPlayerService?.setPlayerProgress(progress.toLong())
                         userSelectPosition = progress
                     }
                 }
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    //isUserSeeking=true
+
                 }
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    //isUserSeeking=false
+
+                    musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
                     mainSeekBar.progress = userSelectPosition
 
                 }

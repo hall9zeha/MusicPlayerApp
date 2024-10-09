@@ -392,7 +392,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 ) {
                     if (fromUser) {
                         seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
-                        musicPlayerService?.setPlayerProgress(progress.toLong())
+                        //musicPlayerService?.setPlayerProgress(progress.toLong())
                         userSelectPosition = progress
                     }
                 }
@@ -403,6 +403,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     isUserSeeking = false
+                    musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
                     seekbarControl.loadSeekBar.progress = userSelectPosition
                 }
             })

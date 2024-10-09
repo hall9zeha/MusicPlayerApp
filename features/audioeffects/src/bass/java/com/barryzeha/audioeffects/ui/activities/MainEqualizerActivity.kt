@@ -252,8 +252,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                EqualizerManager.updateFX(seekBar.tag.toString().toInt(),seekBar.progress)
-                //updateFX(seekBar)
+               EqualizerManager.updateFX(seekBar.tag.toString().toInt(),progress)
             }
         }
 

@@ -21,6 +21,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -135,6 +136,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     val state = intent.getIntExtra("state",-1)
                     if(state==0){
                         if(mPrefs.isPlaying) {
+                            mPrefs.isPlaying=false
                             bassManager?.channelPause()
                             _songController?.pause()
                             _songController?.musicState(currentMusicState.copy(isPlaying = mPrefs.isPlaying))
@@ -154,37 +156,47 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
                 if (action != null) {
                     when (action) {
-                        BluetoothDevice.ACTION_ACL_CONNECTED -> {
+                       BluetoothDevice.ACTION_ACL_CONNECTED -> {
                             bluetoothIsConnect = true
                             Log.d("BLUETOOTH_STATE", "Bluetooth connected")
+                            // lógica cuando se conecta el Bluetooth
 
-                            // Aquí puedes agregar la lógica cuando se conecta el Bluetooth
+
                         }
-                        BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
 
+                        BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                            if (mPrefs.isPlaying) {
+                                mPrefs.isPlaying = false
+                                bassManager?.channelPause()
+                                _songController?.pause()
+                                _songController?.musicState(currentMusicState.copy(isPlaying = false))
+                            }
                         }
                         BluetoothAdapter.ACTION_STATE_CHANGED -> {
                             val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
                             when (state) {
+
                                 BluetoothAdapter.STATE_OFF -> {
                                     Log.d("BLUETOOTH_STATE", "Bluetooth disconnected")
-                                    // Aquí puedes agregar la lógica cuando se desconecta el Bluetooth
+                                    // Logica cuando se desconecta el Bluetooth
                                     if (mPrefs.isPlaying) {
+                                        mPrefs.isPlaying = false
                                         bassManager?.channelPause()
                                         _songController?.pause()
                                         _songController?.musicState(currentMusicState.copy(isPlaying = false))
                                     }
                                 }
-                                BluetoothAdapter.STATE_TURNING_ON->{
-                                    Log.d("BLUETOOTH_STATE", "Turning on")
-                                }
-                                BluetoothAdapter.STATE_TURNING_OFF->{
-                                    Log.d("BLUETOOTH_STATE", "Turning off")
-                                }
+
                                 BluetoothAdapter.STATE_ON -> {
                                     Log.d("BluetoothReceiver", "Bluetooth adapter turned on")
-                                    // Aquí puedes agregar lógica adicional cuando el adaptador Bluetooth se enciende
+                                    // Si el Bluetooth se enciende y la música estaba pausada, se puede reanudar aquí
+                                    if (!mPrefs.isPlaying) {
+                                        mPrefs.isPlaying = true
+                                        bassManager?.channelPlay(currentSongPosition)
+                                        _songController?.musicState(currentMusicState.copy(isPlaying = true))
+                                    }
                                 }
+
                             }
                         }
                     }
@@ -196,6 +208,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         val bluetoothFilter = IntentFilter().apply {
             addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED)
             addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         }
         registerReceiver(bluetoothReceiver,bluetoothFilter)
@@ -210,7 +223,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     play(songsList[indexOfSong])
                 }
                 else->{
-                    if(mPrefs.isPlaying)nextSong()}
+                    if(mPrefs.isPlaying)nextSong()
+                }
             }
 
         }else{
@@ -229,17 +243,19 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 if(Intent.ACTION_MEDIA_BUTTON == mediaButtonIntent.action){
                     val event = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
                     event?.let{
+                        //TODO controla los eventos desde un dispositivo bluetooth
+                        // KEYCODE_MEDIA_NEXT se está llamando dos veces desde bluetooth
                         when(it.keyCode){
                             KeyEvent.KEYCODE_MEDIA_PLAY ->{ _songController?.play()}
                             KeyEvent.KEYCODE_MEDIA_PAUSE -> {_songController?.pause()}
-                            KeyEvent.KEYCODE_MEDIA_NEXT -> {_songController?.next()}
+                            KeyEvent.KEYCODE_MEDIA_NEXT -> { nextSong()}
                             KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {_songController?.previous()}
 
                             else -> {}
                         }
                     }
                 }
-                return true
+                return false
             }
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
@@ -262,6 +278,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             override fun onSkipToNext() {
                 super.onSkipToNext()
+                //TODO trying controla el evento desde la notificación
                 nextOrPrevTrack(NEXT)
             }
             override fun onSkipToPrevious() {
@@ -285,11 +302,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
         }
     }
-    private fun setUpEqualizer(channel:Int?){
-        channel?.let {chan->
-            //EqualizerManager.applyEqualizer()
-        }
-    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
@@ -309,6 +322,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
             }
             SongAction.Next -> {
+                //TODO trying probar en android 8
                 nextOrPrevTrack(NEXT)
             }
             SongAction.Previous -> {
@@ -365,7 +379,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
 
-
     }
 
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
@@ -382,9 +395,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                             newState.currentDuration,
                             1f
                         )
-                       /* .setActions(PlaybackState.ACTION_PLAY_PAUSE)
-                        .setActions(PlaybackState.ACTION_SEEK_TO)*/
-
                         // Los siguiente controles aparecerán en android 13 y 14
                         .setActions(PlaybackState.ACTION_SEEK_TO
                                 or PlaybackState.ACTION_PLAY
@@ -526,10 +536,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 songEntity = it
                 currentSongPosition = 0
                 findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
-                bassManager?.streamCreateFile(it.pathLocation!!)
+                bassManager?.streamCreateFile(song)
                 executeOnceTime=true
             } ?: run {
-                bassManager?.streamCreateFile(songEntity.pathLocation!!)
+                bassManager?.streamCreateFile(songEntity)
                 executeOnceTime=false
             }
             if (bassManager?.getActiveChannel() != 0) {
