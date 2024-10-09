@@ -148,7 +148,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     }
                 }
                 withContext(Dispatchers.Main) {
-                    setNumberOfTrack()
+                    setNumberOfTrack(mPrefs.idSong)
                 }
             }
         }
@@ -157,7 +157,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
            it?.let{currentTrack->
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                updateUIOnceTime(currentTrack)
-               setNumberOfTrack()
+               setNumberOfTrack(currentTrack.idSong)
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
@@ -194,7 +194,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteAllRows->
             if(deleteAllRows>0){
                 songLists.clear()
-                setNumberOfTrack()
+                setNumberOfTrack(currentMusicState.idSong)
             }
         }
     }
@@ -326,9 +326,23 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             //tvSongTimeCompleted.text = createTime(musicState.duration).third
         }
     }
-    private fun setNumberOfTrack(){
-        bind?.tvNumberSong?.text =
-        String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, songLists.count())
+    private fun setNumberOfTrack(songId:Long? = null){
+        /*bind?.tvNumberSong?.text =
+        String.format("#%s/%s", if(mPrefs.currentPosition>-1)position else 0, songLists.count())*/
+        CoroutineScope(Dispatchers.IO).launch {
+        if(songId != null && songId >-1) {
+                val song = ListPlayerFragment.listAdapter?.getSongById(songId.toLong())
+                val (itemNumOnList,_) = ListPlayerFragment.listAdapter?.getPositionByItem(song as SongEntity)?:Pair(0,0)
+            withContext(Dispatchers.Main) {
+                bind?.tvNumberSong?.text = String.format(
+                    "#%s/%s",
+                    if (mPrefs.currentPosition > -1) itemNumOnList else 0,
+                    songLists.count()
+                )
+            }
+
+        }
+        }
     }
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
@@ -482,7 +496,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
     override fun onResume() {
         super.onResume()
-        setNumberOfTrack()
+        setNumberOfTrack(mPrefs.idSong)
         checkPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){

@@ -12,7 +12,6 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.PopupMenu
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,7 +38,6 @@ import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.runWhenReady
-import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -77,7 +75,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var param2: String? = null
     private var bind:FragmentListPlayerBinding? = null
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
-    private lateinit var adapter:MusicListAdapter
+    //lateinit var adapter:MusicListAdapter
+
     private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private lateinit var launcherAudioEffectActivity:ActivityResultLauncher<Int>
@@ -141,12 +140,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun setUpAdapter(){
 
-        adapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
+        listAdapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
         bind?.rvSongs?.apply {
             setHasFixedSize(true)
             setItemViewCacheSize(10)
             layoutManager = LinearLayoutManager(context)
-            adapter = this@ListPlayerFragment.adapter
+            adapter = listAdapter
             post {
                 setNumberOfTrack()
             }
@@ -194,7 +193,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro
                 if(!mPrefs.firstExecution)musicPlayerService?.populatePlayList(songList)
                 // ************
-                adapter.addAll(result)
+                listAdapter?.addAll(result)
                 bind?.rvSongs?.runWhenReady {
                     setNumberOfTrack()
                 }
@@ -206,7 +205,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
 
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
-            adapter.removeAll()
+            listAdapter?.removeAll()
             // probando eliminar la lista de media items para cargar la lista nueva, ya que tendrá un orden distinto
             musicPlayerService?.clearPlayList(true)
             // ********
@@ -225,13 +224,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
             currentSelectedPosition = positionSelected
             positionSelected?.let{
-                adapter.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
+                listAdapter?.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
 
             }
         }
         mainViewModel.deletedRow.observe(viewLifecycleOwner){deletedRow->
             if(deletedRow>0) song?.let{song->
-                adapter.remove(song)
+                listAdapter?.remove(song)
                 if(song.id == mPrefs.idSong){
                     mainViewModel.removeSongState(song.id)
                     mPrefs.clearIdSongInPrefs()
@@ -244,7 +243,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteRows->
             if(deleteRows>0){
-                adapter.removeAll()
+                listAdapter?.removeAll()
                 mPrefs.clearIdSongInPrefs()
                 mPrefs.clearCurrentPosition()
                 setNumberOfTrack()
@@ -284,7 +283,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
 
-            adapter.changeBackgroundColorSelectedItem(musicState.idSong)
+            listAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
 
             activity?.let {
                 val songMetadata = getSongMetadata(requireActivity(), musicState.songPath)
@@ -345,7 +344,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 }
             }
             bottomPlayerControls.btnPlay.setOnClickListener {
-                if (adapter.itemCount > 0) {
+                if (listAdapter?.itemCount!! > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) getSongOfAdapter(
                         mPrefs.idSong
                     )?.let { song ->
@@ -369,7 +368,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 }
             }
             bottomPlayerControls.btnNext.setOnClickListener {
-                if (currentSelectedPosition < adapter.itemCount - 1) {
+                if (currentSelectedPosition < listAdapter?.itemCount!! - 1) {
                        musicPlayerService?.nextSong()
 
                     }
@@ -465,7 +464,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 }
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    adapter.filter.filter(s)
+                    listAdapter?.filter?.filter(s)
                 }
                 override fun afterTextChanged(s: Editable?) {
 
@@ -473,13 +472,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             })
             btnMultipleSelect?.setOnClickListener{
                 if(clicked){
-                    adapter.showMultipleSelection(false)
+                    listAdapter?.showMultipleSelection(false)
                     btnMultipleSelect.backgroundTintList = getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                     clicked=false
                     visibleOrGoneBottomActions(true)
-                    adapter.clearListItemsForDelete()
+                    listAdapter?.clearListItemsForDelete()
                 }else{
-                    adapter.showMultipleSelection(true)
+                    listAdapter?.showMultipleSelection(true)
                    btnMultipleSelect.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
                     clicked=true
                     visibleOrGoneBottomActions(false)
@@ -489,10 +488,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 OrderByDialog().show(parentFragmentManager,OrderByDialog::class.simpleName)
             }
             btnDelete?.setOnClickListener {
-                val listForDeleted = adapter.getListItemsForDelete().toList()
-                mainViewModel.deleteSong(listForDeleted)
-                musicPlayerService?.removeMediaItems(listForDeleted)
-                adapter.removeItemsForMultipleSelectedAction()
+                val listForDeleted = listAdapter?.getListItemsForDelete()?.toList()
+                listForDeleted?.let {
+                    mainViewModel.deleteSong(listForDeleted)
+                    musicPlayerService?.removeMediaItems(listForDeleted)
+                    listAdapter?.removeItemsForMultipleSelectedAction()
+                }
             }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
@@ -504,7 +505,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 },{
                     // Delete all items callback
-                    adapter.removeAll()
+                    listAdapter?.removeAll()
                     mainViewModel.deleteAllSongs()
                 })
             }
@@ -560,7 +561,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             imm!!.hideSoftInputFromWindow(bind?.edtSearch?.windowToken,0)
             CoroutineScope(Dispatchers.Main).launch {
                 delay(1000)
-                adapter.changeBackgroundColorSelectedItem( mPrefs.idSong)
+                listAdapter?.changeBackgroundColorSelectedItem( mPrefs.idSong)
             }
         }
     }
@@ -568,13 +569,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun getSongOfAdapter(idSong: Long):SongEntity?{
         var song:SongEntity?=null
         song = if(idSong>-1){
-            adapter.getSongById(idSong)
+            listAdapter?.getSongById(idSong)
         }else{
             // En la posición 1 porque primero tendremos un item header en la posición 0
-            adapter.getSongByPosition(1)
+            listAdapter?.getSongByPosition(1)
         }
         song?.let{
-            val pos =  adapter.getPositionByItem(it)
+            val pos =  listAdapter?.getPositionByItem(it)
             mainViewModel.setCurrentPosition(pos!!.second)
             mPrefs.currentPosition = pos.first.toLong()
             bind?.rvSongs?.scrollToPosition(pos.second)
@@ -643,7 +644,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun onItemClick(position:Int,song: SongEntity){
-       adapter.getPositionByItem(song)?.let {pos->
+       listAdapter?.getPositionByItem(song)?.let { pos->
             musicPlayerService?.startPlayer(song)
             mPrefs.idSong = song.id
             mainViewModel.setCurrentPosition(pos.first)
@@ -656,24 +657,24 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             this.song=selectedSong
         },{
             // Delete all items callback
-            adapter.removeAll()
+            listAdapter?.removeAll()
             mainViewModel.deleteAllSongs()
         })
 
     }
 
     private fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){
-        val itemSong = adapter.getSongById(mPrefs.idSong)
+        val itemSong = listAdapter?.getSongById(mPrefs.idSong)
 
         itemSong?.let{
-            val (numberedPos, realPos) = adapter.getPositionByItem(itemSong)
+            val (numberedPos, realPos) = listAdapter?.getPositionByItem(itemSong)!!
             mPrefs.currentPosition = numberedPos.toLong()
-            adapter.changeBackgroundColorSelectedItem(mPrefs.idSong)
+            listAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
 
         bind?.seekbarControl?.tvNumberSong?.text =
-            String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, (adapter.getSongItemCount() + itemCount))
+            String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, (listAdapter?.getSongItemCount()!! + itemCount))
     }
    private fun updateService(){
         serviceConnection?.let{
@@ -716,7 +717,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.currentTrack(musicState)
         musicState?.let{
             if(!musicState.isPlaying){
-                if((adapter.itemCount -1)  == currentSelectedPosition && !musicState.latestPlayed) {
+                if((listAdapter?.itemCount!! -1)  == currentSelectedPosition && !musicState.latestPlayed) {
                     bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
                     mainViewModel.saveStatePlaying(false)
 
@@ -799,6 +800,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onStop()
     }
     companion object {
+         var listAdapter:MusicListAdapter?=null
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             ListPlayerFragment().apply {

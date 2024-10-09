@@ -175,6 +175,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                         _songController?.musicState(currentMusicState.copy(isPlaying = false))
                                     }
                                 }
+                                BluetoothAdapter.STATE_TURNING_ON->{
+                                    Log.d("BLUETOOTH_STATE", "Turning on")
+                                }
+                                BluetoothAdapter.STATE_TURNING_OFF->{
+                                    Log.d("BLUETOOTH_STATE", "Turning off")
+                                }
                                 BluetoothAdapter.STATE_ON -> {
                                     Log.d("BluetoothReceiver", "Bluetooth adapter turned on")
                                     // Aquí puedes agregar lógica adicional cuando el adaptador Bluetooth se enciende
