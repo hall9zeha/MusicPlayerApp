@@ -69,6 +69,8 @@ private const val ARG_PARAM2 = "param2"
 @AndroidEntryPoint
 class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
+
+
     @Inject
     lateinit var mPrefs:MyPreferences
     private var param1: String? = null
@@ -90,6 +92,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var musicPlayerService: MusicPlayerService?=null
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
+    private var prevOrNextClicked:Boolean =false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,6 +106,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onViewCreated(view, savedInstanceState)
 
         bind = FragmentListPlayerBinding.bind(view)
+        currentSelectedPosition = mPrefs.currentPosition.toInt()
         setUpAdapter()
         setUpObservers()
         setUpPlayListName()
@@ -162,8 +166,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
             updateUIOnceTime(currentTRack)
-            setNumberOfTrack(scrollToPosition = false)
-
+            setNumberOfTrack(scrollToPosition = prevOrNextClicked)
+            prevOrNextClicked=false
         }
         mainViewModel.processedRegisterInfo.observe(viewLifecycleOwner){(size, count)->
             bind?.pbLoad?.apply {
@@ -365,12 +369,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bottomPlayerControls.btnPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
                         musicPlayerService?.prevSong()
+                        prevOrNextClicked=true
                 }
             }
             bottomPlayerControls.btnNext.setOnClickListener {
                 if (currentSelectedPosition < listAdapter?.itemCount!! - 1) {
                        musicPlayerService?.nextSong()
-
+                        prevOrNextClicked=true
                     }
                 else {
                     getSongOfAdapter(0)?.let { song ->
