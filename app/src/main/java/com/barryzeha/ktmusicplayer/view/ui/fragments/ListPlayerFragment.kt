@@ -592,7 +592,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         val permissionList:MutableList<String> =  if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
             mutableListOf(Manifest.permission.POST_NOTIFICATIONS,
                 Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.READ_MEDIA_AUDIO)
+                Manifest.permission.READ_MEDIA_AUDIO,
+                // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
+                // cuando el servicio bluetooth del móvil esté activo.
+                Manifest.permission.BLUETOOTH_CONNECT)
         }else{
             mutableListOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,

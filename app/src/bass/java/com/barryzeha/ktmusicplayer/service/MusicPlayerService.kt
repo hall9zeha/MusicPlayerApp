@@ -78,7 +78,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     private var songsList: MutableList<SongEntity> = mutableListOf()
     private  var bassManager:BassManager?=null
-    private var mainChannel:Int=0
+
     private var currentSongPosition:Long=0
     private var indexOfSong:Int=0
 
@@ -100,7 +100,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private lateinit var mPrefs:MyPreferences
     private var songEntity:SongEntity=SongEntity()
 
-    private var songs:MutableList<SongEntity> = arrayListOf()
     private var songState:List<SongStateWithDetail> = arrayListOf()
     private var headsetReceiver:BroadcastReceiver?=null
     private var bluetoothReceiver:BroadcastReceiver?=null
@@ -242,16 +241,42 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
                 if(Intent.ACTION_MEDIA_BUTTON == mediaButtonIntent.action){
                     val event = mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
-                    event?.let{
-                        //TODO controla los eventos desde un dispositivo bluetooth
-                        // KEYCODE_MEDIA_NEXT se está llamando dos veces desde bluetooth
-                        when(it.keyCode){
-                            KeyEvent.KEYCODE_MEDIA_PLAY ->{ _songController?.play()}
-                            KeyEvent.KEYCODE_MEDIA_PAUSE -> {_songController?.pause()}
-                            KeyEvent.KEYCODE_MEDIA_NEXT -> { nextSong()}
-                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {_songController?.previous()}
+                    event?.let {
+                        // Para evitar el lanzamiento de los eventos dos veces cuando usamos dispositivos bluetooth
+                        // usamos la condición if (event.action == KeyEvent.ACTION_UP)
+                        if (event.action == KeyEvent.ACTION_UP) {
+                            when (it.keyCode) {
+                                KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                                    if (_songController == null) {
+                                        play(null)
+                                        mPrefs.nextOrPrevFromNotify = true
+                                        mPrefs.controlFromNotify = true
+                                    } else {
+                                        _songController?.play()
+                                    }
 
-                            else -> {}
+                                }
+
+                                KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                                    if (_songController == null) {
+                                        pausePlayer()
+                                        mPrefs.nextOrPrevFromNotify = true
+                                        mPrefs.controlFromNotify = true
+                                    } else {
+                                        _songController?.pause()
+                                    }
+                                }
+
+                                KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                                    nextOrPrevTrack(NEXT)
+                                }
+
+                                KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                                    nextOrPrevTrack(PREVIOUS)
+                                }
+
+                                else -> {}
+                            }
                         }
                     }
                 }
