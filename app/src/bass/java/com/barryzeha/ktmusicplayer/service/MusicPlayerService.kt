@@ -614,7 +614,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 else indexOfSong = 0
             }
             nextOrPrevAnimValue = NEXT
-            setOrPlaySong(indexOfSong)
+            setOrPlaySong(indexOfSong, NEXT)
             checkIfPhoneIsLock()
         }
 
@@ -625,26 +625,26 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
                 else indexOfSong -=1
                 nextOrPrevAnimValue = PREVIOUS
-                setOrPlaySong(indexOfSong)
+                setOrPlaySong(indexOfSong, PREVIOUS)
                 checkIfPhoneIsLock()
             }
 
         }
     }
-    private fun setOrPlaySong(indexOfSong:Int){
+    private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
         if (mPrefs.isPlaying) play(songsList[indexOfSong])
-        else  setMusicForPlayer(songsList[indexOfSong])
+        else  setMusicForPlayer(songsList[indexOfSong], animDirection)
     }
-    private fun setMusicForPlayer(song: SongEntity){
+    private fun setMusicForPlayer(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
         val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
         mPrefs.idSong = song.id
-        setMusicStateSaved(songState)
+        setMusicStateSaved(songState, animDirection)
     }
     fun setPlayerProgress(progress:Long){
        bassManager?.setChannelProgress(progress){currentSongPosition=it}
     }
 
-    private fun setMusicStateSaved(songState: SongStateWithDetail){
+    private fun setMusicStateSaved(songState: SongStateWithDetail,animDirection:Int= DEFAULT_DIRECTION){
         val song=songState.songEntity
         songEntity = song
         // Set info currentSongEntity
@@ -652,7 +652,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             currentMusicState = musicState.copy(
                 currentDuration = songState.songState.currentPosition,
                 latestPlayed = true,
-                nextOrPrev = DEFAULT_DIRECTION
+                nextOrPrev = animDirection
             )
 
         }
