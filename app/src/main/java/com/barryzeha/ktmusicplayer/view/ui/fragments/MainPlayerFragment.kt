@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -40,6 +43,7 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -86,12 +90,20 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
             setUpObservers()
             setUpListeners()
-            bind?.tvSongDescription?.setSelected(true)
+
+            /*bind?.tvSongDescription?.setSelected(true)
             bind?.tvSongArtist?.setSelected(true)
-            bind?.tvSongAlbum?.setSelected(true)
+            bind?.tvSongAlbum?.setSelected(true)*/
+        setUpScrollOnTextViews()
 
     }
-
+    private fun setUpScrollOnTextViews()=with(bind){
+        this?.let{
+            tvSongArtist.setSelected(true)
+            tvSongAlbum.setSelected(true)
+            tvSongDescription.setSelected(true);
+        }
+    }
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
         this?.let {
@@ -158,6 +170,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                updateUIOnceTime(currentTrack)
                setNumberOfTrack(currentTrack.idSong)
+
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
@@ -350,6 +363,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
         this?.let {
+            bind?.tvSongDescription?.setSelected(true)
+            bind?.tvSongArtist?.setSelected(true)
+            bind?.tvSongAlbum?.setSelected(true)
             btnMainMenu?.setOnClickListener {
 
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
