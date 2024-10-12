@@ -553,11 +553,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     private fun play(song:SongEntity?){
-
         if(songsList.isNotEmpty()) {
             song?.let {
-                BASS.BASS_StreamFree(bassManager?.getActiveChannel()!!)
-                // Cleaning a previous track if have anyone
                 songEntity = it
                 currentSongPosition = 0
                 findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }

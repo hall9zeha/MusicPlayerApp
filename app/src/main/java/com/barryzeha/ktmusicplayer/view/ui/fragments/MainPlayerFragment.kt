@@ -362,7 +362,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                         }
 
-
                     } else {
                         if (isPlaying) {
                             musicPlayerService?.pausePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
@@ -372,7 +371,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             musicPlayerService?.resumePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                             mainViewModel.saveStatePlaying(true)
                             //(bind?.ivMusicCover as AlbumCoverView).start()
-
                         }
                     }
 
@@ -384,13 +382,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }
             }
             btnMainNext.setOnClickListener {
-                if (currentSelectedPosition < songLists.size - 1) {
+                if (currentSelectedPosition < ListPlayerFragment.listAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
-                    getSongOfList(1)?.let{song->
+                    getSongOfList(0)?.let{song->
                         musicPlayerService?.startPlayer(song)
                     }
-
                 }
             }
             mainSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
