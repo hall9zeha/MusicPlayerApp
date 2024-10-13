@@ -210,8 +210,11 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     override fun onFinishPlayback() {
         if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
             when(mPrefs.songMode){
-                REPEAT_ONE->{
-                    BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, true);}
+                REPEAT_ONE-> {
+                    if (mPrefs.isPlaying) {
+                        BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, true);
+                    }
+                }
                 SHUFFLE->{
                     indexOfSong = (songsList.indices).random()
                     play(songsList[indexOfSong])
@@ -552,8 +555,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             song?.let {
                 songEntity = it
                 currentSongPosition = 0
-                findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
                 bassManager?.streamCreateFile(song)
+                findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
                 executeOnceTime=true
             } ?: run {
                 bassManager?.streamCreateFile(songEntity)
@@ -648,9 +651,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             )
 
         }
+        mPrefs.isPlaying=false
         currentSongPosition=songState.songState.currentPosition
-        val channel = BASS.BASS_StreamCreateFile(songState.songEntity.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
-        bassManager?.setSongStateSaved(channel,songState.songState.currentPosition )
+        bassManager?.streamCreateFile(songState.songEntity)
+        bassManager?.setSongStateSaved(bassManager?.getActiveChannel()!!,songState.songState.currentPosition )
         findItemSongIndexById(songState.songEntity.id)?.let{
             indexOfSong=it
         }
@@ -660,7 +664,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
         // para evitarlo
         executeOnceTime = true
-        mPrefs.isPlaying=false
+
     }
     private fun fetchSong(song:SongEntity):MusicState?{
         try {

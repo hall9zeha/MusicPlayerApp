@@ -31,6 +31,7 @@ import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.components.AlbumCoverView
+import com.barryzeha.core.components.DiscCoverView
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
@@ -322,6 +323,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             currentMusicState = musicState
             mainViewModel.saveStatePlaying(mPrefs.isPlaying)
             updateService()
+           /* (bind?.ivMusicCover as DiscCoverView).stop()
+            if(mPrefs.isPlaying)(bind?.ivMusicCover as DiscCoverView).start()*/
+
         }
 
     }
@@ -382,11 +386,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         if (isPlaying) {
                             musicPlayerService?.pausePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                             mainViewModel.saveStatePlaying(false)
-                            //(bind?.ivMusicCover as AlbumCoverView).stop()
+                            //(bind?.ivMusicCover as DiscCoverView).pause()
                         } else {
                             musicPlayerService?.resumePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                             mainViewModel.saveStatePlaying(true)
-                            //(bind?.ivMusicCover as AlbumCoverView).start()
+                            //(bind?.ivMusicCover as DiscCoverView).resume()
                         }
                     }
 
@@ -395,6 +399,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             btnMainPrevious.setOnClickListener {
                 if (currentSelectedPosition > 0) {
                        musicPlayerService?.prevSong()
+
                 }
             }
             btnMainNext.setOnClickListener {
@@ -405,6 +410,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         musicPlayerService?.startPlayer(song)
                     }
                 }
+
             }
             mainSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 var userSelectPosition = 0

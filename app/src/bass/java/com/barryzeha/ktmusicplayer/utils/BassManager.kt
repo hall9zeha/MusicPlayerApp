@@ -109,7 +109,7 @@ open class BassManager {
     }
     fun streamCreateFile(song:SongEntity){
         // Cleaning a previous track if have anyone
-        BASS.BASS_StreamFree(mainChannel!!)
+        BASS.BASS_StreamFree(getActiveChannel())
         // Creating the new channel for playing
         mainChannel = BASS.BASS_StreamCreateFile(song.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
     }
