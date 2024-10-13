@@ -188,12 +188,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
                                 BluetoothAdapter.STATE_ON -> {
                                     Log.d("BluetoothReceiver", "Bluetooth adapter turned on")
-                                    // Si el Bluetooth se enciende y la música estaba pausada, se puede reanudar aquí
-                                    if (!mPrefs.isPlaying) {
-                                        mPrefs.isPlaying = true
-                                        bassManager?.channelPlay(currentSongPosition)
-                                        _songController?.musicState(currentMusicState.copy(isPlaying = true))
-                                    }
+
                                 }
 
                             }

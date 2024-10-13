@@ -7,4 +7,5 @@
         </attr>
         <attr name="trackColor" format="color"/>
     </declare-styleable>
+
 </resources>
