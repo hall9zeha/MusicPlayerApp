@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="AlbumCoverView">
+    <declare-styleable name="DiscCoverView">
         <attr name="shape" format="enum">
             <enum name="rectangle" value="0"/>
             <enum name="circle" value="1"/>
         </attr>
         <attr name="trackColor" format="color"/>
+        <attr name="speedRotation" format="integer"/>
     </declare-styleable>
 
 </resources>

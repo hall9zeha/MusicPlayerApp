@@ -59,8 +59,8 @@ public class AlbumCoverViewTransition extends Transition {
 
     public AlbumCoverViewTransition(Context context, AttributeSet attrs) {
         super(context, attrs);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AlbumCoverView);
-        int shape = a.getInt(R.styleable.AlbumCoverView_shape, AlbumCoverView.SHAPE_RECTANGLE);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView);
+        int shape = a.getInt(R.styleable.DiscCoverView_shape, AlbumCoverView.SHAPE_RECTANGLE);
         a.recycle();
         mStartShape = shape;
     }

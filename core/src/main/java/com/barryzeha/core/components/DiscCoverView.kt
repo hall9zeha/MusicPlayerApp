@@ -50,11 +50,9 @@ class DiscCoverView @JvmOverloads constructor(context: Context, attrs: Attribute
  private val TRACK_WIDTH: Float = 8f
  private val TRACK_COLOR: Int = Color.parseColor("#56FFFFFF")
 
-
- //private static final int TRACK_COLOR = Color.TRANSPARENT;
  private val FULL_ANGLE: Float = 360f
  private val HALF_ANGLE: Float = FULL_ANGLE / 2
- private val DURATION: Int = 3500
+ private var DURATION: Int = 3500
  private val DURATION_PER_DEGREES: Float = DURATION / FULL_ANGLE
 
  private var mStartRotateAnimator: ValueAnimator? = null
@@ -125,7 +123,7 @@ class DiscCoverView @JvmOverloads constructor(context: Context, attrs: Attribute
    }
   })
 
-  mEndRotateAnimator = ObjectAnimator.ofFloat<View>(this@DiscCoverView, ROTATION, 0f)
+  mEndRotateAnimator = ObjectAnimator.ofFloat(this@DiscCoverView, ROTATION, 0f)
   mEndRotateAnimator!!.interpolator = LinearInterpolator()
   mEndRotateAnimator!!.addListener(object : AnimatorListenerAdapter() {
    override fun onAnimationEnd(animation: Animator) {
@@ -172,15 +170,15 @@ class DiscCoverView @JvmOverloads constructor(context: Context, attrs: Attribute
    }
   })
 
-  val a = context.obtainStyledAttributes(attrs, R.styleable.AlbumCoverView)
-  @Shape val shape =
-   a.getInt(R.styleable.AlbumCoverView_shape, SHAPE_RECTANGLE)
-  @ColorInt val trackColor =
-   a.getColor(R.styleable.AlbumCoverView_trackColor, TRACK_COLOR)
+  val a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView)
+  @Shape val shape = a.getInt(R.styleable.DiscCoverView_shape, SHAPE_CIRCLE)
+  @ColorInt val trackColor = a.getColor(R.styleable.DiscCoverView_trackColor, TRACK_COLOR)
+  val speedRotation = a.getInt(R.styleable.DiscCoverView_speedRotation,DURATION)
   a.recycle()
 
   setShape(shape)
   setTrackColor(trackColor)
+  setRotateDuration(speedRotation)
   setScaleType()
  }
 
@@ -225,6 +223,9 @@ class DiscCoverView @JvmOverloads constructor(context: Context, attrs: Attribute
    mTrackPaint?.alpha = alpha * mTrackAlpha / ALPHA_OPAQUE
    invalidate()
   }
+ }
+ fun setRotateDuration(duration:Int){
+  DURATION = duration
  }
 
  /**
@@ -469,11 +470,6 @@ class DiscCoverView @JvmOverloads constructor(context: Context, attrs: Attribute
   var trackColor: Int = 0
   var isRotating: Boolean = false
 
-  /*constructor(parcel: Parcel, loader: ClassLoader?) : super(parcel, loader) {
-   shape = parcel.readInt()
-   trackColor = parcel.readInt()
-   isRotating = parcel.readValue(Boolean::class.java.classLoader) as Boolean
-  }*/
   constructor(parcel: Parcel):super(parcel){}
   constructor(superState: Parcelable) : super(superState) {
    shape = 0 // o un valor por defecto
@@ -521,7 +517,6 @@ class DiscCoverView @JvmOverloads constructor(context: Context, attrs: Attribute
  companion object{
    private var _discCoverView:DiscCoverView?=null
    val discCoverView:DiscCoverView  get() = _discCoverView!!
-
 
  }
 }

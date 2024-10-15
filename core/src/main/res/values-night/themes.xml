@@ -5,7 +5,7 @@
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
     <style name="imageViewCornerStyle" parent="">
-        <item name="cornerSize">8%</item>
+        <item name="cornerSize">6%</item>
     </style>
     <style name="myButtonsColorStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="strokeWidth">0dp</item>
@@ -49,12 +49,12 @@
         <item name="colorAccent">@color/controls_colors</item>
         <item name="colorControlNormal">@color/controls_colors</item>
     </style>
-    <style name="VinylShapeAppearance" parent="">
+    <style name="albumCoverImageAppearance" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerFamilyBottomLeft">rounded</item>
         <item name="cornerFamilyBottomRight">rounded</item>
         <item name="cornerFamilyTopLeft">rounded</item>
         <item name="cornerFamilyTopRight">rounded</item>
-        <item name="cornerSize">50%</item>
+        <item name="cornerSize">10%</item>
     </style>
 </resources>

@@ -49,8 +49,8 @@ class DiscCoverViewTransition @JvmOverloads constructor(context: Context, attrs:
 
  private var mStartShape = 0
  init{
-  val a = context.obtainStyledAttributes(attrs, R.styleable.AlbumCoverView)
-  val shape = a.getInt(R.styleable.AlbumCoverView_shape, AlbumCoverView.SHAPE_RECTANGLE)
+  val a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView)
+  val shape = a.getInt(R.styleable.DiscCoverView_shape, AlbumCoverView.SHAPE_RECTANGLE)
   a.recycle()
   mStartShape = shape
  }

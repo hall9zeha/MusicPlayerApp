@@ -186,9 +186,9 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
             }
         });
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AlbumCoverView);
-        @Shape int shape = a.getInt(R.styleable.AlbumCoverView_shape, SHAPE_RECTANGLE);
-        @ColorInt int trackColor = a.getColor(R.styleable.AlbumCoverView_trackColor, TRACK_COLOR);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView);
+        @Shape int shape = a.getInt(R.styleable.DiscCoverView_shape, SHAPE_RECTANGLE);
+        @ColorInt int trackColor = a.getColor(R.styleable.DiscCoverView_trackColor, TRACK_COLOR);
         a.recycle();
 
         setShape(shape);
