@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.IBinder
 import androidx.appcompat.app.AppCompatDelegate
@@ -15,6 +16,7 @@ import com.barryzeha.ktmusicplayer.common.createNotificationChannel
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 
 /**
@@ -25,7 +27,8 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class MyApp:Application() ,ServiceConnection{
-
+    @Inject
+    lateinit var defaultPrefs:SharedPreferences
     companion object{
         @SuppressLint("StaticFieldLeak")
         private var _context: Context?=null
@@ -49,13 +52,12 @@ class MyApp:Application() ,ServiceConnection{
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {}
     override fun onServiceDisconnected(name: ComponentName?) {}
     private fun setUpGlobalPreferences(){
-        val gPrefs=PreferenceManager.getDefaultSharedPreferences(this)
+
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.S){
-            if(gPrefs.getBoolean("themeKey",false)){
+            if(defaultPrefs.getBoolean("themeKey",false)){
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             }else{
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-
             }
         }
     }

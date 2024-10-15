@@ -8,7 +8,14 @@
             app:widgetLayout="@layout/material_switch_layout"
             app:title="@string/themeMsg" />
 
-
     </PreferenceCategory>
-
+    <PreferenceCategory app:title="Cover view style">
+        <SwitchPreferenceCompat
+            app:key="coverStyle"
+            app:defaultValue="false"
+            app:widgetLayout="@layout/material_switch_layout"
+            app:singleLineTitle="false"
+            app:title="Enable album cover disc style"
+            />
+    </PreferenceCategory>
 </PreferenceScreen>

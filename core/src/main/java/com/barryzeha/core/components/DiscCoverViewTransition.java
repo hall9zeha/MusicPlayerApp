@@ -23,49 +23,49 @@ import java.util.List;
  * Copyright (c)  All rights reserved.
  **/
 
-public class AlbumCoverViewTransition extends Transition {
+public class DiscCoverViewTransition extends Transition {
 
-    private static final String PROPNAME_RADIUS = AlbumCoverViewTransition.class.getName() + ":radius";
-    private static final String PROPNAME_ALPHA = AlbumCoverViewTransition.class.getName() + ":alpha";
+    private static final String PROPNAME_RADIUS = DiscCoverViewTransition.class.getName() + ":radius";
+    private static final String PROPNAME_ALPHA = DiscCoverViewTransition.class.getName() + ":alpha";
     private static final String[] sTransitionProperties = {PROPNAME_RADIUS, PROPNAME_ALPHA};
 
-    private static final Property<AlbumCoverView, Float> RADIUS_PROPERTY =
-            new Property<AlbumCoverView, Float>(Float.class, "radius") {
+    private static final Property<DiscCoverView, Float> RADIUS_PROPERTY =
+            new Property<DiscCoverView, Float>(Float.class, "radius") {
                 @Override
-                public void set(AlbumCoverView view, Float radius) {
+                public void set(DiscCoverView view, Float radius) {
                     view.setTransitionRadius(radius);
                 }
 
                 @Override
-                public Float get(AlbumCoverView view) {
+                public Float get(DiscCoverView view) {
                     return view.getTransitionRadius();
                 }
             };
 
-    private static final Property<AlbumCoverView, Integer> ALPHA_PROPERTY =
-            new Property<AlbumCoverView, Integer>(Integer.class, "alpha") {
+    private static final Property<DiscCoverView, Integer> ALPHA_PROPERTY =
+            new Property<DiscCoverView, Integer>(Integer.class, "alpha") {
                 @Override
-                public void set(AlbumCoverView view, Integer alpha) {
+                public void set(DiscCoverView view, Integer alpha) {
                     view.setTransitionAlpha(alpha);
                 }
 
                 @Override
-                public Integer get(AlbumCoverView view) {
+                public Integer get(DiscCoverView view) {
                     return (int) view.getTransitionAlpha();
                 }
             };
 
     private final int mStartShape;
 
-    public AlbumCoverViewTransition(Context context, AttributeSet attrs) {
+    public DiscCoverViewTransition(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView);
-        int shape = a.getInt(R.styleable.DiscCoverView_shape, AlbumCoverView.SHAPE_RECTANGLE);
+        int shape = a.getInt(R.styleable.DiscCoverView_shape, DiscCoverView.SHAPE_RECTANGLE);
         a.recycle();
         mStartShape = shape;
     }
 
-    public AlbumCoverViewTransition(int shape) {
+    public DiscCoverViewTransition(int shape) {
         mStartShape = shape;
     }
 
@@ -87,7 +87,7 @@ public class AlbumCoverViewTransition extends Transition {
     }
 
     private void captureValues(TransitionValues transitionValues, Object value) {
-        if (transitionValues.view instanceof AlbumCoverView) {
+        if (transitionValues.view instanceof DiscCoverView) {
             transitionValues.values.put(PROPNAME_RADIUS, value);
             transitionValues.values.put(PROPNAME_ALPHA, value);
         }
@@ -96,27 +96,27 @@ public class AlbumCoverViewTransition extends Transition {
     @Override
     public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues, TransitionValues endValues) {
 
-        if (endValues == null || !(endValues.view instanceof AlbumCoverView)) {
+        if (endValues == null || !(endValues.view instanceof DiscCoverView)) {
             return null;
         }
 
-        AlbumCoverView coverView = (AlbumCoverView) endValues.view;
+        DiscCoverView coverView = (DiscCoverView) endValues.view;
         final float minRadius = coverView.getMinRadius();
         final float maxRadius = coverView.getMaxRadius();
 
         float startRadius, endRadius;
         int startTrackAlpha, endTrackAlpha;
 
-        if (mStartShape == AlbumCoverView.SHAPE_RECTANGLE) {
+        if (mStartShape == DiscCoverView.SHAPE_RECTANGLE) {
             startRadius = maxRadius;
             endRadius = minRadius;
-            startTrackAlpha = AlbumCoverView.ALPHA_TRANSPARENT;
-            endTrackAlpha = AlbumCoverView.ALPHA_OPAQUE;
+            startTrackAlpha = DiscCoverView.ALPHA_TRANSPARENT;
+            endTrackAlpha = DiscCoverView.ALPHA_OPAQUE;
         } else {
             startRadius = minRadius;
             endRadius = maxRadius;
-            startTrackAlpha = AlbumCoverView.ALPHA_OPAQUE;
-            endTrackAlpha = AlbumCoverView.ALPHA_TRANSPARENT;
+            startTrackAlpha = DiscCoverView.ALPHA_OPAQUE;
+            endTrackAlpha = DiscCoverView.ALPHA_TRANSPARENT;
         }
 
         List<Animator> animatorList = new ArrayList<>();

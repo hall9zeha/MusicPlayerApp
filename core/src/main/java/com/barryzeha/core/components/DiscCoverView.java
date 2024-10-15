@@ -35,17 +35,13 @@ import androidx.transition.TransitionSet;
 
 import com.barryzeha.core.R;
 
-import java.lang.annotation.RetentionPolicy;
-
-import kotlin.annotation.Retention;
-
 /**
  * Project KTMusicPlayer
  * Created by Barry Zea H. on 8/10/24.
  * Copyright (c)  All rights reserved.
  **/
 
-public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView implements Animatable {
+public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView implements Animatable {
 
     public static final int SHAPE_RECTANGLE = 0;
     public static final int SHAPE_CIRCLE = 1;
@@ -60,7 +56,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
 
     private static final float FULL_ANGLE = 360;
     private static final float HALF_ANGLE = FULL_ANGLE / 2;
-    private static final int DURATION = 3500;
+    private static int DURATION = 3500;
     private static final float DURATION_PER_DEGREES = DURATION / FULL_ANGLE;
 
     private final ValueAnimator mStartRotateAnimator;
@@ -88,20 +84,20 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
     }
 
     public interface Callbacks {
-        void onMorphEnd(AlbumCoverView coverView);
+        void onMorphEnd(DiscCoverView coverView);
 
-        void onRotateEnd(AlbumCoverView coverView);
+        void onRotateEnd(DiscCoverView coverView);
     }
 
-    public AlbumCoverView(Context context) {
+    public DiscCoverView(Context context) {
         this(context, null, 0);
     }
 
-    public AlbumCoverView(Context context, AttributeSet attrs) {
+    public DiscCoverView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public AlbumCoverView(Context context, AttributeSet attrs, final int defStyleAttr) {
+    public DiscCoverView(Context context, AttributeSet attrs, final int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         // Canvas.clipPath works wrong when running with hardware acceleration on Android N
@@ -131,7 +127,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
             }
         });
 
-        mEndRotateAnimator = ObjectAnimator.ofFloat(AlbumCoverView.this, View.ROTATION, 0);
+        mEndRotateAnimator = ObjectAnimator.ofFloat(DiscCoverView.this, View.ROTATION, 0);
         mEndRotateAnimator.setInterpolator(new LinearInterpolator());
         mEndRotateAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -143,7 +139,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
                     @Override
                     public void run() {
                         if (mCallbacks != null) {
-                            mCallbacks.onRotateEnd(AlbumCoverView.this);
+                            mCallbacks.onRotateEnd(DiscCoverView.this);
                         }
                     }
                 });
@@ -163,7 +159,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
                 mIsMorphing = false;
                 mShape = SHAPE_CIRCLE;
                 if (mCallbacks != null) {
-                    mCallbacks.onMorphEnd(AlbumCoverView.this);
+                    mCallbacks.onMorphEnd(DiscCoverView.this);
                 }
             }
         });
@@ -181,7 +177,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
                 mIsMorphing = false;
                 mShape = SHAPE_RECTANGLE;
                 if (mCallbacks != null) {
-                    mCallbacks.onMorphEnd(AlbumCoverView.this);
+                    mCallbacks.onMorphEnd(DiscCoverView.this);
                 }
             }
         });
@@ -189,10 +185,12 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView);
         @Shape int shape = a.getInt(R.styleable.DiscCoverView_shape, SHAPE_RECTANGLE);
         @ColorInt int trackColor = a.getColor(R.styleable.DiscCoverView_trackColor, TRACK_COLOR);
+        int durationRotate = a.getColor(R.styleable.DiscCoverView_speedRotation, DURATION);
         a.recycle();
 
         setShape(shape);
         setTrackColor(trackColor);
+        setRotateDuration(durationRotate);
         setScaleType();
     }
 
@@ -208,7 +206,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
     }
 
     /**
-     * Set which shape should be drawn by this {@link AlbumCoverView}
+     * Set which shape should be drawn by this {@link DiscCoverView}
      *
      * @param shape The shape as {@link #SHAPE_CIRCLE} or {@link #SHAPE_RECTANGLE}
      */
@@ -236,6 +234,10 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
             mTrackPaint.setAlpha(alpha * mTrackAlpha / ALPHA_OPAQUE);
             invalidate();
         }
+    }
+
+    public void  setRotateDuration(int duration){
+        DURATION = duration;
     }
 
     /**
@@ -393,6 +395,18 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
         }
     }
 
+    public void pause(){
+        if (mStartRotateAnimator.isRunning()) {
+            mStartRotateAnimator.pause();
+        }
+    }
+    public void  resume(){
+        if (mStartRotateAnimator.isPaused()) {
+            mStartRotateAnimator.resume();
+        }else if(!mStartRotateAnimator.isRunning()) {
+            mStartRotateAnimator.start();
+        }
+    }
     /**
      * Stop the rotate animation
      */
@@ -414,7 +428,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
     private static class MorphTransition extends TransitionSet {
         private MorphTransition(int shape) {
             setOrdering(ORDERING_TOGETHER);
-            addTransition(new AlbumCoverViewTransition(shape));
+            addTransition(new DiscCoverViewTransition(shape));
             addTransition(new ChangeImageTransform());
             addTransition(new ChangeTransform());
         }
@@ -459,6 +473,10 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         setShape(ss.shape);
@@ -495,7 +513,7 @@ public class AlbumCoverView extends androidx.appcompat.widget.AppCompatImageView
 
         @Override
         public String toString() {
-            return AlbumCoverView.class.getSimpleName() + "." + SavedState.class.getSimpleName() + "{"
+            return DiscCoverView.class.getSimpleName() + "." + SavedState.class.getSimpleName() + "{"
                     + Integer.toHexString(System.identityHashCode(this))
                     + " shape=" + shape + ", trackColor=" + trackColor + ", isRotating=" + isRotating + "}";
         }

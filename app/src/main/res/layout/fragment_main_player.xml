@@ -60,6 +60,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:elevation="4dp"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -76,16 +77,14 @@
             android:scaleType="fitXY"
             app:shapeAppearanceOverlay="@style/imageViewCornerStyle"
            />
-        <!-- <com.barryzeha.core.components.DiscCoverView
+         <com.barryzeha.core.components.DiscCoverView
            android:id="@+id/ivDiscMusicCover"
            android:layout_width="match_parent"
            android:layout_height="match_parent"
            android:src="@mipmap/ic_launcher"
            app:shape="circle"
-           android:scaleType="centerCrop"
-           android:elevation="4dp"
-           android:scaleType="fitXY"
-       />-->
+           android:visibility="gone"
+           android:elevation="4dp"/>
     </LinearLayout>
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongDescription"

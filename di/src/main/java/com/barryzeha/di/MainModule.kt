@@ -2,6 +2,8 @@ package com.barryzeha.di
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import androidx.room.Room
 import com.barryzeha.core.common.MyPreferences
 
@@ -41,6 +43,10 @@ class MainModule {
     @Provides
     @Singleton
     fun preferencesProvides(app:Application):MyPreferences = MyPreferences(app.applicationContext)
+
+    @Provides
+    @Singleton
+    fun globalPreferencesProvides(app:Application):SharedPreferences = PreferenceManager.getDefaultSharedPreferences(app.applicationContext)
 
 }
 @Module

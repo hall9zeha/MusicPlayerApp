@@ -6,11 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.ui.activities.MainActivity">
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/contentCover"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:elevation="4dp"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="24dp"
@@ -27,17 +28,16 @@
             android:scaleType="fitXY"
             app:shapeAppearanceOverlay="@style/imageViewCornerStyle"
             />
-        <!-- <com.barryzeha.core.components.DiscCoverView
-           android:id="@+id/ivDiscMusicCover"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:src="@mipmap/ic_launcher"
-           app:shape="circle"
-           android:scaleType="centerCrop"
-           android:elevation="4dp"
-           android:scaleType="fitXY"
-       />-->
-    </LinearLayout>
+        <com.barryzeha.core.components.DiscCoverView
+            android:id="@+id/ivDiscMusicCover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@mipmap/ic_launcher"
+            app:shape="circle"
+            android:visibility="gone"
+            android:elevation="4dp"
+            android:scaleType="fitXY"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <LinearLayout
         android:id="@+id/lnDesc"
         android:layout_width="0dp"

@@ -2,12 +2,10 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.annotation.SuppressLint
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -30,7 +28,6 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.components.AlbumCoverView
 import com.barryzeha.core.components.DiscCoverView
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -44,7 +41,6 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -55,6 +51,9 @@ private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
 class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
+
+    @Inject
+    lateinit var defaultPrefs:SharedPreferences
 
     @Inject
     lateinit var mPrefs:MyPreferences
@@ -91,11 +90,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
             setUpObservers()
             setUpListeners()
-
-            /*bind?.tvSongDescription?.setSelected(true)
-            bind?.tvSongArtist?.setSelected(true)
-            bind?.tvSongAlbum?.setSelected(true)*/
-        setUpScrollOnTextViews()
+            setUpScrollOnTextViews()
 
     }
     private fun setUpScrollOnTextViews()=with(bind){
@@ -104,6 +99,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongAlbum.setSelected(true)
             tvSongDescription.setSelected(true);
         }
+    }
+    private fun discCoverViewIsEnable():Boolean{
+        return defaultPrefs.getBoolean("coverStyle",false)
     }
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
@@ -145,6 +143,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
     private fun setUpObservers(){
         //bind?.ivMusicCover?.loadImage(coreRes.drawable.placeholder_cover)
+        (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
         (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
@@ -316,15 +315,19 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
             //ivMusicCover.loadImage(albumArt!!,musicState.nextOrPrev)
-            (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
+            if(discCoverViewIsEnable())(ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
+            else(ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
+
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
             currentMusicState = musicState
             mainViewModel.saveStatePlaying(mPrefs.isPlaying)
             updateService()
-           /* (bind?.ivMusicCover as DiscCoverView).stop()
-            if(mPrefs.isPlaying)(bind?.ivMusicCover as DiscCoverView).start()*/
+            if(discCoverViewIsEnable()) {
+                (bind?.ivDiscMusicCover as DiscCoverView).stop()
+                if (mPrefs.isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).start()
+            }
 
         }
 
@@ -363,6 +366,18 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
         }
     }
+    private fun checkCoverViewStyle()=with(bind){
+        this?.let {
+            if (discCoverViewIsEnable()) {
+                ivMusicCover.visibility = View.GONE
+                ivDiscMusicCover.visibility = View.VISIBLE
+            } else {
+                ivDiscMusicCover.visibility = View.GONE
+                ivMusicCover.visibility = View.VISIBLE
+            }
+
+        }
+    }
 
     @SuppressLint("ResourceType")
     private fun setUpListeners()=with(bind){
@@ -370,6 +385,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             bind?.tvSongDescription?.setSelected(true)
             bind?.tvSongArtist?.setSelected(true)
             bind?.tvSongAlbum?.setSelected(true)
+
+           checkCoverViewStyle()
             btnMainMenu?.setOnClickListener {
 
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
@@ -386,11 +403,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         if (isPlaying) {
                             musicPlayerService?.pausePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
                             mainViewModel.saveStatePlaying(false)
-                            //(bind?.ivMusicCover as DiscCoverView).pause()
+                            if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).pause()
+
                         } else {
                             musicPlayerService?.resumePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
                             mainViewModel.saveStatePlaying(true)
-                            //(bind?.ivMusicCover as DiscCoverView).resume()
+                            if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).resume()
                         }
                     }
 
@@ -518,6 +536,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
+        //checkCoverViewStyle()
         checkPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
