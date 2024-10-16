@@ -552,7 +552,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     private fun play(song:SongEntity?){
-        CoroutineScope(Dispatchers.IO).launch {
             if (songsList.isNotEmpty()) {
                 song?.let {
                     songEntity = it
@@ -591,7 +590,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
                 }
             }
-        }
     }
     fun pausePlayer(){
         mPrefs.isPlaying = false
