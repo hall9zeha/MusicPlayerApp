@@ -42,6 +42,7 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -178,6 +179,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             updateUI(it)
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
+            checkIfDiscCoverViewIsRotating(statePlay)
             isPlaying=statePlay
             if (statePlay) {
                 bind?.btnMainPlay?.setIconResource(com.barryzeha.core.R.drawable.ic_pause)
@@ -327,12 +329,30 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             mainViewModel.saveStatePlaying(mPrefs.isPlaying)
             updateService()
             if(discCoverViewIsEnable()) {
-                (bind?.ivDiscMusicCover as DiscCoverView).stop()
-                if (mPrefs.isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).start()
+                // Detenemos la animación para cada cambio de canción para que la imágen
+                // aparezca correctamente y no rotada
+                (bind?.ivDiscMusicCover as DiscCoverView).end()
+                CoroutineScope(Dispatchers.IO).launch{
+                    delay(500)
+                    withContext(Dispatchers.Main) {
+                        // Si se estaba reproduciendo iniciamos animacion nuevamente al cambiar de canción
+                        if (mPrefs.isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).start()
+                    }
+                }
             }
 
         }
 
+    }
+    private fun checkIfDiscCoverViewIsRotating(isPlaying:Boolean){
+        if(discCoverViewIsEnable()) {
+            CoroutineScope(Dispatchers.IO).launch{
+                withContext(Dispatchers.Main) {
+                    if (isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).resume()
+                    else (bind?.ivDiscMusicCover as DiscCoverView).pause()
+                }
+            }
+        }
     }
     private fun updateUI(musicState: MusicState)=with(bind){
         this?.let {
@@ -373,6 +393,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             if (discCoverViewIsEnable()) {
                 ivMusicCover.visibility = View.GONE
                 ivDiscMusicCover.visibility = View.VISIBLE
+                checkIfDiscCoverViewIsRotating(mPrefs.isPlaying)
             } else {
                 ivDiscMusicCover.visibility = View.GONE
                 ivMusicCover.visibility = View.VISIBLE

@@ -51,9 +51,7 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
 
     private static final float TRACK_SIZE = 10;
     private static final float TRACK_WIDTH = 8;
-    private static final int TRACK_COLOR = Color.parseColor("#56FFFFFF");
-    //private static final int TRACK_COLOR = Color.TRANSPARENT;
-
+    private static final int TRACK_COLOR = Color.parseColor("#76FFFFFF");
     private static final float FULL_ANGLE = 360;
     private static final float HALF_ANGLE = FULL_ANGLE / 2;
     private static int DURATION = 3500;
@@ -99,11 +97,7 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
 
     public DiscCoverView(Context context, AttributeSet attrs, final int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
-        // Canvas.clipPath works wrong when running with hardware acceleration on Android N
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        }
+        setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
         final float density = getResources().getDisplayMetrics().density;
         mTrackSize = TRACK_SIZE * density;
@@ -185,7 +179,7 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView);
         @Shape int shape = a.getInt(R.styleable.DiscCoverView_shape, SHAPE_RECTANGLE);
         @ColorInt int trackColor = a.getColor(R.styleable.DiscCoverView_trackColor, TRACK_COLOR);
-        int durationRotate = a.getColor(R.styleable.DiscCoverView_speedRotation, DURATION);
+        int durationRotate = a.getInt(R.styleable.DiscCoverView_speedRotation, DURATION);
         a.recycle();
 
         setShape(shape);
@@ -238,6 +232,8 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
 
     public void  setRotateDuration(int duration){
         DURATION = duration;
+        mStartRotateAnimator.setDuration(DURATION);
+
     }
 
     /**
@@ -346,7 +342,6 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
         canvas.clipPath(mClipPath);
         super.onDraw(canvas);
         canvas.drawPath(mTrackPath, mTrackPaint);
-
     }
 
     @Override
@@ -413,10 +408,16 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
     @Override
     public void stop() {
         if (mStartRotateAnimator.isRunning()) {
+            //If is rotation the animation stop with rotation to original position slowly
             mStartRotateAnimator.cancel();
         }
     }
-
+    public void end(){
+        if(mStartRotateAnimator.isRunning()){
+            //If is rotation the animation stop with rotation to original position fastly
+            mStartRotateAnimator.end();
+        }
+    }
     /**
      * Return if the rotate animation is running
      */

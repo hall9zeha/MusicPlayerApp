@@ -55,6 +55,7 @@ import com.un4seen.bass.BASS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -551,38 +552,44 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     private fun play(song:SongEntity?){
-        if(songsList.isNotEmpty()) {
-            song?.let {
-                songEntity = it
-                currentSongPosition = 0
-                bassManager?.streamCreateFile(song)
-                findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
-                executeOnceTime=true
-            } ?: run {
-                bassManager?.streamCreateFile(songEntity)
-                executeOnceTime=false
-            }
-            if (bassManager?.getActiveChannel() != 0) {
-                bassManager?.channelPlay(currentSongPosition)
-                bassManager?.startCheckingPlayback()
+        CoroutineScope(Dispatchers.IO).launch {
+            if (songsList.isNotEmpty()) {
+                song?.let {
+                    songEntity = it
+                    currentSongPosition = 0
+                    bassManager?.streamCreateFile(song)
+                    findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
+                    executeOnceTime = true
+                } ?: run {
+                    bassManager?.streamCreateFile(songEntity)
+                    executeOnceTime = false
+                }
+                if (bassManager?.getActiveChannel() != 0) {
+                    bassManager?.channelPlay(currentSongPosition)
+                    bassManager?.startCheckingPlayback()
 
-                mPrefs.isPlaying = true
-                mPrefs.idSong = songEntity.id
-                currentMusicState = fetchSong(songEntity)?.copy(
-                    isPlaying = mPrefs.isPlaying,
-                    idSong = songEntity.id,
-                    latestPlayed = false,
-                    nextOrPrev = nextOrPrevAnimValue
-                )!!
+                    mPrefs.isPlaying = true
+                    mPrefs.idSong = songEntity.id
+                    currentMusicState = fetchSong(songEntity)?.copy(
+                        isPlaying = mPrefs.isPlaying,
+                        idSong = songEntity.id,
+                        latestPlayed = false,
+                        nextOrPrev = nextOrPrevAnimValue
+                    )!!
 
-                EqualizerManager.applyEqualizer(bassManager?.getActiveChannel()!!,effectsPrefs)
+                    EqualizerManager.applyEqualizer(bassManager?.getActiveChannel()!!, effectsPrefs)
 
-            }else{
-                _activity?.showSnackBar(_activity?.findViewById(android.R.id.content)!!,"Can't player this file, will be deleted or error format", Snackbar.LENGTH_LONG)
-            }
-            song?.let {
-                if(executeOnceTime)_songController?.currentTrack(currentMusicState)
+                } else {
+                    _activity?.showSnackBar(
+                        _activity?.findViewById(android.R.id.content)!!,
+                        "Can't player this file, will be deleted or error format",
+                        Snackbar.LENGTH_LONG
+                    )
+                }
+                song?.let {
+                    if (executeOnceTime) _songController?.currentTrack(currentMusicState)
 
+                }
             }
         }
     }
@@ -640,33 +647,37 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
 
     private fun setMusicStateSaved(songState: SongStateWithDetail,animDirection:Int= DEFAULT_DIRECTION){
-        val song=songState.songEntity
-        songEntity = song
-        // Set info currentSongEntity
-        fetchSong(song)?.let{musicState->
-            currentMusicState = musicState.copy(
-                currentDuration = songState.songState.currentPosition,
-                latestPlayed = true,
-                nextOrPrev = animDirection
-            )
 
-        }
-        mPrefs.isPlaying=false
-        currentSongPosition=songState.songState.currentPosition
-        bassManager?.streamCreateFile(songState.songEntity)
-        bassManager?.setSongStateSaved(bassManager?.getActiveChannel()!!,songState.songState.currentPosition )
-        findItemSongIndexById(songState.songEntity.id)?.let{
-            indexOfSong=it
-        }
-        _songController?.currentTrack(currentMusicState)
-        // Al cargar la información de una pista guardada
-        // se ejecutaba una primera vez el evento currentTRack de la interface
-        // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
-        // para evitarlo
-        executeOnceTime = true
+           val song = songState.songEntity
+           songEntity = song
+           // Set info currentSongEntity
+           fetchSong(song)?.let { musicState ->
+               currentMusicState = musicState.copy(
+                   currentDuration = songState.songState.currentPosition,
+                   latestPlayed = true,
+                   nextOrPrev = animDirection
+               )
 
+           }
+           mPrefs.isPlaying = false
+           currentSongPosition = songState.songState.currentPosition
+           bassManager?.streamCreateFile(songState.songEntity)
+           bassManager?.setSongStateSaved(
+               bassManager?.getActiveChannel()!!,
+               songState.songState.currentPosition
+           )
+           findItemSongIndexById(songState.songEntity.id)?.let {
+               indexOfSong = it
+           }
+           _songController?.currentTrack(currentMusicState)
+           // Al cargar la información de una pista guardada
+           // se ejecutaba una primera vez el evento currentTRack de la interface
+           // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
+           // para evitarlo
+           executeOnceTime = true
     }
     private fun fetchSong(song:SongEntity):MusicState?{
+
         try {
         val songPath = song.pathLocation.toString()
         val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!
