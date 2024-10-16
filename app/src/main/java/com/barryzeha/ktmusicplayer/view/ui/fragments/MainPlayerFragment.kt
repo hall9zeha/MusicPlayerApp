@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -315,8 +316,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
             //ivMusicCover.loadImage(albumArt!!,musicState.nextOrPrev)
-            if(discCoverViewIsEnable())(ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
-            else(ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
+
+            (ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
+            (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
 
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
@@ -375,7 +377,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 ivDiscMusicCover.visibility = View.GONE
                 ivMusicCover.visibility = View.VISIBLE
             }
-
         }
     }
 
@@ -385,8 +386,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             bind?.tvSongDescription?.setSelected(true)
             bind?.tvSongArtist?.setSelected(true)
             bind?.tvSongAlbum?.setSelected(true)
-
-           checkCoverViewStyle()
+            checkCoverViewStyle()
             btnMainMenu?.setOnClickListener {
 
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
@@ -415,12 +415,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }
             }
             btnMainPrevious.setOnClickListener {
+                checkCoverViewStyle()
                 if (currentSelectedPosition > 0) {
                        musicPlayerService?.prevSong()
 
                 }
             }
             btnMainNext.setOnClickListener {
+                checkCoverViewStyle()
                 if (currentSelectedPosition < ListPlayerFragment.listAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
@@ -536,7 +538,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
-        //checkCoverViewStyle()
+        checkCoverViewStyle()
         checkPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){

@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
@@ -19,6 +20,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.Resource
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 
@@ -45,21 +51,18 @@ fun ImageView.loadImage(bitmap:Bitmap, animDirection:Int=-1) {
         PREVIOUS->direction= -1f
         DEFAULT_DIRECTION->direction=0f
     }
-    val slideAnimation = TranslateAnimation(
-        Animation.RELATIVE_TO_PARENT, direction, // Desde fuera de la pantalla a la izquierda
-        Animation.RELATIVE_TO_PARENT, 0f,  // Hasta su posición original
-        Animation.RELATIVE_TO_PARENT, 0f,  // Sin cambio en la altura
-        Animation.RELATIVE_TO_PARENT, 0f   // Sin cambio en la altura
-    )
-    slideAnimation.duration = 300 // Duración de la animación en milisegundos
-    slideAnimation.fillAfter = true // Mantiene la posición final después de la animación
-
     Glide.with(this.context)
         .load(bitmap)
         .fitCenter()
         .into(this)
-    this.startAnimation(slideAnimation)
+    this.translationX = direction * width // Coloca fuera de la pantalla
+    this.animate()
+        .translationX(0f) // Desliza a su posición original
+        .setDuration(300)
+        .setListener(null)
+
 }
+
 // El placeholder solo se usa para la carátula del fragmento principal
 fun ImageView.loadImage(resource:Int)=
     Glide.with(this.context)
