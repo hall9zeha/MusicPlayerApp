@@ -96,6 +96,9 @@ open class BassManager {
         }
         handler.post(checkRunnable!!)
     }
+    fun stopCheckingPlayback(){
+        stopRunnable()
+    }
     private fun stopRunnable(){
         checkRunnable?.let{
             handler.removeCallbacks(it)
@@ -112,6 +115,9 @@ open class BassManager {
         BASS.BASS_StreamFree(getActiveChannel())
         // Creating the new channel for playing
         mainChannel = BASS.BASS_StreamCreateFile(song.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+    }
+    fun repeatSong(){
+        BASS.BASS_ChannelPlay(getActiveChannel(), true);
     }
     fun channelPlay(currentSongPosition:Long){
         BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)

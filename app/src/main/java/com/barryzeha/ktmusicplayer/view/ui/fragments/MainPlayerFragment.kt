@@ -346,13 +346,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
     private fun checkIfDiscCoverViewIsRotating(isPlaying:Boolean){
         if(discCoverViewIsEnable()) {
-            CoroutineScope(Dispatchers.IO).launch{
-                withContext(Dispatchers.Main) {
                     if (isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).resume()
                     else (bind?.ivDiscMusicCover as DiscCoverView).pause()
                 }
-            }
-        }
     }
     private fun updateUI(musicState: MusicState)=with(bind){
         this?.let {

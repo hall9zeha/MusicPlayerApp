@@ -210,10 +210,11 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     override fun onFinishPlayback() {
         if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
+            Log.e("INDEX-S-Finish", indexOfSong.toString() )
             when(mPrefs.songMode){
                 REPEAT_ONE-> {
                     if (mPrefs.isPlaying) {
-                        BASS.BASS_ChannelPlay(bassManager?.getActiveChannel()!!, true);
+                        bassManager?.repeatSong()
                     }
                 }
                 SHUFFLE->{
@@ -228,7 +229,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }else{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}
-                else->{if(songsList.isNotEmpty())setMusicForPlayer(songsList[0])
+                else->{
+                    //Todo revisar el cambio de canción y mejorar
+                    //if(indexOfSong  songsList.size) {
+                        if (songsList.isNotEmpty()) setMusicForPlayer(songsList[0])
+                        bassManager?.stopCheckingPlayback()
+                    //}
                 }
             }
 
@@ -595,6 +601,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         mPrefs.isPlaying = false
         currentSongPosition=bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0
         bassManager?.channelPause()
+        bassManager?.stopCheckingPlayback()
     }
 
     fun getSessionOrChannelId(): Int {
@@ -632,13 +639,15 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
-        if (mPrefs.isPlaying) play(songsList[indexOfSong])
-        else  setMusicForPlayer(songsList[indexOfSong], animDirection)
+        if (mPrefs.isPlaying)play(songsList[indexOfSong])
+        else setMusicForPlayer(songsList[indexOfSong], animDirection)
+
     }
     private fun setMusicForPlayer(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
         val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
         mPrefs.idSong = song.id
         setMusicStateSaved(songState, animDirection)
+
     }
     fun setPlayerProgress(progress:Long){
        bassManager?.setChannelProgress(progress){currentSongPosition=it}
