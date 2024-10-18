@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         super.onCreate(savedInstanceState)
         bind= ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
+
         setContentView(bind.root)
         ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

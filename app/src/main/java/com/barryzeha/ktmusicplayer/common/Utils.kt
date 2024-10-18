@@ -157,17 +157,17 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         .build()
 
 }
-fun cancelPersistentNotify(context:Context){
-    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val builder = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+fun cancelPersistentNotify(context:Context) {
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    /*val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         Notification.Builder(context, CHANNEL_ID)
-    }else Notification.Builder(context)
+    } else Notification.Builder(context)
     builder
         .setSmallIcon(R.drawable.ic_play)
         .setOngoing(false) // Hacer que la notificación ya no sea persistente
-    notificationManager.notify(NOTIFICATION_ID,builder.build())
+    notificationManager.notify(NOTIFICATION_ID, builder.build())*/
     notificationManager.cancelAll()
-
 }
 fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSorted:MutableList<Any>)->Unit){
     if (songList.isNotEmpty()) {

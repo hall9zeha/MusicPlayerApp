@@ -56,6 +56,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -210,7 +211,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     override fun onFinishPlayback() {
         if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
-            Log.e("INDEX-S-Finish", indexOfSong.toString() )
             when(mPrefs.songMode){
                 REPEAT_ONE-> {
                     if (mPrefs.isPlaying) {
@@ -320,14 +320,22 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             override fun onCustomAction(action: String, extras: Bundle?) {
                 if(ACTION_CLOSE == action){
-                    bassManager?.releasePlayback()
-                    songHandler.removeCallbacks(songRunnable)
-                    // Remove notification of foreground service process
-                    stopForeground(STOP_FOREGROUND_REMOVE)
-                    stopSelf()
-                    _songController?.stop()
-                    // Close application
-                    _activity?.finish()
+                    mPrefs.isPlaying=false
+                    pausePlayer()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(1000)
+                        bassManager?.releasePlayback()
+                        songHandler.removeCallbacks(songRunnable)
+                        _songController?.stop()
+                        // Remove notification of foreground service process
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                        // Close application
+                        _activity?.finish()
+                        // exitProcess elimina completamente la notificación y el servicio
+                        exitProcess(0)
+                    }
+
                 }
             }
         }
@@ -361,13 +369,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             SongAction.Close -> {
                 bassManager?.releasePlayback()
                 songHandler.removeCallbacks(songRunnable)
-
                 // Remove notification of foreground service process
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 _songController?.stop()
                 // Close application
                 _activity?.finish()
+
 
             }
             SongAction.Nothing -> {}
