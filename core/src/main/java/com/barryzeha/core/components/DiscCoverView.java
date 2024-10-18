@@ -177,7 +177,7 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
         });
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DiscCoverView);
-        @Shape int shape = a.getInt(R.styleable.DiscCoverView_shape, SHAPE_RECTANGLE);
+        @Shape int shape = a.getInt(R.styleable.DiscCoverView_shape, SHAPE_CIRCLE);
         @ColorInt int trackColor = a.getColor(R.styleable.DiscCoverView_trackColor, TRACK_COLOR);
         int durationRotate = a.getInt(R.styleable.DiscCoverView_speedRotation, DURATION);
         a.recycle();
@@ -192,18 +192,10 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
         mCallbacks = callbacks;
     }
 
-    /**
-     * Return the current shape
-     */
     public int getShape() {
         return mShape;
     }
 
-    /**
-     * Set which shape should be drawn by this {@link DiscCoverView}
-     *
-     * @param shape The shape as {@link #SHAPE_CIRCLE} or {@link #SHAPE_RECTANGLE}
-     */
     public void setShape(@Shape int shape) {
         if (shape != mShape) {
             mShape = shape;
@@ -215,11 +207,6 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
         }
     }
 
-    /**
-     * Set the color of the music tracks
-     *
-     * @param trackColor The color int
-     */
     public void setTrackColor(@ColorInt int trackColor) {
         if (trackColor != getTrackColor()) {
             int alpha = mShape == SHAPE_CIRCLE ? ALPHA_OPAQUE : ALPHA_TRANSPARENT;
@@ -236,9 +223,6 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
 
     }
 
-    /**
-     * Return the current color of the tracks
-     */
     public int getTrackColor() {
         return mTrackPaint.getColor();
     }
@@ -350,9 +334,6 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
         return insets;
     }
 
-    /**
-     * Starts the transition morph to rect or circle, depending the current shape.
-     */
     public void morph() {
         if (SHAPE_CIRCLE == mShape) {
             morphToRect();
@@ -390,11 +371,18 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
         }
     }
 
+    /**
+     * pause the rotate animation
+     */
     public void pause(){
         if (mStartRotateAnimator.isRunning()) {
             mStartRotateAnimator.pause();
         }
     }
+
+    /**
+     * resume the rotate animation
+     */
     public void  resume(){
         if (mStartRotateAnimator.isPaused()) {
             mStartRotateAnimator.resume();
@@ -412,6 +400,10 @@ public class DiscCoverView extends androidx.appcompat.widget.AppCompatImageView 
             mStartRotateAnimator.cancel();
         }
     }
+
+    /**
+     * End the rotate animation
+     */
     public void end(){
         if(mStartRotateAnimator.isRunning()){
             //If is rotation the animation stop with rotation to original position fastly

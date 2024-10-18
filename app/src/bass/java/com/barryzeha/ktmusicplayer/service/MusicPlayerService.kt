@@ -386,23 +386,24 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     @OptIn(UnstableApi::class)
     private fun setUpRepository(){
        CoroutineScope(Dispatchers.Main).launch {
-            // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
-            // si no hay algo seleccionado previamente solo devolverá la lista por defecto
-            val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
 
-            songState=repository.fetchSongState()
             // TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {
+                // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
+                // si no hay algo seleccionado previamente solo devolverá la lista por defecto
+                val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
+                songState=repository.fetchSongState()
+
                 songs.forEach { s ->
                     if (!songsList.contains(s)) {
                         songsList.add(s)
                     }
                }
             }
-            if(!songState.isNullOrEmpty()) {
-                val songEntity=songState[0].songEntity
-                if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
-            }
+           if(!songState.isNullOrEmpty()) {
+               val songEntity=songState[0].songEntity
+               if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
+           }
 
         }
     }
