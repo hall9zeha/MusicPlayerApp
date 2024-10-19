@@ -29,7 +29,6 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.components.DiscCoverView
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
@@ -39,6 +38,7 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
+import com.barryzeha.library.components.DiscCoverView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
