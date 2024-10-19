@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -65,7 +64,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var bind:FragmentMainPlayerBinding ? = null
     private var isPlaying:Boolean = false
     private var currentMusicState = MusicState()
-    private var songLists:MutableList<SongEntity> = arrayListOf()
+
     private var currentSelectedPosition=0
 
     private val launcherAudioEffectActivity: ActivityResultLauncher<Int> = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
@@ -88,7 +87,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
             bind=FragmentMainPlayerBinding.bind(view)
-            currentSelectedPosition = mPrefs.currentPosition.toInt()
+            currentSelectedPosition = mPrefs.currentIndexSong.toInt()
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
             setUpObservers()
             setUpListeners()
@@ -156,11 +155,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             CoroutineScope(Dispatchers.IO).launch {
-                if (songs.isNotEmpty()) {
+                /*if (songs.isNotEmpty()) {
                     songs.forEach {
                         if (!songLists.contains(it)) songLists.add(it)
                     }
-                }
+                }*/
                 withContext(Dispatchers.Main) {
                     setNumberOfTrack(mPrefs.idSong)
                 }
@@ -194,7 +193,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // Si se agregó una pista nueva desde la lista del segundo fragmento
             // el observador lo agregará a la lista de este fragmento principal
             song?.let{
-                if(!songLists.contains(song)) songLists.add(song)
+                //if(!songLists.contains(song)) songLists.add(song)
             }
         }
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
@@ -203,13 +202,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
         mainViewModel.deletedRow.observe(viewLifecycleOwner){deleteRow->
             if(deleteRow>0){
-                songLists.clear()
-                mainViewModel.fetchAllSongFromMain()
+                setNumberOfTrack(currentMusicState.idSong)
             }
         }
         mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteAllRows->
             if(deleteAllRows>0){
-                songLists.clear()
+
                 setNumberOfTrack(currentMusicState.idSong)
             }
         }
@@ -265,7 +263,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         // pero aún falta obtener los metadatos de la reproducción en curso si es automática
         musicState?.let{
             if(!musicState.isPlaying){
-                if((songLists.size -1)  == mPrefs.currentPosition.toInt() && !musicState.latestPlayed) {
+                if((musicPlayerService?.getSongsList()!!.size -1)  == mPrefs.currentIndexSong.toInt() && !musicState.latestPlayed) {
                     bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
                     mainViewModel.saveStatePlaying(false)
                     //mainViewModel.setCurrentPosition(0)
@@ -376,8 +374,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 withContext(Dispatchers.Main) {
                     bind?.tvNumberSong?.text = String.format(
                         "#%s/%s",
-                        if (mPrefs.currentPosition > -1) itemNumOnList else 0,
-                        songLists.count()
+                        if (mPrefs.currentIndexSong > -1) itemNumOnList else 0,
+                        musicPlayerService?.getSongsList()?.count()
                     )
                 }
             }
@@ -409,7 +407,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }
             btnMainPlay.setOnClickListener {
-                if (songLists.size > 0) {
+                if (musicPlayerService?.getSongsList()?.size!! > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
                         getSongOfList(currentSelectedPosition)?.let{song->
                             musicPlayerService?.startPlayer(song)
@@ -443,6 +441,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 if (currentSelectedPosition < ListPlayerFragment.listAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
+                    //TODO mejorar en modo ordenar lista por artista, etc debe de tomar su valor desde
+                    // la lista del servicio
                     getSongOfList(0)?.let{song->
                         musicPlayerService?.startPlayer(song)
                     }
@@ -534,16 +534,22 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
 
     private fun getSongOfList(position:Int): SongEntity?{
-        if(mPrefs.currentPosition>-1) {
-            mPrefs.currentPosition = position.toLong()
+        if(mPrefs.currentIndexSong>-1) {
+            mPrefs.currentIndexSong = position.toLong()
             mainViewModel.setCurrentPosition(position)
-            val song = songLists[position]
-            return song
+            musicPlayerService?.getSongsList()?.let{songsList->
+               return songsList[position]
+           }?:run{
+                return null
+            }
+
         }else{
-            mPrefs.currentPosition = 1
+            //mPrefs.currentPosition = 1
             mainViewModel.setCurrentPosition(0)
-            val song = songLists[0]
-            return song
+            musicPlayerService?.getSongsList()?.let{songsList->
+                return songsList[0]
+            }?:run { return null }
+
        }
 
     }
@@ -560,8 +566,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
             try {
-                //val song = songLists[mPrefs.currentPosition.toInt()]
-                val song = songLists.find { mPrefs.idSong == it.id }
+
+                val song = musicPlayerService?.getSongsList()?.find { mPrefs.idSong == it.id }
                 song?.let {
 
                     val songMetadata = getSongMetadata(requireContext(), song.pathLocation)

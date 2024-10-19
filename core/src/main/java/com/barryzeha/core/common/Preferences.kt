@@ -44,7 +44,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var firstExecution:Boolean
         get()= myPreferences.getBoolean(FIRST_EXECUTION,false)
         set(value)=myPreferences.edit().putBoolean(FIRST_EXECUTION,value).apply()
-    var currentPosition:Long
+    var currentIndexSong:Long
         get()=myPreferences.getLong(CURRENT_POSITION,-1)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()
     var idSong:Long

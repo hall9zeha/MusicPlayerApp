@@ -59,7 +59,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        if(savedInstanceState==null)mainViewModel.fetchAllSong()
+        if(savedInstanceState==null){
+           mainViewModel.fetchAllSongsBy(mPrefs.playListSortOption)
+        }
         setUpViewPager()
         setUpObservers()
         setUpListeners()

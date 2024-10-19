@@ -4,7 +4,6 @@ import android.content.ServiceConnection
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
 import com.barryzeha.core.model.entities.MusicState
@@ -16,7 +15,6 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -217,7 +215,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun setCurrentPosition(position:Int){
         launch {
             _currentSongListPosition.value = position
-            MyApp.mPrefs.currentPosition=position.toLong()
+            MyApp.mPrefs.currentIndexSong=position.toLong()
         }
     }
 

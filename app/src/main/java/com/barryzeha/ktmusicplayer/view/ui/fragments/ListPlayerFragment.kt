@@ -106,7 +106,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onViewCreated(view, savedInstanceState)
 
         bind = FragmentListPlayerBinding.bind(view)
-        currentSelectedPosition = mPrefs.currentPosition.toInt()
+        currentSelectedPosition = mPrefs.currentIndexSong.toInt()
         setUpAdapter()
         setUpObservers()
         setUpPlayListName()
@@ -298,6 +298,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+            mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
 
         }
     }
@@ -582,7 +583,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         song?.let{
             val pos =  listAdapter?.getPositionByItem(it)
             mainViewModel.setCurrentPosition(pos!!.second)
-            mPrefs.currentPosition = pos.first.toLong()
+            mPrefs.currentIndexSong = pos.first.toLong()
             bind?.rvSongs?.scrollToPosition(pos.second)
             return song
         }
@@ -676,13 +677,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
         itemSong?.let{
             val (numberedPos, realPos) = listAdapter?.getPositionByItem(itemSong)!!
-            mPrefs.currentPosition = numberedPos.toLong()
+            mPrefs.currentIndexSong = numberedPos.toLong()
             listAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
 
         bind?.seekbarControl?.tvNumberSong?.text =
-            String.format("#%s/%s", if(mPrefs.currentPosition>-1)mPrefs.currentPosition else 0, (listAdapter?.getSongItemCount()!! + itemCount))
+            String.format("#%s/%s", if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0, (listAdapter?.getSongItemCount()!! + itemCount))
     }
    private fun updateService(){
         serviceConnection?.let{

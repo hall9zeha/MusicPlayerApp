@@ -21,7 +21,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -51,11 +50,9 @@ import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import com.barryzeha.ktmusicplayer.utils.BassManager
 import com.google.android.material.snackbar.Snackbar
-import com.un4seen.bass.BASS
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -209,36 +206,48 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
-    override fun onFinishPlayback() {
-        if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
-            when(mPrefs.songMode){
-                REPEAT_ONE-> {
-                    if (mPrefs.isPlaying) {
-                        bassManager?.repeatSong()
+
+    @OptIn(UnstableApi::class)
+    private fun setUpRepository(){
+        CoroutineScope(Dispatchers.Main).launch {
+
+            // TODO Revisar, no cargar toda la lista antes del estado de la canción
+            withContext(Dispatchers.IO) {
+                // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
+                // si no hay algo seleccionado previamente solo devolverá la lista por defecto
+                val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
+                songState=repository.fetchSongState()
+
+                songs.forEach { s ->
+                    if (!songsList.contains(s)) {
+                        songsList.add(s)
                     }
                 }
-                SHUFFLE->{
-                    indexOfSong = (songsList.indices).random()
-                    play(songsList[indexOfSong])
-                }
-                else->{
-                    if(mPrefs.isPlaying)nextSong()
-                }
             }
-
-        }else{
-            when(mPrefs.songMode){
-                REPEAT_ALL->{ play(songsList[0])}
-                else->{
-                    //Todo revisar el cambio de canción y mejorar
-                    //if(indexOfSong  songsList.size) {
-                        if (songsList.isNotEmpty()) setMusicForPlayer(songsList[0])
-                        bassManager?.stopCheckingPlayback()
-                    //}
-                }
+            if(!songState.isNullOrEmpty()) {
+                val songEntity=songState[0].songEntity
+                if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
             }
 
         }
+    }
+    private fun initMusicStateLooper(){
+        songRunnable = Runnable {
+            if(bassManager?.getActiveChannel() != 0) {
+                currentMusicState = currentMusicState.copy(
+                    isPlaying = mPrefs.isPlaying,
+                    currentDuration = bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0,
+                    duration = bassManager?.getDuration(bassManager?.getActiveChannel()!!)?:0,
+                    latestPlayed = false
+                )
+            }
+            _songController?.musicState(currentMusicState)
+            updateNotify()
+
+            songHandler.postDelayed(songRunnable, 500)
+        }
+        songHandler.post(songRunnable)
+
     }
 
     private fun mediaSessionCallback():MediaSession.Callback{
@@ -383,37 +392,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
       return START_NOT_STICKY
     }
 
-    @OptIn(UnstableApi::class)
-    private fun setUpRepository(){
-       CoroutineScope(Dispatchers.Main).launch {
-
-            // TODO Revisar, no cargar toda la lista antes del estado de la canción
-            withContext(Dispatchers.IO) {
-                // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
-                // si no hay algo seleccionado previamente solo devolverá la lista por defecto
-                val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
-                songState=repository.fetchSongState()
-
-                songs.forEach { s ->
-                    if (!songsList.contains(s)) {
-                        songsList.add(s)
-                    }
-               }
-            }
-           if(!songState.isNullOrEmpty()) {
-               val songEntity=songState[0].songEntity
-               if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
-           }
-
-        }
-    }
     private fun nextOrPrevTrack(action:Int){
             if(songsList.isNotEmpty()) {
                 when(action){
                     NEXT->nextSong()
                     PREVIOUS->prevSong()
                 }
-              //mPrefs.currentPosition = position.toLong()
+
             }
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
@@ -475,24 +460,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
 
     }
-    private fun initMusicStateLooper(){
-            songRunnable = Runnable {
-               if(bassManager?.getActiveChannel() != 0) {
-                    currentMusicState = currentMusicState.copy(
-                        isPlaying = mPrefs.isPlaying,
-                        currentDuration = bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0,
-                        duration = bassManager?.getDuration(bassManager?.getActiveChannel()!!)?:0,
-                        latestPlayed = false
-                    )
-                }
-                _songController?.musicState(currentMusicState)
-                updateNotify()
-
-              songHandler.postDelayed(songRunnable, 500)
-            }
-            songHandler.post(songRunnable)
-
-    }
 
     private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {
@@ -531,11 +498,19 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     songsList.add(s)
                 }
             }
+            // Volvemos a obtener la posición de la pista en
+            // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
+            findItemSongIndexById(mPrefs.idSong)?.let {
+                indexOfSong = it
+            }?:run{
+                indexOfSong = 0
+            }
+            mPrefs.currentIndexSong = indexOfSong.toLong()
         }
     }
     fun clearPlayList(isSort:Boolean){
         songsList.clear()
-        // Cuando no es para ordenar la lista sera para eliminar
+        // Cuando no es para ordenar la lista será para eliminar
         if(!isSort){
             mPrefs.isPlaying=false
             _songController?.currentTrack(MusicState())
@@ -632,6 +607,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             nextOrPrevAnimValue = NEXT
             setOrPlaySong(indexOfSong, NEXT)
             checkIfPhoneIsLock()
+            mPrefs.currentIndexSong = indexOfSong.toLong()
+            Log.e("INDEX-SONG--next", indexOfSong.toString() +" -- "+ (songsList.size-1).toString() )
         }
 
     }
@@ -643,9 +620,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 nextOrPrevAnimValue = PREVIOUS
                 setOrPlaySong(indexOfSong, PREVIOUS)
                 checkIfPhoneIsLock()
+                mPrefs.currentIndexSong = indexOfSong.toLong()
+                Log.e("INDEX-SONG--prev", indexOfSong.toString() +" -- "+ (songsList.size-1).toString() )
             }
 
         }
+    }
+    fun getSongsList():List<SongEntity>{
+        return songsList
     }
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
         if (mPrefs.isPlaying)play(songsList[indexOfSong])
@@ -710,6 +692,37 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         )
         }catch(ex:Exception) {
             return null
+        }
+    }
+    override fun onFinishPlayback() {
+        if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
+            when(mPrefs.songMode){
+                REPEAT_ONE-> {
+                    if (mPrefs.isPlaying) {
+                        bassManager?.repeatSong()
+                    }
+                }
+                SHUFFLE->{
+                    indexOfSong = (songsList.indices).random()
+                    play(songsList[indexOfSong])
+                }
+                else->{
+                    if(mPrefs.isPlaying)nextSong()
+                }
+            }
+
+        }else{
+            when(mPrefs.songMode){
+                REPEAT_ALL->{ play(songsList[0])}
+                else->{
+                    //Todo revisar el cambio de canción y mejorar
+                    //if(indexOfSong  songsList.size) {
+                    if (songsList.isNotEmpty()) setMusicForPlayer(songsList[0])
+                    bassManager?.stopCheckingPlayback()
+                    //}
+                }
+            }
+
         }
     }
     override fun onDestroy() {
