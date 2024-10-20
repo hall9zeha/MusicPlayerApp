@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -93,6 +94,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             setUpListeners()
             setUpScrollOnTextViews()
 
+
     }
     private fun setUpScrollOnTextViews()=with(bind){
         this?.let{
@@ -104,6 +106,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private fun discCoverViewIsEnable():Boolean{
         return defaultPrefs.getBoolean("coverStyle",false)
     }
+
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
         this?.let {
@@ -150,7 +153,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
             serviceConnection= instance.first
             musicPlayerService= instance.second
-
 
         }
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
@@ -303,6 +305,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         musicPlayerService = bind.getService()
         this.serviceConnection=conn
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
+
     }
     override fun onServiceDisconnected() {
         super.onServiceDisconnected()
@@ -441,8 +444,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 if (currentSelectedPosition < ListPlayerFragment.listAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
-                    //TODO mejorar en modo ordenar lista por artista, etc debe de tomar su valor desde
-                    // la lista del servicio
                     getSongOfList(0)?.let{song->
                         musicPlayerService?.startPlayer(song)
                     }
@@ -481,6 +482,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                             )
                             mPrefs.songMode = CLEAR_MODE
+                            // For bass flavor
+                            musicPlayerService?.sortList()
                         }
                         SongMode.RepeatAll.ordinal -> {
                             // Second: repeat one
@@ -488,7 +491,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                             )
                             mPrefs.songMode = REPEAT_ONE
-
+                            // For bass flavor
+                            musicPlayerService?.sortList()
                         }
                         else -> {
                             // First: active repeat All
@@ -496,6 +500,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                             )
                             mPrefs.songMode= REPEAT_ALL
+                            // For bass flavor
+                            musicPlayerService?.sortList()
                         }
                     }
 
@@ -505,7 +511,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         SongMode.Shuffle.ordinal->{
                         btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
-                        mPrefs.songMode= CLEAR_MODE
+                            mPrefs.songMode= CLEAR_MODE
+                            // For bass flavor
+                            musicPlayerService?.sortList()
+
                     }
                     else->{
                         btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
@@ -513,6 +522,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         )
                         mPrefs.songMode= SHUFFLE
+                        // For bass flavor
+                        musicPlayerService?.shuffleList()
+
                     }
                 }
             }

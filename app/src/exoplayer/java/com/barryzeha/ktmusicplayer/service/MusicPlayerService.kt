@@ -712,6 +712,13 @@ class MusicPlayerService : Service(){
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
     }
+    // Solo en bass flavour
+    fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){
+
+    }
+    // Solo en bass flavour Reordenamos la lista nuevamente a su forma original
+    fun sortList(){}
+
     fun getSongsList():List<SongEntity>{
         return songsList
     }

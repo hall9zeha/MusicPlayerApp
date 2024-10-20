@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -142,6 +143,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
+
     private fun setUpAdapter(){
 
         listAdapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
@@ -446,7 +448,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         mPrefs.songMode= SHUFFLE
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                         bottomPlayerControls.btnRepeat.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-
                     }
                 }
             }

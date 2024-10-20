@@ -21,6 +21,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -104,6 +105,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var bluetoothReceiver:BroadcastReceiver?=null
     private var bluetoothIsConnect:Boolean = false
     private var nextOrPrevAnimValue=-1
+    private var listIsShuffled:Boolean=false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -219,9 +221,21 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 songState=repository.fetchSongState()
 
                 songs.forEach { s ->
-                    if (!songsList.contains(s)) {
+                    //if (!songsList.contains(s)) {
                         songsList.add(s)
+                    //}
+                }
+                if(mPrefs.songMode == SHUFFLE){
+                    //TODO revisar porqué no funciona si usamos la función shuffleList y si cuando
+                    // directamente manipulamos la lista desde aquí, problemas con corutinas
+                    songsList.shuffle()
+                    findItemSongIndexById(mPrefs.idSong)?.let {
+                        indexOfSong = it
+                    } ?: run {
+                        indexOfSong = 0
                     }
+                    listIsShuffled = true
+                    //shuffleList(songsList)
                 }
             }
             if(!songState.isNullOrEmpty()) {
@@ -505,6 +519,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }?:run{
                 indexOfSong = 0
             }
+            if(mPrefs.songMode == SHUFFLE)shuffleList()
             mPrefs.currentIndexSong = indexOfSong.toLong()
         }
     }
@@ -598,33 +613,67 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun nextSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong < songsList.size - 1 ) {
-                if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
-                else indexOfSong  += 1
+                /*if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
+                else indexOfSong  += 1*/
+                indexOfSong +=1
             }else{
-                if(mPrefs.songMode == SHUFFLE){indexOfSong = (songsList.indices).random()}
-                else indexOfSong = 0
+               /* if(mPrefs.songMode == SHUFFLE){indexOfSong = (songsList.indices).random()}
+                else indexOfSong = 0*/
+                indexOfSong = 0
             }
             nextOrPrevAnimValue = NEXT
             setOrPlaySong(indexOfSong, NEXT)
             checkIfPhoneIsLock()
             mPrefs.currentIndexSong = indexOfSong.toLong()
-            Log.e("INDEX-SONG--next", indexOfSong.toString() +" -- "+ (songsList.size-1).toString() )
+
         }
 
     }
     fun prevSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong > 0) {
-                if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
-                else indexOfSong -=1
+                /*if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
+                else indexOfSong -=1*/
+                indexOfSong -=1
                 nextOrPrevAnimValue = PREVIOUS
                 setOrPlaySong(indexOfSong, PREVIOUS)
                 checkIfPhoneIsLock()
                 mPrefs.currentIndexSong = indexOfSong.toLong()
-                Log.e("INDEX-SONG--prev", indexOfSong.toString() +" -- "+ (songsList.size-1).toString() )
+
             }
 
         }
+    }
+    // Probamos nueva forma de implementar shuffle
+    fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){
+        //CoroutineScope(Dispatchers.IO).launch {
+            //if(!listIsShuffled) {
+                songsList.shuffle()
+                findItemSongIndexById(mPrefs.idSong)?.let {
+                    indexOfSong = it
+                } ?: run {
+                    indexOfSong = 0
+                }
+
+            //}
+
+        //}
+        listIsShuffled = true
+    }
+    // Reordenamos la lista nuevamente a su forma original
+    fun sortList(){
+        if(listIsShuffled) {
+            CoroutineScope(Dispatchers.IO).launch {
+                songsList.clear()
+                songsList = repository.fetchAllSongsBy(mPrefs.playListSortOption).toMutableList()
+                findItemSongIndexById(mPrefs.idSong)?.let {
+                    indexOfSong = it
+                } ?: run {
+                    indexOfSong = 0
+                }
+            }
+        }
+        listIsShuffled = false
     }
     fun getSongsList():List<SongEntity>{
         return songsList
@@ -702,10 +751,11 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         bassManager?.repeatSong()
                     }
                 }
-                SHUFFLE->{
+                //TODO probamos nueva forma de barajar la lista comentamos por ahora
+               /* SHUFFLE->{
                     indexOfSong = (songsList.indices).random()
                     play(songsList[indexOfSong])
-                }
+                }*/
                 else->{
                     if(mPrefs.isPlaying)nextSong()
                 }
