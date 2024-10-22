@@ -225,17 +225,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         songsList.add(s)
                     //}
                 }
+                // Comprobamos si la opción shuffle está activada al iniciar el servicio
                 if(mPrefs.songMode == SHUFFLE){
-                    //TODO revisar porqué no funciona si usamos la función shuffleList y si cuando
-                    // directamente manipulamos la lista desde aquí, problemas con corutinas
-                    songsList.shuffle()
-                    findItemSongIndexById(mPrefs.idSong)?.let {
-                        indexOfSong = it
-                    } ?: run {
-                        indexOfSong = 0
-                    }
-                    listIsShuffled = true
-                    //shuffleList(songsList)
+                    shuffleList()
                 }
             }
             if(!songState.isNullOrEmpty()) {
@@ -331,7 +323,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             override fun onSkipToNext() {
                 super.onSkipToNext()
-                //TODO trying controla el evento desde la notificación
+                //Controla el evento desde la notificación android >=12
                 nextOrPrevTrack(NEXT)
             }
             override fun onSkipToPrevious() {
@@ -645,7 +637,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     // Probamos nueva forma de implementar shuffle
-    fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){
+    fun shuffleList(){
         //CoroutineScope(Dispatchers.IO).launch {
             //if(!listIsShuffled) {
                 songsList.shuffle()
