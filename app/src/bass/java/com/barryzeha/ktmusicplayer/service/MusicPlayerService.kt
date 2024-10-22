@@ -550,7 +550,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }else{
             _songController?.currentTrack(currentMusicState)
         }
-        //bassManager?.clearBassChannel()
+
         executeOnceTime=false
     }
     fun unregisterController(){

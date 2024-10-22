@@ -284,7 +284,7 @@ class MusicPlayerService : Service(){
                 )
                 listOfBands.forEachIndexed { index, value ->
                     EqualizerManager.setBand(index.toShort(),value)
-                    Log.e("SESSION-ID", index.toString() + "--" + value.toString())
+
                 }
             }
         }
@@ -345,11 +345,7 @@ class MusicPlayerService : Service(){
             }
             SongAction.Nothing -> {}
         }
-        musicState?.let { newState ->
-            if (isForegroundService) {
-                //updateNotify()
-            }
-        }
+
         return START_NOT_STICKY
     }
 
@@ -683,8 +679,6 @@ class MusicPlayerService : Service(){
                     }
                 }
             }
-            Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
-
         }
     }
     // Ya que el fragmento de lista no es diferente para cada versión, en bass flavor se implemnta clearPlayList
