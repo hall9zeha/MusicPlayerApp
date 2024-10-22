@@ -86,6 +86,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private lateinit var mediaStyle: MediaStyle
     private lateinit var notificationManager: NotificationManager
     private lateinit var mediaPlayerNotify:Notification
+    private var playBackState:PlaybackState? = null
+    private var mediaMetadata:MediaMetadata? = null
+
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
 
@@ -238,6 +241,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     private fun initMusicStateLooper(){
+        initNotify()
         songRunnable = Runnable {
             if(bassManager?.getActiveChannel() != 0) {
                 currentMusicState = currentMusicState.copy(
@@ -249,7 +253,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             _songController?.musicState(currentMusicState)
             updateNotify()
-
             songHandler.postDelayed(songRunnable, 500)
         }
         songHandler.post(songRunnable)
@@ -411,6 +414,58 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     }
 
+    private fun initNotify(){
+        currentMusicState?.let { newState ->
+        playBackState = PlaybackState.Builder()
+            .setState(
+                if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                newState.currentDuration,
+                1f
+            )
+            // Los siguiente controles aparecerán en android 13 y 14
+            .setActions(
+                PlaybackState.ACTION_SEEK_TO
+                        or PlaybackState.ACTION_PLAY
+                        or PlaybackState.ACTION_PAUSE
+                        or PlaybackState.ACTION_SKIP_TO_NEXT
+                        or PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                        or PlaybackState.ACTION_STOP
+            )
+            .addCustomAction(
+                PlaybackState.CustomAction.Builder(
+                    ACTION_CLOSE,
+                    ACTION_CLOSE,
+                    com.barryzeha.core.R.drawable.ic_close
+                ).build()
+            )
+            .build()
+            mediaMetadata = MediaMetadata.Builder()
+                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                .build()
+
+            mediaSession.setPlaybackState(playBackState)
+            mediaSession.setMetadata(mediaMetadata)
+
+            mediaPlayerNotify = notificationMediaPlayer(
+                this,
+                MediaStyle()
+                    .setMediaSession(mediaSession.sessionToken)
+                    .setShowActionsInCompactView(0, 1, 2),
+                currentMusicState
+            )
+            startForeground(NOTIFICATION_ID, mediaPlayerNotify).also {
+                isForegroundService = true
+            }
+            notificationManager.notify(
+                NOTIFICATION_ID,
+                mediaPlayerNotify
+            )
+        }
+    }
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
     // nos ayuda a controlar el estado de la notificación cuando el móvil esta en modo de bloqueo
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
@@ -418,52 +473,30 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
         currentMusicState?.let { newState ->
-              mediaSession.setPlaybackState(
-                    PlaybackState.Builder()
-                        .setState(
-                            if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                            newState.currentDuration,
-                            1f
-                        )
-                        // Los siguiente controles aparecerán en android 13 y 14
-                        .setActions(PlaybackState.ACTION_SEEK_TO
-                                or PlaybackState.ACTION_PLAY
-                                or PlaybackState.ACTION_PAUSE
-                                or PlaybackState.ACTION_SKIP_TO_NEXT
-                                or PlaybackState.ACTION_SKIP_TO_PREVIOUS
-                                or PlaybackState.ACTION_STOP
-                          )
-                        .addCustomAction(PlaybackState.CustomAction.Builder(
-                            ACTION_CLOSE,
-                            ACTION_CLOSE,
-                            com.barryzeha.core.R.drawable.ic_close
-                        ).build())
-                        .build()
-                )
-                mediaSession.setMetadata(
-                    MediaMetadata.Builder()
-                        .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                        .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                        .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
-                        .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                        .build()
-                )
-                mediaPlayerNotify = notificationMediaPlayer(
-                    this,
-                    MediaStyle()
-                        .setMediaSession(mediaSession.sessionToken)
-                        .setShowActionsInCompactView(0, 1, 2),
-                   currentMusicState
-                )
-                startForeground(NOTIFICATION_ID, mediaPlayerNotify).also {
-                    isForegroundService = true
-                }
-                notificationManager.notify(
-                    NOTIFICATION_ID,
-                    mediaPlayerNotify
-                )
+            val updatePlaybackState = playBackState?.let{
+                PlaybackState.Builder(it)
+                    .setState(if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                        newState.currentDuration,
+                        1f)
+                    .build()
             }
+            mediaSession.setPlaybackState(updatePlaybackState)
+            val updateMediaMetadata = MediaMetadata.Builder()
+                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                .build()
+
+            // Para android >=12
+            if(mediaMetadata != updateMediaMetadata) mediaSession.setMetadata(updateMediaMetadata)
+
+            notificationManager.notify(
+                NOTIFICATION_ID,
+                mediaPlayerNotify
+            )
+        }
 
     }
 
