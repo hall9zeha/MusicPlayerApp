@@ -76,6 +76,9 @@ class MusicPlayerService : Service(){
     private lateinit var mediaStyle: MediaStyle
     private lateinit var notificationManager: NotificationManager
     private lateinit var mediaPlayerNotify:Notification
+    private var playBackState:PlaybackState? = null
+    private var mediaMetadata:MediaMetadata? = null
+
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
@@ -238,13 +241,13 @@ class MusicPlayerService : Service(){
             override fun onSkipToNext() {
                 super.onSkipToNext()
                 _songController?.next()
-                nextOrPrevTRack(mPrefs.currentPosition.toInt() +1)
+                nextOrPrevTRack(mPrefs.currentIndexSong.toInt() +1)
             }
 
             override fun onSkipToPrevious() {
                 super.onSkipToPrevious()
                 _songController?.previous()
-                nextOrPrevTRack(mPrefs.currentPosition.toInt() -1)
+                nextOrPrevTRack(mPrefs.currentIndexSong.toInt() -1)
             }
 
             override fun onStop() {
@@ -263,6 +266,7 @@ class MusicPlayerService : Service(){
                     _songController?.stop()
                     // Close application
                     _activity?.finish()
+                    exitProcess(0)
                 }
             }
 
@@ -320,11 +324,11 @@ class MusicPlayerService : Service(){
             }
             SongAction.Next -> {
                 _songController?.next()
-                nextOrPrevTRack(mPrefs.currentPosition.toInt() +1)
+                nextOrPrevTRack(mPrefs.currentIndexSong.toInt() +1)
             }
             SongAction.Previous -> {
                 _songController?.previous()
-               nextOrPrevTRack(mPrefs.currentPosition.toInt() -1)
+               nextOrPrevTRack(mPrefs.currentIndexSong.toInt() -1)
             }
             SongAction.Close -> {
                 exoPlayer.stop()
@@ -393,94 +397,118 @@ class MusicPlayerService : Service(){
         if(_songController==null){
             if(songsList.isNotEmpty()) {
                 startPlayer(songsList[position])
-                mPrefs.currentPosition = position.toLong()
+                mPrefs.currentIndexSong = position.toLong()
             }
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
             mPrefs.isPlaying = exoPlayer.isPlaying
         }
     }
+    private fun initNotify(){
+        currentMusicState?.let { newState ->
+            playBackState = PlaybackState.Builder()
+                .setState(
+                    if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                    newState.currentDuration,
+                    1f
+                )
+                // Los siguiente controles aparecerán en android 13 y 14
+                .setActions(
+                    PlaybackState.ACTION_SEEK_TO
+                            or PlaybackState.ACTION_PLAY
+                            or PlaybackState.ACTION_PAUSE
+                            or PlaybackState.ACTION_SKIP_TO_NEXT
+                            or PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                            or PlaybackState.ACTION_STOP
+                )
+                .addCustomAction(
+                    PlaybackState.CustomAction.Builder(
+                        ACTION_CLOSE,
+                        ACTION_CLOSE,
+                        com.barryzeha.core.R.drawable.ic_close
+                    ).build()
+                )
+                .build()
+            mediaMetadata = MediaMetadata.Builder()
+                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                .build()
 
+            mediaSession.setPlaybackState(playBackState)
+            mediaSession.setMetadata(mediaMetadata)
+
+            mediaPlayerNotify = notificationMediaPlayer(
+                this,
+                MediaStyle()
+                    .setMediaSession(mediaSession.sessionToken)
+                    .setShowActionsInCompactView(0, 1, 2),
+                currentMusicState
+            )
+            startForeground(NOTIFICATION_ID, mediaPlayerNotify).also {
+                isForegroundService = true
+            }
+            notificationManager.notify(
+                NOTIFICATION_ID,
+                mediaPlayerNotify
+            )
+        }
+    }
     // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
     // nos ayuda a controlar el estado de la notificación cuando el móvil esta en modo de bloqueo
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
-
         currentMusicState?.let { newState ->
-              mediaSession.setPlaybackState(
-                    PlaybackState.Builder()
-                        .setState(
-                            if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                            newState.currentDuration,
-                            1f
-                        )
-                       /* .setActions(PlaybackState.ACTION_PLAY_PAUSE)
-                        .setActions(PlaybackState.ACTION_SEEK_TO)*/
-                        //TODO implementar Controles que aparecen en android 14
-
-                        .setActions(PlaybackState.ACTION_SEEK_TO
-                                or PlaybackState.ACTION_PLAY
-                                or PlaybackState.ACTION_PAUSE
-                                or PlaybackState.ACTION_SKIP_TO_NEXT
-                                or PlaybackState.ACTION_SKIP_TO_PREVIOUS
-                                or PlaybackState.ACTION_STOP
-                          )
-
-                        .addCustomAction(PlaybackState.CustomAction.Builder(
-                            ACTION_CLOSE,
-                            ACTION_CLOSE,
-                            com.barryzeha.core.R.drawable.ic_close
-                        ).build())
-                        .build()
-                )
-                mediaSession.setMetadata(
-                    MediaMetadata.Builder()
-                        .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                        .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                        .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
-                        .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                        .build()
-                )
-                mediaPlayerNotify = notificationMediaPlayer(
-                    this,
-                    MediaStyle()
-                        .setMediaSession(mediaSession.sessionToken)
-                        .setShowActionsInCompactView(0, 1, 2),
-                   currentMusicState
-                )
-                startForeground(NOTIFICATION_ID, mediaPlayerNotify).also {
-                    isForegroundService = true
-                }
-                notificationManager.notify(
-                    NOTIFICATION_ID,
-                    mediaPlayerNotify
-                )
+            val updatePlaybackState = playBackState?.let{
+                PlaybackState.Builder(it)
+                    .setState(if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                        newState.currentDuration,
+                        1f)
+                    .build()
             }
+            mediaSession.setPlaybackState(updatePlaybackState)
+            val updateMediaMetadata = MediaMetadata.Builder()
+                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                .build()
 
+            // Para android >=12
+            if(mediaMetadata != updateMediaMetadata) mediaSession.setMetadata(updateMediaMetadata)
+
+            notificationManager.notify(
+                NOTIFICATION_ID,
+                mediaPlayerNotify
+            )
+        }
     }
     private fun initMusicStateLooper(){
-            songRunnable = Runnable {
-                if(exoPlayer.currentPosition>0) {
-                    currentMusicState = currentMusicState.copy(
-                        isPlaying = exoPlayer.isPlaying,
-                        currentDuration = exoPlayer.currentPosition,
-                        duration = exoPlayer.duration,
-                        latestPlayed = false
-                    )
-                }
-
-                //if(exoPlayer.isPlaying) {
-                    _songController?.musicState(currentMusicState)
-                    updateNotify()
-                //}
-                setUpExoPlayerRepeatMode()
-
-               songHandler.postDelayed(songRunnable, 500)
+        initNotify()
+        songRunnable = Runnable {
+            if(exoPlayer.currentPosition>0) {
+                currentMusicState = currentMusicState.copy(
+                    isPlaying = exoPlayer.isPlaying,
+                    currentDuration = exoPlayer.currentPosition,
+                    duration = exoPlayer.duration,
+                    latestPlayed = false
+                )
             }
-            songHandler.post(songRunnable)
+
+            //if(exoPlayer.isPlaying) {
+                _songController?.musicState(currentMusicState)
+                updateNotify()
+            //}
+            setUpExoPlayerRepeatMode()
+
+           songHandler.postDelayed(songRunnable, 500)
+        }
+        songHandler.post(songRunnable)
 
     }
     private fun setUpExoPlayerRepeatMode(){
@@ -542,8 +570,8 @@ class MusicPlayerService : Service(){
 
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
-                     if(mPrefs.currentPosition < songsList.size -1 ){
-                         nextOrPrevTRack((mPrefs.currentPosition + 1).toInt())
+                     if(mPrefs.currentIndexSong < songsList.size -1 ){
+                         nextOrPrevTRack((mPrefs.currentIndexSong + 1).toInt())
 
                      }
                  }
@@ -579,7 +607,7 @@ class MusicPlayerService : Service(){
                                 // Para encontrar la posición del item en la lista de nuestra vista
                                 // por su id
                                 mPrefs.idSong = song.id
-                                mPrefs.currentPosition = newPosition.mediaItemIndex.toLong() +1
+                                mPrefs.currentIndexSong = newPosition.mediaItemIndex.toLong()
                                 if(_songController == null){
                                     mPrefs.controlFromNotify = true
                                     mPrefs.nextOrPrevFromNotify = true
@@ -659,7 +687,10 @@ class MusicPlayerService : Service(){
 
         }
     }
-    fun clearPlayList(){
+    // Ya que el fragmento de lista no es diferente para cada versión, en bass flavor se implemnta clearPlayList
+    // con el parámetro (isSort), pero en exoplayer flavor no, aún así debemos ponerlo porque el fragmento de lista
+    // lo usa así tanto para bass como exoplayer.
+    fun clearPlayList(isSort:Boolean=false){
         mediaItemList.clear()
         songsList.clear()
         exoPlayer.clearMediaItems()
@@ -692,7 +723,7 @@ class MusicPlayerService : Service(){
     }
 
     @OptIn(UnstableApi::class)
-    fun getSessionId(): Int {
+    fun getSessionOrChannelId(): Int {
         return exoPlayer.audioSessionId
     }
     fun resumePlayer(){
@@ -767,6 +798,7 @@ class MusicPlayerService : Service(){
         // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
         // para evitarlo
         executeOnceTime = true
+        mPrefs.isPlaying = false
     }
     private fun fetchSong(song:SongEntity):MusicState?{
         try {

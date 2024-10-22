@@ -11,7 +11,7 @@ import android.util.Log
 
 fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
   return when(effectType){
-   CUSTOM->{when (bandLevel) {
+   CUSTOM_PRESET->{when (bandLevel) {
     0 -> 1500  // +5 dB (60 Hz)
     1 -> 1500  // +5 dB (230 Hz)
     2 -> 1500  // +5 dB (910 Hz)
@@ -19,7 +19,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
     4 -> 1500  // +5 dB (14000 Hz)
     else -> 1500
    }}
-   ROCK->{
+   ROCK_PRESET->{
     when (bandLevel) {
      0 -> 1200  // +2 dB (60 Hz)
      1 -> 1800  // +3 dB (230 Hz)
@@ -30,7 +30,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
 
     }
    }
-   POP->{
+   POP_PRESET->{
     when (bandLevel) {
      0 -> 1500  // 0 dB (60 Hz)
      1 -> 2100  // +3 dB (230 Hz)
@@ -40,7 +40,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
-   BASS->{
+   BASS_PRESET->{
     when (bandLevel) {
      0 -> 2400  // +3 dB (60 Hz)
      1 -> 2700  // +4 dB (230 Hz)
@@ -50,7 +50,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
-   FLAT-> {
+   FLAT_PRESET-> {
     when (bandLevel) {
      0 -> 1500  // 0 dB (60 Hz)
      1 -> 1500  // 0 dB (230 Hz)
@@ -60,7 +60,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
-   JAZZ -> {
+   JAZZ_PRESET -> {
     when (bandLevel) {
      0 -> 1400  // -1 dB (60 Hz)
      1 -> 1600  // +1 dB (230 Hz)
@@ -70,7 +70,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
-   CLASSICAL -> {
+   CLASSICAL_PRESET -> {
     when (bandLevel) {
      0 -> 1500  // 0 dB (60 Hz)
      1 -> 1600  // +1 dB (230 Hz)
@@ -80,7 +80,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
-   HIP_HOP -> {
+   HIP_HOP_PRESET -> {
     when (bandLevel) {
      0 -> 2000  // +2 dB (60 Hz)
      1 -> 2200  // +3 dB (230 Hz)
@@ -90,7 +90,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
-   ELECTRONIC -> {
+   ELECTRONIC_PRESET -> {
     when (bandLevel) {
      0 -> 2100  // +3 dB (60 Hz)
      1 -> 2300  // +4 dB (230 Hz)
@@ -100,7 +100,7 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
      else -> 1500
     }
    }
-   FULL_SOUND -> {
+   FULL_SOUND_PRESET -> {
     when (bandLevel) {
      0 -> 2000  // +4 dB (60 Hz)
      1 -> 1900  // +3 dB (230 Hz)

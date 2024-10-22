@@ -69,8 +69,6 @@ import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MusicPlayerService : Service(),BassManager.PlaybackManager{
-
-
     @Inject
     lateinit var repository: MainRepository
     @Inject
@@ -163,10 +161,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                             bluetoothIsConnect = true
                             Log.d("BLUETOOTH_STATE", "Bluetooth connected")
                             // lógica cuando se conecta el Bluetooth
-
-
                         }
-
                         BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                             if (mPrefs.isPlaying) {
                                 mPrefs.isPlaying = false
@@ -497,9 +492,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 mediaPlayerNotify
             )
         }
-
     }
-
     private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {
             return songsList.indexOfFirst{it.id == idSong}
@@ -511,11 +504,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun setActivity(activity:AppCompatActivity){
         this._activity=activity
-
     }
     fun setSongController(controller:ServiceSongListener){
         _songController=controller
-
     }
     fun setNewMediaItem(song:SongEntity){
        if(!songsList.contains(song)){ songsList.add(song)}
@@ -617,7 +608,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 }
                 song?.let {
                     if (executeOnceTime) _songController?.currentTrack(currentMusicState)
-
                 }
             }
     }
@@ -627,13 +617,11 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         bassManager?.channelPause()
         bassManager?.stopCheckingPlayback()
     }
-
     fun getSessionOrChannelId(): Int {
         return bassManager?.getActiveChannel()!!
     }
     fun resumePlayer(){
         play(null)
-
     }
     fun nextSong(){
         if(songsList.isNotEmpty()){
@@ -650,9 +638,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             setOrPlaySong(indexOfSong, NEXT)
             checkIfPhoneIsLock()
             mPrefs.currentIndexSong = indexOfSong.toLong()
-
         }
-
     }
     fun prevSong(){
         if(songsList.isNotEmpty()){
@@ -664,9 +650,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 setOrPlaySong(indexOfSong, PREVIOUS)
                 checkIfPhoneIsLock()
                 mPrefs.currentIndexSong = indexOfSong.toLong()
-
             }
-
         }
     }
     // Probamos nueva forma de implementar shuffle

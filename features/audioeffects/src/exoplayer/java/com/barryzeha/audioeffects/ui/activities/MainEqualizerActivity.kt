@@ -18,22 +18,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.barryzeha.audioeffects.common.BASS
-import com.barryzeha.audioeffects.common.CLASSICAL
-import com.barryzeha.audioeffects.common.CUSTOM
-import com.barryzeha.audioeffects.common.ELECTRONIC
+import com.barryzeha.audioeffects.common.BASS_PRESET
+import com.barryzeha.audioeffects.common.CLASSICAL_PRESET
+import com.barryzeha.audioeffects.common.CUSTOM_PRESET
+import com.barryzeha.audioeffects.common.ELECTRONIC_PRESET
+
 import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
-import com.barryzeha.audioeffects.common.FLAT
-import com.barryzeha.audioeffects.common.FULL_SOUND
-import com.barryzeha.audioeffects.common.HIP_HOP
-import com.barryzeha.audioeffects.common.JAZZ
-import com.barryzeha.audioeffects.common.POP
-import com.barryzeha.audioeffects.common.ROCK
+import com.barryzeha.audioeffects.common.FLAT_PRESET
+import com.barryzeha.audioeffects.common.FULL_SOUND_PRESET
+import com.barryzeha.audioeffects.common.HIP_HOP_PRESET
+import com.barryzeha.audioeffects.common.JAZZ_PRESET
+import com.barryzeha.audioeffects.common.POP_PRESET
+import com.barryzeha.audioeffects.common.ROCK_PRESET
+
 import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.barryzeha.core.common.COLOR_PRIMARY
-import com.barryzeha.core.common.EXOPLAYER_SESSION_ID_EXTRA
+import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.mColorList
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
@@ -72,7 +74,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     }
     private fun handleIntent(){
         intent?.let{
-            sessionId=intent.getIntExtra(EXOPLAYER_SESSION_ID_EXTRA,-1)
+            sessionId=intent.getIntExtra(MUSIC_PLAYER_SESSION,-1)
 
         }
     }
@@ -120,16 +122,16 @@ class MainEqualizerActivity : AppCompatActivity() {
             if(checkedIds.isNotEmpty()){
             val chip = group.findViewById<Chip>(checkedIds[0])
             when(group.indexOfChild(chip)){
-            CUSTOM->{bind.contentBands.removeAllViews(); createView(CUSTOM)}
-            ROCK->{bind.contentBands.removeAllViews(); createView(ROCK)}
-            POP->{bind.contentBands.removeAllViews(); createView(POP)}
-            BASS->{bind.contentBands.removeAllViews(); createView(BASS)}
-            FLAT->{bind.contentBands.removeAllViews(); createView(FLAT)}
-            JAZZ->{bind.contentBands.removeAllViews(); createView(JAZZ)}
-            CLASSICAL->{bind.contentBands.removeAllViews(); createView(CLASSICAL)}
-            HIP_HOP->{bind.contentBands.removeAllViews(); createView(HIP_HOP)}
-            ELECTRONIC->{bind.contentBands.removeAllViews(); createView(ELECTRONIC)}
-            FULL_SOUND->{bind.contentBands.removeAllViews(); createView(FULL_SOUND)}
+            CUSTOM_PRESET->{bind.contentBands.removeAllViews(); createView(CUSTOM_PRESET)}
+            ROCK_PRESET->{bind.contentBands.removeAllViews(); createView(ROCK_PRESET)}
+            POP_PRESET->{bind.contentBands.removeAllViews(); createView(POP_PRESET)}
+            BASS_PRESET->{bind.contentBands.removeAllViews(); createView(BASS_PRESET)}
+            FLAT_PRESET->{bind.contentBands.removeAllViews(); createView(FLAT_PRESET)}
+            JAZZ_PRESET->{bind.contentBands.removeAllViews(); createView(JAZZ_PRESET)}
+            CLASSICAL_PRESET->{bind.contentBands.removeAllViews(); createView(CLASSICAL_PRESET)}
+            HIP_HOP_PRESET->{bind.contentBands.removeAllViews(); createView(HIP_HOP_PRESET)}
+            ELECTRONIC_PRESET->{bind.contentBands.removeAllViews(); createView(ELECTRONIC_PRESET)}
+            FULL_SOUND_PRESET->{bind.contentBands.removeAllViews(); createView(FULL_SOUND_PRESET)}
         }
 }
         }
@@ -281,7 +283,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     class MainEqualizerContract:ActivityResultContract<Int,Unit>(){
         override fun createIntent(context: Context, sessionId: Int): Intent {
                 return Intent(context,MainEqualizerActivity::class.java).apply {
-                    putExtra(EXOPLAYER_SESSION_ID_EXTRA,sessionId)
+                    putExtra(MUSIC_PLAYER_SESSION,sessionId)
                 }
         }
 
