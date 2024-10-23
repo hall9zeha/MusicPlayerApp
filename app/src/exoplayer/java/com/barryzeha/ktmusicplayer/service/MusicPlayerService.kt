@@ -103,6 +103,8 @@ class MusicPlayerService : Service(){
     private var headsetReceiver:BroadcastReceiver?=null
     private var bluetoothReceiver:BroadcastReceiver?=null
     private var bluetoothIsConnect:Boolean = false
+    // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
+    private var idSong:Long=-1
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -402,6 +404,7 @@ class MusicPlayerService : Service(){
     }
     private fun initNotify(){
         currentMusicState?.let { newState ->
+            idSong = newState.idSong
             playBackState = PlaybackState.Builder()
                 .setState(
                     if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
@@ -467,17 +470,20 @@ class MusicPlayerService : Service(){
                     .build()
             }
             mediaSession.setPlaybackState(updatePlaybackState)
-            val updateMediaMetadata = MediaMetadata.Builder()
-                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
-                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                .build()
+            if(idSong != newState.idSong) {// Comparamos los ids para saber si ha cambiado la canción
+                val updateMediaMetadata = MediaMetadata.Builder()
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                    .build()
 
-            // Para android >=12
-            if(mediaMetadata != updateMediaMetadata) mediaSession.setMetadata(updateMediaMetadata)
-
+                // Para android >=12
+                mediaSession.setMetadata(updateMediaMetadata)
+                // Reemplazamos temporalmente el nuevo id para la comparación
+                idSong = newState.idSong
+            }
             notificationManager.notify(
                 NOTIFICATION_ID,
                 mediaPlayerNotify
