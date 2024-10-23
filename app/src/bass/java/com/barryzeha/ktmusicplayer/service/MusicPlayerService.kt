@@ -477,8 +477,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         1f)
                     .build()
             }
+            // Actualizamos el progreso y estado de reproducción de la canción
             mediaSession.setPlaybackState(updatePlaybackState)
 
+            // Actualizamos la información que se muestra de la canción
             if(idSong != newState.idSong) {// Comparamos los ids para saber si ha cambiado la canción
                 val updateMediaMetadata = MediaMetadata.Builder()
                     .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
