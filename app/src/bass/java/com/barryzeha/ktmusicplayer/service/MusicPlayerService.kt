@@ -126,8 +126,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         setUpRepository()
         initMusicStateLooper()
         setUpHeadsetAndBluetoothReceiver()
-
-
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
         headsetReceiver = object:BroadcastReceiver(){
@@ -353,7 +351,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
         }
     }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
@@ -773,12 +770,15 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }else{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}
+                REPEAT_ONE-> {
+                    if (mPrefs.isPlaying) {
+                        bassManager?.repeatSong()
+                    }
+                }
                 else->{
-                    //Todo revisar el cambio de canción y mejorar
-                    //if(indexOfSong  songsList.size) {
                     if (songsList.isNotEmpty()) setMusicForPlayer(songsList[0])
                     bassManager?.stopCheckingPlayback()
-                    //}
+
                 }
             }
 
