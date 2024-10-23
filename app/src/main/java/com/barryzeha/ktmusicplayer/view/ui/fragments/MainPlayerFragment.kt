@@ -164,12 +164,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             CoroutineScope(Dispatchers.IO).launch {
-                /*if (songs.isNotEmpty()) {
-                    songs.forEach {
-                        if (!songLists.contains(it)) songLists.add(it)
-                    }
-                }*/
-                withContext(Dispatchers.Main) {
+                 withContext(Dispatchers.Main) {
                     setNumberOfTrack(mPrefs.idSong)
                 }
             }
