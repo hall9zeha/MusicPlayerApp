@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
@@ -76,6 +77,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var musicPlayerService: MusicPlayerService?=null
+    private var listener: OnFragmentReadyListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,8 +95,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             setUpObservers()
             setUpListeners()
             setUpScrollOnTextViews()
+            listener?.onFragmentReady()
 
+    }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = context as? OnFragmentReadyListener
     }
     private fun setUpScrollOnTextViews()=with(bind){
         this?.let{
@@ -276,6 +283,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
                     mainViewModel.saveStatePlaying(false)
                     mainViewModel.setCurrentTrack(musicState)
+                    // Obtenemos el número de la pista y el tamaño de la lista la primera vez desde el servicio
+                    val (songNumber, listSize) = musicPlayerService?.getNumberOfTrack()!!
+                    bind?.tvNumberSong?.text = String.format( "#%s/%s",songNumber,listSize)
+
                 }
                 else if(!musicState.latestPlayed && (mPrefs.songMode == SongMode.Shuffle.ordinal)){
                      mainViewModel.setCurrentTrack(musicState)
@@ -284,15 +295,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     //TODO al usar los controles de next y prev directamente desde el servicio
                     // nos vemos obligados e implementar esta sección, revisar su estabilidad
                     mainViewModel.setCurrentTrack(musicState)
-
-
                 }
             }else{
-
                 mainViewModel.saveStatePlaying(true)
                 mainViewModel.setCurrentTrack(musicState)
                 Log.e("CASO 4", "ACTIVO" )
-
             }
 
         }
@@ -305,6 +312,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         musicPlayerService = bind.getService()
         this.serviceConnection=conn
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
+
 
     }
     override fun onServiceDisconnected() {
@@ -628,5 +636,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     putString(ARG_PARAM2, param2)
                 }
             }
+    }
+    interface OnFragmentReadyListener{
+        fun onFragmentReady()
     }
 }

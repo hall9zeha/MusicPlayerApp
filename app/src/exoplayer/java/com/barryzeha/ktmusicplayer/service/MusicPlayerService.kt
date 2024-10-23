@@ -726,6 +726,13 @@ class MusicPlayerService : Service(){
     fun getSessionOrChannelId(): Int {
         return exoPlayer.audioSessionId
     }
+    fun getNumberOfTrack():Pair<Int,Int>{
+        if(songsList.isNotEmpty()) {
+            val indexOfSong = songsList.indexOf(songEntity)
+            return Pair((indexOfSong + 1),songsList.size)
+        }
+        return Pair(0,0)
+    }
     fun resumePlayer(){
         if(!exoPlayer.isPlaying){
             exoPlayer.prepare()

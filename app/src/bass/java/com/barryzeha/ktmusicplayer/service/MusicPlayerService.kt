@@ -110,7 +110,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
 
-
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -628,6 +627,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun getSessionOrChannelId(): Int {
         return bassManager?.getActiveChannel()!!
+    }
+    fun getNumberOfTrack():Pair<Int,Int>{
+        if(songsList.isNotEmpty()) {
+            val indexOfSong = songsList.indexOf(songEntity)
+            return Pair((indexOfSong + 1),songsList.size)
+        }
+        return Pair(0,0)
     }
     fun resumePlayer(){
         play(null)

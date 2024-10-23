@@ -5,11 +5,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
-import android.view.WindowManager
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -23,22 +19,25 @@ import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
-import com.barryzeha.core.common.SETTINGS
-import com.barryzeha.core.common.SETTINGS_FRAGMENT
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
-import com.barryzeha.core.model.entities.MusicState
-import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
+import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.barryzeha.core.R as coreRes
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), ServiceConnection{
+class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.OnFragmentReadyListener{
     internal lateinit var bind:ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
@@ -82,7 +81,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
         val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
         bind.mViewPager.adapter=viewPagerAdapter
         // Para precargar el segundo fragmento mientras se muestra el primero
-        bind.mViewPager.offscreenPageLimit=2
+        //bind.mViewPager.offscreenPageLimit=2
         bind.mViewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback(){
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -164,26 +163,28 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
             override fun handleOnBackPressed() {
                 if(bind.mainDrawerLayout.isDrawerOpen(GravityCompat.START)){
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
-
                 }else{
                     onBackPressedDispatcher.onBackPressed()
                 }
             }
         })
     }*/
-
-
+    // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
+    override fun onFragmentReady() {
+        CoroutineScope(Dispatchers.Main).launch {
+            // Retrasamos 1 segundo la carga del segundo fragmento
+            delay(1000)
+            bind.mViewPager.offscreenPageLimit = 2
+        }
+    }
     override fun onStart() {
         super.onStart()
         startOrUpdateService(this,MusicPlayerService::class.java,this)
     }
-
     override fun onDestroy() {
         super.onDestroy()
         unbindService(this)
-
     }
-
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if(bind.mainDrawerLayout.isOpen){
@@ -198,9 +199,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection{
                 super.onBackPressed()
             }
         }
-
     }
-
     override fun onResume() {
         super.onResume()
         checkedSelectedMenuDrawerItems()
