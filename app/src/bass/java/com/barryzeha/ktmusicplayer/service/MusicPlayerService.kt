@@ -489,10 +489,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                     .build()
 
-                    // Para android >=12
-                    mediaSession.setMetadata(updateMediaMetadata)
-                    // Reemplazamos temporalmente el nuevo id para la comparación
-                    idSong = newState.idSong
+                // Para android >=12
+                mediaSession.setMetadata(updateMediaMetadata)
+                // Reemplazamos temporalmente el nuevo id para la comparación
+                idSong = newState.idSong
             }
 
             notificationManager.notify(
