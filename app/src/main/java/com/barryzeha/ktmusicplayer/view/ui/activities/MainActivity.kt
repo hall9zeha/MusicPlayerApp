@@ -172,8 +172,8 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
     override fun onFragmentReady() {
         CoroutineScope(Dispatchers.Main).launch {
-            // Retrasamos 1 segundo la carga del segundo fragmento
-            delay(1000)
+            // Retrasamos 1.5 segundos la carga del segundo fragmento
+            delay(1500)
             bind.mViewPager.offscreenPageLimit = 2
         }
     }
