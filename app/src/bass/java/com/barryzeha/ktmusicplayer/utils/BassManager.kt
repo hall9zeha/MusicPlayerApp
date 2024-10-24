@@ -128,6 +128,13 @@ open class BassManager {
     fun channelPause(){
         BASS.BASS_ChannelPause(getActiveChannel())
     }
+    fun fastForwardOrRewind(isForward:Boolean,currentProgress: (Long) -> Unit){
+        val progressOnSeconds = getCurrentPositionInSeconds(getActiveChannel())
+        val forwardProgress = if(isForward)progressOnSeconds + 2000 else progressOnSeconds - 2000
+        setChannelProgress(forwardProgress){currentProgress(it)}
+
+    }
+
     fun setChannelProgress(progress:Long, currentProgress:(Long)->Unit){
 
         val progressBytes = BASS.BASS_ChannelSeconds2Bytes(getActiveChannel(), progress / 1000.0)

@@ -58,7 +58,7 @@ fun ImageView.loadImage(bitmap:Bitmap, animDirection:Int=-1) {
     this.translationX = direction * width // Coloca fuera de la pantalla
     this.animate()
         .translationX(0f) // Desliza a su posición original
-        .setDuration(300)
+        .setDuration(200)
         .setListener(null)
 
 }

@@ -668,6 +668,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
         }
     }
+    fun fastForward(){
+        bassManager?.fastForwardOrRewind(isForward=true){currentSongPosition=it}
+    }
+    fun fastRewind(){
+        bassManager?.fastForwardOrRewind(isForward=false){currentSongPosition=it}
+    }
     // Probamos nueva forma de implementar shuffle
     fun shuffleList(){
         //CoroutineScope(Dispatchers.IO).launch {

@@ -750,6 +750,13 @@ class MusicPlayerService : Service(){
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
     }
+    // TODO implementar
+    fun fastForward(){
+
+    }
+    fun fastRewind(){
+
+    }
     // Solo en bass flavour
     fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){
 

@@ -7,6 +7,8 @@ import android.content.ServiceConnection
 import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -94,6 +96,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
     private var prevOrNextClicked:Boolean =false
+    // Forward and rewind
+    private var fastForwardingOrRewind = false
+    private var fastForwardOrRewindHandler: Handler? = null
+    private var forwardOrRewindRunnable:Runnable?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -386,6 +392,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     }
                 }
             }
+            bottomPlayerControls.btnNext.setOnLongClickListener {
+                fastForwardOrRewind(true)
+                true
+            }
+            bottomPlayerControls.btnPrevious.setOnLongClickListener {
+                fastForwardOrRewind(false)
+                true
+            }
             seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object :
                 SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(
@@ -572,7 +586,26 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
+    private fun fastForwardOrRewind(isForward:Boolean){
+        fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
+        forwardOrRewindRunnable = Runnable{
+            fastForwardingOrRewind = if(isForward) bind?.bottomPlayerControls?.btnNext?.isPressed!!
+            else bind?.bottomPlayerControls?.btnPrevious?.isPressed!!
+            if(fastForwardingOrRewind){
+                if(isForward){
+                    musicPlayerService?.fastForward()
+                }
+                else{
+                    musicPlayerService?.fastRewind()
+                }
+            }else{
+                fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!)
+            }
+            fastForwardOrRewindHandler?.postDelayed(forwardOrRewindRunnable!!,200)
 
+        }
+        fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
+    }
     private fun getSongOfAdapter(idSong: Long):SongEntity?{
         var song:SongEntity?=null
         song = if(idSong>-1){

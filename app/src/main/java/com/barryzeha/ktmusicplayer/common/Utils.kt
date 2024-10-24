@@ -226,7 +226,6 @@ fun onMenuItem(onItemClick:Boolean=true,activity:Activity, view:View,deleteItem:
     popupView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
     popupWindow.width = LinearLayout.LayoutParams.WRAP_CONTENT
     popupWindow.height = View.MeasureSpec.makeMeasureSpec(popupView.root.measuredHeight, View.MeasureSpec.UNSPECIFIED)
-
     popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, location[0], location[1] - popupWindow.height - 16)
 
 }

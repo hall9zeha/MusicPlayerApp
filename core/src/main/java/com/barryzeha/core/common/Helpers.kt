@@ -278,6 +278,7 @@ fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     matrix.postScale(scale, scale)
     return Bitmap.createBitmap(bitmap, 0, 0, originalWidth, originalHeight, matrix, true)
 }
+
 fun mColorList(context:Context)=
     context.obtainStyledAttributes(intArrayOf(
         android.R.attr.textColorPrimaryInverseNoDisable,

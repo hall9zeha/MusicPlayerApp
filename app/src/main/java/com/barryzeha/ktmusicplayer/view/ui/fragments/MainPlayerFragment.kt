@@ -6,12 +6,13 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -78,6 +79,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var musicPlayerService: MusicPlayerService?=null
     private var listener: OnFragmentReadyListener? = null
+
+    // Forward and rewind
+    private var fastForwardingOrRewind = false
+    private var fastForwardOrRewindHandler: Handler? = null
+    private var forwardOrRewindRunnable:Runnable?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -153,7 +159,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
     private fun setUpObservers(){
-        //bind?.ivMusicCover?.loadImage(coreRes.drawable.placeholder_cover)
+
         (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
         (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
@@ -321,7 +327,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongAlbum.text = musicState.album
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
-            //ivMusicCover.loadImage(albumArt!!,musicState.nextOrPrev)
 
             (ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
             (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
@@ -369,8 +374,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
     private fun setNumberOfTrack(songId:Long? = null){
-        /*bind?.tvNumberSong?.text =
-        String.format("#%s/%s", if(mPrefs.currentPosition>-1)position else 0, songLists.count())*/
+
         CoroutineScope(Dispatchers.IO).launch {
         if(songId != null && songId >-1) {
                 val song = ListPlayerFragment.listAdapter?.getSongById(songId.toLong())
@@ -442,6 +446,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
                 }
             }
+
             btnMainNext.setOnClickListener {
                 checkCoverViewStyle()
                 if (currentSelectedPosition < ListPlayerFragment.listAdapter?.itemCount!! - 1) {
@@ -451,7 +456,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         musicPlayerService?.startPlayer(song)
                     }
                 }
-
+            }
+            btnMainNext.setOnLongClickListener {
+                fastForwardOrRewind(isForward = true)
+                true
+            }
+            btnMainPrevious.setOnLongClickListener {
+                fastForwardOrRewind(isForward=false)
+                true
             }
             mainSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 var userSelectPosition = 0
@@ -548,6 +560,26 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     }
 
+    private fun fastForwardOrRewind(isForward:Boolean){
+        fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
+        forwardOrRewindRunnable = Runnable{
+            if(isForward)fastForwardingOrRewind = bind?.btnMainNext?.isPressed!!
+            else  fastForwardingOrRewind = bind?.btnMainPrevious?.isPressed!!
+            if(fastForwardingOrRewind){
+                if(isForward){
+                    musicPlayerService?.fastForward()
+                }
+                else{
+                   musicPlayerService?.fastRewind()
+                }
+            }else{
+                fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!)
+            }
+            fastForwardOrRewindHandler?.postDelayed(forwardOrRewindRunnable!!,200)
+
+        }
+        fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
+    }
     private fun getSongOfList(position:Int): SongEntity?{
         if(mPrefs.currentIndexSong>-1) {
             mPrefs.currentIndexSong = position.toLong()
@@ -559,7 +591,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
 
         }else{
-            //mPrefs.currentPosition = 1
             mainViewModel.setCurrentPosition(0)
             musicPlayerService?.getSongsList()?.let{songsList->
                 return songsList[0]
