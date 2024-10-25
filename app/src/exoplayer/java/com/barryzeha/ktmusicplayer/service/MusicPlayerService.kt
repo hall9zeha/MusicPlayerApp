@@ -750,12 +750,16 @@ class MusicPlayerService : Service(){
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
     }
-    // TODO implementar
-    fun fastForward(){
 
+    fun fastForward(){
+        val currentPosition = exoPlayer.currentPosition
+        val newPosition = (currentPosition + 2000).coerceAtMost(exoPlayer.duration)
+        exoPlayer.seekTo(newPosition)
     }
     fun fastRewind(){
-
+        val currentPosition = exoPlayer.currentPosition
+        val newPosition = (currentPosition - 2000).coerceAtLeast(0)
+        exoPlayer.seekTo(newPosition)
     }
     // Solo en bass flavour
     fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){
