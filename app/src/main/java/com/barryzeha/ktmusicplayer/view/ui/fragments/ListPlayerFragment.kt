@@ -15,7 +15,6 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -40,14 +39,13 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
-import com.barryzeha.core.common.runWhenReady
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
-import com.barryzeha.ktmusicplayer.common.onMenuItem
+import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
 import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.common.sortPlayList
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
@@ -520,7 +518,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }
             btnMore?.setOnClickListener{view->
-                onMenuItem(onItemClick=false,requireActivity(),view,{
+                onMenuItemPopup(onItemClick=false,requireActivity(),view,{
                     // Delete item callback
 
                 },{
@@ -693,7 +691,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {
-        onMenuItem(true,requireActivity(),view,{
+        onMenuItemPopup(true,requireActivity(),view,{
             // Delete item callback
             mainViewModel.deleteSong(selectedSong)
             this.song=selectedSong
