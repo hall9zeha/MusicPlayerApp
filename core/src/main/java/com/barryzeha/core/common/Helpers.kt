@@ -2,9 +2,6 @@ package com.barryzeha.core.common
 
 
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
@@ -13,26 +10,15 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.os.Build
-import android.os.Environment
-import android.provider.DocumentsContract
-import android.provider.MediaStore
-import android.provider.OpenableColumns
-import android.util.Log
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.FileProvider
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
-
 import com.barryzeha.core.model.entities.MusicState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
@@ -167,41 +153,7 @@ fun getTimeOfSong(duration:Long):String{
         TimeUnit.MILLISECONDS.toMinutes(duration),
         TimeUnit.MILLISECONDS.toSeconds(duration) -
         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)))
-}/*
-fun getRealPathFromURI(uri: Uri, context: Context): String? {
-    val returnCursor = context.contentResolver.query(uri, null, null, null, null)
-    val nameIndex =  returnCursor!!.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-    val sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE)
-    returnCursor.moveToFirst()
-    val name = returnCursor.getString(nameIndex)
-    val size = returnCursor.getLong(sizeIndex).toString()
-    val file = File(context.filesDir, name)
-    try {
-        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-        val outputStream = FileOutputStream(file)
-        var read = 0
-        val maxBufferSize = 1 * 1024 * 1024
-        val bytesAvailable: Int = inputStream?.available() ?: 0
-        //int bufferSize = 1024;
-        val bufferSize = Math.min(bytesAvailable, maxBufferSize)
-        val buffers = ByteArray(bufferSize)
-        while (inputStream?.read(buffers).also {
-                if (it != null) {
-                    read = it
-                }
-            } != -1) {
-            outputStream.write(buffers, 0, read)
-        }
-        Log.e("File Size", "Size " + file.length())
-        inputStream?.close()
-        outputStream.close()
-        Log.e("File Path", "Path " + file.path)
-
-    } catch (e: java.lang.Exception) {
-        Log.e("Exception", e.message!!)
-    }
-    return file.path
-}*/
+}
 fun getBitrate(pathFile: String): Int? {
     val retriever = MediaMetadataRetriever()
     retriever.setDataSource(pathFile)
@@ -218,29 +170,10 @@ fun createTime(duration: Long): Triple<Int,Int,String> {
     return Triple(minutes.toInt(),seconds.toInt(),formattedDuration)
 }
 
-fun cancelNotification(context:Context,idNotify:Int){
-    val notificationManager = getSystemService(context,NotificationManager::class.java) as NotificationManager?
-    notificationManager!!.cancel(idNotify)
-}
-fun createNotificationChannel(notificationManager:NotificationManager){
-    if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O){
-        val notificationChannel = NotificationChannel(
-            CHANNEL_ID, CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply{
-            enableLights(true)
-            setBypassDnd(true)
-        }
-        notificationManager.createNotificationChannel(notificationChannel)
-    }
-}
-
 fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
         val metadata=fetchFileMetadata(context,path)
         mmr.setDataSource(path)
-        //val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-        //val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
         val bitmap = getBitmap(context,mmr.embeddedPicture,isForNotify)!!
         metadata?.let {
             return MusicState(

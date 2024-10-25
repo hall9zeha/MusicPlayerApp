@@ -22,6 +22,7 @@ import android.widget.PopupWindow
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
+import androidx.viewbinding.ViewBinding
 import com.barryzeha.core.R
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
@@ -200,32 +201,36 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
     }
 }
 fun onMenuItem(onItemClick:Boolean=true,activity:Activity, view:View,deleteItem:()->Unit, deleteAllItems:()->Unit){
+
     val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
-
-    val popupWindow = PopupWindow(popupView.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-    if (!onItemClick) popupView.btnDeleteItem.visibility = View.GONE
-    popupView.btnDeleteItem.setOnClickListener {
-        deleteItem()
-        popupWindow.dismiss()
-    }
-    popupView.btnDeleteAll.setOnClickListener {
-        showDialog(activity, R.string.delete_all,
-            R.string.delete_all_msg) {
-            deleteAllItems()
+    createPopUpWindow(popupView,view,activity){popupWindow->
+        if (!onItemClick) popupView.btnDeleteItem.visibility = View.GONE
+        popupView.btnDeleteItem.setOnClickListener {
+            deleteItem()
+            popupWindow.dismiss()
         }
-        popupWindow.dismiss()
+        popupView.btnDeleteAll.setOnClickListener {
+            showDialog(activity, R.string.delete_all,
+                R.string.delete_all_msg) {
+                deleteAllItems()
+            }
+            popupWindow.dismiss()
+        }
     }
 
+}
+private fun createPopUpWindow(dialogView:ViewBinding,parentView:View, activity: Activity, listeners:(popup:PopupWindow)->Unit):PopupWindow{
+
+    val popupWindow = PopupWindow(dialogView.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    listeners(popupWindow)
     popupWindow.isFocusable = true
-
     popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(activity,com.barryzeha.ktmusicplayer.R.drawable.popup_window_background))
-
     val location = IntArray(2)
-    view.getLocationOnScreen(location)
+    parentView.getLocationOnScreen(location)
 
-    popupView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+    dialogView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
     popupWindow.width = LinearLayout.LayoutParams.WRAP_CONTENT
-    popupWindow.height = View.MeasureSpec.makeMeasureSpec(popupView.root.measuredHeight, View.MeasureSpec.UNSPECIFIED)
-    popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, location[0], location[1] - popupWindow.height - 16)
-
+    popupWindow.height = View.MeasureSpec.makeMeasureSpec(dialogView.root.measuredHeight, View.MeasureSpec.UNSPECIFIED)
+    popupWindow.showAtLocation(dialogView.root, Gravity.NO_GRAVITY, location[0], location[1] - popupWindow.height - 16)
+    return popupWindow
 }

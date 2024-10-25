@@ -93,7 +93,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
 
     }
     // Esta función también nos mostrará la numeración original incluso mientras filtramos
-    // la lista al buscar un canción
+    // la lista al buscar una canción
     private fun getOriginalPosition(item: Any): Int {
         // Encuentra la posición del ítem en la lista original
         val itemPos = originalList.indexOf(item)
@@ -102,7 +102,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             // Busca la posición en la lista de índices
             return songEntityIndices.indexOf(itemPos) + 1
         }
-        return 0 // Retorna 0 si no se encuentra o no es un SongEntity
+        return 0 // Retorna 0 si no se encuentra o no es SongEntity
     }
     private fun getSongPositionOnlySongItem(position: Int): Int {
         var count = 0
