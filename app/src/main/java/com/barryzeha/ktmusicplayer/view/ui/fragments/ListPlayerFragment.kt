@@ -199,14 +199,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             // Dará problemas al recrearse la vista cuando rotemos la pantalla si no está en el
             // hilo principal
 
-            //TODO ordenar la lista de media items nuevamente cada vez que hacemos un filtro
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
                 // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro
                 if(!mPrefs.firstExecution)musicPlayerService?.populatePlayList(songList)
                 // ************
                 listAdapter?.addAll(result)
-                bind?.rvSongs?.runWhenReady {
+                bind?.rvSongs?.post {
                     setNumberOfTrack()
                 }
 
