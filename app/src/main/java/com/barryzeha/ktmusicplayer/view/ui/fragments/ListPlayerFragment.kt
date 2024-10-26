@@ -15,6 +15,7 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -45,6 +46,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.onMenuActionAddPopup
 import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
 import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.common.sortPlayList
@@ -340,17 +342,22 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     requireContext(),
                     permissionList
                 ) { isGranted, permissionsList ->
-                    if (isGranted) {
-                       launcherFilePickerActivity.launch(Unit)
+                    onMenuActionAddPopup(requireActivity(),btnAdd,{
+                        if (isGranted) {
+                            launcherFilePickerActivity.launch(Unit)
 
-                    } else {
-                        permissionsList.forEach { (permission,granted)->
-                            if (!granted) {
-                                launcherPermission.launch(permission)
+                        } else {
+                            permissionsList.forEach { (permission,granted)->
+                                if (!granted) {
+                                    launcherPermission.launch(permission)
 
+                                }
                             }
                         }
-                    }
+                    },{
+                        Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                    })
+
                 }
             }
             bottomPlayerControls.btnPlay.setOnClickListener {

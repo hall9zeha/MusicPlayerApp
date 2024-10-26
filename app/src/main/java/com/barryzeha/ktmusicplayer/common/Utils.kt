@@ -26,6 +26,7 @@ import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.databinding.ActionAddMenuPopupBinding
 import com.barryzeha.ktmusicplayer.databinding.WindowPopupMenuBinding
 
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
@@ -212,6 +213,16 @@ fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View, dele
     }
 
 }
+fun onMenuActionAddPopup(activity: Activity,view: View,
+                         addFileCallback:()->Unit,
+                         addPlaylistCallback:()->Unit,){
+    val popupView = ActionAddMenuPopupBinding.inflate(activity.layoutInflater)
+    createPopUpWindow(popupView,view,activity){popupWindow->
+        popupView.btnAddFile.setOnClickListener { addFileCallback(); popupWindow.dismiss() }
+        popupView.btnAddPlayList.setOnClickListener { addPlaylistCallback(); popupWindow.dismiss() }
+    }
+}
+
 private fun createPopUpWindow(dialogView:ViewBinding,parentView:View, activity: Activity, listeners:(popup:PopupWindow)->Unit):PopupWindow{
 
     val popupWindow = PopupWindow(dialogView.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)

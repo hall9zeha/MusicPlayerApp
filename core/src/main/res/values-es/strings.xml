@@ -25,5 +25,7 @@
     <string name="delete_song">Quitar de la lista</string>
     <string name="delete_all_msg">Realmente quiere eliminar toda la lista?</string>
     <string name="order_list_by">Ordenar lista por</string>
+    <string name="addPlayList">Crear lista de reproducción</string>
+    <string name="addFile">Agregar archivo</string>
 
 </resources>

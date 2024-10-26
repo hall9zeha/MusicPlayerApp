@@ -23,5 +23,7 @@
     <string name="delete_song">Remove from list</string>
     <string name="delete_all_msg">Really wants to remove the entire list?</string>
     <string name="order_list_by">Order list by</string>
+    <string name="addPlayList">Create new playlist</string>
+    <string name="addFile">Add File</string>
 
 </resources>
