@@ -1,8 +1,10 @@
 package com.barryzeha.core.model.entities
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 
 
 /**
@@ -10,10 +12,12 @@ import androidx.room.PrimaryKey
  * Created by Barry Zea H. on 30/4/24.
  * Copyright (c)  All rights reserved.
  **/
+@Parcelize
 @Entity
 data class SongEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("id")
     val id:Long=0,
+    val idPlaylistCreator:Long=0,
     val description:String?="",
     val artist:String="",
     val album:String="",
@@ -30,7 +34,7 @@ data class SongEntity(
     // Para saber qué items seleccionados debemos procesar para eliminar u otras acciones
     val isChecked:Boolean=false
 
-) {
+):Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
