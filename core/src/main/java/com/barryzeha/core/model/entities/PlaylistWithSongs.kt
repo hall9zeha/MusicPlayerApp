@@ -11,14 +11,13 @@ import kotlinx.parcelize.Parcelize
  * Created by Barry Zea H. on 26/10/24.
  * Copyright (c)  All rights reserved.
  **/
-/*
 @Parcelize
 data class PlaylistWithSongs(
-  @Embedded val playList:Playlist,
+  @Embedded val playList:PlaylistEntity,
   @Relation(
-    parentColumn = "id",
-   entityColumn = "idPlaylist"
+    parentColumn = "idPlaylist",
+    entityColumn = "idPlaylistCreator"
   )
  val songs:List<SongEntity>
 
-):Parcelable*/
+):Parcelable

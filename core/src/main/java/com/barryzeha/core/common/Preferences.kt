@@ -23,6 +23,7 @@ private const val ID_SONG = "idSong"
 private const val CURRENT_VIEW = "currentView"
 private const val PLAY_LIST_SORT_OPTION="playListSortOption"
 private const val FIRST_EXECUTION = "firstExecution"
+private const val PLAYLIST_ID = "playlistId"
 
 
 class  MyPreferences @Inject constructor(private val context: Context){
@@ -65,6 +66,9 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var playListSortOption:Int
         get()=myPreferences.getInt(PLAY_LIST_SORT_OPTION,0)
         set(value)=myPreferences.edit().putInt(PLAY_LIST_SORT_OPTION,value).apply()
+    var playlistId:Int
+        get()=myPreferences.getInt(PLAYLIST_ID,0)
+        set(value)=myPreferences.edit().putInt(PLAYLIST_ID,value).apply()
 
     fun clearIdSongInPrefs(){
         myPreferences.edit().remove(ID_SONG).apply()

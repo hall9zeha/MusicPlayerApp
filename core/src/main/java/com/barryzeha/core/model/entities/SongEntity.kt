@@ -3,6 +3,8 @@ package com.barryzeha.core.model.entities
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 
@@ -13,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  * Copyright (c)  All rights reserved.
  **/
 @Parcelize
-@Entity
+@Entity(indices = [Index(value = ["idPlaylistCreator", "id"], unique = true)])
 data class SongEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("id")
     val id:Long=0,
