@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -27,9 +28,11 @@ import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.databinding.ActionAddMenuPopupBinding
+import com.barryzeha.ktmusicplayer.databinding.CreatePlaylistLayoutBinding
 import com.barryzeha.ktmusicplayer.databinding.WindowPopupMenuBinding
 
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -238,3 +241,16 @@ private fun createPopUpWindow(dialogView:ViewBinding,parentView:View, activity: 
     popupWindow.showAtLocation(dialogView.root, Gravity.NO_GRAVITY, location[0], location[1] - popupWindow.height - 16)
     return popupWindow
 }
+ fun createNewPlayListDialog(context:Activity, onAccept:(value:String)->Unit){
+     val dialogView = CreatePlaylistLayoutBinding.inflate(context.layoutInflater)
+     val dialog = MaterialAlertDialogBuilder(context)
+         .setView(dialogView.root)
+         .setMessage("Write a name for playlist")
+         .setPositiveButton(R.string.accept){dialog,_->
+             onAccept(dialogView.edtPlaylistName.text.toString())
+             dialog.dismiss()
+         }
+         .setNegativeButton(R.string.cancel, null)
+
+     dialog.show()
+ }

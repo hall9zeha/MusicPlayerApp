@@ -46,6 +46,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.common.onMenuActionAddPopup
 import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
 import com.barryzeha.ktmusicplayer.common.processSongPaths
@@ -355,7 +356,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             }
                         }
                     },{
-                        Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                        createNewPlayListDialog(requireActivity()){
+
+                        }
                     })
 
                 }
