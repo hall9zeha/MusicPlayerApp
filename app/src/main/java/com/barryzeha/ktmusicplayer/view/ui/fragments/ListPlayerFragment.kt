@@ -42,6 +42,7 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
@@ -266,7 +267,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
         }
-
+        // Playlist
+        mainViewModel.createdPlayList.observe(viewLifecycleOwner){insertedRow->
+            if(insertedRow >0){
+                Toast.makeText(activity, "Lista creada", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
     private fun setUpPlayListName()=with(bind){
         this?.let{
@@ -356,8 +362,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             }
                         }
                     },{
-                        createNewPlayListDialog(requireActivity()){
-
+                        createNewPlayListDialog(requireActivity()){name->
+                            mainViewModel.createPlayList(PlaylistEntity(playListName = name))
                         }
                     })
 
