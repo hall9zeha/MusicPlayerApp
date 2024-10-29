@@ -2,6 +2,8 @@ package com.barryzeha.data.repository
 
 import android.media.MediaPlayer
 import androidx.media3.exoplayer.ExoPlayer
+import com.barryzeha.core.model.entities.PlaylistEntity
+import com.barryzeha.core.model.entities.PlaylistWithSongs
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -35,4 +37,12 @@ interface MainRepository {
     suspend fun updateSongState(songState: SongState):Int
     suspend fun deleteSongState(idSong:Long):Int
 
+    //PlayList
+    suspend fun createPlayList(playlistEntity:PlaylistEntity):Long
+    suspend fun updatePlaylist(name:String, idPlaylist:Long):Int
+    suspend fun deletePlaylist(id:Long):Int
+    suspend fun deleteAllPlaylist(playlistEntities:List<PlaylistEntity>)
+    suspend fun fetchPlaylist():List<PlaylistWithSongs>
+    suspend fun fetchPlaylistOrderBy(idPlaylist:Long,orderByField:Int):List<SongEntity>
+    suspend fun fetchPlaylistByFavorites(idPlaylist: Long):List<SongEntity>
 }

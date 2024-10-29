@@ -1,22 +1,16 @@
 package com.barryzeha.data.repository
 
-import android.media.MediaPlayer
-import android.util.Log
-import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
-import com.barryzeha.core.common.createTime
+import com.barryzeha.core.model.entities.PlaylistEntity
+import com.barryzeha.core.model.entities.PlaylistWithSongs
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.database.SongDatabase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -28,73 +22,112 @@ import javax.inject.Inject
  **/
 
 class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
-    private val dao = db.getSongDao()
+    private val songDao = db.getSongDao()
+    private val playlistDao = db.getPlaylistDao()
     // Room database
     override suspend fun fetchAllSongs(): List<SongEntity> = withContext(Dispatchers.IO){
-        dao.fetchAllSongs()
+        songDao.fetchAllSongs()
     }
 
     override suspend fun fetchAllSongsBy(field: Int): List<SongEntity> = withContext(Dispatchers.IO){
         when(field){
-            BY_ALBUM-> dao.fetchAllSongByAlbum()
-            BY_ARTIST-> dao.fetchAllSongByArtist()
-            BY_GENRE-> dao.fetchAllSongByGenre()
-            BY_FAVORITE->dao.fetchAllFavorites()
-            else->dao.fetchAllSongs()
+            BY_ALBUM-> songDao.fetchAllSongByAlbum()
+            BY_ARTIST-> songDao.fetchAllSongByArtist()
+            BY_GENRE-> songDao.fetchAllSongByGenre()
+            BY_FAVORITE->songDao.fetchAllFavorites()
+            else->songDao.fetchAllSongs()
         }
     }
 
     override suspend fun fetchAllFavorites(): List<SongEntity>  = withContext(Dispatchers.IO){
-        dao.fetchAllFavorites()
+        songDao.fetchAllFavorites()
     }
 
     override suspend fun fetchSongById(idSong: Long): SongEntity = withContext(Dispatchers.IO){
-        dao.fetchSongById(idSong)
+        songDao.fetchSongById(idSong)
     }
 
     override suspend fun saveNewSong(song: SongEntity): Long = withContext(Dispatchers.IO) {
-        dao.saveNewSong(song)
+        songDao.saveNewSong(song)
     }
 
     override suspend fun saveSongs(songList: List<SongEntity>): LongArray = withContext(Dispatchers.IO){
-        dao.saveSongs(songList)
+        songDao.saveSongs(songList)
     }
 
     override suspend fun updateSong(song: SongEntity): Int = withContext(Dispatchers.IO){
-        dao.updateSong(song)
+        songDao.updateSong(song)
     }
 
     override suspend fun updateFavoriteSong(isFavorite: Boolean, idSong: Long): Int = withContext(Dispatchers.IO){
-        dao.updateFavoriteSong(isFavorite,idSong)
+        songDao.updateFavoriteSong(isFavorite,idSong)
     }
 
     override suspend fun deleteSong(idSong: Long): Int= withContext(Dispatchers.IO) {
-        dao.deleteSong(idSong)
+        songDao.deleteSong(idSong)
     }
 
     override suspend fun deleteSong(songIds: List<Long>): Int = withContext(Dispatchers.IO){
-        dao.deleteSong(songIds)
+        songDao.deleteSong(songIds)
     }
 
     override suspend fun deleteAllSongs(): Int = withContext(Dispatchers.IO) {
-        dao.deleteAllSongs()
+        songDao.deleteAllSongs()
     }
 
     // SongState
     override suspend fun fetchSongState(): List<SongStateWithDetail> = withContext(Dispatchers.IO){
-        dao.fetchSongState()
+        songDao.fetchSongState()
     }
 
     override suspend fun saveSongState(songState: SongState): Long = withContext(Dispatchers.IO){
-        dao.saveSongState(songState)
+        songDao.saveSongState(songState)
 
     }
 
     override suspend fun updateSongState(songState: SongState): Int = withContext(Dispatchers.IO){
-        dao.updateSongState(songState)
+        songDao.updateSongState(songState)
     }
 
     override suspend fun deleteSongState(idSong: Long): Int= withContext(Dispatchers.IO) {
-        dao.deleteSongState(idSong)
+        songDao.deleteSongState(idSong)
+    }
+
+    // Playlist
+
+    override suspend fun createPlayList(playlistEntity: PlaylistEntity): Long = withContext(Dispatchers.IO) {
+        playlistDao.createPlaylist(playlistEntity)
+    }
+
+    override suspend fun updatePlaylist(name: String, idPlaylist: Long): Int  = withContext(Dispatchers.IO){
+        playlistDao.updatePlaylist(name, idPlaylist)
+    }
+
+    override suspend fun deletePlaylist(id: Long): Int = withContext(Dispatchers.IO) {
+        playlistDao.deletePlaylist(id)
+    }
+
+    override suspend fun deleteAllPlaylist(playlistEntities: List<PlaylistEntity>) = withContext(Dispatchers.IO) {
+        playlistDao.deleteAllPlaylists(playlistEntities)
+    }
+    override suspend fun fetchPlaylist(): List<PlaylistWithSongs> = withContext(Dispatchers.IO) {
+        playlistDao.fetchPlaylists()
+    }
+
+    override suspend fun fetchPlaylistOrderBy(
+        idPlaylist: Long,
+        orderByField: Int
+    ): List<SongEntity> = withContext(Dispatchers.IO) {
+        when(orderByField){
+            BY_ALBUM -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"album")
+            BY_ARTIST -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"artist")
+            BY_GENRE -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"genre")
+            BY_FAVORITE ->playlistDao.fetchPlaylistOrderBy(idPlaylist,"favorite")
+            else->playlistDao.fetchPlaylistOrderBy(idPlaylist,"default")
+        }
+    }
+
+    override suspend fun fetchPlaylistByFavorites(idPlaylist: Long): List<SongEntity> = withContext(Dispatchers.IO) {
+        playlistDao.fetchPlaylistByFavorites(idPlaylist)
     }
 }

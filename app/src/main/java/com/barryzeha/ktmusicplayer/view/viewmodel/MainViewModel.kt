@@ -4,9 +4,14 @@ import android.content.ServiceConnection
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.barryzeha.core.common.BY_ALBUM
+import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_FAVORITE
+import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -18,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
 /**
@@ -34,7 +40,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
 
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
-
 
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
     val songState:LiveData<List<SongStateWithDetail>> = _songState
@@ -64,8 +69,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _songById:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
-
-
     private var _currentSongListPosition:MutableLiveData<Int> = MutableLiveData()
     val currentSongListPosition:LiveData<Int> = _currentSongListPosition
 
@@ -84,6 +87,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _processedRegistersInfo:SingleMutableLiveData<Pair<Int,Int>> = SingleMutableLiveData()
     val processedRegisterInfo:LiveData<Pair<Int,Int>> = _processedRegistersInfo
 
+    private var _createdPlayList:SingleMutableLiveData<Long> = SingleMutableLiveData()
+    val createdPlayList:LiveData<Long> = _createdPlayList
+
     init{
         initScope()
     }
@@ -99,7 +105,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     }
     fun fetchAllSongsBy(field:Int){
         launch{
-            _allSongs.value=repository.fetchAllSongsBy(field)
+            _allSongs.value =repository.fetchPlaylistOrderBy(MyApp.mPrefs.playlistId.toLong(), field)
         }
     }
     fun fetchAllSongFromMain(){
@@ -137,8 +143,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
                         saveNewSong(song)
                     }
                 }
-
-
         }
     }
 
@@ -209,7 +213,12 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             repository.deleteSongState(idSong)
         }
     }
-
+    // For playlist
+    fun createPlayList(playlistEntity:PlaylistEntity){
+        launch{
+            _createdPlayList.value = repository.createPlayList(playlistEntity)
+        }
+    }
 
     // Temporal values, not insert to database
     fun setCurrentPosition(position:Int){
