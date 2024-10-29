@@ -139,8 +139,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         if(mPrefs.isPlaying) {
                             mPrefs.isPlaying=false
                             bassManager?.channelPause()
-                            _songController?.pause()
-                            _songController?.musicState(currentMusicState.copy(isPlaying = mPrefs.isPlaying))
+                            _songController?.let{controller->
+                                controller.pause()
+                                controller.musicState(currentMusicState.copy(isPlaying = mPrefs.isPlaying))
+                            }?:run{
+                                mPrefs.nextOrPrevFromNotify = true
+                                mPrefs.controlFromNotify = true
+                            }
+
                         }
                         Log.e("HEADSET_STATE","disconnect")
 
@@ -163,11 +169,18 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                             // lógica cuando se conecta el Bluetooth
                         }
                         BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                            // En android >=12 esta parte del código detecta cuando el dispositivo
+                            // bluetooth está apagado
                             if (mPrefs.isPlaying) {
                                 mPrefs.isPlaying = false
                                 bassManager?.channelPause()
-                                _songController?.pause()
-                                _songController?.musicState(currentMusicState.copy(isPlaying = false))
+                                _songController?.let{controller->
+                                    controller.pause()
+                                    controller.musicState(currentMusicState.copy(isPlaying = false))
+                                }?:run{
+                                    mPrefs.nextOrPrevFromNotify = true
+                                    mPrefs.controlFromNotify = true
+                                }
                             }
                         }
                         BluetoothAdapter.ACTION_STATE_CHANGED -> {
@@ -180,8 +193,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                     if (mPrefs.isPlaying) {
                                         mPrefs.isPlaying = false
                                         bassManager?.channelPause()
-                                        _songController?.pause()
-                                        _songController?.musicState(currentMusicState.copy(isPlaying = false))
+                                        _songController?.let{controller->
+                                            controller.pause()
+                                            controller.musicState(currentMusicState.copy(isPlaying = false))
+                                        }?:run{
+                                            mPrefs.nextOrPrevFromNotify = true
+                                            mPrefs.controlFromNotify = true
+                                        }
+
                                     }
                                 }
 

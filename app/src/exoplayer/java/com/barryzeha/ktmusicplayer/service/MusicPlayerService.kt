@@ -132,8 +132,14 @@ class MusicPlayerService : Service(){
                     if(state==0){
                         if(exoPlayer.isPlaying) {
                             exoPlayer.pause()
-                            _songController?.pause()
-                            _songController?.musicState(currentMusicState.copy(isPlaying = exoPlayer.isPlaying))
+                            _songController?.let{
+                                _songController?.pause()
+                                _songController?.musicState(currentMusicState.copy(isPlaying = exoPlayer.isPlaying))
+                            }?:run{
+                                mPrefs.nextOrPrevFromNotify = true
+                                mPrefs.controlFromNotify = true
+                            }
+
                         }
                         Log.e("HEADSET_STATE","disconnect")
 
@@ -157,7 +163,17 @@ class MusicPlayerService : Service(){
                             // Aquí puedes agregar la lógica cuando se conecta el Bluetooth
                         }
                         BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                            if (exoPlayer.isPlaying) {
+                                exoPlayer.pause()
+                                _songController?.let{
+                                    _songController?.pause()
+                                    _songController?.musicState(currentMusicState.copy(isPlaying = false))
+                                }?:run{
+                                    mPrefs.nextOrPrevFromNotify = true
+                                    mPrefs.controlFromNotify = true
+                                }
 
+                            }
                         }
                         BluetoothAdapter.ACTION_STATE_CHANGED -> {
                             val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
@@ -167,8 +183,14 @@ class MusicPlayerService : Service(){
                                     // Aquí puedes agregar la lógica cuando se desconecta el Bluetooth
                                     if (exoPlayer.isPlaying) {
                                         exoPlayer.pause()
-                                        _songController?.pause()
-                                        _songController?.musicState(currentMusicState.copy(isPlaying = false))
+                                        _songController?.let{
+                                            _songController?.pause()
+                                            _songController?.musicState(currentMusicState.copy(isPlaying = false))
+                                        }?:run{
+                                            mPrefs.nextOrPrevFromNotify = true
+                                            mPrefs.controlFromNotify = true
+                                        }
+
                                     }
                                 }
                                 BluetoothAdapter.STATE_ON -> {
