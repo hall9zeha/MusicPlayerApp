@@ -42,7 +42,8 @@ interface MainRepository {
     suspend fun updatePlaylist(name:String, idPlaylist:Long):Int
     suspend fun deletePlaylist(id:Long):Int
     suspend fun deleteAllPlaylist(playlistEntities:List<PlaylistEntity>)
-    suspend fun fetchPlaylist():List<PlaylistWithSongs>
+    suspend fun fetchPlaylistWithSongs():List<PlaylistWithSongs>
+    suspend fun fetchPlaylists():List<PlaylistEntity>
     suspend fun fetchPlaylistOrderBy(idPlaylist:Long,orderByField:Int):List<SongEntity>
     suspend fun fetchPlaylistByFavorites(idPlaylist: Long):List<SongEntity>
 }

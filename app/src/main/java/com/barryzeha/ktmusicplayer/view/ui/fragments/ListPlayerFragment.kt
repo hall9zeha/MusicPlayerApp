@@ -56,9 +56,11 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
+import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +84,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var param2: String? = null
     private var bind:FragmentListPlayerBinding? = null
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
+    private var playListAdapter:PlayListsAdapter?=null
     //lateinit var adapter:MusicListAdapter
 
     private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
@@ -103,6 +106,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var fastForwardOrRewindHandler: Handler? = null
     private var forwardOrRewindRunnable:Runnable?=null
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -117,6 +121,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bind = FragmentListPlayerBinding.bind(view)
         currentSelectedPosition = mPrefs.currentIndexSong.toInt()
         setUpAdapter()
+        setUpPlayListAdapters()
         setUpObservers()
         setUpPlayListName()
         filePickerActivityResult()
@@ -124,6 +129,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         activityResultForPermission()
         initCheckPermission()
         setUpListeners()
+        setupBottomSheet()
 
     }
     private fun audioEffectActivityResult(){
@@ -163,6 +169,16 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             post {
                 setNumberOfTrack()
             }
+        }
+    }
+    private fun setUpPlayListAdapters(){
+        playListAdapter = PlayListsAdapter()
+        bind?.bottomSheetView?.rvPlaylists?.apply{
+            setHasFixedSize(true)
+            setItemViewCacheSize(10)
+            layoutManager = LinearLayoutManager(context)
+            adapter = playListAdapter
+
         }
     }
     private fun setUpObservers(){
@@ -273,6 +289,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 Toast.makeText(activity, "Lista creada", Toast.LENGTH_SHORT).show()
             }
         }
+        mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
+            playListAdapter?.let{
+                it.addAll(playLists)
+            }
+        }
     }
     private fun setUpPlayListName()=with(bind){
         this?.let{
@@ -341,6 +362,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 Manifest.permission.RECORD_AUDIO,)
         }
         this?.let {
+            tvPlayListName.setOnClickListener{
+                if(btmSheetIsExpanded) bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
+                else bottomSheetBehavior.state=BottomSheetBehavior.STATE_EXPANDED
+            }
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }
@@ -544,6 +569,25 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 })
             }
         }
+    }
+    private fun setupBottomSheet(){
+        bottomSheetBehavior = BottomSheetBehavior.from(bind?.bottomSheetView?.listsBottomSheet!!)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+        bottomSheetBehavior.addBottomSheetCallback(object :BottomSheetBehavior.BottomSheetCallback(){
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when(newState){
+                    BottomSheetBehavior.STATE_EXPANDED->{
+
+                        btmSheetIsExpanded=true}
+                    BottomSheetBehavior.STATE_COLLAPSED->btmSheetIsExpanded=false
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+
+            }
+        })
     }
     private fun getColorStateList(index:Int,defaultIndex:Int):ColorStateList{
         return ColorStateList.valueOf(mColorList(requireContext()).getColor(index,defaultIndex))
@@ -856,7 +900,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onStop()
     }
     companion object {
-         var listAdapter:MusicListAdapter?=null
+        var listAdapter:MusicListAdapter?=null
+        lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+        var btmSheetIsExpanded:Boolean = false
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             ListPlayerFragment().apply {

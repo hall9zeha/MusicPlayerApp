@@ -110,8 +110,12 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
     override suspend fun deleteAllPlaylist(playlistEntities: List<PlaylistEntity>) = withContext(Dispatchers.IO) {
         playlistDao.deleteAllPlaylists(playlistEntities)
     }
-    override suspend fun fetchPlaylist(): List<PlaylistWithSongs> = withContext(Dispatchers.IO) {
-        playlistDao.fetchPlaylists()
+    override suspend fun fetchPlaylistWithSongs(): List<PlaylistWithSongs> = withContext(Dispatchers.IO) {
+        playlistDao.fetchPlaylistWithSongs()
+    }
+
+    override suspend fun fetchPlaylists(): List<PlaylistEntity>  = withContext(Dispatchers.IO){
+        playlistDao.fetchAllPlaylists()
     }
 
     override suspend fun fetchPlaylistOrderBy(

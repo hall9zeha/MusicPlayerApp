@@ -36,7 +36,11 @@ interface PlaylistDAO {
 
   @Transaction
   @Query("select * from PlaylistEntity")
-  suspend fun fetchPlaylists():List<PlaylistWithSongs>
+  suspend fun fetchPlaylistWithSongs():List<PlaylistWithSongs>
+
+  @Transaction
+  @Query("select * from PlaylistEntity")
+  suspend fun fetchAllPlaylists():List<PlaylistEntity>
 
   @Transaction
   @Query("select * from PlaylistEntity where playListName =:name")

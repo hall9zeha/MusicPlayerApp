@@ -18,4 +18,17 @@ data class PlaylistEntity(
  val idPlaylist:Long=0,
  val playListName:String="",
 
-):Parcelable
+):Parcelable {
+ override fun equals(other: Any?): Boolean {
+  if (this === other) return true
+  if (javaClass != other?.javaClass) return false
+
+  other as PlaylistEntity
+
+  return idPlaylist == other.idPlaylist
+ }
+
+ override fun hashCode(): Int {
+  return idPlaylist.hashCode()
+ }
+}

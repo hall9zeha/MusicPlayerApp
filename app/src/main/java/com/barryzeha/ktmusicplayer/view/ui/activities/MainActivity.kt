@@ -28,6 +28,7 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -192,8 +193,11 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         }else{
             checkedSelectedMenuDrawerItems()
             if(mPrefs.currentView == SONG_LIST_FRAGMENT){
-                bind.mViewPager.setCurrentItem(MAIN_FRAGMENT,true)
-                mPrefs.currentView = MAIN_FRAGMENT
+                if (ListPlayerFragment.btmSheetIsExpanded)ListPlayerFragment.bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
+                else {
+                    bind.mViewPager.setCurrentItem(MAIN_FRAGMENT, true)
+                    mPrefs.currentView = MAIN_FRAGMENT
+                }
 
             }else {
                 super.onBackPressed()

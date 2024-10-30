@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/listsBottomSheet"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    app:behavior_peekHeight="0dp"
+    app:behavior_hideable="true"
+    app:behavior_skipCollapsed = "false"
+    android:background="@drawable/bottom_sheet_bg"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    >
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPlaylists"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

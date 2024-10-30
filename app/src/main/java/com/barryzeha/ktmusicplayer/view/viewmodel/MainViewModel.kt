@@ -18,6 +18,7 @@ import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
+import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,8 +91,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _createdPlayList:SingleMutableLiveData<Long> = SingleMutableLiveData()
     val createdPlayList:LiveData<Long> = _createdPlayList
 
+    private var _playLists:MutableLiveData<List<PlaylistEntity>> = MutableLiveData()
+    val playLists:LiveData<List<PlaylistEntity>> = _playLists
+
     init{
         initScope()
+        // trying
+        fetchPlaylists()
     }
 
     fun setItemsCount(itemsCount:Int){
@@ -219,7 +225,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             _createdPlayList.value = repository.createPlayList(playlistEntity)
         }
     }
-
+    fun fetchPlaylists(){
+        launch{
+           _playLists.value= repository.fetchPlaylists()
+        }
+    }
     // Temporal values, not insert to database
     fun setCurrentPosition(position:Int){
         launch {
