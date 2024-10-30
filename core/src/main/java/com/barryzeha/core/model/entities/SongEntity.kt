@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  * Copyright (c)  All rights reserved.
  **/
 @Parcelize
-@Entity(indices = [Index(value = ["idPlaylistCreator", "id"], unique = true)])
+@Entity(indices = [Index(value = ["id"], unique = true)])
 data class SongEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo("id")
     val id:Long=0,
