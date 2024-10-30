@@ -566,7 +566,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     // Delete all items callback
                     listAdapter?.removeAll()
                     mainViewModel.deleteAllSongs()
-                })
+                },{})
             }
         }
     }
@@ -759,6 +759,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             // Delete all items callback
             listAdapter?.removeAll()
             mainViewModel.deleteAllSongs()
+        },{
+            // Send to playlist callback
+            if(playListAdapter?.itemCount!! > 0){
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         })
 
     }

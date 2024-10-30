@@ -11,7 +11,6 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -197,20 +196,30 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
         }
     }
 }
-fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View, deleteItem:()->Unit, deleteAllItems:()->Unit){
+fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
+                    deleteItemCallback:()->Unit,
+                    deleteAllItemsCallback:()->Unit,
+                    sendToPlaylistCallback:()->Unit){
 
     val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
     createPopUpWindow(popupView,view,activity){popupWindow->
-        if (!onItemClick) popupView.btnDeleteItem.visibility = View.GONE
+        if (!onItemClick) {
+            popupView.btnDeleteItem.visibility = View.GONE
+            popupView.btnSendToList.visibility = View.GONE
+        }
         popupView.btnDeleteItem.setOnClickListener {
-            deleteItem()
+            deleteItemCallback()
             popupWindow.dismiss()
         }
         popupView.btnDeleteAll.setOnClickListener {
             showDialog(activity, R.string.delete_all,
                 R.string.delete_all_msg) {
-                deleteAllItems()
+                deleteAllItemsCallback()
             }
+            popupWindow.dismiss()
+        }
+        popupView.btnSendToList.setOnClickListener {
+            sendToPlaylistCallback()
             popupWindow.dismiss()
         }
     }

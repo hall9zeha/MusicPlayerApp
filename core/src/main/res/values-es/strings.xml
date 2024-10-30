@@ -23,6 +23,7 @@
     <string name="soundEffects">Efectos de sonido</string>
     <string name="delete_all">Eliminar  lista</string>
     <string name="delete_song">Quitar de la lista</string>
+    <string name="sendToList">Enviar a lista de reproducción</string>
     <string name="delete_all_msg">Realmente quiere eliminar toda la lista?</string>
     <string name="order_list_by">Ordenar lista por</string>
     <string name="addPlayList">Crear lista de reproducción</string>

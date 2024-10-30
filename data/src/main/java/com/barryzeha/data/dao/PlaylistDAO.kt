@@ -47,13 +47,14 @@ interface PlaylistDAO {
   suspend fun fetchPlaylistByName(name:String):List<PlaylistEntity>
 
   // Cuando idPlayList sea mayor que 0 (significa que ya habrá listas creadas) se buscará las canciones, que hayan sido
-  // agregadas a dichas listas, caso contrario cuando sea 0 por defecto. en ambos casos se ordenará por el campo enviado a través del
+  // agregadas a dichas listas, caso contrario (:orderBy !='favorite') se cargará todas la canciones. en ambos casos se ordenará por el campo enviado a través del
   // parámetro orderBy que pueden ser(album, genre, artist)
+  // el caso favoritos (:orderBy = 'favorite' AND favorite = 1), nos devolverá solo aquellos que tengan el valor 1(true) en el campo correspondiente
 
  @Transaction@Query("""
     SELECT * FROM SongEntity  
     WHERE (:idPlaylist >0 AND idPlaylistCreator =  (SELECT idPlaylist FROM PlaylistEntity WHERE idPlaylist = :idPlaylist LIMIT 1))
-       OR (:idPlaylist = 0 AND :orderBy !='favorite')
+       OR (:orderBy !='favorite')
        OR (:orderBy = 'favorite' AND favorite = 1)
        
     ORDER BY CASE 

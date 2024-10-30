@@ -8,7 +8,13 @@
     android:padding="16dp"
 
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSendToList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sendToList"
+        android:ellipsize="end"
+        style="@style/Widget.Material3.Button.TextButton"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDeleteItem"
         android:layout_width="wrap_content"
