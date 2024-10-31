@@ -12,28 +12,28 @@ import androidx.room.PrimaryKey
  * Copyright (c)  All rights reserved.
  **/
 @Entity(
-  primaryKeys = ["playlistId", "songId"],
+  primaryKeys = ["idPlaylist", "id"],
           foreignKeys = [
             ForeignKey(
               entity = PlaylistEntity::class,
               parentColumns = arrayOf("idPlaylist"),
-              childColumns = arrayOf("playlistId"),
+              childColumns = arrayOf("idPlaylist"),
               onDelete = ForeignKey.CASCADE
             ),
             ForeignKey(
               entity = SongEntity::class,
               parentColumns = arrayOf("id"),
-              childColumns = arrayOf("songId"),
+              childColumns = arrayOf("id"),
               onDelete = ForeignKey.CASCADE
             )
 
           ],
   indices = [
-    Index("playlistId"),
-    Index("songId")
+    Index("idPlaylist"),
+    Index("id")
   ]
 )
 data class PlaylistWithSongsCrossRef(
-  val playlistId:Long=0,
-  val songId:Long=0
+  val idPlaylist:Long=0,
+  val id:Long=0
 )

@@ -127,7 +127,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
             BY_ARTIST -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"artist")
             BY_GENRE -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"genre")
             BY_FAVORITE ->playlistDao.fetchPlaylistOrderBy(idPlaylist,"favorite")
-            else->playlistDao.fetchPlaylistOrderBy(idPlaylist,"default")
+            else-> {
+                // BY_DEFAULT
+                fetchAllSongsBy(orderByField)
+            }
         }
     }
 

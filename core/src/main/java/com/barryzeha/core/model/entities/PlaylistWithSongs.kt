@@ -2,6 +2,7 @@ package com.barryzeha.core.model.entities
 
 import android.os.Parcelable
 import androidx.room.Embedded
+import androidx.room.Junction
 import androidx.room.Relation
 import kotlinx.parcelize.Parcelize
 
@@ -16,8 +17,9 @@ data class PlaylistWithSongs(
   @Embedded val playList:PlaylistEntity,
   @Relation(
     parentColumn = "idPlaylist",
-    entityColumn = "idPlaylistCreator"
+    entityColumn = "id",
+    associateBy = Junction(PlaylistWithSongsCrossRef::class)
   )
- val songs:List<SongEntity>
+ val songs:List<SongEntity> = arrayListOf()
 
 ):Parcelable
