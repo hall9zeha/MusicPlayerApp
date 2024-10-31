@@ -181,6 +181,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 mainViewModel.savePlaylistWithSongRef(
                     PlaylistWithSongsCrossRef(playlistEntity.idPlaylist,idSongForSendToPlaylist)
                 )
+
+            }else{
+
             }
         })
         bind?.bottomSheetView?.rvPlaylists?.apply{
@@ -309,7 +312,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(insertedRow>0){
                 Toast.makeText(activity, "Agregado correctamente", Toast.LENGTH_SHORT).show()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                // Reiniciamos el valor para evitar inconvenientes, lo usaremos para nuestrá lógica de
+                // si es mayor que cero, agregar a lista y si es cero, cambiar entre listas
+                idSongForSendToPlaylist =0
                 // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
+
             }
         }
     }

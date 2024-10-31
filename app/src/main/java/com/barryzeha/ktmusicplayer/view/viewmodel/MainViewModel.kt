@@ -115,9 +115,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     }
     fun fetchAllSongsBy(field:Int){
         launch{
-
             _allSongs.value =repository.fetchPlaylistOrderBy(MyApp.mPrefs.playlistId.toLong(), field)
-
         }
     }
     fun fetchAllSongFromMain(){

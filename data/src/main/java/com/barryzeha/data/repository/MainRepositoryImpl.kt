@@ -134,16 +134,13 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
         idPlaylist: Long,
         orderByField: Int
     ): List<SongEntity> = withContext(Dispatchers.IO) {
-        if(prefs.playlistId>0) {
+        if(idPlaylist>0) {
             when (orderByField) {
                 BY_ALBUM -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "album")
                 BY_ARTIST -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "artist")
                 BY_GENRE -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "genre")
                 BY_FAVORITE -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "favorite")
-                else -> {
-                    // BY_DEFAULT
-                    fetchAllSongsBy(orderByField)
-                }
+                else -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "default")
             }
         }else{
             fetchAllSongsBy(orderByField)

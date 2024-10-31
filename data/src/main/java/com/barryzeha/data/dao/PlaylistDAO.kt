@@ -64,9 +64,8 @@ interface PlaylistDAO {
 
  @Transaction@Query("""
     SELECT * FROM SongEntity  
-    WHERE (:idPlaylist >0 AND id in (SELECT id FROM PlaylistWithSongsCrossRef WHERE idPlaylist = :idPlaylist))
-       OR (:orderBy !='favorite')
-       OR (:orderBy = 'favorite' AND favorite = 1)
+    WHERE (:orderBy !='favorite' and  id in (SELECT id FROM PlaylistWithSongsCrossRef WHERE idPlaylist = :idPlaylist))
+        OR (:orderBy = 'favorite' AND favorite = 1 and  id in (SELECT id FROM PlaylistWithSongsCrossRef WHERE idPlaylist = :idPlaylist))
        
     ORDER BY CASE 
         WHEN :orderBy = 'album' THEN album 
