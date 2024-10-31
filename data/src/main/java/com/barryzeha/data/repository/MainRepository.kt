@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongs
+import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -44,6 +45,11 @@ interface MainRepository {
     suspend fun deleteAllPlaylist(playlistEntities:List<PlaylistEntity>)
     suspend fun fetchPlaylistWithSongs():List<PlaylistWithSongs>
     suspend fun fetchPlaylists():List<PlaylistEntity>
+
     suspend fun fetchPlaylistOrderBy(idPlaylist:Long,orderByField:Int):List<SongEntity>
     suspend fun fetchPlaylistByFavorites(idPlaylist: Long):List<SongEntity>
+
+    //Playlist with song cross ref
+    suspend fun savePlaylistWithSongCrossRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef):Long
+    suspend fun deletePlaylistWithSongCrossRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef):Int
 }

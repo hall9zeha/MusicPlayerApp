@@ -12,6 +12,7 @@ import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
+import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -93,6 +94,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
 
     private var _playLists:MutableLiveData<List<PlaylistEntity>> = MutableLiveData()
     val playLists:LiveData<List<PlaylistEntity>> = _playLists
+
+    private var _playlistWithSongRefInserted:SingleMutableLiveData<Long> = SingleMutableLiveData()
+    val playlistWithSongRefInserted:LiveData<Long> = _playlistWithSongRefInserted
 
     init{
         initScope()
@@ -232,6 +236,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
            _playLists.value= repository.fetchPlaylists()
         }
     }
+    // For playlist with songs cross ref
+    fun savePlaylistWithSongRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef){
+        launch{
+            _playlistWithSongRefInserted.value=repository.savePlaylistWithSongCrossRef(playlistWithSongsCrossRef)
+        }
+    }
+
     // Temporal values, not insert to database
     fun setCurrentPosition(position:Int){
         launch {

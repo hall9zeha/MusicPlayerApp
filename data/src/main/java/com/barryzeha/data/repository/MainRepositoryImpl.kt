@@ -4,8 +4,10 @@ import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongs
+import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -21,7 +23,7 @@ import javax.inject.Inject
  * Copyright (c)  All rights reserved.
  **/
 
-class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
+class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPreferences):MainRepository {
     private val songDao = db.getSongDao()
     private val playlistDao = db.getPlaylistDao()
     // Room database
@@ -110,27 +112,41 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase):MainRepository {
     override suspend fun deleteAllPlaylist(playlistEntities: List<PlaylistEntity>) = withContext(Dispatchers.IO) {
         playlistDao.deleteAllPlaylists(playlistEntities)
     }
+
+    override suspend fun fetchPlaylists(): List<PlaylistEntity>  = withContext(Dispatchers.IO){
+        playlistDao.fetchAllPlaylists()
+    }
+
     override suspend fun fetchPlaylistWithSongs(): List<PlaylistWithSongs> = withContext(Dispatchers.IO) {
         playlistDao.fetchPlaylistWithSongs()
     }
 
-    override suspend fun fetchPlaylists(): List<PlaylistEntity>  = withContext(Dispatchers.IO){
-        playlistDao.fetchAllPlaylists()
+    // For playlist and songs cross ref table
+    override suspend fun savePlaylistWithSongCrossRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef): Long = with(Dispatchers.IO){
+        playlistDao.savePlaylistWithSongCrossRef(playlistWithSongsCrossRef)
+    }
+
+    override suspend fun deletePlaylistWithSongCrossRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef): Int = with(Dispatchers.IO) {
+        playlistDao.deletePlaylistWithSongCrossRef(playlistWithSongsCrossRef)
     }
 
     override suspend fun fetchPlaylistOrderBy(
         idPlaylist: Long,
         orderByField: Int
     ): List<SongEntity> = withContext(Dispatchers.IO) {
-        when(orderByField){
-            BY_ALBUM -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"album")
-            BY_ARTIST -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"artist")
-            BY_GENRE -> playlistDao.fetchPlaylistOrderBy(idPlaylist,"genre")
-            BY_FAVORITE ->playlistDao.fetchPlaylistOrderBy(idPlaylist,"favorite")
-            else-> {
-                // BY_DEFAULT
-                fetchAllSongsBy(orderByField)
+        if(prefs.playlistId>0) {
+            when (orderByField) {
+                BY_ALBUM -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "album")
+                BY_ARTIST -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "artist")
+                BY_GENRE -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "genre")
+                BY_FAVORITE -> playlistDao.fetchPlaylistOrderBy(idPlaylist, "favorite")
+                else -> {
+                    // BY_DEFAULT
+                    fetchAllSongsBy(orderByField)
+                }
             }
+        }else{
+            fetchAllSongsBy(orderByField)
         }
     }
 

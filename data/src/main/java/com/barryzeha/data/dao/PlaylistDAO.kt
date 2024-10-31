@@ -3,11 +3,13 @@ package com.barryzeha.data.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongs
+import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 
 
@@ -51,9 +53,18 @@ interface PlaylistDAO {
   // parámetro orderBy que pueden ser(album, genre, artist)
   // el caso favoritos (:orderBy = 'favorite' AND favorite = 1), nos devolverá solo aquellos que tengan el valor 1(true) en el campo correspondiente
 
+  // For playlist and songs cross ref table
+  @Transaction
+  @Insert(onConflict = OnConflictStrategy.IGNORE)
+  suspend fun savePlaylistWithSongCrossRef(playlistWithSong: PlaylistWithSongsCrossRef):Long
+
+  @Transaction
+  @Delete
+  suspend fun deletePlaylistWithSongCrossRef(playlistWithSong: PlaylistWithSongsCrossRef):Int
+
  @Transaction@Query("""
     SELECT * FROM SongEntity  
-    WHERE (:idPlaylist >0 AND idPlaylistCreator =  (SELECT idPlaylist FROM PlaylistEntity WHERE idPlaylist = :idPlaylist LIMIT 1))
+    WHERE (:idPlaylist >0 AND id in (SELECT id FROM PlaylistWithSongsCrossRef WHERE idPlaylist = :idPlaylist))
        OR (:orderBy !='favorite')
        OR (:orderBy = 'favorite' AND favorite = 1)
        
@@ -69,5 +80,7 @@ interface PlaylistDAO {
  @Transaction
  @Query("select * from SongEntity,(select idPlaylist from PlaylistEntity where idPlaylist =:idPlaylist limit 1) as playlist where idPlaylistCreator = playlist.idPlaylist and favorite = 1 ")
  suspend fun fetchPlaylistByFavorites(idPlaylist: Long):List<SongEntity>
+
+
 
 }

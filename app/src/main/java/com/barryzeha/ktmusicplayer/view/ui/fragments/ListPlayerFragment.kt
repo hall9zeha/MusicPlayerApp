@@ -43,6 +43,7 @@ import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
+import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
@@ -101,6 +102,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var isFavorite:Boolean=false
     private var isFiltering:Boolean=false
     private var prevOrNextClicked:Boolean =false
+    private var idSongForSendToPlaylist:Long =0
     // Forward and rewind
     private var fastForwardingOrRewind = false
     private var fastForwardOrRewindHandler: Handler? = null
@@ -172,7 +174,15 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun setUpPlayListAdapters(){
-        playListAdapter = PlayListsAdapter()
+        playListAdapter = PlayListsAdapter({playlistEntity ->
+            // Guardamos los ids de playlist y de la canción al hacer click en un item de la lista
+            // que representa nuestras listas creadas
+            if(idSongForSendToPlaylist>0){
+                mainViewModel.savePlaylistWithSongRef(
+                    PlaylistWithSongsCrossRef(playlistEntity.idPlaylist,idSongForSendToPlaylist)
+                )
+            }
+        })
         bind?.bottomSheetView?.rvPlaylists?.apply{
             setHasFixedSize(true)
             setItemViewCacheSize(10)
@@ -287,11 +297,19 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.createdPlayList.observe(viewLifecycleOwner){insertedRow->
             if(insertedRow >0){
                 Toast.makeText(activity, "Lista creada", Toast.LENGTH_SHORT).show()
+                mainViewModel.fetchPlaylists()
             }
         }
         mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
             playListAdapter?.let{
                 it.addAll(playLists)
+            }
+        }
+        mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner){insertedRow->
+            if(insertedRow>0){
+                Toast.makeText(activity, "Agregado correctamente", Toast.LENGTH_SHORT).show()
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
             }
         }
     }
@@ -763,6 +781,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             // Send to playlist callback
             if(playListAdapter?.itemCount!! > 0){
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                idSongForSendToPlaylist = selectedSong.id
             }
         })
 
