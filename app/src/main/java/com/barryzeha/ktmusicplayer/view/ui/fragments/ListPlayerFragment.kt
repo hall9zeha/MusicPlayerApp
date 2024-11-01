@@ -129,7 +129,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         filePickerActivityResult()
         audioEffectActivityResult()
         activityResultForPermission()
-        initCheckPermission()
+        CoroutineScope(Dispatchers.IO).launch {
+            initCheckPermission()
+        }
         setUpListeners()
         setupBottomSheet()
 
@@ -592,6 +594,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     listAdapter?.removeAll()
                     mainViewModel.deleteAllSongs()
                 },{})
+            }
+            bottomSheetView.btnAdd.setOnClickListener{
+                createNewPlayListDialog(requireActivity()){playlistName ->
+                    mainViewModel.createPlayList(PlaylistEntity(playListName = playlistName))
+                }
             }
         }
     }

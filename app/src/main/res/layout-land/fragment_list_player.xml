@@ -267,6 +267,6 @@
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-    <include layout="@layout/playlists_layout"
+    <include layout="@layout/bottom_sheet_playlists_layout"
         android:id="@+id/bottomSheetView"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
