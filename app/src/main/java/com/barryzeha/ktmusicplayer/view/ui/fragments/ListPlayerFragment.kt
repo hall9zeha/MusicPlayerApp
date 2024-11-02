@@ -14,16 +14,17 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
-
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_FAVORITE
@@ -386,7 +387,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         } else {
             listOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.RECORD_AUDIO,)
+                Manifest.permission.RECORD_AUDIO,
+            )
         }
         this?.let {
             tvPlayListName.setOnClickListener{
@@ -609,9 +611,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bottomSheetBehavior.addBottomSheetCallback(object :BottomSheetBehavior.BottomSheetCallback(){
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when(newState){
-                    BottomSheetBehavior.STATE_EXPANDED->{
-
-                        btmSheetIsExpanded=true}
+                    BottomSheetBehavior.STATE_EXPANDED->{btmSheetIsExpanded=true}
                     BottomSheetBehavior.STATE_COLLAPSED->btmSheetIsExpanded=false
                 }
             }
