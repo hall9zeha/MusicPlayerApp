@@ -15,7 +15,7 @@ import com.barryzeha.ktmusicplayer.databinding.PlaylistItemBinding
  * Copyright (c)  All rights reserved.
  **/
 
-class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit):RecyclerView.Adapter<PlayListsAdapter.ViewHolder>() {
+class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit, private val deletePlayList:(PlaylistEntity)->Unit):RecyclerView.Adapter<PlayListsAdapter.ViewHolder>() {
     private var playLists:MutableList<PlaylistEntity> = arrayListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -70,6 +70,9 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit):RecyclerV
         fun onBind(playList:PlaylistEntity)=with(bind){
             tvPlaylistName.text=playList.playListName
             this.root.setOnClickListener { onItemClick(playList)}
+            imbDelete.setOnClickListener {
+                deletePlayList(playList)
+            }
         }
         fun setPlaylistName(name:String){
             bind.tvPlaylistName.text = name

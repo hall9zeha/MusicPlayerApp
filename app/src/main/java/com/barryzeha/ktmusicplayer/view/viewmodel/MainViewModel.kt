@@ -240,7 +240,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             _playlistWithSongRefInserted.value=repository.savePlaylistWithSongCrossRef(playlistWithSongsCrossRef)
         }
     }
-
+    fun deletePlayList(playlistEntity: PlaylistEntity){
+        launch{
+            repository.deletePlaylist(playlistEntity.idPlaylist)
+        }
+    }
     // Temporal values, not insert to database
     fun setCurrentPosition(position:Int){
         launch {

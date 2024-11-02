@@ -12,9 +12,9 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -186,8 +186,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 )
 
             }else{
-
+            // Cargamos la lista de reproducción seleecionada
             }
+        },{playlist->
+            // Al eliminar un item
+            mainViewModel.deletePlayList(playlist)
+            playListAdapter?.remove(playlist)
+            resizeBottomSheet(isIncrement = false)
+
         })
         bind?.bottomSheetView?.rvPlaylists?.apply{
             setHasFixedSize(true)
@@ -309,6 +315,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
             playListAdapter?.let{
                 it.addAll(playLists)
+               resizeBottomSheet(isIncrement = true)
             }
         }
         mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner){insertedRow->
@@ -323,6 +330,29 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
+    private fun resizeBottomSheet(isIncrement:Boolean){
+        if(btmSheetIsExpanded){
+            val behavior= BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
+            val itemCount= playListAdapter?.itemCount!!
+            val bottomSheetHeight = bind?.bottomSheetView?.rvPlaylists?.height!!
+            val rvPlaylistHeight = bind?.bottomSheetView?.rvPlaylists?.height!!
+            val paddingTop = bind?.bottomSheetView?.rvPlaylists?.paddingTop!! * itemCount
+            val paddingBottom = bind?.bottomSheetView?.rvPlaylists?.paddingBottom!!  * itemCount
+            val totalHeight: Int
+            if(isIncrement){totalHeight = bottomSheetHeight + (bottomSheetHeight - rvPlaylistHeight) + paddingBottom  + paddingTop}
+            else{totalHeight = (paddingBottom / itemCount -1 )  - (paddingTop/itemCount -1) - 60}
+            // Ajusta el tamaño del BottomSheet
+            val layoutParams = bind?.bottomSheetView?.listsBottomSheet?.layoutParams
+            layoutParams?.height = totalHeight
+            bind?.bottomSheetView?.listsBottomSheet?.layoutParams = layoutParams
+
+            // Redibuja el BottomSheet
+            bind?.bottomSheetView?.listsBottomSheet?.requestLayout()
+            bind?.bottomSheetView?.listsBottomSheet?.invalidate()
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
     private fun setUpPlayListName()=with(bind){
         this?.let{
             when(mPrefs.playListSortOption){
@@ -612,7 +642,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when(newState){
                     BottomSheetBehavior.STATE_EXPANDED->{btmSheetIsExpanded=true}
-                    BottomSheetBehavior.STATE_COLLAPSED->btmSheetIsExpanded=false
+                    BottomSheetBehavior.STATE_COLLAPSED->{
+                        val behavior= BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
+                        behavior.peekHeight = 0
+                        btmSheetIsExpanded=false
+                    }
                 }
             }
 
