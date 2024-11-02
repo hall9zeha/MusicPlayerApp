@@ -21,6 +21,7 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -101,7 +102,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     init{
         initScope()
         // trying
-        fetchPlaylists()
+        CoroutineScope(Dispatchers.IO).launch {
+            fetchPlaylists()
+        }
     }
 
     fun setItemsCount(itemsCount:Int){

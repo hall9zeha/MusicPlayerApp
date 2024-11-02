@@ -136,6 +136,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         setUpListeners()
         setupBottomSheet()
 
+
     }
     private fun audioEffectActivityResult(){
         launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){
@@ -173,6 +174,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             adapter = listAdapter
             post {
                 setNumberOfTrack()
+
             }
         }
     }
@@ -315,7 +317,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
             playListAdapter?.let{
                 it.addAll(playLists)
-               resizeBottomSheet(isIncrement = true)
+                resizeBottomSheet(isIncrement = true)
             }
         }
         mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner){insertedRow->
@@ -422,6 +424,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         this?.let {
             tvPlayListName.setOnClickListener{
+
                 if(btmSheetIsExpanded) bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
                 else bottomSheetBehavior.state=BottomSheetBehavior.STATE_EXPANDED
             }
