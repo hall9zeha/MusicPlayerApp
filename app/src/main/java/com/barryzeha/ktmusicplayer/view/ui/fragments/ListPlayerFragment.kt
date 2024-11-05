@@ -188,7 +188,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 )
 
             }else{
-            // Cargamos la lista de reproducción seleecionada
+            // Cargamos la lista de reproducción seleccionada
+               mPrefs.playlistId = playlistEntity.idPlaylist.toInt()
+               musicPlayerService?.clearPlayList(false)
+                mainViewModel.fetchAllSongsBy(mPrefs.playListSortOption)
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
             }
         },{playlist->
             // Al eliminar un item
@@ -208,6 +213,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             adapter = playListAdapter
 
         }
+        playListAdapter!!.add(PlaylistEntity(0,"Default"))
     }
     private fun setUpObservers(){
         //mainViewModel.fetchAllSong()

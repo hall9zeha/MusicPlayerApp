@@ -234,7 +234,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             withContext(Dispatchers.IO) {
                 // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
                 // si no hay algo seleccionado previamente solo devolverá la lista por defecto
-                val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
+
+                //val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
+                val songs=repository.fetchPlaylistOrderBy(mPrefs.playlistId.toLong(), mPrefs.playListSortOption)
                 songState=repository.fetchSongState()
 
                 songs.forEach { s ->
@@ -564,6 +566,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             if(mPrefs.songMode == SHUFFLE)shuffleList()
             mPrefs.currentIndexSong = indexOfSong.toLong()
+            //TODO: implementar si la canción existe en la nueva playlist que se cargue entonces enviar sus datos a la UI
+            // sino mover a la posición cero
         }
     }
     fun clearPlayList(isSort:Boolean){
@@ -577,7 +581,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }else{
             _songController?.currentTrack(currentMusicState)
         }
-
         executeOnceTime=false
     }
     fun unregisterController(){

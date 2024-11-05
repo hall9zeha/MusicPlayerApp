@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.ktmusicplayer.R
@@ -77,22 +78,29 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
     inner class ViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         private val bind = PlaylistItemBinding.bind(itemView)
         fun onBind(playList:PlaylistEntity)=with(bind){
+            if(playList.idPlaylist.toInt() ==0){
+                btnDelete.visibility=View.INVISIBLE
+                btnEdit.visibility=View.INVISIBLE
+            }
             edtPlaylistName.setText(playList.playListName)
-            this.root.setOnClickListener { onItemClick(playList)}
-            imbDelete.setOnClickListener {
+            edtPlaylistName.setOnClickListener {
+                if(!isEdit) {
+                    onItemClick(playList)
+                }}
+            btnDelete.setOnClickListener {
                 deletePlaylistCallback(playList)
             }
-            imbEdit.setOnClickListener{
+            btnEdit.setOnClickListener{
 
                 if(!isEdit) {
-                    imbEdit.setIconResource(com.barryzeha.mfilepicker.R.drawable.ic_check)
+                    btnEdit.setIconResource(com.barryzeha.mfilepicker.R.drawable.ic_check)
                     edtPlaylistName.isFocusableInTouchMode=true
                     edtPlaylistName.requestFocus()
                     edtPlaylistName.setSelection(edtPlaylistName.length())
 
                     isEdit=true
                 }else{
-                    imbEdit.setIconResource(com.barryzeha.core.R.drawable.ic_edit)
+                    btnEdit.setIconResource(com.barryzeha.core.R.drawable.ic_edit)
                     val playListsUpdated= playList.copy(playListName = edtPlaylistName.text.toString())
                     updateNameOfPlaylist(playList,playListsUpdated)
                     edtPlaylistName.isFocusableInTouchMode=false
