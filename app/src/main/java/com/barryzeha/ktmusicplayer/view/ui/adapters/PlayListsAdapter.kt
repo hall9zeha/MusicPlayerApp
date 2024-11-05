@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.ktmusicplayer.R
@@ -31,7 +32,7 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
         when(val latestPayload=payloads.lastOrNull()){
-            is ItemPlaylistChangePayload.playlistName -> holder.setPlaylistName(latestPayload.name)
+            is ItemPlaylistChangePayload.PlaylistName -> holder.setPlaylistName(latestPayload.name)
             else->onBindViewHolder(holder,position)
         }
     }
@@ -56,7 +57,7 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
         if(playLists.contains(playList)){
             val index = playLists.indexOf(playList)
             playLists[index] = playList
-            notifyItemChanged(index,ItemPlaylistChangePayload.playlistName(playList.playListName))
+            notifyItemChanged(index,ItemPlaylistChangePayload.PlaylistName(playList.playListName))
         }
     }
     fun remove(playList: PlaylistEntity){
@@ -69,7 +70,7 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
     private fun updateNameOfPlaylist(oldEntity: PlaylistEntity, newEntity:PlaylistEntity){
         if(playLists.contains(oldEntity)){
             val index = playLists.indexOf(oldEntity)
-            notifyItemChanged(index, ItemPlaylistChangePayload.playlistName(newEntity.playListName))
+            notifyItemChanged(index, ItemPlaylistChangePayload.PlaylistName(newEntity.playListName))
 
         }
     }
@@ -87,6 +88,7 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
                     imbEdit.setIconResource(com.barryzeha.mfilepicker.R.drawable.ic_check)
                     edtPlaylistName.isFocusableInTouchMode=true
                     edtPlaylistName.requestFocus()
+                    edtPlaylistName.setSelection(edtPlaylistName.length())
 
                     isEdit=true
                 }else{
@@ -96,6 +98,7 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
                     edtPlaylistName.isFocusableInTouchMode=false
                     edtPlaylistName.clearFocus()
                     editedNameCallback(playListsUpdated)
+                    edtPlaylistName.onEditorAction(EditorInfo.IME_ACTION_DONE)
                     isEdit = false
                 }
             }
@@ -105,6 +108,6 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
         }
     }
     private sealed interface ItemPlaylistChangePayload{
-        data class playlistName(val name:String):ItemPlaylistChangePayload
+        data class PlaylistName(val name:String):ItemPlaylistChangePayload
     }
 }
