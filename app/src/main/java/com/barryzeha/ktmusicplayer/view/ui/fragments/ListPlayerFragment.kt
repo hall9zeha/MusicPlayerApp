@@ -196,6 +196,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             playListAdapter?.remove(playlist)
             resizeBottomSheet(isIncrement = false)
 
+        },{playlist->
+            // Cambiar nombre de una playlist
+            mainViewModel.updatePlaylist(playlist)
+
         })
         bind?.bottomSheetView?.rvPlaylists?.apply{
             setHasFixedSize(true)

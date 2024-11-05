@@ -15,9 +15,11 @@ import com.barryzeha.ktmusicplayer.databinding.PlaylistItemBinding
  * Copyright (c)  All rights reserved.
  **/
 
-class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit, private val deletePlayList:(PlaylistEntity)->Unit):RecyclerView.Adapter<PlayListsAdapter.ViewHolder>() {
+class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
+                       private val deletePlaylistCallback:(PlaylistEntity)->Unit,
+                       private val editedNameCallback:(PlaylistEntity)->Unit):RecyclerView.Adapter<PlayListsAdapter.ViewHolder>() {
     private var playLists:MutableList<PlaylistEntity> = arrayListOf()
-
+    private var isEdit:Boolean = false
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.playlist_item,parent,false)
         return ViewHolder(itemView)
@@ -64,18 +66,42 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit, private v
             notifyItemRemoved(index)
         }
     }
+    private fun updateNameOfPlaylist(oldEntity: PlaylistEntity, newEntity:PlaylistEntity){
+        if(playLists.contains(oldEntity)){
+            val index = playLists.indexOf(oldEntity)
+            notifyItemChanged(index, ItemPlaylistChangePayload.playlistName(newEntity.playListName))
 
+        }
+    }
     inner class ViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
         private val bind = PlaylistItemBinding.bind(itemView)
         fun onBind(playList:PlaylistEntity)=with(bind){
-            tvPlaylistName.text=playList.playListName
+            edtPlaylistName.setText(playList.playListName)
             this.root.setOnClickListener { onItemClick(playList)}
             imbDelete.setOnClickListener {
-                deletePlayList(playList)
+                deletePlaylistCallback(playList)
+            }
+            imbEdit.setOnClickListener{
+
+                if(!isEdit) {
+                    imbEdit.setIconResource(com.barryzeha.mfilepicker.R.drawable.ic_check)
+                    edtPlaylistName.isFocusableInTouchMode=true
+                    edtPlaylistName.requestFocus()
+
+                    isEdit=true
+                }else{
+                    imbEdit.setIconResource(com.barryzeha.core.R.drawable.ic_edit)
+                    val playListsUpdated= playList.copy(playListName = edtPlaylistName.text.toString())
+                    updateNameOfPlaylist(playList,playListsUpdated)
+                    edtPlaylistName.isFocusableInTouchMode=false
+                    edtPlaylistName.clearFocus()
+                    editedNameCallback(playListsUpdated)
+                    isEdit = false
+                }
             }
         }
         fun setPlaylistName(name:String){
-            bind.tvPlaylistName.text = name
+            bind.edtPlaylistName.setText(name)
         }
     }
     private sealed interface ItemPlaylistChangePayload{

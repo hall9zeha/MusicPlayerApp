@@ -105,6 +105,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
         playlistDao.updatePlaylist(name, idPlaylist)
     }
 
+    override suspend fun updatePlaylist(playlistEntity: PlaylistEntity): Int = withContext(Dispatchers.IO){
+        playlistDao.updatePlaylist(playlistEntity)
+    }
+
     override suspend fun deletePlaylist(id: Long): Int = withContext(Dispatchers.IO) {
         playlistDao.deletePlaylist(id)
     }

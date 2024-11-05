@@ -26,6 +26,9 @@ interface PlaylistDAO {
   @Query("update PlaylistEntity set playListName =:name where idPlaylist =:idPlaylist")
   suspend fun updatePlaylist(name:String,idPlaylist:Long):Int
 
+  @Update
+  suspend fun updatePlaylist(playlistEntity: PlaylistEntity):Int
+
   @Query("delete from PlaylistEntity where idPlaylist =:id")
   suspend fun deletePlaylist(id:Long):Int
 

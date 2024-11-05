@@ -248,6 +248,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             repository.deletePlaylist(playlistEntity.idPlaylist)
         }
     }
+    fun updatePlaylist(playlistEntity: PlaylistEntity){
+        launch {
+            repository.updatePlaylist(playlistEntity)
+        }
+    }
     // Temporal values, not insert to database
     fun setCurrentPosition(position:Int){
         launch {

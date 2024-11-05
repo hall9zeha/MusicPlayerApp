@@ -41,6 +41,7 @@ interface MainRepository {
     //PlayList
     suspend fun createPlayList(playlistEntity:PlaylistEntity):Long
     suspend fun updatePlaylist(name:String, idPlaylist:Long):Int
+    suspend fun updatePlaylist(playlistEntity: PlaylistEntity):Int
     suspend fun deletePlaylist(id:Long):Int
     suspend fun deleteAllPlaylist(playlistEntities:List<PlaylistEntity>)
     suspend fun fetchPlaylistWithSongs():List<PlaylistWithSongs>
