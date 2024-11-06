@@ -562,10 +562,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             mPrefs.idSong = if(songStateSaved.isNotEmpty())songStateSaved[0].songEntity.id else currentMusicState.idSong
             findItemSongIndexById(mPrefs.idSong)?.let {
                 indexOfSong = it
-                setMusicStateSaved(songStateSaved[0])
+                withContext(Dispatchers.Main) {
+                    setMusicStateSaved(songStateSaved[0])
+                }
             }?:run{
                 indexOfSong = 0
-                setMusicForPlayer(songsList[0])
+                withContext(Dispatchers.Main) {
+                    setMusicForPlayer(songsList[0])
+                }
             }
             if(mPrefs.songMode == SHUFFLE)shuffleList()
             mPrefs.currentIndexSong = indexOfSong.toLong()
