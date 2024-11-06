@@ -191,7 +191,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             checkIfDiscCoverViewIsRotating(statePlay)
             isPlaying=statePlay
             if (statePlay) {
-                bind?.btnMainPlay?.setIconResource(com.barryzeha.core.R.drawable.ic_pause)
+                bind?.btnMainPlay?.setIconResource(com.barryzeha.core.R.drawable.ic_circle_pause)
             }else{
                 bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
             }
@@ -225,7 +225,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     override fun play() {
         super.play()
-        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_pause)
+        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
         musicPlayerService?.resumePlayer()
         mainViewModel.saveStatePlaying(true)
     }
@@ -421,7 +421,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
                         getSongOfList(currentSelectedPosition)?.let{song->
                             musicPlayerService?.startPlayer(song)
-                            btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
+                            btnMainPlay.setIconResource(coreRes.drawable.ic_circle_pause)
                         }
 
                     } else {
@@ -431,7 +431,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).pause()
 
                         } else {
-                            musicPlayerService?.resumePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_pause)
+                            musicPlayerService?.resumePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_circle_pause)
                             mainViewModel.saveStatePlaying(true)
                             if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).resume()
                         }

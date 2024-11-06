@@ -228,7 +228,7 @@
         app:icon="@drawable/ic_play"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
-        app:iconSize="58dp"
+        app:iconSize="64dp"
         app:iconTint="@color/controls_colors"
         android:insetBottom="0dp"
         android:insetLeft="0dp"
