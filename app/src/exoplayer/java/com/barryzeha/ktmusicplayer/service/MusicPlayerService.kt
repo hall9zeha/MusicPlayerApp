@@ -382,7 +382,8 @@ class MusicPlayerService : Service(){
         CoroutineScope(Dispatchers.Main).launch {
             // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
             // si no hay algo seleccionado previamente solo devolverá la lista por defecto
-            val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
+            //val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
+            val songs=repository.fetchPlaylistOrderBy(mPrefs.playlistId.toLong(), mPrefs.playListSortOption)
 
             songState=repository.fetchSongState()
             // TODO Revisar, no cargar toda la lista antes del estado de la canción

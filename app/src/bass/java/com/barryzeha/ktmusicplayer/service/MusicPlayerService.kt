@@ -21,7 +21,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -45,7 +44,6 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
-import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
@@ -71,6 +69,8 @@ import kotlin.system.exitProcess
 class MusicPlayerService : Service(),BassManager.PlaybackManager{
     @Inject
     lateinit var repository: MainRepository
+    @Inject
+    lateinit var mPrefs:MyPreferences
     @Inject
     lateinit var effectsPrefs:EffectsPreferences
 
@@ -98,7 +98,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
     private var musicState:MusicState?=null
-    private lateinit var mPrefs:MyPreferences
     private var songEntity:SongEntity=SongEntity()
 
     private var songState:List<SongStateWithDetail> = arrayListOf()
@@ -117,7 +116,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         bassManager = BassManager()
         bassManager?.getInstance(this)
 
-        mPrefs = MyApp.mPrefs
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mPrefs.firstExecution=true
@@ -136,12 +134,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 if(action != null && action == Intent.ACTION_HEADSET_PLUG){
                     val state = intent.getIntExtra("state",-1)
                     if(state==0){
-                        if(mPrefs.isPlaying) {
-                            mPrefs.isPlaying=false
+                        if(playingState()) {
+                            setPlayingState(false)
                             bassManager?.channelPause()
                             _songController?.let{controller->
                                 controller.pause()
-                                controller.musicState(currentMusicState.copy(isPlaying = mPrefs.isPlaying))
+                                controller.musicState(currentMusicState.copy(isPlaying = playingState()))
                             }?:run{
                                 mPrefs.nextOrPrevFromNotify = true
                                 mPrefs.controlFromNotify = true
@@ -171,8 +169,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                             // En android >=12 esta parte del código detecta cuando el dispositivo
                             // bluetooth está apagado
-                            if (mPrefs.isPlaying) {
-                                mPrefs.isPlaying = false
+                            if (playingState()) {
+                                setPlayingState(false)
                                 bassManager?.channelPause()
                                 _songController?.let{controller->
                                     controller.pause()
@@ -190,8 +188,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                 BluetoothAdapter.STATE_OFF -> {
                                     Log.d("BLUETOOTH_STATE", "Bluetooth disconnected")
                                     // Logica cuando se desconecta el Bluetooth
-                                    if (mPrefs.isPlaying) {
-                                        mPrefs.isPlaying = false
+                                    if (playingState()) {
+                                        setPlayingState(false)
                                         bassManager?.channelPause()
                                         _songController?.let{controller->
                                             controller.pause()
@@ -261,7 +259,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         songRunnable = Runnable {
             if(bassManager?.getActiveChannel() != 0) {
                 currentMusicState = currentMusicState.copy(
-                    isPlaying = mPrefs.isPlaying,
+                    isPlaying = playingState(),
                     currentDuration = bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0,
                     duration = bassManager?.getDuration(bassManager?.getActiveChannel()!!)?:0,
                     latestPlayed = false
@@ -328,7 +326,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
             override fun onPause() {
                 super.onPause()
-                mPrefs.isPlaying=false
+                setPlayingState(false)
                 if(_songController !=null)_songController?.pause()
                 else pausePlayer()
                 checkIfPhoneIsLock()
@@ -354,7 +352,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             override fun onCustomAction(action: String, extras: Bundle?) {
                 if(ACTION_CLOSE == action){
-                    mPrefs.isPlaying=false
+                    setPlayingState(false)
                     pausePlayer()
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(1000)
@@ -378,7 +376,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
-                mPrefs.isPlaying=false
+                setPlayingState(false)
                 if(_songController != null) _songController?.pause()
                 else pausePlayer()
                 checkIfPhoneIsLock()
@@ -524,7 +522,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {
-            return songsList.indexOfFirst{it.id == idSong}
+            val index = songsList.indexOfFirst{it.id == idSong}
+            return  if(index>-1) index else  null
         }
         return null
     }
@@ -559,22 +558,25 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             // Volvemos a obtener la posición de la pista en
             // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
+            val songStateSaved = repository.fetchSongState()
+            mPrefs.idSong = if(songStateSaved.isNotEmpty())songStateSaved[0].songEntity.id else currentMusicState.idSong
             findItemSongIndexById(mPrefs.idSong)?.let {
                 indexOfSong = it
+                setMusicStateSaved(songStateSaved[0])
             }?:run{
                 indexOfSong = 0
+                setMusicForPlayer(songsList[0])
             }
             if(mPrefs.songMode == SHUFFLE)shuffleList()
             mPrefs.currentIndexSong = indexOfSong.toLong()
-            //TODO: implementar si la canción existe en la nueva playlist que se cargue entonces enviar sus datos a la UI
-            // sino mover a la posición cero
+
         }
     }
     fun clearPlayList(isSort:Boolean){
         songsList.clear()
-        // Cuando no es para ordenar la lista será para eliminar
+        // Cuando no es para ordenar la lista por(artista, álbum, género) será para eliminar y cargar una nueva lista de reproducción
         if(!isSort){
-            mPrefs.isPlaying=false
+            setPlayingState(false)
             _songController?.currentTrack(MusicState())
             bassManager?.setSongStateSaved(0,0)
             bassManager?.clearBassChannel()
@@ -592,9 +594,15 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             mPrefs.controlFromNotify = true
         }
     }
+    private fun playingState():Boolean{
+        return mPrefs.isPlaying
+    }
+    private fun setPlayingState(state:Boolean){
+        mPrefs.isPlaying=state
+    }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
-            if(mPrefs.isPlaying){songHandler.post(songRunnable)}
+            if(playingState()){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información  de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
@@ -618,10 +626,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     bassManager?.channelPlay(currentSongPosition)
                     bassManager?.startCheckingPlayback()
 
-                    mPrefs.isPlaying = true
+                    setPlayingState(true)
                     mPrefs.idSong = songEntity.id
                     currentMusicState = fetchSong(songEntity)?.copy(
-                        isPlaying = mPrefs.isPlaying,
+                        isPlaying = playingState(),
                         idSong = songEntity.id,
                         latestPlayed = false,
                         nextOrPrev = nextOrPrevAnimValue
@@ -642,7 +650,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
     }
     fun pausePlayer(){
-        mPrefs.isPlaying = false
+        setPlayingState(false)
         currentSongPosition=bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0
         bassManager?.channelPause()
         bassManager?.stopCheckingPlayback()
@@ -758,7 +766,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                )
 
            }
-           mPrefs.isPlaying = false
+           setPlayingState(false)
            currentSongPosition = songState.songState.currentPosition
            bassManager?.streamCreateFile(songState.songEntity)
            bassManager?.setSongStateSaved(
@@ -782,7 +790,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!
         return MusicState(
             idSong = song.id,
-            isPlaying = mPrefs.isPlaying,
+            isPlaying = playingState(),
             title = songMetadata.title,
             artist = songMetadata.artist,
             album = songMetadata.album,
@@ -799,7 +807,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(indexOfSong<songsList.size -1 && songsList.isNotEmpty()){
             when(mPrefs.songMode){
                 REPEAT_ONE-> {
-                    if (mPrefs.isPlaying) {
+                    if (playingState()) {
                         bassManager?.repeatSong()
                     }
                 }
@@ -809,7 +817,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     play(songsList[indexOfSong])
                 }*/
                 else->{
-                    if(mPrefs.isPlaying)nextSong()
+                    if(playingState())nextSong()
                 }
             }
 
@@ -817,7 +825,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}
                 REPEAT_ONE-> {
-                    if (mPrefs.isPlaying) {
+                    if (playingState()) {
                         bassManager?.repeatSong()
                     }
                 }

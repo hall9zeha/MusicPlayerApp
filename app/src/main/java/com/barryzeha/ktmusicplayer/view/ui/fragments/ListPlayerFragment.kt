@@ -12,9 +12,9 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -343,25 +343,37 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun resizeBottomSheet(isIncrement:Boolean){
-        if(btmSheetIsExpanded){
-            val behavior= BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
-            val itemCount= playListAdapter?.itemCount!!
-            val bottomSheetHeight = bind?.bottomSheetView?.rvPlaylists?.height!!
-            val rvPlaylistHeight = bind?.bottomSheetView?.rvPlaylists?.height!!
-            val paddingTop = bind?.bottomSheetView?.rvPlaylists?.paddingTop!! * itemCount
-            val paddingBottom = bind?.bottomSheetView?.rvPlaylists?.paddingBottom!!  * itemCount
-            val totalHeight: Int
-            if(isIncrement){totalHeight = bottomSheetHeight + (bottomSheetHeight - rvPlaylistHeight) + paddingBottom  + paddingTop}
-            else{totalHeight = (paddingBottom / itemCount -1 )  - (paddingTop/itemCount -1) - 60}
-            // Ajusta el tamaño del BottomSheet
-            val layoutParams = bind?.bottomSheetView?.listsBottomSheet?.layoutParams
-            layoutParams?.height = totalHeight
-            bind?.bottomSheetView?.listsBottomSheet?.layoutParams = layoutParams
+        if (btmSheetIsExpanded) {
+            val behavior = BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
+            val itemCount = playListAdapter?.itemCount ?: 0
 
-            // Redibuja el BottomSheet
-            bind?.bottomSheetView?.listsBottomSheet?.requestLayout()
-            bind?.bottomSheetView?.listsBottomSheet?.invalidate()
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            if (itemCount > 0) {
+                // Obtener la altura de un solo item en el RecyclerView
+                var itemHeight = bind?.bottomSheetView?.rvPlaylists?.getChildAt(0)?.height ?: 0
+                val recyclerViewHeight = bind?.bottomSheetView?.rvPlaylists?.height ?: 0
+
+                // Cálculo para el padding
+                val paddingTop = bind?.bottomSheetView?.rvPlaylists?.paddingTop ?: 0
+                val paddingBottom = bind?.bottomSheetView?.rvPlaylists?.paddingBottom ?: 0
+                itemHeight += paddingTop
+
+                // Calcula la altura total de acuerdo a la cantidad de elementos en la lista
+                val totalHeight: Int = if (itemCount > 0) {
+                    // Multiplica la altura del item por la cantidad de items
+                    (itemHeight * itemCount) + paddingTop + paddingBottom
+                } else {
+                    recyclerViewHeight // Si no hay items, usar la altura del RecyclerView
+                }
+
+                // Ajusta la altura del BottomSheet
+                val layoutParams = bind?.bottomSheetView?.listsBottomSheet?.layoutParams
+                layoutParams?.height = totalHeight
+
+                // Actualiza el estado del BottomSheet
+                behavior.peekHeight = 0 // Esta es la altura del BottomSheet cuando está minimizado
+                behavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
     }
 
@@ -434,9 +446,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         this?.let {
             tvPlayListName.setOnClickListener{
-
                 if(btmSheetIsExpanded) bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
-                else bottomSheetBehavior.state=BottomSheetBehavior.STATE_EXPANDED
+                else {bottomSheetBehavior.state=BottomSheetBehavior.STATE_EXPANDED
+                    CoroutineScope(Dispatchers.Main).launch {
+                        delay(500)
+                        resizeBottomSheet(isIncrement = true)
+                    }
+                }
             }
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
