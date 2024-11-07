@@ -199,7 +199,9 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
 fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
                     deleteItemCallback:()->Unit,
                     deleteAllItemsCallback:()->Unit,
-                    sendToPlaylistCallback:()->Unit){
+                    sendToPlaylistCallback:()->Unit,
+                    addToFavoriteCallback:()->Unit
+                    ){
 
     val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
     createPopUpWindow(popupView,view,activity){popupWindow->
@@ -220,6 +222,10 @@ fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
         }
         popupView.btnSendToList.setOnClickListener {
             sendToPlaylistCallback()
+            popupWindow.dismiss()
+        }
+        popupView.btnAddToFavorite.setOnClickListener {
+            addToFavoriteCallback()
             popupWindow.dismiss()
         }
     }

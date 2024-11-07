@@ -587,11 +587,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun unregisterController(){
         _songController=null
     }
-    private fun checkIfPhoneIsLock(){
+    private fun checkIfPhoneIsLock():Boolean{
         if(_songController==null){
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
         }
+        return _songController==null
     }
     private fun playingState():Boolean{
         return mPrefs.isPlaying
@@ -775,7 +776,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
            findItemSongIndexById(songState.songEntity.id)?.let {
                indexOfSong = it
            }
-           _songController?.currentTrack(currentMusicState)
+           if(!checkIfPhoneIsLock()){_songController?.currentTrack(currentMusicState)}
            // Al cargar la información de una pista guardada
            // se ejecutaba una primera vez el evento currentTRack de la interface
            // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true

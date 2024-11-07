@@ -22,6 +22,7 @@
     <string name="delete_all">Delete list</string>
     <string name="delete_song">Remove from list</string>
     <string name="sendToList">Send to playlist</string>
+    <string name="addToFavorite">Add to favorites</string>
     <string name="delete_all_msg">Really wants to remove the entire list?</string>
     <string name="order_list_by">Order list by</string>
     <string name="addPlayList">Create new playlist</string>

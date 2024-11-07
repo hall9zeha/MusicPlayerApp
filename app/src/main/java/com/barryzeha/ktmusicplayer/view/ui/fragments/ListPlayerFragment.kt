@@ -656,7 +656,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     // Delete all items callback
                     listAdapter?.removeAll()
                     mainViewModel.deleteAllSongs()
-                },{})
+                },{},{})
             }
             bottomSheetView.btnAdd.setOnClickListener{
                 createNewPlayListDialog(requireActivity()){playlistName ->
@@ -862,6 +862,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 idSongForSendToPlaylist = selectedSong.id
             }
+        },{
+            mainViewModel.updateSong(selectedSong.copy(favorite = true))
         })
 
     }
