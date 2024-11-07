@@ -21,7 +21,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
-import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -407,7 +406,7 @@ class MusicPlayerService : Service(){
             }
             if(!songState.isNullOrEmpty()) {
                 val songEntity=songState[0].songEntity
-                if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
+                if(songsList.contains(songEntity))setSongStateSaved(songState[0])
 
             }
             setUpExoplayerListener()
@@ -806,7 +805,7 @@ class MusicPlayerService : Service(){
 
         }
     }
-    private fun setMusicStateSaved(songState: SongStateWithDetail){
+    private fun setSongStateSaved(songState: SongStateWithDetail){
 
         val song=songState.songEntity
         songEntity = song

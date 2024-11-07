@@ -159,7 +159,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
             if(it){
+                CoroutineScope(Dispatchers.IO).launch{
                 initCheckPermission()
+                }
             }
         }
     }

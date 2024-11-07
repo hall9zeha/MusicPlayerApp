@@ -249,7 +249,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             if(!songState.isNullOrEmpty()) {
                 val songEntity=songState[0].songEntity
-                if(songsList.contains(songEntity))setMusicStateSaved(songState[0])
+                if(songsList.contains(songEntity))setSongStateSaved(songState[0])
             }
 
         }
@@ -558,7 +558,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             // Volvemos a obtener la posición de la pista en
             // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
-
             findItemSongIndexById(mPrefs.idSong)?.let {
                 indexOfSong = it
             }?:run{
@@ -746,14 +745,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private fun setMusicForPlayer(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
         val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
         mPrefs.idSong = song.id
-        setMusicStateSaved(songState, animDirection)
+        setSongStateSaved(songState, animDirection)
 
     }
     fun setPlayerProgress(progress:Long){
        bassManager?.setChannelProgress(progress){currentSongPosition=it}
     }
 
-    private fun setMusicStateSaved(songState: SongStateWithDetail,animDirection:Int= DEFAULT_DIRECTION){
+    private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
 
            val song = songState.songEntity
            songEntity = song
