@@ -558,13 +558,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             // Volvemos a obtener la posición de la pista en
             // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
-            val songStateSaved = repository.fetchSongState()
-            mPrefs.idSong = if(songStateSaved.isNotEmpty())songStateSaved[0].songEntity.id else currentMusicState.idSong
+
             findItemSongIndexById(mPrefs.idSong)?.let {
                 indexOfSong = it
-                withContext(Dispatchers.Main) {
-                    setMusicStateSaved(songStateSaved[0])
-                }
             }?:run{
                 indexOfSong = 0
                 withContext(Dispatchers.Main) {
