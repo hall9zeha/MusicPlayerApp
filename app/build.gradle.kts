@@ -95,9 +95,10 @@ dependencies {
     implementation(libs.gson)
     // Fast scroll
     implementation(libs.fast.scroll)
-    //
+    // Disc cover view
     implementation(libs.disc.cover.view)
-
+    // Splash screen
+    implementation(libs.core.splashscreen)
     // Modules
     implementation(project(":core"))
     implementation(project(":data"))

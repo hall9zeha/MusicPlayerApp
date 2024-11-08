@@ -201,7 +201,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             // Al eliminar un item
             mainViewModel.deletePlayList(playlist)
             playListAdapter?.remove(playlist)
-            resizeBottomSheet(isIncrement = false)
+            resizeBottomSheet()
 
         },{playlist->
             // Cambiar nombre de una playlist
@@ -329,7 +329,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
             playListAdapter?.let{
                 it.addAll(playLists)
-                resizeBottomSheet(isIncrement = true)
+                resizeBottomSheet()
             }
         }
         mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner){insertedRow->
@@ -344,14 +344,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
-    private fun resizeBottomSheet(isIncrement:Boolean){
+    private fun resizeBottomSheet(){
         if (btmSheetIsExpanded) {
             val behavior = BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
             val itemCount = playListAdapter?.itemCount ?: 0
 
             if (itemCount > 0) {
                 // Obtener la altura de un solo item en el RecyclerView
-                var itemHeight = bind?.bottomSheetView?.rvPlaylists?.getChildAt(0)?.height ?: 0
+                var itemHeight = bind?.bottomSheetView?.rvPlaylists?.getChildAt(0)?.height?.plus(24) ?: 0
                 val recyclerViewHeight = bind?.bottomSheetView?.rvPlaylists?.height ?: 0
 
                 // Cálculo para el padding
@@ -373,7 +373,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
                 // Actualiza el estado del BottomSheet
                 behavior.peekHeight = 0 // Esta es la altura del BottomSheet cuando está minimizado
-                behavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
@@ -452,7 +451,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 else {bottomSheetBehavior.state=BottomSheetBehavior.STATE_EXPANDED
                     CoroutineScope(Dispatchers.Main).launch {
                         delay(500)
-                        resizeBottomSheet(isIncrement = true)
+                        resizeBottomSheet()
                     }
                 }
             }
