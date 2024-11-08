@@ -60,4 +60,9 @@
         <item name="cornerFamilyTopRight">rounded</item>
         <item name="cornerSize">10%</item>
     </style>
+
+    <style name="myFullScreenDialog" parent="ShapeAppearanceOverlay.MaterialComponents.MaterialCalendar.Window.Fullscreen">
+        <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
+        <!--<item name="android:theme">@style/myToolbarDrawerStyle</item>-->
+    </style>
 </resources>

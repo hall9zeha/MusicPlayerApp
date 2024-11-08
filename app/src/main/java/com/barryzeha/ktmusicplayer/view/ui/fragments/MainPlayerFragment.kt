@@ -39,6 +39,7 @@ import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
+import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.library.components.DiscCoverView
 import dagger.hilt.android.AndroidEntryPoint
@@ -556,10 +557,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }
+            btnInfo.setOnClickListener{
+                SongInfoDialogFragment().show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
+            }
         }
-
     }
-
     private fun fastForwardOrRewind(isForward:Boolean){
         fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
         forwardOrRewindRunnable = Runnable{
