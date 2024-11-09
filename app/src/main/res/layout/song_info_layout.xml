@@ -91,6 +91,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtTitle"
@@ -111,6 +112,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
         >
        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtArtist"
@@ -130,6 +132,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtAlbum"
@@ -149,6 +152,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtGenre"
@@ -168,6 +172,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtYear"
