@@ -1,27 +1,17 @@
 package com.barryzeha.ktmusicplayer.view.ui.dialog
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
-import android.text.Layout.Alignment
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.ActionBar
-import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
 import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Lifecycle
+import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
 import com.barryzeha.core.common.mColorList
-import com.barryzeha.ktmusicplayer.R
-import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
+import dagger.hilt.android.AndroidEntryPoint
+import com.barryzeha.core.R as coreRes
 
 
 /**
@@ -29,11 +19,12 @@ import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
  * Created by Barry Zea H. on 8/11/24.
  * Copyright (c)  All rights reserved.
  **/
-
+@AndroidEntryPoint
 class SongInfoDialogFragment : DialogFragment() {
     private var _bind: SongInfoLayoutBinding? = null
     private val bind: SongInfoLayoutBinding get() = _bind!!
     private var isEditing: Boolean = false
+    private var idSong:Long=-1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,8 +63,14 @@ class SongInfoDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupMenuProvider()
+        getIntentExtras()
     }
+    private fun getIntentExtras(){
+        arguments?.let{
+            idSong= it.getLong(SONG_INFO_EXTRA_KEY)
 
+        }
+    }
     private fun setupMenuProvider() {
         //TODO Al usar android.widget.Toolbar nos infla el menú pero sin íconos
         // Por el momento androidx.appcompat.widget.Toolbar nos permite usar este tipo de configuración
@@ -111,4 +108,13 @@ class SongInfoDialogFragment : DialogFragment() {
 
        },viewLifecycleOwner, Lifecycle.State.RESUMED)*/
     }
+    companion object{
+        @JvmStatic
+        fun newInstance(idSongParam:Long)=SongInfoDialogFragment().apply {
+            arguments = Bundle().apply {
+                putLong(SONG_INFO_EXTRA_KEY,idSongParam)
+            }
+        }
+    }
+
 }

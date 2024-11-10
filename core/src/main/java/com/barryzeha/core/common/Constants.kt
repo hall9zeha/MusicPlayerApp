@@ -24,6 +24,8 @@ const val MUSIC_PLAYER_SESSION = "MusicPlayerSessionService"
 const val HOME_PLAYER = "homePlayer"
 const val LIST_PLAYER = "listPlayer"
 const val SETTINGS = "settings"
+const val SONG_INFO_EXTRA_KEY = "songInfoExtraKey"
+
 // Song mode
 const val REPEAT_ALL = 0
 const val REPEAT_ONE = 1
