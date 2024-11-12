@@ -200,7 +200,8 @@ fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
                     deleteItemCallback:()->Unit,
                     deleteAllItemsCallback:()->Unit,
                     sendToPlaylistCallback:()->Unit,
-                    addToFavoriteCallback:()->Unit
+                    addToFavoriteCallback:()->Unit,
+                    songInfoCallback:()->Unit
                     ){
 
     val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
@@ -226,6 +227,10 @@ fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
         }
         popupView.btnAddToFavorite.setOnClickListener {
             addToFavoriteCallback()
+            popupWindow.dismiss()
+        }
+        popupView.btnInfo.setOnClickListener {
+            songInfoCallback()
             popupWindow.dismiss()
         }
     }

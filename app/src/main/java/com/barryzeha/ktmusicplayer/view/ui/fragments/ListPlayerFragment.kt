@@ -60,6 +60,7 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
+import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -655,7 +656,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     // Delete all items callback
                     listAdapter?.removeAll()
                     mainViewModel.deleteAllSongs()
-                },{},{})
+                },{},{},{
+                    SongInfoDialogFragment.newInstance(currentMusicState.songPath).show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
+                })
             }
             bottomSheetView.btnAdd.setOnClickListener{
                 createNewPlayListDialog(requireActivity()){playlistName ->
@@ -863,6 +866,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         },{
             mainViewModel.updateSong(selectedSong.copy(favorite = true))
+        },{
+            SongInfoDialogFragment.newInstance(selectedSong.pathLocation.toString()).show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
         })
 
     }

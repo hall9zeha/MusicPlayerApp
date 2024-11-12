@@ -26,6 +26,7 @@
     <string name="delete_song">Quitar de la lista</string>
     <string name="addToFavorite">Agregar a favoritos</string>
     <string name="sendToList">Enviar a lista de reproducción</string>
+    <string name="songInfo">Información del archivo</string>
     <string name="delete_all_msg">Realmente quiere eliminar toda la lista?</string>
     <string name="order_list_by">Ordenar lista por</string>
     <string name="addPlayList">Crear lista de reproducción</string>

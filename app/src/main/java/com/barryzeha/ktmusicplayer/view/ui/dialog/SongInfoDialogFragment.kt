@@ -1,10 +1,14 @@
 package com.barryzeha.ktmusicplayer.view.ui.dialog
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
 import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
@@ -15,6 +19,9 @@ import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
 import dagger.hilt.android.AndroidEntryPoint
+import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.tag.FieldKey
+import java.io.File
 import com.barryzeha.core.R as coreRes
 
 
@@ -30,6 +37,16 @@ class SongInfoDialogFragment : DialogFragment() {
     private var isEditing: Boolean = false
     private var idSong:Long=-1
     private var pathFile:String?=null
+    private val getImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()){uri: Uri?->
+            uri?.let{
+                val galleryUri=it
+                try{
+                    bind.ivSongDetail.loadImage(getPathFromUri(galleryUri)!!)
+                }catch(ex:Exception){
+                    ex.printStackTrace()
+                }
+            }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +86,7 @@ class SongInfoDialogFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         setupMenuProvider()
         getIntentExtras()
+        setupListeners()
     }
     private fun getIntentExtras(){
         arguments?.let{
@@ -82,7 +100,7 @@ class SongInfoDialogFragment : DialogFragment() {
         edtAlbum.isFocusableInTouchMode=isEnable
         edtGenre.isFocusableInTouchMode=isEnable
         edtYear.isFocusableInTouchMode=isEnable
-
+        ivSongDetail.isEnabled = isEnable
 
         /*edtTitle.isEnabled=isEnable
         edtArtist.isEnabled=isEnable
@@ -95,9 +113,13 @@ class SongInfoDialogFragment : DialogFragment() {
             edtAlbum.clearFocus()
             edtGenre.clearFocus()
             edtYear.clearFocus()
-
         }
 
+    }
+    private fun setupListeners()=with(bind){
+        ivSongDetail.setOnClickListener {
+            getImageLauncher.launch("image/*")
+        }
     }
     private fun setFileInfo(filePath:String?)=with(bind){
         enableViews(false)
@@ -138,6 +160,7 @@ class SongInfoDialogFragment : DialogFragment() {
                 coreRes.id.itemSave->{
                     menu[0].setVisible(true)
                     menu[1].setVisible(false)
+                    pathFile?.let{editAudioFileMetadata(it)}
                     isEditing = false
                     enableViews(false)
                 }
@@ -158,6 +181,36 @@ class SongInfoDialogFragment : DialogFragment() {
            }
 
        },viewLifecycleOwner, Lifecycle.State.RESUMED)*/
+    }
+    private fun editAudioFileMetadata(filePath: String?){
+        //TODO, implementar el guardado de metadatos del archivo, aún no funciona
+        filePath?.let{
+            try{
+                val audioFile = AudioFileIO.read(File(filePath))
+                val tag =audioFile.tag
+
+                tag.setField(FieldKey.TITLE,bind.edtTitle.text.toString())
+                tag.setField(FieldKey.ARTIST,bind.edtArtist.text.toString())
+                tag.setField(FieldKey.ALBUM,bind.edtAlbum.text.toString())
+                tag.setField(FieldKey.GENRE,bind.edtGenre.text.toString())
+                tag.setField(FieldKey.YEAR,bind.edtYear.text.toString())
+                audioFile.tag = tag
+                AudioFileIO.write(audioFile)
+
+            }catch(ex:Exception){
+                ex.printStackTrace()
+                Log.e("EDIT-TAG-ERROR", "${ex.message}")
+            }
+        }
+
+    }
+    private fun getPathFromUri(uri: Uri): String? {
+        val cursor = activity?.contentResolver?.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
+        cursor?.moveToFirst()
+        val columnIndex = cursor?.getColumnIndex(MediaStore.Images.Media.DATA)
+        val filePath = columnIndex?.let { cursor.getString(it) }
+        cursor?.close()
+        return filePath
     }
     companion object{
         @JvmStatic

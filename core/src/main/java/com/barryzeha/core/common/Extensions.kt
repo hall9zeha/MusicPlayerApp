@@ -53,7 +53,7 @@ fun ImageView.loadImage(bitmap:Bitmap, animDirection:Int=-1) {
     }
     Glide.with(this.context)
         .load(bitmap)
-        .fitCenter()
+        .centerCrop()
         .into(this)
     this.translationX = direction * width // Coloca fuera de la pantalla
     this.animate()
@@ -67,7 +67,13 @@ fun ImageView.loadImage(bitmap:Bitmap, animDirection:Int=-1) {
 fun ImageView.loadImage(resource:Int)=
     Glide.with(this.context)
         .load(resource)
-        .fitCenter()
+        .centerCrop()
+        .placeholder(R.drawable.placeholder_cover)
+        .into(this)
+fun ImageView.loadImage(url:String)=
+    Glide.with(this.context)
+        .load(url)
+        .centerCrop()
         .placeholder(R.drawable.placeholder_cover)
         .into(this)
 fun Int.adjustAlpha(factor: Float): Int =
