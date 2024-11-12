@@ -19,42 +19,15 @@
 
 
     </com.google.android.material.appbar.AppBarLayout>
-   <!-- <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/ic_arrow_back"
-
-        style="@style/ShapeAppearanceOverlay.MyApp.Button.Circle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tvHeader"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="File information"
-        android:gravity="center"
-        app:layout_constraintStart_toEndOf="@id/btnBack"
-        app:layout_constraintEnd_toStartOf="@id/btnEdit"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="8dp"
-        />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnEdit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/ic_edit"
-        style="@style/ShapeAppearanceOverlay.MyApp.Button.Circle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />-->
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivSongDetail"
         android:layout_width="160dp"
         android:layout_height="160dp"
         android:src="@mipmap/ic_launcher"
+        android:foreground="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true"
         app:shapeAppearanceOverlay="@style/imageViewCornerStyle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbarInfoLayout"
@@ -95,10 +68,11 @@
             android:text="FLAC"
             />
     </LinearLayout>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilTitle"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
 
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
         app:layout_constraintTop_toBottomOf="@id/ivSongDetail"
@@ -120,7 +94,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilArtist"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
 
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
         app:layout_constraintTop_toBottomOf="@id/tilTitle"
@@ -140,7 +114,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilAlbum"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
 
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
         app:layout_constraintTop_toBottomOf="@id/tilArtist"
@@ -160,7 +134,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilGenre"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
 
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
         app:layout_constraintTop_toBottomOf="@id/tilAlbum"
@@ -180,7 +154,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilYear"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
 
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
         app:layout_constraintTop_toBottomOf="@id/tilGenre"
@@ -197,4 +171,5 @@
             android:hint="Year" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

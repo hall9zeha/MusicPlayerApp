@@ -20,6 +20,7 @@
     <string name="artist">Artista</string>
     <string name="genre">Género</string>
     <string name="favorite">Fovoritos</string>
+    <string name="file_meta_info">%s Kbps, %s, %s</string>
     <string name="soundEffects">Efectos de sonido</string>
     <string name="delete_all">Eliminar  lista</string>
     <string name="delete_song">Quitar de la lista</string>

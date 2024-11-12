@@ -24,6 +24,7 @@ data class AudioMetadata(
     val bitRate:String?="",
     val songLengthFormatted:String?="",
     val songLength:Long=0,
-    val format:String?=""
-
+    val format:String?="",
+    val freq:String?="",
+    val fileSize:String?="",
 )

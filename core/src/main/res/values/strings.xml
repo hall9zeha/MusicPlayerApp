@@ -18,6 +18,7 @@
     <string name="artist">Artist</string>
     <string name="genre">Genre</string>
     <string name="favorite">Favorite</string>
+    <string name="file_meta_info">%s Kbps, %s, %s</string>
     <string name="soundEffects">Sound effects</string>
     <string name="delete_all">Delete list</string>
     <string name="delete_song">Remove from list</string>

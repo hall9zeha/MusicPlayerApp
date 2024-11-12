@@ -8,6 +8,10 @@ import android.view.ViewGroup
 import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
 import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
+import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.fetchFileMetadata
+import com.barryzeha.core.common.getSongMetadata
+import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,6 +29,7 @@ class SongInfoDialogFragment : DialogFragment() {
     private val bind: SongInfoLayoutBinding get() = _bind!!
     private var isEditing: Boolean = false
     private var idSong:Long=-1
+    private var pathFile:String?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +72,52 @@ class SongInfoDialogFragment : DialogFragment() {
     }
     private fun getIntentExtras(){
         arguments?.let{
-            idSong= it.getLong(SONG_INFO_EXTRA_KEY)
+            pathFile= it.getString(SONG_INFO_EXTRA_KEY)
+            setFileInfo(pathFile)
+        }
+    }
+    private fun enableViews(isEnable:Boolean)=with(bind){
+        edtTitle.isFocusableInTouchMode=isEnable
+        edtArtist.isFocusableInTouchMode=isEnable
+        edtAlbum.isFocusableInTouchMode=isEnable
+        edtGenre.isFocusableInTouchMode=isEnable
+        edtYear.isFocusableInTouchMode=isEnable
 
+
+        /*edtTitle.isEnabled=isEnable
+        edtArtist.isEnabled=isEnable
+        edtAlbum.isEnabled=isEnable
+        edtGenre.isEnabled=isEnable
+        edtYear.isEnabled=isEnable*/
+        if(!isEnable){
+            edtTitle.clearFocus()
+            edtArtist.clearFocus()
+            edtAlbum.clearFocus()
+            edtGenre.clearFocus()
+            edtYear.clearFocus()
+
+        }
+
+    }
+    private fun setFileInfo(filePath:String?)=with(bind){
+        enableViews(false)
+        filePath?.let {
+            val metadata = fetchFileMetadata(requireContext(),filePath)
+            val songInfo = getSongMetadata(requireContext(),filePath)
+            metadata?.let{meta->
+                toolbarInfo.subtitle=meta.title
+                songInfo?.let { ivSongDetail.loadImage(songInfo.albumArt) }
+                tvDuration.text = createTime(meta.songLength).third
+                tvBitrate.text=getString(coreRes.string.file_meta_info,meta.bitRate,meta.freq,"Stereo")
+                tvSizeFile.text=meta.fileSize
+                tvFileFormat.text=meta.format
+                edtTitle.setText(meta.title)
+                edtArtist.setText(meta.artist)
+                edtAlbum.setText(meta.album)
+                edtGenre.setText(meta.genre)
+                edtYear.setText(meta.year)
+
+            }
         }
     }
     private fun setupMenuProvider() {
@@ -84,11 +133,13 @@ class SongInfoDialogFragment : DialogFragment() {
                     menu[0].setVisible(false)
                     menu[1].setVisible(true)
                     isEditing = true
+                    enableViews(true)
                 }
                 coreRes.id.itemSave->{
                     menu[0].setVisible(true)
                     menu[1].setVisible(false)
                     isEditing = false
+                    enableViews(false)
                 }
             }
             true
@@ -110,9 +161,9 @@ class SongInfoDialogFragment : DialogFragment() {
     }
     companion object{
         @JvmStatic
-        fun newInstance(idSongParam:Long)=SongInfoDialogFragment().apply {
+        fun newInstance(filePath:String)=SongInfoDialogFragment().apply {
             arguments = Bundle().apply {
-                putLong(SONG_INFO_EXTRA_KEY,idSongParam)
+                putString(SONG_INFO_EXTRA_KEY,filePath)
             }
         }
     }

@@ -107,6 +107,10 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
         val songLengthFormatted = try { getTimeOfSong(songLength) } catch (ex: Exception) { "0" }
         val format = try { metadata.audioHeader.format } catch (ex: Exception) { "unknown" }
 
+        val sampleRate = try {metadata.audioHeader.sampleRate}catch(ex:Exception){0}
+        val fileSizeBytes = File(pathFile).length()
+        val fileSizeFormatted = formatFileSize(fileSizeBytes)
+
         return AudioMetadata(
             artist = artist,
             album = album,
@@ -121,12 +125,21 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
             bitRate = bitRate,
             songLengthFormatted = songLengthFormatted,
             songLength = songLength,
-            format = format
+            format = format,
+            freq = sampleRate.toString(),
+            fileSize = fileSizeFormatted
             //coverArt = bitmapCoverArt
         )
 
     }
      return null
+}
+fun formatFileSize(bytes: Long): String {
+    return when {
+        bytes >= 1_000_000 -> String.format("%.2f MB", bytes / 1_000_000.0)
+        bytes >= 1_000 -> String.format("%.2f KB", bytes / 1_000.0)
+        else -> "$bytes Bytes"
+    }
 }
 fun fetchFileMetadata(pathFile:String):AudioMetadata?{
     val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}

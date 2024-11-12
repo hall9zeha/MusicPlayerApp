@@ -558,7 +558,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }
             btnInfo.setOnClickListener{
-                SongInfoDialogFragment.newInstance(currentMusicState.idSong)
+                SongInfoDialogFragment.newInstance(currentMusicState.songPath)
                     .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
             }
         }
