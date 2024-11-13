@@ -790,6 +790,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }else{
             mutableListOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.BLUETOOTH_CONNECT)
         }

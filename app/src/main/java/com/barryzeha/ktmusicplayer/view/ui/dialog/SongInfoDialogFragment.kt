@@ -1,6 +1,9 @@
 package com.barryzeha.ktmusicplayer.view.ui.dialog
 
 import android.annotation.SuppressLint
+import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -8,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.get
 import androidx.fragment.app.DialogFragment
@@ -19,9 +23,15 @@ import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
 import dagger.hilt.android.AndroidEntryPoint
+import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
+import org.jaudiotagger.tag.Tag
+import org.jaudiotagger.tag.id3.ID3v24Tag
+import org.jaudiotagger.tag.images.ArtworkFactory
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import com.barryzeha.core.R as coreRes
 
 
@@ -37,11 +47,13 @@ class SongInfoDialogFragment : DialogFragment() {
     private var isEditing: Boolean = false
     private var idSong:Long=-1
     private var pathFile:String?=null
+    private var imagePath:String?=null
     private val getImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()){uri: Uri?->
             uri?.let{
                 val galleryUri=it
                 try{
-                    bind.ivSongDetail.loadImage(getPathFromUri(galleryUri)!!)
+                    imagePath = getPathFromUri(galleryUri)
+                    bind.ivSongDetail.loadImage(imagePath!!)
                 }catch(ex:Exception){
                     ex.printStackTrace()
                 }
@@ -183,19 +195,48 @@ class SongInfoDialogFragment : DialogFragment() {
        },viewLifecycleOwner, Lifecycle.State.RESUMED)*/
     }
     private fun editAudioFileMetadata(filePath: String?){
-        //TODO, implementar el guardado de metadatos del archivo, aún no funciona
+        //TODO, implementar el guardado de metadatos para android >=12 y la carga de imágenes que no funciona en android 8
         filePath?.let{
             try{
                 val audioFile = AudioFileIO.read(File(filePath))
-                val tag =audioFile.tag
+                var tag =audioFile.tag
+                if(tag==null){
+                    // Si el archivo no tiene etiquetas de metadatos las creamos vacías
+                    tag = ID3v24Tag()
+                }
 
-                tag.setField(FieldKey.TITLE,bind.edtTitle.text.toString())
-                tag.setField(FieldKey.ARTIST,bind.edtArtist.text.toString())
-                tag.setField(FieldKey.ALBUM,bind.edtAlbum.text.toString())
-                tag.setField(FieldKey.GENRE,bind.edtGenre.text.toString())
-                tag.setField(FieldKey.YEAR,bind.edtYear.text.toString())
+                val title = bind.edtTitle.text.toString()
+                val artist =bind.edtArtist.text.toString()
+                val album = bind.edtAlbum.text.toString()
+                val genre = bind.edtGenre.text.toString()
+                val year = bind.edtYear.text.toString()
+
+                if(title.isNotEmpty()){
+                    try{tag.getFirst(FieldKey.TITLE)
+                        tag.setField(FieldKey.TITLE,title)
+                    }catch(ex:Exception){
+                       tag.createField(FieldKey.TITLE,title)
+                    }
+                }
+                if(artist.isNotEmpty()) {
+                    tag.setField(FieldKey.ARTIST, artist)
+                }
+                if(album.isNotEmpty()) {
+                    tag.setField(FieldKey.ALBUM, album)
+                }
+                if(genre.isNotEmpty()) {
+                    tag.setField(FieldKey.GENRE, genre)
+                }
+                if(year.isNotEmpty()) {
+                    tag.setField(FieldKey.YEAR, year)
+                }
+                if(imagePath !=null){
+                    val artwork = ArtworkFactory.createArtworkFromFile(File(imagePath!!))
+                    tag.setField(artwork)
+                }
                 audioFile.tag = tag
-                AudioFileIO.write(audioFile)
+                audioFile.commit()
+                //AudioFileIO.write(audioFile)
 
             }catch(ex:Exception){
                 ex.printStackTrace()
@@ -204,13 +245,66 @@ class SongInfoDialogFragment : DialogFragment() {
         }
 
     }
+    private fun getBytesFromBitmap(bitmap: Bitmap): ByteArray {
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)  // Usamos JPEG como formato
+        return stream.toByteArray()
+    }
     private fun getPathFromUri(uri: Uri): String? {
-        val cursor = activity?.contentResolver?.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
+      /*  val cursor = activity?.contentResolver?.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
         cursor?.moveToFirst()
         val columnIndex = cursor?.getColumnIndex(MediaStore.Images.Media.DATA)
         val filePath = columnIndex?.let { cursor.getString(it) }
         cursor?.close()
-        return filePath
+        return filePath*/
+
+
+
+        try {
+            val oldFile = File(activity?.filesDir, "image.jpg")
+            if(deleteTempFile(oldFile)) {
+                val inputStream = activity?.contentResolver?.openInputStream(uri)
+                val file =
+                    File(activity?.filesDir, "image.jpg") // Usamos un archivo temporal en la caché
+                val outputStream = FileOutputStream(file)
+
+                // Copiar los datos de InputStream a OutputStream
+                inputStream?.copyTo(outputStream)
+                inputStream?.close()
+                outputStream.close()
+
+                // Cuando ya no necesitemos el archivo, lo eliminamos
+                //deleteTempFile(file)
+
+                return file.absolutePath // Devolvemos la ruta del archivo temporal
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+        return null
+    }
+    private fun deleteTempFile(file: File):Boolean {
+        try {
+            if (file.exists()) {
+                val deleted = file.delete()
+                if (deleted) {
+                    Log.d("File Deletion", "El archivo temporal fue borrado exitosamente.")
+                    return true
+                } else {
+                    Log.d("File Deletion", "No se pudo borrar el archivo temporal.")
+                    return false
+                }
+            }else{
+                return true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("File Deletion", "Error al intentar borrar el archivo temporal: ${e.message}")
+            return false
+        }
+
     }
     companion object{
         @JvmStatic
