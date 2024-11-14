@@ -6,6 +6,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,6 +26,12 @@ import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
@@ -52,8 +61,10 @@ class SongInfoDialogFragment : DialogFragment() {
             uri?.let{
                 val galleryUri=it
                 try{
-                    imagePath = getPathFromUri(galleryUri)
-                    bind.ivSongDetail.loadImage(imagePath!!)
+                     getPathFromUri(galleryUri){path->
+                         imagePath = path
+                         bind.ivSongDetail.loadImage(imagePath!!)
+                     }
                 }catch(ex:Exception){
                     ex.printStackTrace()
                 }
@@ -195,7 +206,7 @@ class SongInfoDialogFragment : DialogFragment() {
        },viewLifecycleOwner, Lifecycle.State.RESUMED)*/
     }
     private fun editAudioFileMetadata(filePath: String?){
-        //TODO, implementar el guardado de metadatos para android >=12 y la carga de imágenes que no funciona en android 8
+        //TODO, implementar el guardado de metadatos para android >=12
         filePath?.let{
             try{
                 val audioFile = AudioFileIO.read(File(filePath))
@@ -250,62 +261,39 @@ class SongInfoDialogFragment : DialogFragment() {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)  // Usamos JPEG como formato
         return stream.toByteArray()
     }
-    private fun getPathFromUri(uri: Uri): String? {
-      /*  val cursor = activity?.contentResolver?.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
-        cursor?.moveToFirst()
-        val columnIndex = cursor?.getColumnIndex(MediaStore.Images.Media.DATA)
-        val filePath = columnIndex?.let { cursor.getString(it) }
-        cursor?.close()
-        return filePath*/
-
-
-
+    private fun getPathFromUri(uri: Uri,pathFile:(path:String?)->Unit ){
         try {
-            val oldFile = File(activity?.filesDir, "image.jpg")
-            if(deleteTempFile(oldFile)) {
-                val inputStream = activity?.contentResolver?.openInputStream(uri)
-                val file =
-                    File(activity?.filesDir, "image.jpg") // Usamos un archivo temporal en la caché
+            CoroutineScope(Dispatchers.IO).launch{
+            Log.e("MI-URI", uri.toString() )
+
+            val oldFile = File(requireContext().filesDir, "cover.jpg")
+            Log.e("MI-URI",oldFile.absolutePath )
+            if(oldFile.exists())oldFile.delete()
+            delay(200)
+
+                val inputStream = requireContext().contentResolver?.openInputStream(uri)
+                val file = File(requireContext().filesDir, "cover.jpg") // Usamos un archivo temporal en la caché
                 val outputStream = FileOutputStream(file)
 
                 // Copiar los datos de InputStream a OutputStream
+
                 inputStream?.copyTo(outputStream)
                 inputStream?.close()
                 outputStream.close()
 
-                // Cuando ya no necesitemos el archivo, lo eliminamos
-                //deleteTempFile(file)
-
-                return file.absolutePath // Devolvemos la ruta del archivo temporal
-            }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        return null
-    }
-    private fun deleteTempFile(file: File):Boolean {
-        try {
-            if (file.exists()) {
-                val deleted = file.delete()
-                if (deleted) {
-                    Log.d("File Deletion", "El archivo temporal fue borrado exitosamente.")
-                    return true
-                } else {
-                    Log.d("File Deletion", "No se pudo borrar el archivo temporal.")
-                    return false
+                withContext(Dispatchers.Main) {
+                    pathFile(file.absolutePath) // Devolvemos la ruta del archivo temporal
                 }
-            }else{
-                return true
             }
+
+
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.e("File Deletion", "Error al intentar borrar el archivo temporal: ${e.message}")
-            return false
+            return pathFile(null)
         }
-
+        return pathFile(null)
     }
+
     companion object{
         @JvmStatic
         fun newInstance(filePath:String)=SongInfoDialogFragment().apply {

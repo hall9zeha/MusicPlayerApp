@@ -74,6 +74,11 @@ fun ImageView.loadImage(url:String)=
     Glide.with(this.context)
         .load(url)
         .centerCrop()
+        .diskCacheStrategy(DiskCacheStrategy.NONE)
+        // Importante para evitar que glide use imágenes almacenadas en memoria,
+        // aunque se haya desabilitado con (DiskCacheStrategy.NONE)
+        .skipMemoryCache(true)
+
         .placeholder(R.drawable.placeholder_cover)
         .into(this)
 fun Int.adjustAlpha(factor: Float): Int =
