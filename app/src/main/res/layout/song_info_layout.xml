@@ -82,6 +82,7 @@
         app:layout_constraintTop_toBottomOf="@id/ivSongDetail">
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvTitle"
+            android:textSize="16sp"
             android:drawableStart="@drawable/ic_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,6 +91,7 @@
             />
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvArtist"
+            android:textSize="16sp"
             android:drawableStart="@drawable/ic_person"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,6 +100,7 @@
             />
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvAlbum"
+            android:textSize="16sp"
             android:drawableStart="@drawable/ic_disc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -106,6 +109,7 @@
             />
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvGenre"
+            android:textSize="16sp"
             android:drawableStart="@drawable/ic_genre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,10 +118,20 @@
             />
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvYear"
-            android:drawableStart="@drawable/ic_title"
+            android:textSize="16sp"
+            android:drawableStart="@drawable/ic_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="1979-12-11"
+            android:layout_marginTop="4dp"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvNumberTrack"
+            android:textSize="16sp"
+            android:drawableStart="@drawable/ic_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="20"
             android:layout_marginTop="4dp"
             />
     </LinearLayout>
@@ -232,6 +246,25 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtYear"
                 android:drawableStart="@drawable/ic_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilNumTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Track"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintTop_toBottomOf="@id/tilGenre"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtNumTrack"
+                android:drawableStart="@drawable/ic_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />

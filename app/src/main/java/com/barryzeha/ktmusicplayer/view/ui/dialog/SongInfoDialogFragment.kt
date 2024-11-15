@@ -162,6 +162,7 @@ class SongInfoDialogFragment : DialogFragment() {
                 edtAlbum.setText(meta.album)
                 edtGenre.setText(meta.genre)
                 edtYear.setText(meta.year)
+                edtNumTrack.setText(meta.track)
 
                 //
                 tvTitle.text=meta.title
@@ -169,6 +170,7 @@ class SongInfoDialogFragment : DialogFragment() {
                 tvAlbum.text=meta.album
                 tvGenre.text=meta.genre
                 tvYear.text=meta.year
+                tvNumberTrack.text= meta.track
 
             }
         }
@@ -229,6 +231,7 @@ class SongInfoDialogFragment : DialogFragment() {
                 val album = bind.edtAlbum.text.toString()
                 val genre = bind.edtGenre.text.toString()
                 val year = bind.edtYear.text.toString()
+                val numTrack = bind.edtNumTrack.text.toString()
 
                 if(title.isNotEmpty()){
                     try{tag.getFirst(FieldKey.TITLE)
@@ -248,6 +251,9 @@ class SongInfoDialogFragment : DialogFragment() {
                 }
                 if(year.isNotEmpty()) {
                     tag.setField(FieldKey.YEAR, year)
+                }
+                if(numTrack.isNotEmpty()){
+                    tag.setField(FieldKey.TRACK,numTrack)
                 }
                 if(imagePath !=null){
                     val artwork = ArtworkFactory.createArtworkFromFile(File(imagePath!!))
