@@ -36,6 +36,7 @@ import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.Tag
+import org.jaudiotagger.tag.id3.ID3v23Tag
 import org.jaudiotagger.tag.id3.ID3v24Tag
 import org.jaudiotagger.tag.images.ArtworkFactory
 import java.io.ByteArrayOutputStream
@@ -213,7 +214,7 @@ class SongInfoDialogFragment : DialogFragment() {
                 var tag =audioFile.tag
                 if(tag==null){
                     // Si el archivo no tiene etiquetas de metadatos las creamos vacías
-                    tag = ID3v24Tag()
+                    tag = ID3v23Tag()
                 }
 
                 val title = bind.edtTitle.text.toString()

@@ -15,6 +15,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Binder
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -124,7 +125,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
         setUpRepository()
-        initMusicStateLooper()
         setUpHeadsetAndBluetoothReceiver()
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
@@ -251,7 +251,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 val songEntity=songState[0].songEntity
                 if(songsList.contains(songEntity))setSongStateSaved(songState[0])
             }
-
+            initMusicStateLooper()
         }
     }
     private fun initMusicStateLooper(){
@@ -513,7 +513,16 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 // Reemplazamos temporalmente el nuevo id para la comparación
                 idSong = newState.idSong
             }
-
+            // Para android <=10
+            if(Build.VERSION.SDK_INT <=Build.VERSION_CODES.Q){
+                mediaPlayerNotify = notificationMediaPlayer(
+                    this,
+                    MediaStyle()
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowActionsInCompactView(0, 1, 2),
+                    currentMusicState
+                )
+            }
             notificationManager.notify(
                 NOTIFICATION_ID,
                 mediaPlayerNotify

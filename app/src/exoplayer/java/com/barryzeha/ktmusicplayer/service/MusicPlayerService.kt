@@ -506,6 +506,16 @@ class MusicPlayerService : Service(){
                 // Reemplazamos temporalmente el nuevo id para la comparación
                 idSong = newState.idSong
             }
+            // Para android <=10
+            if(Build.VERSION.SDK_INT <=Build.VERSION_CODES.Q){
+                mediaPlayerNotify = notificationMediaPlayer(
+                    this,
+                    MediaStyle()
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowActionsInCompactView(0, 1, 2),
+                    currentMusicState
+                )
+            }
             notificationManager.notify(
                 NOTIFICATION_ID,
                 mediaPlayerNotify

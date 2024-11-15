@@ -9,6 +9,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.media.session.MediaSession
 import android.os.Build
 import android.view.Gravity
 import android.view.View
@@ -22,6 +23,7 @@ import com.barryzeha.core.R
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_GENRE
+import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
