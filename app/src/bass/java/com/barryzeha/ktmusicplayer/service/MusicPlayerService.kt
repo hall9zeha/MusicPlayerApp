@@ -487,47 +487,51 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
-        currentMusicState?.let { newState ->
-            val updatePlaybackState = playBackState?.let{
-                PlaybackState.Builder(it)
-                    .setState(if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                        newState.currentDuration,
-                        1f)
-                    .build()
-            }
-            // Actualizamos el progreso y estado de reproducción de la canción
-            mediaSession.setPlaybackState(updatePlaybackState)
 
-            // Actualizamos la información que se muestra de la canción
-            if(idSong != newState.idSong) {// Comparamos los ids para saber si ha cambiado la canción
-                val updateMediaMetadata = MediaMetadata.Builder()
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                    .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                    .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
-                    .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                    .build()
+            currentMusicState?.let { newState ->
+                val updatePlaybackState = playBackState?.let {
+                    PlaybackState.Builder(it)
+                        .setState(
+                            if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                            newState.currentDuration,
+                            1f
+                        )
+                        .build()
+                }
+                // Actualizamos el progreso y estado de reproducción de la canción
+                mediaSession.setPlaybackState(updatePlaybackState)
 
-                // Para android >=12
-                mediaSession.setMetadata(updateMediaMetadata)
-                // Reemplazamos temporalmente el nuevo id para la comparación
-                idSong = newState.idSong
-            }
-            // Para android <=10
-            if(Build.VERSION.SDK_INT <=Build.VERSION_CODES.Q){
-                mediaPlayerNotify = notificationMediaPlayer(
-                    this,
-                    MediaStyle()
-                        .setMediaSession(mediaSession.sessionToken)
-                        .setShowActionsInCompactView(0, 1, 2),
-                    currentMusicState
+                // Actualizamos la información que se muestra de la canción
+                if (idSong != newState.idSong) {// Comparamos los ids para saber si ha cambiado la canción
+                    val updateMediaMetadata = MediaMetadata.Builder()
+                        .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                        .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                        .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                        .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                        .build()
+
+                    // Para android >=12
+                    mediaSession.setMetadata(updateMediaMetadata)
+                    // Reemplazamos temporalmente el nuevo id para la comparación
+                    idSong = newState.idSong
+                }
+                // Para android <=10
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                    mediaPlayerNotify = notificationMediaPlayer(
+                        this,
+                        MediaStyle()
+                            .setMediaSession(mediaSession.sessionToken)
+                            .setShowActionsInCompactView(0, 1, 2),
+                        currentMusicState
+                    )
+                }
+                notificationManager.notify(
+                    NOTIFICATION_ID,
+                    mediaPlayerNotify
                 )
             }
-            notificationManager.notify(
-                NOTIFICATION_ID,
-                mediaPlayerNotify
-            )
-        }
+
     }
     private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {

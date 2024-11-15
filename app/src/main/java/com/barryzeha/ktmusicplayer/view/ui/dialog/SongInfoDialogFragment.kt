@@ -126,17 +126,17 @@ class SongInfoDialogFragment : DialogFragment() {
         edtYear.isFocusableInTouchMode=isEnable
         ivSongDetail.isEnabled = isEnable
 
-        /*edtTitle.isEnabled=isEnable
-        edtArtist.isEnabled=isEnable
-        edtAlbum.isEnabled=isEnable
-        edtGenre.isEnabled=isEnable
-        edtYear.isEnabled=isEnable*/
         if(!isEnable){
             edtTitle.clearFocus()
             edtArtist.clearFocus()
             edtAlbum.clearFocus()
             edtGenre.clearFocus()
             edtYear.clearFocus()
+            lnMainInfo.visibility=View.VISIBLE
+            lnMainInfoEdit.visibility=View.GONE
+        }else{
+            lnMainInfo.visibility=View.GONE
+            lnMainInfoEdit.visibility=View.VISIBLE
         }
 
     }
@@ -163,6 +163,13 @@ class SongInfoDialogFragment : DialogFragment() {
                 edtGenre.setText(meta.genre)
                 edtYear.setText(meta.year)
 
+                //
+                tvTitle.text=meta.title
+                tvArtist.text=meta.artist
+                tvAlbum.text=meta.album
+                tvGenre.text=meta.genre
+                tvYear.text=meta.year
+
             }
         }
     }
@@ -187,6 +194,7 @@ class SongInfoDialogFragment : DialogFragment() {
                     pathFile?.let{editAudioFileMetadata(it)}
                     isEditing = false
                     enableViews(false)
+                    pathFile?.let{setFileInfo(it)}
                 }
             }
             true
@@ -199,7 +207,6 @@ class SongInfoDialogFragment : DialogFragment() {
            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                menuInflater.inflate(R.menu.note_menu,menu)
            }
-
            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                return true
            }

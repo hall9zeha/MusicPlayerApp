@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/toolbarInfoLayout"
         android:layout_width="match_parent"
@@ -68,111 +69,175 @@
             android:text="FLAC"
             />
     </LinearLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilTitle"
+    <LinearLayout
+        android:id="@+id/lnMainInfo"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-        app:layout_constraintTop_toBottomOf="@id/ivSongDetail"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:hint="Title"
         android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-
-        >
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edtTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivSongDetail">
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvTitle"
+            android:drawableStart="@drawable/ic_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            tools:text="Song title"
+
             />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilArtist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-        app:layout_constraintTop_toBottomOf="@id/tilTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:hint="Artist"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="4dp"
-        >
-       <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edtArtist"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvArtist"
+            android:drawableStart="@drawable/ic_person"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            tools:text="Artist name"
+            android:layout_marginTop="4dp"
             />
-
-    </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilAlbum"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Album"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-        app:layout_constraintTop_toBottomOf="@id/tilArtist"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="4dp"
-
-        >
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edtAlbum"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvAlbum"
+            android:drawableStart="@drawable/ic_disc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             />
-
-    </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilGenre"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Genre"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-        app:layout_constraintTop_toBottomOf="@id/tilAlbum"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="4dp"
-        >
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edtGenre"
+            tools:text="Album title"
+            android:layout_marginTop="4dp"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvGenre"
+            android:drawableStart="@drawable/ic_genre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             />
-
-    </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilYear"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Year"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-        app:layout_constraintTop_toBottomOf="@id/tilGenre"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="4dp"
-        >
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edtYear"
+            tools:text="Genre"
+            android:layout_marginTop="4dp"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvYear"
+            android:drawableStart="@drawable/ic_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             />
+            tools:text="1979-12-11"
+            android:layout_marginTop="4dp"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/lnMainInfoEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivSongDetail">
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
 
-    </com.google.android.material.textfield.TextInputLayout>
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintTop_toBottomOf="@id/ivSongDetail"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:hint="Title"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTitle"
+                android:drawableStart="@drawable/ic_title"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintTop_toBottomOf="@id/tilTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:hint="Artist"
+            android:layout_marginTop="4dp"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtArtist"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:drawableStart="@drawable/ic_person"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilAlbum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Album"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintTop_toBottomOf="@id/tilArtist"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp"
+
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtAlbum"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:drawableStart="@drawable/ic_disc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilGenre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Genre"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintTop_toBottomOf="@id/tilAlbum"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtGenre"
+                android:drawableStart="@drawable/ic_genre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilYear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Year"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintTop_toBottomOf="@id/tilGenre"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtYear"
+                android:drawableStart="@drawable/ic_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
