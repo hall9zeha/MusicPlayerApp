@@ -37,6 +37,9 @@ import kotlin.math.roundToInt
 fun Activity.showSnackBar(view: View, msg:String, duration:Int = Snackbar.LENGTH_SHORT)=
     Snackbar.make(view,msg,duration).show()
 
+fun Activity.showSnackBar(view: View, msg:Int, duration:Int = Snackbar.LENGTH_SHORT)=
+    Snackbar.make(view,msg,duration).show()
+
 @Suppress("DEPRECATION")
 fun <T> Context.isServiceRunning(service:Class<T>):Boolean{
     return (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)

@@ -29,5 +29,7 @@
     <string name="order_list_by">Order list by</string>
     <string name="addPlayList">Create new playlist</string>
     <string name="addFile">Add File</string>
+    <string name="editFileMsgError">The file could not be edited. Non-existent file or incompatible format</string>
+    <string name="editFileSuccess">Edited successful</string>
 
 </resources>

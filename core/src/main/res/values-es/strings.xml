@@ -31,5 +31,6 @@
     <string name="order_list_by">Ordenar lista por</string>
     <string name="addPlayList">Crear lista de reproducción</string>
     <string name="addFile">Agregar archivo</string>
-
+    <string name="editFileMsgError">No se pudo editar el archivo. Archivo inexistente o formato no soportado</string>
+    <string name="editFileSuccess">Editado correctamente</string>
 </resources>
