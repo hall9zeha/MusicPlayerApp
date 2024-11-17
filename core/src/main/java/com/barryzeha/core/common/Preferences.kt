@@ -24,6 +24,7 @@ private const val CURRENT_VIEW = "currentView"
 private const val PLAY_LIST_SORT_OPTION="playListSortOption"
 private const val FIRST_EXECUTION = "firstExecution"
 private const val PLAYLIST_ID = "playlistId"
+private const val STORAGE_DIR_SAF_URI = "storageDirSAFUri"
 
 
 class  MyPreferences @Inject constructor(private val context: Context){
@@ -69,6 +70,9 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var playlistId:Int
         get()=myPreferences.getInt(PLAYLIST_ID,0)
         set(value)=myPreferences.edit().putInt(PLAYLIST_ID,value).apply()
+    var directorySAFUri:String?
+        get()=myPreferences.getString(STORAGE_DIR_SAF_URI,"")
+        set(value)=myPreferences.edit().putString(STORAGE_DIR_SAF_URI,value).apply()
 
     fun clearIdSongInPrefs(){
         myPreferences.edit().remove(ID_SONG).apply()

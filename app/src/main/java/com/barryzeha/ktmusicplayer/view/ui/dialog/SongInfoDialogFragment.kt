@@ -1,9 +1,9 @@
 package com.barryzeha.ktmusicplayer.view.ui.dialog
 
 import android.annotation.SuppressLint
-import android.content.ContentUris
-import android.content.ContentValues
-import android.graphics.Bitmap
+import android.content.ContentResolver
+import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -13,10 +13,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toFile
 import androidx.core.view.get
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.fetchFileMetadata
@@ -34,18 +36,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.audio.mp3.MP3File
 import org.jaudiotagger.tag.FieldKey
+import org.jaudiotagger.tag.Tag
 import org.jaudiotagger.tag.id3.ID3v23Tag
+import org.jaudiotagger.tag.id3.ID3v24Tag
 import org.jaudiotagger.tag.images.ArtworkFactory
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
 
@@ -56,6 +57,10 @@ import com.barryzeha.core.R as coreRes
  **/
 @AndroidEntryPoint
 class SongInfoDialogFragment : DialogFragment() {
+
+    @Inject
+    lateinit var mPrefs:MyPreferences
+
     private var _bind: SongInfoLayoutBinding? = null
     private val bind: SongInfoLayoutBinding get() = _bind!!
     private var isEditing: Boolean = false
@@ -66,7 +71,7 @@ class SongInfoDialogFragment : DialogFragment() {
             uri?.let{
                 val galleryUri=it
                 try{
-                     getPathFromUri(galleryUri){path->
+                     getPathOfImageCoverFromUri(galleryUri){ path->
                          imagePath = path
                          bind.ivSongDetail.loadImage(imagePath!!)
                      }
@@ -75,6 +80,12 @@ class SongInfoDialogFragment : DialogFragment() {
                 }
             }
     }
+    private val openDocumentTreeLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()){uri:Uri?->
+        uri?.let{
+            handleUriSAFSelection(uri)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -232,18 +243,24 @@ class SongInfoDialogFragment : DialogFragment() {
 
        },viewLifecycleOwner, Lifecycle.State.RESUMED)*/
     }
+    private fun handleUriSAFSelection(treeUri:Uri){
+        // Guardamos la uri del directorio para uso posterior
+        mPrefs.directorySAFUri = treeUri.toString()
+        // Conceder permisos persistentes para que no sea necesario pedir acceso nuevamente.
+        requireContext().contentResolver.takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        saveFileEdited(pathFile!!)
+    }
+
     private fun editAudioFileMetadata(filePath: String?){
         //TODO, implementar el guardado de metadatos para android >=12
 
         filePath?.let{
             try{
 
-                val audioFile:AudioFile = if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.Q) {
+                val audioFile:AudioFile = if(Build.VERSION.SDK_INT<=Build.VERSION_CODES.Q) {
                     AudioFileIO.read(File(filePath))
                 }else{
-                    //AudioFileIO.read(getPathOfAppDirectory(filePath))
-                    AudioFileIO.read(getAudioUriByName(filePath)?.toFile()!!)
-
+                    AudioFileIO.read(getPathOfAppDirectory(filePath))
                 }
                 var tag =audioFile.tag
                 if(tag==null){
@@ -285,9 +302,15 @@ class SongInfoDialogFragment : DialogFragment() {
                     tag.setField(artwork)
                 }
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-                    audioFile.tag = tag
-                    audioFile.commit()
-                    activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess, Snackbar.LENGTH_LONG)
+                    //openDocumentTreeLauncher.launch(null)
+                    if(mPrefs.directorySAFUri?.isEmpty()!!) {
+                        openDocumentTreeLauncher.launch(null)
+                    }else{
+                        audioFile.tag = tag
+                        audioFile.commit()
+                        saveFileEdited(filePath)
+                    }
+
                 }else {
                     audioFile.tag = tag
                     audioFile.commit()
@@ -302,38 +325,8 @@ class SongInfoDialogFragment : DialogFragment() {
         }
 
     }
-    fun getAudioUriByName(originalPath: String): Uri? {
-        val fileName = originalPath.substringAfterLast("/")
-        val resolver = requireContext().contentResolver
-        val projection = arrayOf(
-            MediaStore.MediaColumns._ID,  // El ID del archivo en MediaStore
-            MediaStore.MediaColumns.DISPLAY_NAME,
-            MediaStore.MediaColumns.RELATIVE_PATH,
-            MediaStore.MediaColumns.MIME_TYPE
-        )
-        val selection = "${MediaStore.MediaColumns.DISPLAY_NAME} = ?"
-        val selectionArgs = arrayOf(fileName)
 
-        // Buscar el archivo en MediaStore
-        val queryUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val cursor = resolver.query(
-            queryUri, projection, selection, selectionArgs, null
-        )
-
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val idColumnIndex = it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-                val audioId = it.getLong(idColumnIndex)
-                val contentUri = ContentUris.withAppendedId(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, audioId
-                )
-                return contentUri
-            }
-        }
-
-        return null
-    }
-    private fun getPathFromUri(uri: Uri,pathFile:(path:String?)->Unit ){
+    private fun getPathOfImageCoverFromUri(uri: Uri, pathFile:(path:String?)->Unit ){
         try {
             CoroutineScope(Dispatchers.IO).launch{
             val oldFile = File(requireContext().filesDir, "cover.jpg")
@@ -363,9 +356,9 @@ class SongInfoDialogFragment : DialogFragment() {
         return pathFile(null)
     }
     private fun getPathOfAppDirectory(originalPath:String):File{
-        val songName = pathFile?.substringAfterLast("/")
-        val inputFile = File(pathFile!!)
-        val outputFile = File(requireContext().filesDir, songName!!)
+        val songName = originalPath.substringAfterLast("/")
+        val inputFile = File(originalPath)
+        val outputFile = File(requireContext().filesDir, songName)
         val inputStream = FileInputStream(inputFile)
         val outputStream = FileOutputStream(outputFile)
 
@@ -375,62 +368,67 @@ class SongInfoDialogFragment : DialogFragment() {
 
         return outputFile
     }
-    private fun saveFileEdited(originalPathFile:String){
-        try{
+    private fun saveFileEdited(originalPathFile: String){
+        try {
 
             val fileName = originalPathFile.substringAfterLast("/")
             val pathWithoutName = originalPathFile.substringBeforeLast("/")
             val internalPathAppDir = File(requireContext().filesDir, fileName)
 
-            val inputFile = File(originalPathFile)
-            val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(inputFile.extension)
+            val contentResolver: ContentResolver = requireContext().contentResolver
 
-            val values = ContentValues()
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, pathWithoutName)
-
-            val  resolver = requireContext().contentResolver
-            val collection = MediaStore.Files.getContentUri("external")
-            val item = resolver.insert(collection,values)
-
-            val outputStream = resolver.openOutputStream(item!!)
-
-            val bufferedInputStream = BufferedInputStream(FileInputStream(inputFile))
-
-            // Abrimos el BufferedOutputStream para escribir al archivo en el MediaStore
-            val bufferedOutputStream = BufferedOutputStream(outputStream)
-
-            // Crear un buffer de lectura y escritura
-            val buffer = ByteArray(8192)  // Buffer de 8KB
-            var bytesRead: Int
-
-            // Leer del inputStream y escribir en el outputStream en bloques
-            while (bufferedInputStream.read(buffer).also { bytesRead = it } != -1) {
-                bufferedOutputStream.write(buffer, 0, bytesRead)
+            // Crear un archivo de entrada a partir de tu archivo editado (directorio interno)
+            val inputFile = internalPathAppDir
+            if (!inputFile.exists()) {
+                throw IOException("El archivo original no existe")
             }
 
-            // Asegurarse de que todos los datos se escriban
-            bufferedOutputStream.flush()
+            // Acceder al directorio seleccionado con SAF
+            val documentFile = DocumentFile.fromTreeUri(requireContext(), Uri.parse(mPrefs.directorySAFUri))
 
-            // Cerrar ambos streams
-            bufferedInputStream.close()
-            bufferedOutputStream.close()
+            // Verificar si el directorio es válido
+            if (documentFile != null && documentFile.canWrite()) {
+                val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(internalPathAppDir.extension)
+                // Crear un nuevo archivo dentro del directorio seleccionado por el usuario
+                val newFile = documentFile.createFile(mimeType.toString(), fileName) // Cambiar MIME si es necesario
 
-            /* val outputFile = File(requireContext().filesDir,fileName!!)
-            val inputStream = FileInputStream(inputFile)
-            val outputStream = FileOutputStream(outputFile)
+                // Comprobar si el archivo fue creado correctamente
+                if (newFile != null) {
+                    // Abrir un OutputStream para el nuevo archivo
+                    val outputStream = contentResolver.openOutputStream(newFile.uri)
 
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
-            outputStream.close()*/
+                    // Abrir un InputStream para el archivo original (editado)
+                    val inputStream = FileInputStream(inputFile)
 
+                    // Copiar el contenido del archivo original al nuevo archivo
+                    inputStream.use { input ->
+                        outputStream?.use { output ->
+                            input.copyTo(output)
+                        }
+                    }
 
-        }catch(ex:Exception){
-            ex.printStackTrace()
-            activity?.showSnackBar(bind.root,coreRes.string.editFileMsgError,Snackbar.LENGTH_LONG)
+                    // Si todo va bien, notificar al usuario que la operación fue exitosa
+                    activity?.runOnUiThread {
+                        Toast.makeText(context,"Archivo copiado correctamente",Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    throw IOException("No se pudo crear el archivo en el directorio seleccionado")
+                }
+            } else {
+                throw IOException("No se tiene permiso para escribir en el directorio seleccionado")
+            }
+
+        }catch (ex:Exception){
+                ex.printStackTrace()
+                activity?.showSnackBar(
+                    bind.root,
+                    coreRes.string.editFileMsgError,
+                    Snackbar.LENGTH_LONG
+                )
+            }
         }
-    }
+
+
 
     companion object{
         @JvmStatic
