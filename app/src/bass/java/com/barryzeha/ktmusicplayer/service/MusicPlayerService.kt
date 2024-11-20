@@ -768,33 +768,36 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
 
-           val song = songState.songEntity
-           songEntity = song
-           // Set info currentSongEntity
-           fetchSong(song)?.let { musicState ->
-               currentMusicState = musicState.copy(
-                   currentDuration = songState.songState.currentPosition,
-                   latestPlayed = true,
-                   nextOrPrev = animDirection
-               )
+            val song = songState.songEntity
+            songEntity = song
+            // Set info currentSongEntity
+            fetchSong(song)?.let { musicState ->
+                currentMusicState = musicState.copy(
+                    currentDuration = songState.songState.currentPosition,
+                    latestPlayed = true,
+                    nextOrPrev = animDirection
+                )
+            }
+            setPlayingState(false)
+            currentSongPosition = songState.songState.currentPosition
+            bassManager?.streamCreateFile(songState.songEntity)
+            bassManager?.setSongStateSaved(
+                bassManager?.getActiveChannel()!!,
+                songState.songState.currentPosition
+            )
+            findItemSongIndexById(songState.songEntity.id)?.let {
+                indexOfSong = it
+            }
+            if (!checkIfPhoneIsLock()) {
+               _songController?.currentTrack(currentMusicState)
 
-           }
-           setPlayingState(false)
-           currentSongPosition = songState.songState.currentPosition
-           bassManager?.streamCreateFile(songState.songEntity)
-           bassManager?.setSongStateSaved(
-               bassManager?.getActiveChannel()!!,
-               songState.songState.currentPosition
-           )
-           findItemSongIndexById(songState.songEntity.id)?.let {
-               indexOfSong = it
-           }
-           if(!checkIfPhoneIsLock()){_songController?.currentTrack(currentMusicState)}
-           // Al cargar la información de una pista guardada
-           // se ejecutaba una primera vez el evento currentTRack de la interface
-           // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
-           // para evitarlo
-           executeOnceTime = true
+            }
+            // Al cargar la información de una pista guardada
+            // se ejecutaba una primera vez el evento currentTRack de la interface
+            // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
+            // para evitarlo
+            executeOnceTime = true
+
     }
     private fun fetchSong(song:SongEntity):MusicState?{
 

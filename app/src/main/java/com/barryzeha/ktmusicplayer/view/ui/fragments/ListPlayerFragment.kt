@@ -79,8 +79,6 @@ private const val ARG_PARAM2 = "param2"
 @AndroidEntryPoint
 class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
-
-
     @Inject
     lateinit var mPrefs:MyPreferences
     private var param1: String? = null
@@ -979,7 +977,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         checkPreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
-        setNumberOfTrack()
+
         if(mPrefs.controlFromNotify){
             try {
                 //val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
