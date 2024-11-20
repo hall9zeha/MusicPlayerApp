@@ -344,6 +344,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }
         }
+        mainViewModel.isSongTagEdited.observe(viewLifecycleOwner){song->
+            song?.let{
+                //TODO funciona actualizar toda la lista al editar un solo archivo pero, no se posiciona en la ubicación
+                // desde donde se estaba editando, buscar una nueva alternativa
+                //mainViewModel.fetchAllSongsBy(mPrefs.playListSortOption)
+            }
+        }
     }
     private fun resizeBottomSheet(){
         if (btmSheetIsExpanded) {
@@ -657,7 +664,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     listAdapter?.removeAll()
                     mainViewModel.deleteAllSongs()
                 },{},{},{
-                    SongInfoDialogFragment.newInstance(currentMusicState.songPath).show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
+                    SongInfoDialogFragment.newInstance(SongEntity(id=currentMusicState.idSong, pathLocation = currentMusicState.songPath ))
+                        .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
                 })
             }
             bottomSheetView.btnAdd.setOnClickListener{
@@ -868,7 +876,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         },{
             mainViewModel.updateSong(selectedSong.copy(favorite = true))
         },{
-            SongInfoDialogFragment.newInstance(selectedSong.pathLocation.toString()).show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
+            SongInfoDialogFragment.newInstance(SongEntity(id=selectedSong.id, pathLocation = selectedSong.pathLocation))
+                .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
         })
 
     }

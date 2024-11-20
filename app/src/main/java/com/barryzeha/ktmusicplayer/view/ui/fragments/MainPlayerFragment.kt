@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -220,6 +221,18 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             if(deleteAllRows>0){
 
                 setNumberOfTrack(currentMusicState.idSong)
+            }
+        }
+        mainViewModel.isSongTagEdited.observe(viewLifecycleOwner){songEntity->
+            songEntity?.let {song->
+                val meta = getSongMetadata(requireContext(),song.pathLocation)
+                meta?.let {
+                    val updateSongInfo = currentMusicState.copy(
+                        title = meta.title,
+                        album = meta.album,
+                        artist = meta.artist)
+                    updateUIOnceTime(updateSongInfo)
+                }
             }
         }
     }
@@ -558,7 +571,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }
             btnInfo.setOnClickListener{
-                SongInfoDialogFragment.newInstance(currentMusicState.songPath)
+                SongInfoDialogFragment.newInstance(SongEntity(id = currentMusicState.idSong, pathLocation =currentMusicState.songPath))
                     .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
             }
         }

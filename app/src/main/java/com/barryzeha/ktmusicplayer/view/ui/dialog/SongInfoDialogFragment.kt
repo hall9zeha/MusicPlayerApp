@@ -15,6 +15,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.get
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
 import com.barryzeha.core.common.createTime
@@ -23,7 +25,9 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.showSnackBar
+import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
+import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.common.util.getParentDirectories
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,13 +58,14 @@ class SongInfoDialogFragment : DialogFragment() {
 
     @Inject
     lateinit var mPrefs:MyPreferences
-
+    private val viewModel:MainViewModel by activityViewModels()
     private var _bind: SongInfoLayoutBinding? = null
     private val bind: SongInfoLayoutBinding get() = _bind!!
     private var isEditing: Boolean = false
     private var idSong:Long=-1
     private var pathFile:String?=null
     private var imagePath:String?=null
+    private var songEntity:SongEntity? = null
     private val getImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()){uri: Uri?->
             uri?.let{
                 val galleryUri=it
@@ -124,8 +129,11 @@ class SongInfoDialogFragment : DialogFragment() {
     }
     private fun getIntentExtras(){
         arguments?.let{
-            pathFile= it.getString(SONG_INFO_EXTRA_KEY)
-            setFileInfo(pathFile)
+            songEntity = it.getParcelable(SONG_INFO_EXTRA_KEY)
+            songEntity?.pathLocation?.let{path->
+                pathFile=path
+                setFileInfo(pathFile)
+            }
 
         }
     }
@@ -237,8 +245,9 @@ class SongInfoDialogFragment : DialogFragment() {
         saveFileEdited(pathFile!!,{
             isEditing = false
             showEditViews(false)
-            activity?.showSnackBar(bind.root, "Archivo editado correctamente")
+            activity?.showSnackBar(bind.root, coreRes.string.editFileSuccess)
             pathFile?.let { setFileInfo(it) }
+            viewModel.setIsSongTagEdited(songEntity!!)
 
         },{})
     }
@@ -307,6 +316,7 @@ class SongInfoDialogFragment : DialogFragment() {
                             enableViews(true)
                             activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess)
                             pathFile?.let{setFileInfo(it)}
+                            viewModel.setIsSongTagEdited(songEntity!!)
                             },{
                     })
 
@@ -315,6 +325,7 @@ class SongInfoDialogFragment : DialogFragment() {
                     audioFile.commit()
                     isEditing = false
                     showEditViews(false)
+                    viewModel.setIsSongTagEdited(songEntity!!)
                     activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess, Snackbar.LENGTH_LONG)
                 }
                 //AudioFileIO.write(audioFile)
@@ -480,9 +491,9 @@ class SongInfoDialogFragment : DialogFragment() {
 
     companion object{
         @JvmStatic
-        fun newInstance(filePath:String)=SongInfoDialogFragment().apply {
+        fun newInstance(songEntity:SongEntity)=SongInfoDialogFragment().apply {
             arguments = Bundle().apply {
-                putString(SONG_INFO_EXTRA_KEY,filePath)
+                putParcelable(SONG_INFO_EXTRA_KEY,songEntity)
             }
         }
     }

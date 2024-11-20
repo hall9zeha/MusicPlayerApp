@@ -99,6 +99,10 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     private var _playlistWithSongRefInserted:SingleMutableLiveData<Long> = SingleMutableLiveData()
     val playlistWithSongRefInserted:LiveData<Long> = _playlistWithSongRefInserted
 
+    // Song tag edited
+    private var _isSongTagEdited:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
+    val isSongTagEdited:LiveData<SongEntity> = _isSongTagEdited
+
     init{
         initScope()
         // trying
@@ -280,6 +284,12 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun setServiceInstance(serviceConnection:ServiceConnection,serviceInstance:MusicPlayerService){
         launch {
             _serviceInstance.value=Pair(serviceConnection,serviceInstance)
+        }
+    }
+    // Song tag edited
+    fun setIsSongTagEdited(songEntity:SongEntity){
+        launch{
+            _isSongTagEdited.value = songEntity
         }
     }
     override fun onCleared() {

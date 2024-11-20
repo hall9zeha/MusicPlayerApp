@@ -169,6 +169,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         submitList(songs)
 
     }
+
     // Al usar DiffUtils o asyncListDiffer para agregar más de un item a la vez a veces solo ingresa el último
     // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
     // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo, parece poco eficiente,
