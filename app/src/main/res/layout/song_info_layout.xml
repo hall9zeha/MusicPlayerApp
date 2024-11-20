@@ -20,7 +20,15 @@
 
 
     </com.google.android.material.appbar.AppBarLayout>
-
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/pbEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarInfoLayout"/>
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivSongDetail"
         android:layout_width="160dp"
@@ -31,7 +39,7 @@
         android:clickable="true"
         app:shapeAppearanceOverlay="@style/imageViewCornerStyle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbarInfoLayout"
+        app:layout_constraintTop_toBottomOf="@id/pbEdit"
         android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"/>
     <LinearLayout

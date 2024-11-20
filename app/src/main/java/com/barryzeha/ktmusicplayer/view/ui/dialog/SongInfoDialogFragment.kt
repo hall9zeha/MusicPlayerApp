@@ -126,15 +126,10 @@ class SongInfoDialogFragment : DialogFragment() {
         arguments?.let{
             pathFile= it.getString(SONG_INFO_EXTRA_KEY)
             setFileInfo(pathFile)
-            Log.e("SONG", getParentDirectories(pathFile!!))
+
         }
     }
-    private fun enableViews(isEnable:Boolean)=with(bind){
-        edtTitle.isFocusableInTouchMode=isEnable
-        edtArtist.isFocusableInTouchMode=isEnable
-        edtAlbum.isFocusableInTouchMode=isEnable
-        edtGenre.isFocusableInTouchMode=isEnable
-        edtYear.isFocusableInTouchMode=isEnable
+    private fun showEditViews(isEnable:Boolean)=with(bind){
         ivSongDetail.isEnabled = isEnable
 
         if(!isEnable){
@@ -150,6 +145,15 @@ class SongInfoDialogFragment : DialogFragment() {
             lnMainInfoEdit.visibility=View.VISIBLE
         }
 
+    }
+    private fun enableViews(isEnable:Boolean)=with(bind){
+        tilTitle.isEnabled=isEnable
+        tilArtist.isEnabled=isEnable
+        tilAlbum.isEnabled=isEnable
+        tilGenre.isEnabled=isEnable
+        tilYear.isEnabled=isEnable
+        tilNumTrack.isEnabled=isEnable
+        pbEdit.visibility = if(isEnable) View.GONE else View.VISIBLE
     }
     private fun clearInternalAppFilesDir(){
         try{
@@ -167,7 +171,7 @@ class SongInfoDialogFragment : DialogFragment() {
         }
     }
     private fun setFileInfo(filePath:String?)=with(bind){
-        enableViews(false)
+        showEditViews(false)
         filePath?.let {
             val inputFile = File(filePath)
             val metadata = fetchFileMetadata(requireContext(),filePath)
@@ -210,48 +214,36 @@ class SongInfoDialogFragment : DialogFragment() {
                     menu[0].setVisible(false)
                     menu[1].setVisible(true)
                     isEditing = true
-                    enableViews(true)
+                    showEditViews(true)
                 }
                 coreRes.id.itemSave->{
                     menu[0].setVisible(true)
                     menu[1].setVisible(false)
                     pathFile?.let{editAudioFileMetadata(it)}
-                    isEditing = false
-                    enableViews(false)
+
 
                 }
             }
             true
         }
 
-        // No funciona correctamente para nuestros propósitos
-
-        /* val menuHost:MenuHost = requireActivity()
-       menuHost.addMenuProvider(object:MenuProvider{
-           override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-               menuInflater.inflate(R.menu.note_menu,menu)
-           }
-           override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-               return true
-           }
-
-       },viewLifecycleOwner, Lifecycle.State.RESUMED)*/
     }
+
     private fun handleUriSAFSelection(treeUri:Uri){
         // Guardamos la uri del directorio para uso posterior
         mPrefs.directorySAFUri = treeUri.toString()
         // Conceder permisos persistentes para que no sea necesario pedir acceso nuevamente.
         requireContext().contentResolver.takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
         saveFileEdited(pathFile!!,{
-                activity?.showSnackBar(bind.root, "Archivo editado correctamente")
-                pathFile?.let { setFileInfo(it) }
+            isEditing = false
+            showEditViews(false)
+            activity?.showSnackBar(bind.root, "Archivo editado correctamente")
+            pathFile?.let { setFileInfo(it) }
 
         },{})
     }
 
     private fun editAudioFileMetadata(filePath: String?){
-        //TODO, implementar el guardado de metadatos para android >=12
-
         filePath?.let{
             try{
 
@@ -308,19 +300,27 @@ class SongInfoDialogFragment : DialogFragment() {
                     }else{
                         audioFile.tag = tag
                         audioFile.commit()
+                        enableViews(false)
                         saveFileEdited(filePath,{
-                                activity?.showSnackBar(bind.root,"Archivo editado correctamente")
-                                pathFile?.let{setFileInfo(it)}
+                            isEditing = false
+                            showEditViews(false)
+                            enableViews(true)
+                            activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess)
+                            pathFile?.let{setFileInfo(it)}
                             },{
                     })
 
                 }}else {
                     audioFile.tag = tag
                     audioFile.commit()
+                    isEditing = false
+                    showEditViews(false)
                     activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess, Snackbar.LENGTH_LONG)
                 }
                 //AudioFileIO.write(audioFile)
             }catch(ex:Exception){
+                isEditing = false
+                showEditViews(false)
                 ex.printStackTrace()
                 Log.e("EDIT-TAG-ERROR", "${ex.message}")
                 activity?.showSnackBar(bind.root,coreRes.string.editFileMsgError, Snackbar.LENGTH_LONG)
@@ -376,21 +376,17 @@ class SongInfoDialogFragment : DialogFragment() {
 
                 val fileName = originalPathFile.substringAfterLast("/")
                 val pathWithoutName = originalPathFile.substringBeforeLast("/")
-                val internalPathAppDir = File(requireContext().filesDir, fileName)
+                val songFileInternalPath = File(requireContext().filesDir, fileName)
 
                 val contentResolver: ContentResolver = requireContext().contentResolver
 
                 // Crear un archivo de entrada a partir de tu archivo editado (directorio interno)
-                val inputFile = internalPathAppDir
+                val inputFile = songFileInternalPath
                 if (!inputFile.exists()) {
                     throw IOException("El archivo original no existe")
                 }
-
                 // Acceder al directorio seleccionado con SAF
-                val documentFile =
-                    DocumentFile.fromTreeUri(requireContext(), Uri.parse(mPrefs.directorySAFUri))
-
-
+                val documentFile =DocumentFile.fromTreeUri(requireContext(), Uri.parse(mPrefs.directorySAFUri))
                 // Verificar si el directorio es válido
                 if (documentFile != null) {
                     if (!documentFile.canWrite()) {
@@ -398,8 +394,12 @@ class SongInfoDialogFragment : DialogFragment() {
                         openDocumentTreeLauncher.launch(null)
                     } else {
                         //TODO REFACTORIZAR
-                        val directory = if(isFileInRootSAF(documentFile,fileName)) documentFile
-                        else getSubdirectory(documentFile,getParentDirectories(originalPathFile).split("/"))
+                        val uriPath = Uri.parse(mPrefs.directorySAFUri).path
+                        val rootSAFDir = uriPath?.substringAfterLast(":")
+                        val parentDir = getParentDirectories(originalPathFile)
+
+                        val directory = if(rootSAFDir == parentDir) documentFile
+                        else getSubdirectory(documentFile,parentDir.split("/"))
 
                         // Buscamos el archivo existente para eliminarlo y luego copiar el que tenemos editado
 
@@ -410,15 +410,12 @@ class SongInfoDialogFragment : DialogFragment() {
                             existingFile?.delete()
 
                         }
-
-                        val mimeType = MimeTypeMap.getSingleton()
-                            .getMimeTypeFromExtension(internalPathAppDir.extension)
+                        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(songFileInternalPath.extension)
 
                         val newFile = directory?.createFile(
                             mimeType.toString().lowercase(),
                             fileName
-                        ) // Cambiar MIME si es necesario
-
+                        )
                         // Comprobar si el archivo fue creado correctamente
                         if (newFile != null) {
                             // Abrir un OutputStream para el nuevo archivo
@@ -433,16 +430,14 @@ class SongInfoDialogFragment : DialogFragment() {
                                     input.copyTo(output)
                                 }
                             }
-
-
                             withContext(Dispatchers.Main){
-                                //clearInternalAppFilesDir()
+                                clearInternalAppFilesDir()
                                 onSuccess()
 
                             }
                         } else {
                             withContext(Dispatchers.Main){
-                                //clearInternalAppFilesDir()
+                                clearInternalAppFilesDir()
                                 onError()
                             }
                             throw IOException("No se pudo crear el archivo en el directorio seleccionado")
@@ -450,7 +445,7 @@ class SongInfoDialogFragment : DialogFragment() {
                     }
                 } else {
                    withContext(Dispatchers.Main){
-                        //clearInternalAppFilesDir()
+                        clearInternalAppFilesDir()
                         onError()
                     }
                     throw IOException("No se tiene permiso para escribir en el directorio seleccionado")
@@ -482,9 +477,7 @@ class SongInfoDialogFragment : DialogFragment() {
         }
         return currentDir
     }
-    private fun isFileInRootSAF(root:DocumentFile,fileName:String):Boolean{
-        return root.findFile(fileName) != null
-    }
+
     companion object{
         @JvmStatic
         fun newInstance(filePath:String)=SongInfoDialogFragment().apply {
