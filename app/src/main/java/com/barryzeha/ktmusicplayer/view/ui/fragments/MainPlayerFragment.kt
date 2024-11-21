@@ -230,7 +230,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         title = meta.title,
                         album = meta.album,
                         artist = meta.artist)
-                    updateUIOnceTime(updateSongInfo)
+
+                    mainViewModel.setCurrentTrack(updateSongInfo)
+                    musicPlayerService?.updateNotify(updateSongInfo)
                 }
             }
         }

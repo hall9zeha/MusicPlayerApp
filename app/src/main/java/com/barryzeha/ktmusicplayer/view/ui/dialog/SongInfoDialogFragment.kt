@@ -100,7 +100,11 @@ class SongInfoDialogFragment : DialogFragment() {
         activity?.let {
             _bind = SongInfoLayoutBinding.inflate(inflater, container, false)
             _bind?.let { b ->
-
+                if(mPrefs.directorySAFUri!!.isNotEmpty()){
+                    // Después de un nuevo reinicio de nuestro dispositivo para conservar los persmisos sobre el directorio que hayamos seleccionado a través de SAF
+                    val safUri = mPrefs.directorySAFUri
+                    requireContext().contentResolver.takePersistableUriPermission(Uri.parse(safUri), Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
                 b.toolbarInfo.setNavigationIcon(coreRes.drawable.ic_arrow_back)
                 b.toolbarInfo.title = "Song info"
                 b.toolbarInfo.subtitle = "Song name"

@@ -22,6 +22,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -272,7 +273,19 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         songHandler.post(songRunnable)
 
     }
-
+    private fun stopLooper(){
+        songHandler.removeCallbacks(songRunnable)
+        initNotify()
+    }
+    private fun startLooper(){
+        songHandler.post(songRunnable)
+    }
+    fun updateNotify(musicState:MusicState){
+        stopLooper()
+        currentMusicState = musicState
+        initNotify()
+        startLooper()
+    }
     private fun mediaSessionCallback():MediaSession.Callback{
         return object:MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -374,6 +387,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
+
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
                 setPlayingState(false)
@@ -427,7 +441,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     }
 
-    private fun initNotify(){
+   private fun initNotify(){
         currentMusicState?.let { newState ->
             idSong = newState.idSong
 
