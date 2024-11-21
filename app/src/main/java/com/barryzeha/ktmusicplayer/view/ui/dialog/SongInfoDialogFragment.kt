@@ -16,7 +16,6 @@ import androidx.core.view.get
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
 import com.barryzeha.core.common.createTime
@@ -241,7 +240,7 @@ class SongInfoDialogFragment : DialogFragment() {
         // Guardamos la uri del directorio para uso posterior
         mPrefs.directorySAFUri = treeUri.toString()
         // Conceder permisos persistentes para que no sea necesario pedir acceso nuevamente.
-        requireContext().contentResolver.takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        requireContext().contentResolver.takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
         saveFileEdited(pathFile!!,{
             isEditing = false
             showEditViews(false)
@@ -406,11 +405,11 @@ class SongInfoDialogFragment : DialogFragment() {
                     } else {
                         //TODO REFACTORIZAR
                         val uriPath = Uri.parse(mPrefs.directorySAFUri).path
-                        val rootSAFDir = uriPath?.substringAfterLast(":")
-                        val parentDir = getParentDirectories(originalPathFile)
+                        val rootUriDir = uriPath?.substringAfterLast(":")
+                        val parentFileDir = getParentDirectories(originalPathFile)
 
-                        val directory = if(rootSAFDir == parentDir) documentFile
-                        else getSubdirectory(documentFile,parentDir.split("/"))
+                        val directory = if(rootUriDir == parentFileDir) documentFile
+                        else getSubdirectory(documentFile,parentFileDir.split("/"))
 
                         // Buscamos el archivo existente para eliminarlo y luego copiar el que tenemos editado
 

@@ -40,7 +40,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
 
     private val SONG_ITEM=0
     private val HEADER_ITEM=1
-
     private var originalList:MutableList<Any> = arrayListOf()
     private var songEntityIndices = mutableListOf<Int>()
     private var itemListForDelete:MutableList<SongEntity> = arrayListOf()
@@ -84,7 +83,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             } finally {
                 mColorList(context).recycle()
             }
-            //val songPosition = getSongPositionOnlySongItem(position)
+
             val songPosition = getOriginalPosition(getItem(position))
             holder.onBind(songPosition, getItem(position) as SongEntity)
         }else if(holder is HeaderViewHolder){
@@ -104,15 +103,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         }
         return 0 // Retorna 0 si no se encuentra o no es SongEntity
     }
-    private fun getSongPositionOnlySongItem(position: Int): Int {
-        var count = 0
-        for (i in 0 until position) {
-            if (getItemViewType(i) == SONG_ITEM) {
-                count++
-            }
-        }
-        return count + 1
-    }
+
     override fun getItemViewType(position: Int): Int {
         return if(getItem(position) is SongEntity) SONG_ITEM else HEADER_ITEM
     }
@@ -196,8 +187,10 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         }
 
     }
-
+    //TODO crear otro método para manejar la eliminación de una lista de elementos seleccionados
+    // y llamar al método setUpSongEntitiesIndices() al final
     fun remove(song:SongEntity){
+
         val currentList=currentList.toMutableList()
         if(currentList.contains(song)){
             val position = currentList.indexOf(song)
@@ -214,8 +207,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             submitList(currentList)
             originalList = currentList
 
+            setUpSongEntitiesIndices()
         }
-
     }
 
     fun removeItemsForMultipleSelectedAction() {
