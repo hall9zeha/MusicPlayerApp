@@ -13,7 +13,6 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -391,9 +390,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
         CoroutineScope(Dispatchers.IO).launch {
         if(songId != null && songId >-1) {
-                val song = ListPlayerFragment.listAdapter?.getSongById(songId.toLong())
+                val song = ListPlayerFragment.musicListAdapter?.getSongById(songId.toLong())
             song?.let {
-               val (itemNumOnList, _) = ListPlayerFragment.listAdapter?.getPositionByItem(song as SongEntity)
+               val (itemNumOnList, _) = ListPlayerFragment.musicListAdapter?.getPositionByItem(song as SongEntity)
                     ?: Pair(0, 0)
                 withContext(Dispatchers.Main) {
                     bind?.tvNumberSong?.text = String.format(
@@ -463,7 +462,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
             btnMainNext.setOnClickListener {
                 checkCoverViewStyle()
-                if (currentSelectedPosition < ListPlayerFragment.listAdapter?.itemCount!! - 1) {
+                if (currentSelectedPosition < ListPlayerFragment.musicListAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
                     getSongOfList(0)?.let{song->

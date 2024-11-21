@@ -163,6 +163,11 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             }
         }
     }
+    // Al usar DiffUtils o asyncListDiffer para agregar más de un item a la vez a veces solo ingresa el último
+    // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
+    // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo, parece poco eficiente,
+    // pero diff util está diseñado para manejarlo, aún así seguiremos averiguando más.
+
     fun addAll(songs:List<Any>){
         this.originalList=songs.toMutableList()
         setUpSongEntitiesIndices()
@@ -170,10 +175,27 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
 
     }
 
-    // Al usar DiffUtils o asyncListDiffer para agregar más de un item a la vez a veces solo ingresa el último
-    // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
-    // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo, parece poco eficiente,
-    // pero diff util está diseñado para manejarlo, aún así seguiremos averiguando más.
+    fun update(song:SongEntity){
+        val currentList = currentList.toMutableList()
+        val item = getSongById(song.id)
+        val positionOnAdapter = currentList.indexOf(item as SongEntity)
+        val positionOnOriginalList = originalList.indexOf(item)
+
+        val meta = fetchFileMetadata(context, song.pathLocation!!)
+        meta?.let {
+            val itemUpdated = item?.copy(
+                description = meta.title.toString(),
+                artist = meta.artist.toString(),
+                album = meta.album.toString(),
+                genre = meta.genre.toString()
+            )
+            originalList[positionOnOriginalList] = itemUpdated as SongEntity
+            currentList[positionOnAdapter] = itemUpdated
+            submitList(currentList)
+            notifyItemChanged(positionOnAdapter)
+        }
+
+    }
 
     fun remove(song:SongEntity){
         val currentList=currentList.toMutableList()
