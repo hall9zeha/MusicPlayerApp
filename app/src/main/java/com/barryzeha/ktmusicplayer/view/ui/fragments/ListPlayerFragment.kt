@@ -280,7 +280,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
-                //adapter.add(song)
                 musicPlayerService?.setNewMediaItem(song)
             }
         }

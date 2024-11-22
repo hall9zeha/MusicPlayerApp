@@ -242,6 +242,7 @@ class SongInfoDialogFragment : DialogFragment() {
         saveFileEdited(pathFile!!,{
             isEditing = false
             showEditViews(false)
+            enableViews(true)
             activity?.showSnackBar(bind.root, coreRes.string.editFileSuccess)
             pathFile?.let { setFileInfo(it) }
             viewModel.setIsSongTagEdited(songEntity!!)
