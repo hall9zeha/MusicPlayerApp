@@ -545,6 +545,19 @@ class MusicPlayerService : Service(){
         songHandler.post(songRunnable)
 
     }
+    private fun stopLooper(){
+        songHandler.removeCallbacks(songRunnable)
+        initNotify()
+    }
+    private fun startLooper(){
+        songHandler.post(songRunnable)
+    }
+    fun updateNotify(musicState:MusicState){
+        stopLooper()
+        currentMusicState = musicState
+        initNotify()
+        startLooper()
+    }
     private fun setUpExoPlayerRepeatMode(){
         when(mPrefs.songMode){
             SongMode.RepeatAll.ordinal->{

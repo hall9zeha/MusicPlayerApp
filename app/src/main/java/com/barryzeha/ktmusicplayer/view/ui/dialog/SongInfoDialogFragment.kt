@@ -83,14 +83,10 @@ class SongInfoDialogFragment : DialogFragment() {
             handleUriSAFSelection(uri)
         }
     }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, coreRes.style.myFullScreenDialog)
     }
-
-
     @SuppressLint("ResourceType")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -231,8 +227,6 @@ class SongInfoDialogFragment : DialogFragment() {
                     menu[0].setVisible(true)
                     menu[1].setVisible(false)
                     pathFile?.let{editAudioFileMetadata(it)}
-
-
                 }
             }
             true
@@ -360,9 +354,8 @@ class SongInfoDialogFragment : DialogFragment() {
 
             withContext(Dispatchers.Main) {
                 pathFile(file.absolutePath) // Devolvemos la ruta del archivo temporal
+                }
             }
-            }
-
 
         } catch (e: Exception) {
             e.printStackTrace()
