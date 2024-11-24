@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
    <application
+        tools:node="remove"
         android:theme ="@style/Theme.KTMusicPlayer"
         >
        <activity

@@ -79,4 +79,7 @@ dependencies {
     // Dagger hilt
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.dagger.hilt)
+
+    // Splash screen
+    implementation(libs.core.splashscreen)
 }

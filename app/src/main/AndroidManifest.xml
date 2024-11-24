@@ -31,7 +31,7 @@
         android:label="${appLabel}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.KTMusicPlayer"
+        android:theme="@style/splashScreenTheme"
         android:extractNativeLibs="true"
         android:hardwareAccelerated="true"
 

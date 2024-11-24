@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -50,6 +51,12 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     private var serviceSongListener:ServiceSongListener?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen().apply {
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(1000)
+                setKeepOnScreenCondition{false}
+            }
+        }
         bind= ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
 

@@ -77,4 +77,9 @@
         <item name="android:statusBarColor">@color/black</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>-->
+    <style name="splashScreenTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/surface</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ktmusic_icon</item>
+        <item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>
+    </style>
 </resources>

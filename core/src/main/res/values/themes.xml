@@ -65,4 +65,9 @@
         <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
         <!--<item name="android:theme">@style/myToolbarDrawerStyle</item>-->
     </style>
+    <style name="splashScreenTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/surface</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ktmusic_icon</item>
+        <item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>
+    </style>
 </resources>
