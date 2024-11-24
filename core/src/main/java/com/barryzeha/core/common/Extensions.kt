@@ -87,6 +87,9 @@ fun ImageView.loadImage(url:String)=
 fun Int.adjustAlpha(factor: Float): Int =
     (this.ushr(24) * factor).roundToInt() shl 24 or (0x00FFFFFF and this)
 
+inline val Int.alpha: Int
+    get() = (this shr 24) and 0xFF
+
 // Convert MusicState object to JSon
 fun  <T> T.toJson():String{
     val gson = Gson()

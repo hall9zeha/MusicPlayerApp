@@ -573,7 +573,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     else -> {
                         // First: active repeat All
                         bottomPlayerControls.btnRepeat.backgroundTintList=
-                            ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                            ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
                         bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
                         mPrefs.songMode= REPEAT_ALL
                     }
@@ -587,7 +587,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         mPrefs.songMode= CLEAR_MODE
                     }
                     else->{
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
                         mPrefs.songMode= SHUFFLE
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                         bottomPlayerControls.btnRepeat.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
@@ -629,7 +629,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     musicListAdapter?.clearListItemsForDelete()
                 }else{
                     musicListAdapter?.showMultipleSelection(true)
-                   btnMultipleSelect.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                   btnMultipleSelect.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
                     clicked=true
                     visibleOrGoneBottomActions(false)
                 }
@@ -697,7 +697,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         this?.let{
             if(!isFiltering){
                 visibleOrGoneViews(false)
-                btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.controls_colors)?.withAlpha(128)
+                btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
                 isFiltering=true
                 showKeyboard(true)
             }else {
@@ -817,19 +817,19 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
                     bottomPlayerControls.btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
                         requireContext(),
-                        coreRes.color.controls_colors
+                        coreRes.color.primaryColor
                     )?.withAlpha(128)
                 }
                 SongMode.RepeatAll.ordinal -> {
                     bottomPlayerControls.btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
                         requireContext(),
-                        coreRes.color.controls_colors
+                        coreRes.color.primaryColor
                     )?.withAlpha(128)
                 }
                 SongMode.Shuffle.ordinal ->{
                     bottomPlayerControls.btnShuffle.backgroundTintList = ContextCompat.getColorStateList(
                         requireContext(),
-                        coreRes.color.controls_colors
+                        coreRes.color.primaryColor
                     )?.withAlpha(128)
                 }
                 else -> {

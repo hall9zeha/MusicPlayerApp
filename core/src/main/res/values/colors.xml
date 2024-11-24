@@ -3,8 +3,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="controls_colors">#323232</color>
+    <color name="primaryColor">#8BC34A</color>
     <color name="bottom_sheet_color">@color/white</color>
     <color name="color_primary">@color/white</color>
     <color name="green" />
     <color name="red">#F44336</color>
+    <color name="switchTrackTint">#8BC34A</color>
+
+
 </resources>

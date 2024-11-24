@@ -138,6 +138,8 @@
         android:layout_height="0dp"
         tools:listitem="@layout/item_song"
         app:bubbleSize="small"
+        app:bubbleColor="?attr/colorPrimaryDark"
+
         app:bubbleTextSize="14sp"
         app:handleColor="?attr/colorPrimary"
         app:layout_constraintStart_toStartOf="parent"

@@ -14,6 +14,7 @@ import android.widget.Filterable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.mColorList
@@ -392,6 +393,10 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         val bind = ListItemHeaderBinding.bind(v)
         fun onBind(value:String)=with(bind){
             tvHeaderDescription.text=value
+            val alpha = 148
+            val colorWithAlpha = (alpha shl 24) or (mColorList(context).getColor(COLOR_PRIMARY,
+                COLOR_PRIMARY) and 0x00FFFFFF)
+            this.root.setBackgroundColor(colorWithAlpha)
         }
     }
     // Filter
