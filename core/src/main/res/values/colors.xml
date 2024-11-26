@@ -10,7 +10,7 @@
     <color name="color_primary">@color/white</color>
     <color name="green" />
     <color name="red">#F44336</color>
-    <color name="switchTrackTint">@color/primaryColor</color>
+    <color name="switchTrackTint">#8BC34A</color>
 
 
 </resources>

@@ -4,12 +4,12 @@
     android:height="180.58dp"
     android:viewportWidth="240.58"
     android:viewportHeight="240.58">
-  <group android:pivotX="80" android:pivotY="80" android:scaleX="0.4" android:scaleY="0.4">
+  <group android:pivotX="90" android:pivotY="90" android:scaleX="0.35" android:scaleY="0.35">
   <path
-      android:strokeWidth="1"
+      android:strokeWidth="8"
       android:pathData="M177.29,177.29m-176.79,0a176.79,176.79 0,1 1,353.58 0a176.79,176.79 0,1 1,-353.58 0"
       android:fillColor="#232323"
-      android:strokeColor="#50f222"/>
+      android:strokeColor="#ffffff"/>
   <path
       android:pathData="M177.27,117.71a59.24,59.24 0,1 0,59.23 59.23A59.23,59.23 0,0 0,177.27 117.71ZM177.27,194.44a17.5,17.5 0,1 1,17.5 -17.5A17.49,17.49 0,0 1,177.27 194.44Z"
       android:fillColor="#50f222"/>
