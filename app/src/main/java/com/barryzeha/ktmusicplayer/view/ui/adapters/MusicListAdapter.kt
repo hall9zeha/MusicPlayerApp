@@ -76,7 +76,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             try {
                 if (selectedPos == position) {
                     (holder as MViewHolder).bind.root.setBackgroundColor(
-                        mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+                        mColorList(context).getColor(COLOR_PRIMARY, 0).adjustAlpha(0.3f)
                     )
                 } else {
                     (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
@@ -141,7 +141,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 notifyItemChanged(
                     selectedPos,
                     ItemSongChangePayload.BackgroundColor(
-                        mColorList(context).getColor(2, 0).adjustAlpha(0.3f)
+                        mColorList(context).getColor(COLOR_PRIMARY, 0).adjustAlpha(0.3f)
                     )
                 )
             }
@@ -396,7 +396,9 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             val alpha = 148
             val colorWithAlpha = (alpha shl 24) or (mColorList(context).getColor(COLOR_PRIMARY,
                 COLOR_PRIMARY) and 0x00FFFFFF)
-            this.root.setBackgroundColor(colorWithAlpha)
+            //this.root.setBackgroundColor(colorWithAlpha)
+            tvHeaderDescription.setTextColor(mColorList(context).getColor(COLOR_PRIMARY,
+                COLOR_PRIMARY))
         }
     }
     // Filter

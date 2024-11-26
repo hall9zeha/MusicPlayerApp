@@ -53,7 +53,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity"
+            android:exported="false" />
+        <activity
 
+            android:name="com.barryzeha.mfilepicker.ui.views.FilePickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.With.Toolbar"
+            />
         <service
             android:name=".service.MusicPlayerService"
             android:foregroundServiceType="mediaPlayback"

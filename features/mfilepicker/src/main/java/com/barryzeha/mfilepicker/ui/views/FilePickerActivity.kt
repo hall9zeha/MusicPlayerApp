@@ -28,6 +28,7 @@ import com.barryzeha.mfilepicker.ui.adapters.FilePickerAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
+import com.barryzeha.core.R as coreRes
 
 @AndroidEntryPoint
 class FilePickerActivity : AppCompatActivity() {

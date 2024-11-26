@@ -57,6 +57,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     private var effectTypeForSave=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
         bind = ActivityMainEqualizerBinding.inflate(layoutInflater)
         enableEdgeToEdge()
