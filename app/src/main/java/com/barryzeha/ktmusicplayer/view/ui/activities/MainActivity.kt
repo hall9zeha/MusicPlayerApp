@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.view.Menu
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -23,6 +24,7 @@ import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
+import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
@@ -41,6 +43,7 @@ import com.barryzeha.core.R as coreRes
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.OnFragmentReadyListener{
     internal lateinit var bind:ActivityMainBinding
+    private var menu:Menu?=null
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
     private val launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
@@ -84,6 +87,10 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         }
         mainViewModel.songState.observe(this){songState->
         }
+        mainViewModel.playLists.observe(this){playLists->
+            val titlesList = playLists.map{it.playListName}
+            addItemOnMenuDrawer(menu,"Playlists", titlesList)
+        }
     }
     private fun setUpViewPager(){
         val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
@@ -102,7 +109,23 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             }
 
         })
+        menu = bind.navView.menu
 
+    }
+    private fun addItemOnMenuDrawer(menu:Menu?,subMenuTitle:String?=null, itemsMenuTitle:List<String>){
+        menu?.let{
+            subMenuTitle?.let{
+                val subMenu = menu.addSubMenu(subMenuTitle)
+                subMenu.setHeaderIcon(coreRes.drawable.ic_playlist_select)
+                val m=subMenu.add("default")
+                m.setIcon(coreRes.drawable.ic_playlist_select)
+                itemsMenuTitle.forEach { title->
+                    val m=subMenu.add(title)
+                    m.setIcon(coreRes.drawable.ic_playlist_select)
+                }
+                bind.navView.invalidate()
+            }
+        }
     }
     // Usamos  la navegación sin el componente de navegación ya que necesitamos el viewPager para deslizarnos
     // y solo el menú para poder mostrar los índices del viewPager programaticamente

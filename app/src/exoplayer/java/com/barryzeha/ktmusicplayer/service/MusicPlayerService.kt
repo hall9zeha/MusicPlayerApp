@@ -15,6 +15,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Binder
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -372,7 +373,7 @@ class MusicPlayerService : Service(){
         return START_NOT_STICKY
     }
 
-    @OptIn(UnstableApi::class)
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun setUpRepository(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
             .build()
@@ -507,7 +508,7 @@ class MusicPlayerService : Service(){
                 idSong = newState.idSong
             }
             // Para android <=10
-            if(Build.VERSION.SDK_INT <=Build.VERSION_CODES.Q){
+            if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
                 mediaPlayerNotify = notificationMediaPlayer(
                     this,
                     MediaStyle()
@@ -767,7 +768,7 @@ class MusicPlayerService : Service(){
         }
     }
 
-    @OptIn(UnstableApi::class)
+    @androidx.annotation.OptIn(UnstableApi::class)
     fun getSessionOrChannelId(): Int {
         return exoPlayer.audioSessionId
     }
