@@ -256,7 +256,6 @@ class MainEqualizerActivity : AppCompatActivity() {
                EqualizerManager.updateFX(seekBar.tag.toString().toInt(),progress)
             }
         }
-
         val frequencies = arrayOf("32 Hz", "64 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz", "16 kHz", "")
         for(i in 0 until fxArray.size-1){
             val seekId=i
