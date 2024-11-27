@@ -22,8 +22,10 @@ import androidx.viewbinding.ViewBinding
 import com.barryzeha.core.R
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
+import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
@@ -276,3 +278,15 @@ private fun createPopUpWindow(dialogView:ViewBinding,parentView:View, activity: 
 
      dialog.show()
  }
+fun getPlayListName(mPrefs:MyPreferences, headerTextRes:(Int)->Unit){
+
+        when(mPrefs.playListSortOption){
+            BY_ALBUM ->headerTextRes(R.string.album)
+            BY_ARTIST ->headerTextRes(R.string.artist)
+            BY_GENRE ->headerTextRes(R.string.genre)
+            BY_FAVORITE ->headerTextRes(R.string.favorite)
+            else->headerTextRes(R.string.default_title)
+
+        }
+
+}

@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     private fun setUpViewPager(){
         val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
         bind.mViewPager.adapter=viewPagerAdapter
+
         // Para precargar el segundo fragmento mientras se muestra el primero
         //bind.mViewPager.offscreenPageLimit=2
         bind.mViewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback(){
@@ -99,6 +100,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                 }
                 bind.navView.menu[position].setChecked(true)
             }
+
         })
 
     }

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.fetchFileMetadata
+import com.barryzeha.core.common.fetchShortFileMetadata
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
@@ -128,8 +129,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         // obtenemos la posición del item por su id, ya que tenemos dos tipos de vistas en el recyclerview
         // solo debemos cambiar de color a items SongEntity
         val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
-
-            songItem?.let {
+        songItem?.let {
                 val position = originalList.indexOf(songItem)
                 selectedPos = originalList.indexOf(songItem)
                 if (lastSelectedPos == -1) {
@@ -330,7 +330,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
                 CoroutineScope(Dispatchers.IO).launch {
-                    val audioTag = fetchFileMetadata(context, song.pathLocation!!)
+                    val audioTag = fetchShortFileMetadata(song.pathLocation!!)
                     withContext(Dispatchers.Main) {
                         audioTag?.let {
                             chkItemSong.visibility = if (song.isSelectShow) View.VISIBLE else View.GONE

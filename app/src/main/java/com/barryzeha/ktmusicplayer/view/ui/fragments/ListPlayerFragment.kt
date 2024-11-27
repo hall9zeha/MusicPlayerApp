@@ -49,6 +49,7 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
+import com.barryzeha.ktmusicplayer.common.getPlayListName
 import com.barryzeha.ktmusicplayer.common.onMenuActionAddPopup
 import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
 import com.barryzeha.ktmusicplayer.common.processSongPaths
@@ -216,7 +217,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         playListAdapter!!.add(PlaylistEntity(0,"Default"))
     }
     private fun setUpObservers(){
-        //mainViewModel.fetchAllSong()
+
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
             serviceConnection=instance.first
             musicPlayerService=instance.second
@@ -270,13 +271,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             musicListAdapter?.removeAll()
             // probando eliminar la lista de media items para cargar la lista nueva, ya que tendrá un orden distinto
-            musicPlayerService?.clearPlayList(true)
+            musicPlayerService?.clearPlayList(isSort = true)
             // ********
             mPrefs.playListSortOption = selectedSort
             mainViewModel.fetchAllSongsBy(selectedSort)
             setUpPlayListName()
-            //Todo manejar correctamente la lista de canciones cuando se traiga solamente los favoritos
-            // volver a llenar la lista de reproducción u otra mejor opción
+
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
@@ -382,14 +382,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     private fun setUpPlayListName()=with(bind){
         this?.let{
-            when(mPrefs.playListSortOption){
-                BY_ALBUM->tvPlayListName.text=getString(coreRes.string.album)
-                BY_ARTIST->tvPlayListName.text=getString(coreRes.string.artist)
-                BY_GENRE->tvPlayListName.text=getString(coreRes.string.genre)
-                BY_FAVORITE->tvPlayListName.text=getString(coreRes.string.favorite)
-                else->tvPlayListName.text=getString(coreRes.string.default_title)
-
-            }
+            getPlayListName(mPrefs){headerTextRes->tvPlayListName.text=getString(headerTextRes)}
         }
     }
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
@@ -683,9 +676,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         btmSheetIsExpanded=false
                     }
                 }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            } override fun onSlide(bottomSheet: View, slideOffset: Float) {
 
             }
         })
@@ -750,12 +741,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             fastForwardingOrRewind = if(isForward) bind?.bottomPlayerControls?.btnNext?.isPressed!!
             else bind?.bottomPlayerControls?.btnPrevious?.isPressed!!
             if(fastForwardingOrRewind){
-                if(isForward){
-                    musicPlayerService?.fastForward()
-                }
-                else{
-                    musicPlayerService?.fastRewind()
-                }
+                if(isForward){musicPlayerService?.fastForward()}
+                else{musicPlayerService?.fastRewind()}
             }else{
                 fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!)
             }
@@ -894,6 +881,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
        startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
 
     }
+
     override fun play() {
         super.play()
         bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)

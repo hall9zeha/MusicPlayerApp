@@ -20,6 +20,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.telephony.PhoneStateListener
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
@@ -234,9 +236,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
                 // si no hay algo seleccionado previamente solo devolverá la lista por defecto
 
+                songState=repository.fetchSongState()
                 //val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
                 val songs=repository.fetchPlaylistOrderBy(mPrefs.playlistId.toLong(), mPrefs.playListSortOption)
-                songState=repository.fetchSongState()
 
                 songs.forEach { s ->
                     //if (!songsList.contains(s)) {

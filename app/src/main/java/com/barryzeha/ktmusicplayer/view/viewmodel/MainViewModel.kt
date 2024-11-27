@@ -210,6 +210,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun deleteAllSongs(){
         launch {
             _deleteAllRows.value = repository.deleteAllSongs()
+            repository.deleteAllSongsState()
         }
     }
     fun getSongById(idSong:Long){

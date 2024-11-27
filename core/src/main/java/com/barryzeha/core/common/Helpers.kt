@@ -134,6 +134,41 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
     }
      return null
 }
+fun fetchShortFileMetadata(pathFile:String):AudioMetadata? {
+    val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
+    metadata?.let {
+        val tag = metadata.tag
+        val nameFile = metadata.file.name.substringBeforeLast(".")
+        fun getTagField(fieldKey: FieldKey, defaultValue: String) =
+            try {
+                tag?.getFirst(fieldKey)?.takeIf { it.isNotEmpty() } ?: defaultValue
+            } catch (ex: Exception) {
+                defaultValue
+            }
+        // Extract metadata with default values
+        val title = getTagField(FieldKey.TITLE, nameFile)
+        val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
+        val album = getTagField(FieldKey.ALBUM, "Album Unknown")
+
+
+        // Extract audio header data with default values
+        val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
+        val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong() } catch (ex: Exception) { 0L }
+        val songLengthFormatted = try { getTimeOfSong(songLength) } catch (ex: Exception) { "0" }
+
+        return AudioMetadata(
+            title = title,
+            artist = artist,
+            album = album,
+            bitRate = bitRate,
+            songLengthFormatted = songLengthFormatted,
+            songLength = songLength
+
+        )
+
+    }
+    return null
+}
 fun formatFileSize(bytes: Long): String {
     return when {
         bytes >= 1_000_000 -> String.format("%.2f MB", bytes / 1_000_000.0)

@@ -37,6 +37,7 @@ interface MainRepository {
     suspend fun saveSongState(songState: SongState):Long
     suspend fun updateSongState(songState: SongState):Int
     suspend fun deleteSongState(idSong:Long):Int
+    suspend fun deleteAllSongsState():Int
 
     //PlayList
     suspend fun createPlayList(playlistEntity:PlaylistEntity):Long
