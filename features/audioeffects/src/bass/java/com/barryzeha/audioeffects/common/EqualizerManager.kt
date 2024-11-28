@@ -70,7 +70,7 @@ object EqualizerManager {
         updateFX(fxArray.size - 1, fxArray[fxArray.size - 1])
         mPrefs?.let {prefs->
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f);
+            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 10f)
         }
     }
 
@@ -96,7 +96,6 @@ object EqualizerManager {
         for (i in fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
             //TODO ya es funcional correctamente, hacer más pruebas
-            //BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
         }
 
         if (isEnable) {
@@ -111,8 +110,6 @@ object EqualizerManager {
         val ch = if (fxChan != 0) fxChan else chan
         for (i in  fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
-            //BASS.BASS_ChannelRemoveFX(chan, fxArray[i])
-
         }
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
