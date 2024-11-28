@@ -31,5 +31,6 @@
     <string name="addFile">Add File</string>
     <string name="editFileMsgError">The file could not be edited. Non-existent file or incompatible format</string>
     <string name="editFileSuccess">Edited successful</string>
-
+    <string name="playlistCreatedMsg">Playlist created</string>
+    <string name="addedToPlaylist">Added to playlist</string>
 </resources>

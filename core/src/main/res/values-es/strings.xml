@@ -33,4 +33,6 @@
     <string name="addFile">Agregar archivo</string>
     <string name="editFileMsgError">No se pudo editar el archivo. Archivo inexistente o formato no soportado</string>
     <string name="editFileSuccess">Editado correctamente</string>
+    <string name="playlistCreatedMsg">Lista creada</string>
+    <string name="addedToPlaylist">Agregada a la lista</string>
 </resources>

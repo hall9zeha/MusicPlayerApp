@@ -319,7 +319,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         // Playlist
         mainViewModel.createdPlayList.observe(viewLifecycleOwner){insertedRow->
             if(insertedRow >0){
-                Toast.makeText(activity, "Lista creada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, coreRes.string.playlistCreatedMsg, Toast.LENGTH_SHORT).show()
                 mainViewModel.fetchPlaylists()
             }
         }
@@ -331,11 +331,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner){insertedRow->
             if(insertedRow>0){
-                Toast.makeText(activity, "Agregado correctamente", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, coreRes.string.addedToPlaylist, Toast.LENGTH_SHORT).show()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 // Reiniciamos el valor para evitar inconvenientes, lo usaremos para nuestrá lógica de
                 // si es mayor que cero, agregar a lista y si es cero, cambiar entre listas
-                idSongForSendToPlaylist =0
+                idSongForSendToPlaylist = 0
                 // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
 
             }
@@ -423,7 +423,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bind?.seekbarControl?.tvEndTime?.text = createTime(musicState.duration).third
         bind?.seekbarControl?.tvInitTime?.text = createTime(musicState.currentDuration).third
         bind?.seekbarControl?.loadSeekBar?.progress = musicState.currentDuration.toInt()
-        //mainViewModel.saveStatePlaying(musicState.isPlaying)
         updateService()
 
     }
@@ -964,7 +963,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
         if(mPrefs.controlFromNotify){
             try {
-                //val song = getSongOfAdapter(mPrefs.currentPosition.toInt())
                 val song = getSongOfAdapter(mPrefs.idSong)
                 song?.let {
                     val songMetadata = getSongMetadata(requireContext(), song.pathLocation)

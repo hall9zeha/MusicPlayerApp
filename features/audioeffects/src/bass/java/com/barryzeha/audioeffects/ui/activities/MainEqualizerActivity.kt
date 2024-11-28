@@ -47,11 +47,8 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     @Inject
     lateinit var mPrefs:EffectsPreferences
-
-
     private lateinit var bind:ActivityMainEqualizerBinding
     private val fxArray:IntArray = IntArray(11)
-
     private var channelIntent=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,8 +148,6 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
             FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews();createView(
                 FULL_BASS_AND_TREBLE_PRESET)
-
-
                 setEffect()
             }
         }
@@ -165,7 +160,6 @@ class MainEqualizerActivity : AppCompatActivity() {
             createView(CUSTOM_PRESET)
             setEffect()
         }
-
     }
     private fun chipGroupFocused(effectType:Int){
         val chip = bind.chipGroupEffects[effectType]
@@ -173,9 +167,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             bind.horizontalScrollView.scrollTo(chip.left,0)
             chip.isSelected=true
             chip.requestFocus()
-
         }
-
     }
 
    private  fun enableOrDisableEffects() {
@@ -317,7 +309,6 @@ class MainEqualizerActivity : AppCompatActivity() {
             layoutParams = layoutParams1
             setOnSeekBarChangeListener(osbcl)
         }
-
         val volumeTextView = TextView(this@MainEqualizerActivity).apply {
             text = "Volume"
             layoutParams = LinearLayout.LayoutParams(
@@ -329,11 +320,9 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
             gravity = Gravity.CENTER
         }
-
         bind.lnContentBands.addView(volumeSeekBar)
         bind.lnContentBands.addView(volumeTextView)
     }
-
     // Por ahora no debe retornar nada
     class MainEqualizerContract:ActivityResultContract<Int,Unit>(){
         override fun createIntent(context: Context, sessionId: Int): Intent {
@@ -341,7 +330,6 @@ class MainEqualizerActivity : AppCompatActivity() {
                     putExtra(CHANNEL_OR_SESSION_ID_EXTRA,sessionId)
                 }
         }
-
         override fun parseResult(resultCode: Int, intent: Intent?) {
             // Por ahora no debe retornar nada
         }

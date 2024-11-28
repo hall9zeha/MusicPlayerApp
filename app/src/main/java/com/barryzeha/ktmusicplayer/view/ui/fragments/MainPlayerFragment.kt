@@ -270,15 +270,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun musicState(musicState: MusicState?) {
         super.musicState(musicState)
         musicState?.let{
-            // Había un error de parpadeo especialmente en los textViews con marquee_forever dezplazables.
-            // Se debía que al recibir las actualizaciones cada 500ms las volvía a enviar a mi viewModel:
-            // mainViewModel.setMusicState(musicState) y recién dentro del observador actualizaba las vistas
-            // esto probablemente generaba más retardo en la actualización de las vistas y un trabajo innecesario
-            // pero sin el viewModel el estado no sobrevive  a un cambio de orientación, a veces lo hace y a veces no.
-            // Al agregar una implementación de ScopedViewModel como base para las clases ViewModels ayudó a solucionar el problema
-            // por ahora
             mainViewModel.setMusicState(musicState)
-            //setChangeInfoViews(musicState)
+
           }
     }
 
