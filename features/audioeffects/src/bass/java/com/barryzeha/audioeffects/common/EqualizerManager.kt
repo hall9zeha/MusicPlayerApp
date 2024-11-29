@@ -76,19 +76,19 @@ object EqualizerManager {
 
     fun updateFX(index: Int, value: Int) {
         val n = index
-        val v = value;
+        val v = value
         if (n < fxArray.size - 1) { // EQ
             val p: BASS.BASS_DX8_PARAMEQ = BASS.BASS_DX8_PARAMEQ()
-            BASS.BASS_FXGetParameters(fxArray[n], p);
+            BASS.BASS_FXGetParameters(fxArray[n], p)
             p.fGain = (v - 10).toFloat()
-            BASS.BASS_FXSetParameters(fxArray[n], p);
+            BASS.BASS_FXSetParameters(fxArray[n], p)
         } else if (n == fxArray.size - 1) { // reverb
             val p: BASS.BASS_DX8_REVERB = BASS.BASS_DX8_REVERB()
-            BASS.BASS_FXGetParameters(fxArray[n], p);
+            BASS.BASS_FXGetParameters(fxArray[n], p)
             p.fReverbMix = (if (v != 0) (Math.log(v / 20.0) * 20).toFloat() else (-96).toFloat())
-            BASS.BASS_FXSetParameters(fxArray[n], p);
+            BASS.BASS_FXSetParameters(fxArray[n], p)
         } else // volume
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 10f);
+            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 10f)
 
     }
     fun setEffect(isEnable: Boolean){
