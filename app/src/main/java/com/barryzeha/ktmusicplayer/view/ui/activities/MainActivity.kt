@@ -24,8 +24,10 @@ import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
+import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
+import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
@@ -88,8 +90,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         mainViewModel.songState.observe(this){songState->
         }
         mainViewModel.playLists.observe(this){playLists->
-            val titlesList = playLists.map{it.playListName}
-            addItemOnMenuDrawer(menu,"Playlists", titlesList)
+            addItemOnMenuDrawer(playLists)
         }
     }
     private fun setUpViewPager(){
@@ -112,17 +113,25 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         menu = bind.navView.menu
 
     }
-    private fun addItemOnMenuDrawer(menu:Menu?,subMenuTitle:String?=null, itemsMenuTitle:List<String>){
-        menu?.let{
-            subMenuTitle?.let{
-                val subMenu = menu.addSubMenu(subMenuTitle)
+    private fun addItemOnMenuDrawer(playlists:List<PlaylistEntity>){
+        menu?.let{menu->
+                val subMenu = menu.addSubMenu("Playlists")
                 subMenu.setHeaderIcon(coreRes.drawable.ic_playlist_select)
                 val m=subMenu.add("default")
                 m.setIcon(coreRes.drawable.ic_playlist_select)
-                itemsMenuTitle.forEach { title->
-                    val m=subMenu.add(title)
+                playlists.forEachIndexed { index,playlist->
+                    val itemView = MenuItemViewBinding.inflate(layoutInflater)
+                    val m = subMenu.add(Menu.NONE,playlist.idPlaylist.toInt(),Menu.NONE,playlist.playListName)
+                    m.setActionView(itemView.root)
                     m.setIcon(coreRes.drawable.ic_playlist_select)
-                }
+
+                    m.setOnMenuItemClickListener{
+                        Toast.makeText(this,m.itemId.toString(), Toast.LENGTH_SHORT).show()
+                        true
+                    }
+                    itemView.menuItemIcon.setOnClickListener {
+                        Toast.makeText(this, "eliminar", Toast.LENGTH_SHORT).show()
+                    }
                 bind.navView.invalidate()
             }
         }
