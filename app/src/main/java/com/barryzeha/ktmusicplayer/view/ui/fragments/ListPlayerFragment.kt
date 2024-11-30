@@ -47,6 +47,7 @@ import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
+import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.common.getPlayListName
@@ -1012,6 +1013,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
                 }
+
             }
     }
 }

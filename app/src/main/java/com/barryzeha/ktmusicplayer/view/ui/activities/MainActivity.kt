@@ -142,7 +142,14 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                         existId.add(playlist.idPlaylist.toInt())
 
                         m?.setOnMenuItemClickListener {
-                            Toast.makeText(this, m?.itemId.toString(), Toast.LENGTH_SHORT).show()
+                           // Enviamos como argumento el id del item que corresponde al id de nuestra playlist
+                            ListPlayerFragment.newInstance(param1 = m?.itemId.toString(),"")
+
+                            bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
+                            mPrefs.currentView = SONG_LIST_FRAGMENT
+                            bind.navView.menu[MAIN_FRAGMENT].setChecked(false)
+                            bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+
                             true
                         }
                         itemView.menuItemIcon.setOnClickListener {
@@ -262,6 +269,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                 if (ListPlayerFragment.btmSheetIsExpanded)ListPlayerFragment.bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
                 else {
                     bind.mViewPager.setCurrentItem(MAIN_FRAGMENT, true)
+                    bind.navView.menu[MAIN_FRAGMENT].setChecked(true)
                     mPrefs.currentView = MAIN_FRAGMENT
                 }
 
