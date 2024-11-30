@@ -198,9 +198,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         },{playlist->
             // Al eliminar un item
-            mainViewModel.deletePlayList(playlist)
+            mainViewModel.deletePlayList(playlist.idPlaylist)
             playListAdapter?.remove(playlist)
             resizeBottomSheet()
+            (activity as? MainActivity)?.removeMenuItemDrawer(playlist.idPlaylist.toInt())
 
         },{playlist->
             // Cambiar nombre de una playlist
@@ -321,12 +322,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(insertedRow >0){
                 Toast.makeText(activity, coreRes.string.playlistCreatedMsg, Toast.LENGTH_SHORT).show()
                 mainViewModel.fetchPlaylists()
+
             }
         }
         mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
             playListAdapter?.let{
                 it.addAll(playLists)
                 resizeBottomSheet()
+                (activity as? MainActivity)?.addItemOnMenuDrawer(playLists)
             }
         }
         mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner){insertedRow->

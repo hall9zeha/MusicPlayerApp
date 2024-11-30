@@ -248,9 +248,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             _playlistWithSongRefInserted.value=repository.savePlaylistWithSongCrossRef(playlistWithSongsCrossRef)
         }
     }
-    fun deletePlayList(playlistEntity: PlaylistEntity){
+    fun deletePlayList(playlistId: Long){
         launch{
-            repository.deletePlaylist(playlistEntity.idPlaylist)
+            repository.deletePlaylist(playlistId)
         }
     }
     fun updatePlaylist(playlistEntity: PlaylistEntity){

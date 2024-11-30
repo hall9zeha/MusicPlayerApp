@@ -41,7 +41,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
-
+const val PLAYLIST_SUBMENU_ID = 25
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.OnFragmentReadyListener{
     internal lateinit var bind:ActivityMainBinding
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
     private val launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
-
+    private var playlists:List<PlaylistEntity> = arrayListOf()
     @Inject
     lateinit var mPrefs:MyPreferences
 
@@ -89,8 +89,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         }
         mainViewModel.songState.observe(this){songState->
         }
-        mainViewModel.playLists.observe(this){playLists->
-            addItemOnMenuDrawer(playLists)
+        mainViewModel.playLists.observe(this){lists->
+            this.playlists = lists
+
         }
     }
     private fun setUpViewPager(){
@@ -113,27 +114,51 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         menu = bind.navView.menu
 
     }
-    private fun addItemOnMenuDrawer(playlists:List<PlaylistEntity>){
+   fun addItemOnMenuDrawer(playlists:List<PlaylistEntity>){
         menu?.let{menu->
-                val subMenu = menu.addSubMenu("Playlists")
+            var subMenu = menu.findItem(PLAYLIST_SUBMENU_ID)?.subMenu
+            if(subMenu==null) {
+                subMenu = menu.addSubMenu(Menu.NONE, PLAYLIST_SUBMENU_ID, Menu.NONE, "Playlists")
                 subMenu.setHeaderIcon(coreRes.drawable.ic_playlist_select)
-                val m=subMenu.add("default")
-                m.setIcon(coreRes.drawable.ic_playlist_select)
-                playlists.forEachIndexed { index,playlist->
-                    val itemView = MenuItemViewBinding.inflate(layoutInflater)
-                    val m = subMenu.add(Menu.NONE,playlist.idPlaylist.toInt(),Menu.NONE,playlist.playListName)
-                    m.setActionView(itemView.root)
-                    m.setIcon(coreRes.drawable.ic_playlist_select)
 
-                    m.setOnMenuItemClickListener{
-                        Toast.makeText(this,m.itemId.toString(), Toast.LENGTH_SHORT).show()
-                        true
-                    }
-                    itemView.menuItemIcon.setOnClickListener {
-                        Toast.makeText(this, "eliminar", Toast.LENGTH_SHORT).show()
-                    }
-                bind.navView.invalidate()
             }
+            subMenu?.clear()
+            val m = subMenu?.add("default")
+            val existId = mutableSetOf<Int>()
+
+                m?.setIcon(coreRes.drawable.ic_playlist_select)
+                playlists.forEachIndexed { index,playlist->
+                    // Comprobamos si el item ya existe a través de su id
+                    if(!existId.contains(playlist.idPlaylist.toInt())) {
+                        val itemView = MenuItemViewBinding.inflate(layoutInflater)
+                        val m = subMenu?.add(
+                            Menu.NONE,
+                            playlist.idPlaylist.toInt(),
+                            Menu.NONE,
+                            playlist.playListName
+                        )
+                        m?.setActionView(itemView.root)
+                        m?.setIcon(coreRes.drawable.ic_playlist_select)
+                        existId.add(playlist.idPlaylist.toInt())
+
+                        m?.setOnMenuItemClickListener {
+                            Toast.makeText(this, m?.itemId.toString(), Toast.LENGTH_SHORT).show()
+                            true
+                        }
+                        itemView.menuItemIcon.setOnClickListener {
+                            mainViewModel.deletePlayList(m?.itemId!!.toLong())
+                            //TODO remover el item
+                            subMenu?.removeItem(m.itemId)
+                        }
+                        bind.navView.invalidate()
+                    }
+            }
+        }
+    }
+    fun removeMenuItemDrawer(itemId:Int){
+        menu?.let{menu->
+            val subMenu = menu.findItem(PLAYLIST_SUBMENU_ID)?.subMenu
+            subMenu?.removeItem(itemId)
         }
     }
     // Usamos  la navegación sin el componente de navegación ya que necesitamos el viewPager para deslizarnos
