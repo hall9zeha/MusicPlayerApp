@@ -24,10 +24,6 @@ import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
-import com.barryzeha.core.common.BY_ALBUM
-import com.barryzeha.core.common.BY_ARTIST
-import com.barryzeha.core.common.BY_FAVORITE
-import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.COLOR_BACKGROUND
 import com.barryzeha.core.common.COLOR_TRANSPARENT
@@ -47,7 +43,6 @@ import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
-import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.common.getPlayListName
@@ -116,8 +111,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
+        handleArgumentsSending()
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -126,6 +122,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         setUpAdapter()
         setUpPlayListAdapters()
         setUpObservers()
+
         setUpPlayListName()
         filePickerActivityResult()
         audioEffectActivityResult()
@@ -137,6 +134,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         setupBottomSheet()
 
 
+    }
+    private fun handleArgumentsSending(){
+        arguments?.let{arg->
+            val playlistId = arg.getInt(ARG_PARAM1)
+            getPlaylist(playlistId)
+        }
     }
     private fun audioEffectActivityResult(){
         launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){
@@ -191,11 +194,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }else{
             // Cargamos la lista de reproducción seleccionada
-               mPrefs.playlistId = playlistEntity.idPlaylist.toInt()
-               musicPlayerService?.clearPlayList(false)
-                mainViewModel.fetchAllSongsBy(mPrefs.playListSortOption)
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-
+                getPlaylist(playlistEntity.idPlaylist.toInt())
             }
         },{playlist->
             // Al eliminar un item
@@ -217,6 +216,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
         }
         playListAdapter!!.add(PlaylistEntity(0,"Default"))
+    }
+    private fun getPlaylist(playlistId:Int){
+        mPrefs.playlistId = playlistId
+        musicPlayerService?.clearPlayList(false)
+        mainViewModel.fetchPlaylistWithSongsBy(playlistId,mPrefs.playListSortOption)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
     }
     private fun setUpObservers(){
 
@@ -276,7 +281,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             musicPlayerService?.clearPlayList(isSort = true)
             // ********
             mPrefs.playListSortOption = selectedSort
-            mainViewModel.fetchAllSongsBy(selectedSort)
+            mainViewModel.fetchPlaylistWithSongsBy(mPrefs.playlistId,selectedSort)
             setUpPlayListName()
 
         }
@@ -1007,10 +1012,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
         var btmSheetIsExpanded:Boolean = false
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(param1: Int, param2: String) =
             ListPlayerFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
+                    putInt(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
                 }
 

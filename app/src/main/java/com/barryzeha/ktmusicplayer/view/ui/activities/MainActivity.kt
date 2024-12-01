@@ -6,7 +6,6 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -25,7 +24,6 @@ import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.PlaylistEntity
-import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -42,6 +40,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 const val PLAYLIST_SUBMENU_ID = 25
+const val PLAYLIST_DEFAULT_ID = 0
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.OnFragmentReadyListener{
     internal lateinit var bind:ActivityMainBinding
@@ -72,7 +71,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             insets
         }
         if(savedInstanceState==null){
-           mainViewModel.fetchAllSongsBy(mPrefs.playListSortOption)
+           mainViewModel.fetchPlaylistWithSongsBy(mPrefs.playlistId,mPrefs.playListSortOption)
         }
         setUpViewPager()
         setUpObservers()
@@ -123,7 +122,16 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
 
             }
             subMenu?.clear()
-            val m = subMenu?.add("default")
+            val m = subMenu?.add(Menu.NONE, PLAYLIST_DEFAULT_ID,Menu.NONE,"default")
+            m?.setOnMenuItemClickListener {
+
+                mainViewModel.fetchPlaylistWithSongsBy(m.itemId,mPrefs.playListSortOption)
+                bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
+                mPrefs.currentView = SONG_LIST_FRAGMENT
+                bind.navView.menu[MAIN_FRAGMENT].setChecked(false)
+                bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+              true
+            }
             val existId = mutableSetOf<Int>()
 
                 m?.setIcon(coreRes.drawable.ic_playlist_select)
@@ -142,14 +150,11 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                         existId.add(playlist.idPlaylist.toInt())
 
                         m?.setOnMenuItemClickListener {
-                           // Enviamos como argumento el id del item que corresponde al id de nuestra playlist
-                            ListPlayerFragment.newInstance(param1 = m?.itemId.toString(),"")
-
+                            mainViewModel.fetchPlaylistWithSongsBy(m.itemId,mPrefs.playListSortOption)
                             bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
                             mPrefs.currentView = SONG_LIST_FRAGMENT
                             bind.navView.menu[MAIN_FRAGMENT].setChecked(false)
                             bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
-
                             true
                         }
                         itemView.menuItemIcon.setOnClickListener {

@@ -4,10 +4,6 @@ import android.content.ServiceConnection
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.barryzeha.core.common.BY_ALBUM
-import com.barryzeha.core.common.BY_ARTIST
-import com.barryzeha.core.common.BY_FAVORITE
-import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
 import com.barryzeha.core.model.entities.MusicState
@@ -19,14 +15,12 @@ import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
-import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 /**
@@ -120,9 +114,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
           _allSongs.value=repository.fetchAllSongs()
          }
     }
-    fun fetchAllSongsBy(field:Int){
+    fun fetchPlaylistWithSongsBy(playlistId:Int,field:Int){
         launch{
-            _allSongs.value =repository.fetchPlaylistOrderBy(MyApp.mPrefs.playlistId.toLong(), field)
+            _allSongs.value =repository.fetchPlaylistOrderBy(playlistId.toLong(), field)
         }
     }
     fun fetchAllSongFromMain(){
