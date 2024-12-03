@@ -82,12 +82,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     private fun setUpObservers(){
 
         mainViewModel.fetchSongState()
-        mainViewModel.musicState.observe(this){
-            //Log.e("MAIN-ACTIVITY", it.toString() )
-
-        }
-        mainViewModel.songState.observe(this){songState->
-        }
         mainViewModel.playLists.observe(this){lists->
             this.playlists = lists
 
@@ -124,7 +118,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             subMenu?.clear()
             val m = subMenu?.add(Menu.NONE, PLAYLIST_DEFAULT_ID,Menu.NONE,"default")
             m?.setOnMenuItemClickListener {
-
                 mainViewModel.fetchPlaylistWithSongsBy(m.itemId,mPrefs.playListSortOption)
                 bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
                 mPrefs.currentView = SONG_LIST_FRAGMENT
@@ -134,36 +127,36 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             }
             val existId = mutableSetOf<Int>()
 
-                m?.setIcon(coreRes.drawable.ic_playlist_select)
-                playlists.forEachIndexed { index,playlist->
-                    // Comprobamos si el item ya existe a través de su id
-                    if(!existId.contains(playlist.idPlaylist.toInt())) {
-                        val itemView = MenuItemViewBinding.inflate(layoutInflater)
-                        val m = subMenu?.add(
-                            Menu.NONE,
-                            playlist.idPlaylist.toInt(),
-                            Menu.NONE,
-                            playlist.playListName
-                        )
-                        m?.setActionView(itemView.root)
-                        m?.setIcon(coreRes.drawable.ic_playlist_select)
-                        existId.add(playlist.idPlaylist.toInt())
+            m?.setIcon(coreRes.drawable.ic_playlist_select)
+            playlists.forEachIndexed { index, playlist ->
+                // Comprobamos si el item ya existe a través de su id
+                if (!existId.contains(playlist.idPlaylist.toInt())) {
+                    val itemView = MenuItemViewBinding.inflate(layoutInflater)
+                    val m = subMenu?.add(
+                        Menu.NONE,
+                        playlist.idPlaylist.toInt(),
+                        Menu.NONE,
+                        playlist.playListName
+                    )
+                    m?.setActionView(itemView.root)
+                    m?.setIcon(coreRes.drawable.ic_playlist_select)
+                    existId.add(playlist.idPlaylist.toInt())
 
-                        m?.setOnMenuItemClickListener {
-                            mainViewModel.fetchPlaylistWithSongsBy(m.itemId,mPrefs.playListSortOption)
-                            bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
-                            mPrefs.currentView = SONG_LIST_FRAGMENT
-                            bind.navView.menu[MAIN_FRAGMENT].setChecked(false)
-                            bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
-                            true
-                        }
-                        itemView.menuItemIcon.setOnClickListener {
-                            mainViewModel.deletePlayList(m?.itemId!!.toLong())
-                            //TODO remover el item
-                            subMenu?.removeItem(m.itemId)
-                        }
-                        bind.navView.invalidate()
+                    m?.setOnMenuItemClickListener {
+                        mainViewModel.fetchPlaylistWithSongsBy(m.itemId, mPrefs.playListSortOption)
+                        bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
+                        mPrefs.currentView = SONG_LIST_FRAGMENT
+                        bind.navView.menu[MAIN_FRAGMENT].setChecked(false)
+                        bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                        true
                     }
+                    itemView.menuItemIcon.setOnClickListener {
+                        mainViewModel.deletePlayList(m?.itemId!!.toLong())
+                        //TODO remover el item
+                        subMenu?.removeItem(m.itemId)
+                    }
+                    bind.navView.invalidate()
+                }
             }
         }
     }
