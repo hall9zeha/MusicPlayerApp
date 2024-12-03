@@ -2,6 +2,7 @@
 
 Una aplicación sencilla para reproducción de música offline escrita en Kotlin para Android. La aplicación tien dos versiones: KTMusic Bass que usa librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) y KTMusic Exo que usa La API [MediaPlayer](https://developer.android.com/media/media3/exoplayer) de Android.
 
+# Demo
 
 # Características
 
@@ -10,6 +11,7 @@ Una aplicación sencilla para reproducción de música offline escrita en Kotlin
 - Equalizador de 5 bandas (en la versión con MediaPlayer)
 - Modo: repetir uno, repetir todo y aleatorio.
 - Editor de etiquetas de audio
+- Agregar a favoritos
 - Filtro por: Artista, Álbum, Género, Favoritos
 - Búsqueda de canción por nombre
 - Agregar canción a favoritos
@@ -29,3 +31,6 @@ Una aplicación sencilla para reproducción de música offline escrita en Kotlin
 - [Dagger Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
 - [DiscCoverView](https://github.com/hall9zeha/DiscCoverView)
 - [Room](https://developer.android.com/jetpack/androidx/releases/room?gclid=EAIaIQobChMIh-Hoi7C_-gIVRxXUAR2kZAAsEAAYASAAEgJnivD_BwE&gclsrc=aw.ds)
+
+# Capturas
+
