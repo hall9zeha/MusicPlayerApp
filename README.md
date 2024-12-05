@@ -22,6 +22,24 @@ Una aplicación sencilla para reproducción de música offline escrita en Kotlin
 - Soporte para dispoditivos bluetooth
 - Cambiar estilo de la cubierta del album mostrada en modo tarjeta o disco compacto.
 
+# Módulos
+- App
+- bass (contiene los archivos de la librería BASS)
+- core
+- data
+- di
+- features
+  - audioeffects (equalizadores)
+  - mfilepicker (selector de archivos)
+    
+# Versiones (Sabores)
+- KTMusic Bass, para los siguientes archivos y módulos:
+  - Clase MusicPlayerService
+  - Módulo audioeffects
+- KTMusic Exo:
+  - Clase MusicPlayerService
+  - Módulo audioeffects
+    
 # Se utilizó en el proyecto
 
 - [un4seen](https://www.un4seen.com/)
