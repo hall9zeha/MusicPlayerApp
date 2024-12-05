@@ -41,7 +41,10 @@ Una aplicación sencilla para reproducción de música offline escrita en Kotlin
   - Módulo audioeffects
     
 # Se utilizó en el proyecto
-
+- [Arquitectura MVVM](https://developer.android.com/jetpack/guide)
+- [ViewModel](https://developer.android.com/jetpack/androidx/releases/lifecycle)
+- [LiveData](https://developer.android.com/topic/libraries/architecture/livedata)
+- [Kotlin coroutines](https://developer.android.com/kotlin/coroutines)
 - [un4seen](https://www.un4seen.com/)
 - [MediaPlayer](https://developer.android.com/media/media3/exoplayer)
 - [Android-splash-screen](https://developer.android.com/develop/ui/views/launch/splash-screen)
@@ -49,6 +52,7 @@ Una aplicación sencilla para reproducción de música offline escrita en Kotlin
 - [Dagger Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
 - [DiscCoverView](https://github.com/hall9zeha/DiscCoverView)
 - [Room](https://developer.android.com/jetpack/androidx/releases/room?gclid=EAIaIQobChMIh-Hoi7C_-gIVRxXUAR2kZAAsEAAYASAAEgJnivD_BwE&gclsrc=aw.ds)
+- [Jaudiotagger](https://www.jthink.net/jaudiotagger/)
 
 # Capturas
 
