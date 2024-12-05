@@ -618,7 +618,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     musicListAdapter?.filter?.filter(s)
                 }
                 override fun afterTextChanged(s: Editable?) {
-
                 }
             })
             btnMultipleSelect?.setOnClickListener{
