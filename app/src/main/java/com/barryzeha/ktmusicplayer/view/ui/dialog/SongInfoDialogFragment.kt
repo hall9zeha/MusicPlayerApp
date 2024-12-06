@@ -204,12 +204,12 @@ class SongInfoDialogFragment : DialogFragment() {
                 tvGenre.text=meta.genre
                 tvYear.text=meta.year
                 tvNumberTrack.text= meta.track
-
+                tvFileLocation.text= filePath
             }
         }
     }
     private fun setupMenuProvider() {
-        //TODO Al usar android.widget.Toolbar nos infla el menú pero sin íconos
+        //TODO Al usar android.widget.Toolbar infla el menú pero sin íconos
         // Por el momento androidx.appcompat.widget.Toolbar nos permite usar este tipo de configuración
         // averiguar más sobre el asunto
         bind.toolbarInfo.inflateMenu(coreRes.menu.song_info_menu)

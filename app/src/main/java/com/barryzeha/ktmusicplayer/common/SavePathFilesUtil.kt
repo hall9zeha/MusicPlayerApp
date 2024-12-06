@@ -92,10 +92,7 @@ private suspend fun processFile(
             val realPathFromFile = file.absolutePath
             val parentDir = getParentDirectories(file.path.toString())
             val metadata = fetchFileMetadata(context, realPathFromFile!!)
-         /*Log.e("ITEM-FILE  ->", filePath)
-            Log.e("ITEM-FILE  ->", uri.toString())
-            Log.e("ITEM-FILE  ->", realPathFromFile.toString())
-            Log.e("ITEM-FILE  ->", parentDir ?: "")*/
+
            val song = SongEntity(
                 idPlaylistCreator = MyApp.mPrefs.playlistId.toLong(),
                 pathLocation = realPathFromFile,
