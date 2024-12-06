@@ -21,6 +21,7 @@ import org.jaudiotagger.tag.FieldKey
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.jvm.Throws
 import kotlin.math.min
 
 /**
@@ -72,17 +73,17 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
  fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata?{
     val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
 
-    // retrieve covert art of song file uncomment if you want implement,
-    /*val coverArtData = try{
-        tag.firstArtwork.binaryData
-    }catch(e:Exception){
-        null
-    }
-    val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
+
     metadata?.let{
         val tag = metadata.tag
         val nameFile=metadata.file.name.substringBeforeLast(".")
-
+        // retrieve covert art of song file uncomment if you want implement,
+        /*val coverArtData = try{
+            tag.firstArtwork.binaryData
+        }catch(e:Exception){
+            null
+        }
+        val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
         fun getTagField(fieldKey: FieldKey, defaultValue: String)=
             try {
                 tag?.getFirst(fieldKey)?.takeIf { it.isNotEmpty() } ?: defaultValue
@@ -134,11 +135,17 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
     }
      return null
 }
-fun fetchShortFileMetadata(pathFile:String):AudioMetadata? {
+fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
     val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
     metadata?.let {
         val tag = metadata.tag
         val nameFile = metadata.file.name.substringBeforeLast(".")
+       /* val coverArtData = try{
+        tag.firstArtwork.binaryData
+        }catch(e:Exception){
+            null
+        }
+        val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
         fun getTagField(fieldKey: FieldKey, defaultValue: String) =
             try {
                 tag?.getFirst(fieldKey)?.takeIf { it.isNotEmpty() } ?: defaultValue
@@ -162,8 +169,8 @@ fun fetchShortFileMetadata(pathFile:String):AudioMetadata? {
             album = album,
             bitRate = bitRate,
             songLengthFormatted = songLengthFormatted,
-            songLength = songLength
-
+            songLength = songLength,
+            //coverArt = bitmapCoverArt
         )
 
     }
@@ -285,4 +292,13 @@ fun showDialog(context:Context,titleRes:Int, msgRes:Int, block:()->Unit){
     }
     dialog.show()
 
+}
+
+fun getEmbeddedSyncedLyrics(pathFile:String):String?{
+    val embeddedLyrics = try{
+        AudioFileIO.read(File(pathFile)).tagOrCreateDefault.getFirst(FieldKey.LYRICS)
+    }catch(ex:Exception){
+        return null
+    }
+    return null
 }

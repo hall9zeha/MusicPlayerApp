@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -177,6 +178,7 @@ class SongInfoDialogFragment : DialogFragment() {
             getImageLauncher.launch("image/*")
         }
     }
+
     private fun setFileInfo(filePath:String?)=with(bind){
         showEditViews(false)
         filePath?.let {

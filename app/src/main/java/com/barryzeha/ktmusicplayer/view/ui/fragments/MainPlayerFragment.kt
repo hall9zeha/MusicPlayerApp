@@ -413,13 +413,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
 
-    @SuppressLint("ResourceType")
+    @SuppressLint("ResourceType", "ClickableViewAccessibility")
     private fun setUpListeners()=with(bind){
         this?.let {
             bind?.tvSongDescription?.setSelected(true)
             bind?.tvSongArtist?.setSelected(true)
             bind?.tvSongAlbum?.setSelected(true)
             checkCoverViewStyle()
+
             btnMainMenu?.setOnClickListener {
 
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)

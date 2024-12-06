@@ -18,6 +18,7 @@ import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.fetchShortFileMetadata
+import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
@@ -330,9 +331,10 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         val bind = ItemSongBinding.bind(itemView)
         fun onBind(position:Int,song: SongEntity) = with(bind){
                 CoroutineScope(Dispatchers.IO).launch {
-                    val audioTag = fetchShortFileMetadata(song.pathLocation!!)
+                    val audioTag = fetchShortFileMetadata(root.context,song.pathLocation!!)
                     withContext(Dispatchers.Main) {
                         audioTag?.let {
+                            //ivThumbnailCover.loadImage(it.coverArt!!)
                             chkItemSong.visibility = if (song.isSelectShow) View.VISIBLE else View.GONE
                             tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
                             tvSongDesc.text = String.format(
