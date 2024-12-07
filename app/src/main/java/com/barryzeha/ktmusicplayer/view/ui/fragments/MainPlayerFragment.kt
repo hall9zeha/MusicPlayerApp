@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -37,6 +38,7 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
+import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
@@ -48,6 +50,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
@@ -85,6 +91,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var fastForwardingOrRewind = false
     private var fastForwardOrRewindHandler: Handler? = null
     private var forwardOrRewindRunnable:Runnable?=null
+
+    private var coverViewClicked=false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -379,6 +387,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             //tvSongTimeCompleted.text = createTime(musicState.duration).third
+            //Todo habilitar cuando se complete la implementación de la vista lyrics
+            //lrcView?.updateTime(musicState.currentDuration)
         }
     }
     private fun setNumberOfTrack(songId:Long? = null){
@@ -412,7 +422,50 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
         }
     }
+    private fun loadLyric(){
+        val file = copyLrcFromAssetsToFile(requireContext(),"Alex_Ubago_Sabes.lrc")
+        bind?.lrcView?.loadLrc(file)
+        bind?.lrcView?.apply {
+            setCurrentColor(ContextCompat.getColor(context, coreRes.color.primaryColor))
+            setTimeTextColor(ContextCompat.getColor(context, coreRes.color.primaryColor))
+            setTimelineColor(ContextCompat.getColor(context, coreRes.color.lrc_timeline_color))
+            setTimelineTextColor(ContextCompat.getColor(context, coreRes.color.lrc_timeline_text_color))
+            setDraggable(true, CoverLrcView.OnPlayClickListener {
 
+                return@OnPlayClickListener true
+            })
+        }
+
+    }
+    private fun copyLrcFromAssetsToFile(context: Context, assetFileName: String): File {
+        // Crear un archivo temporal en el almacenamiento del dispositivo
+        val tempFile = File(context.cacheDir, assetFileName)
+
+        // Si el archivo ya existe, lo eliminamos
+        if (tempFile.exists()) {
+            tempFile.delete()
+        }
+
+        // Abrir el archivo en los assets
+        val assetInputStream: InputStream = context.assets.open(assetFileName)
+
+        // Abrir un OutputStream para escribir en el archivo temporal
+        val fileOutputStream: OutputStream = FileOutputStream(tempFile)
+
+        // Copiar el contenido del archivo de assets al archivo temporal
+        val buffer = ByteArray(1024)
+        var length: Int
+        while (assetInputStream.read(buffer).also { length = it } > 0) {
+            fileOutputStream.write(buffer, 0, length)
+        }
+
+        // Cerrar los streams
+        fileOutputStream.flush()
+        fileOutputStream.close()
+        assetInputStream.close()
+
+        return tempFile
+    }
     @SuppressLint("ResourceType", "ClickableViewAccessibility")
     private fun setUpListeners()=with(bind){
         this?.let {
@@ -420,7 +473,20 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             bind?.tvSongArtist?.setSelected(true)
             bind?.tvSongAlbum?.setSelected(true)
             checkCoverViewStyle()
-
+            ivMusicCover.setOnClickListener{
+                //TODO implementar animaciones para cambiar a lyric View
+                if(!coverViewClicked) {
+                    bind?.ivMusicCover?.visibility = View.GONE
+                    bind?.lrcView?.visibility = View.VISIBLE
+                    loadLyric()
+                    coverViewClicked=true
+                }
+            }
+            lrcView?.setOnClickListener{
+                bind?.ivMusicCover?.visibility = View.VISIBLE
+                bind?.lrcView?.visibility = View.GONE
+                coverViewClicked=false
+            }
             btnMainMenu?.setOnClickListener {
 
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)

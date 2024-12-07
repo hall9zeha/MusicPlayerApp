@@ -206,7 +206,7 @@ class CoverLrcView @JvmOverloads constructor(
         )
         mCurrentTextColor = ta.getColor(
             coreRes.styleable.LrcView_lrcCurrentTextColor,
-            ContextCompat.getColor(context, coreRes.color.lrc_current_text_color)
+            ContextCompat.getColor(context, coreRes.color.primaryColor)
         )
         mTimelineTextColor = ta.getColor(
             coreRes.styleable.LrcView_lrcTimelineTextColor,

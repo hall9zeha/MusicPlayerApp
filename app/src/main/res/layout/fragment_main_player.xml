@@ -55,6 +55,7 @@
         app:layout_constraintWidth_percent="0.72"
         app:layout_constraintDimensionRatio="H,1:1"
         />-->
+
     <LinearLayout
         android:id="@+id/contentCover"
         android:layout_width="0dp"
@@ -88,8 +89,20 @@
            app:shape="circle"
            android:visibility="gone"
            android:elevation="4dp"/>
+        <com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
+            android:id="@+id/lrcView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:lrcLabel="@string/empty"
+            app:lrcNormalTextSize="14sp"
+            app:lrcPadding="24dp"
+            app:lrcTextGravity="left"
+            app:lrcTextSize="18sp"
+            />
 
     </LinearLayout>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvSongDescription"
         android:layout_width="0dp"
