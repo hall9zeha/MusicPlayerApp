@@ -295,7 +295,7 @@ fun showDialog(context:Context,titleRes:Int, msgRes:Int, block:()->Unit){
 }
 
 fun getEmbeddedSyncedLyrics(pathFile:String):String?{
-    val embeddedLyrics = try{
+    return  try{
         AudioFileIO.read(File(pathFile)).tagOrCreateDefault.getFirst(FieldKey.LYRICS)
     }catch(ex:Exception){
         return null

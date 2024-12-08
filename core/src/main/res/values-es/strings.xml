@@ -24,7 +24,7 @@
     <string name="soundEffects">Efectos de sonido</string>
     <string name="delete_all">Eliminar  lista</string>
     <string name="delete_song">Quitar de la lista</string>
-    <string name="empty">Vacío</string>
+    <string name="empty">Sin letra</string>
     <string name="addToFavorite">Agregar a favoritos</string>
     <string name="sendToList">Enviar a lista de reproducción</string>
     <string name="songInfo">Información del archivo</string>

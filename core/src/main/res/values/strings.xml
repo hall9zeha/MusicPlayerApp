@@ -6,7 +6,7 @@
     <string name="artist_placeholder">Artist</string>
     <string name="album_placeholder">Album</string>
     <string name="delete_title">Delete</string>
-    <string name="empty">Empty</string>
+    <string name="empty">No lyric</string>
     <string name="list">List</string>
     <string name="home">Home</string>
     <string name="settings">Settings</string>

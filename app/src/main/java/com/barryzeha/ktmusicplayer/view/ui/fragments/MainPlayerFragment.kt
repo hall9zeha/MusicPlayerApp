@@ -28,6 +28,7 @@ import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.getEmbeddedSyncedLyrics
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
@@ -388,7 +389,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             //tvSongTimeCompleted.text = createTime(musicState.duration).third
             //Todo habilitar cuando se complete la implementación de la vista lyrics
-            //lrcView?.updateTime(musicState.currentDuration)
+            lrcView?.updateTime(musicState.currentDuration)
         }
     }
     private fun setNumberOfTrack(songId:Long? = null){
@@ -423,19 +424,19 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
     private fun loadLyric(){
-        val file = copyLrcFromAssetsToFile(requireContext(),"Alex_Ubago_Sabes.lrc")
-        bind?.lrcView?.loadLrc(file)
-        bind?.lrcView?.apply {
-            setCurrentColor(ContextCompat.getColor(context, coreRes.color.primaryColor))
-            setTimeTextColor(ContextCompat.getColor(context, coreRes.color.primaryColor))
-            setTimelineColor(ContextCompat.getColor(context, coreRes.color.lrc_timeline_color))
-            setTimelineTextColor(ContextCompat.getColor(context, coreRes.color.lrc_timeline_text_color))
-            setDraggable(true, CoverLrcView.OnPlayClickListener {
-
-                return@OnPlayClickListener true
-            })
+        val lyricsString = getEmbeddedSyncedLyrics(currentMusicState.songPath)
+        lyricsString?.let{lyric->
+            bind?.lrcView?.loadLrc(lyric)
+            bind?.lrcView?.apply {
+                setCurrentColor(ContextCompat.getColor(context, coreRes.color.primaryColor))
+                setTimeTextColor(ContextCompat.getColor(context, coreRes.color.primaryColor))
+                setTimelineColor(ContextCompat.getColor(context, coreRes.color.lrc_timeline_color))
+                setTimelineTextColor(ContextCompat.getColor(context, coreRes.color.lrc_timeline_text_color))
+                setDraggable(true, CoverLrcView.OnPlayClickListener {
+                    return@OnPlayClickListener true
+                })
+            }
         }
-
     }
     private fun copyLrcFromAssetsToFile(context: Context, assetFileName: String): File {
         // Crear un archivo temporal en el almacenamiento del dispositivo
@@ -466,6 +467,17 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
         return tempFile
     }
+    private fun showLyricView(enable:Boolean){
+        if(enable) {
+            if (discCoverViewIsEnable()) bind?.ivDiscMusicCover?.visibility = View.GONE
+            else bind?.ivMusicCover?.visibility = View.GONE
+            bind?.lrcView?.visibility = View.VISIBLE
+        }else{
+            if (discCoverViewIsEnable()) bind?.ivDiscMusicCover?.visibility = View.VISIBLE
+            else bind?.ivMusicCover?.visibility = View.VISIBLE
+            bind?.lrcView?.visibility = View.GONE
+        }
+    }
     @SuppressLint("ResourceType", "ClickableViewAccessibility")
     private fun setUpListeners()=with(bind){
         this?.let {
@@ -476,17 +488,32 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             ivMusicCover.setOnClickListener{
                 //TODO implementar animaciones para cambiar a lyric View
                 if(!coverViewClicked) {
-                    bind?.ivMusicCover?.visibility = View.GONE
-                    bind?.lrcView?.visibility = View.VISIBLE
+                    showLyricView(true)
+                   /* if(discCoverViewIsEnable())bind?.ivDiscMusicCover?.visibility = View.GONE
+                    else bind?.ivMusicCover?.visibility = View.GONE
+
+                    bind?.lrcView?.visibility = View.VISIBLE*/
                     loadLyric()
                     coverViewClicked=true
                 }
             }
+            //Cuando lrcView esté lleno podrá usarse el evento click de la vista
             lrcView?.setOnClickListener{
-                bind?.ivMusicCover?.visibility = View.VISIBLE
-                bind?.lrcView?.visibility = View.GONE
+                /*if(discCoverViewIsEnable())bind?.ivDiscMusicCover?.visibility = View.VISIBLE
+                else bind?.ivMusicCover?.visibility = View.VISIBLE
+                bind?.lrcView?.visibility = View.GONE*/
+                showLyricView(false)
                 coverViewClicked=false
             }
+            //Cuando lrcView  esté vacío solo el evento click en rootView funcionará
+            lrcView?.rootView?.setOnClickListener{
+                /*if(discCoverViewIsEnable())bind?.ivDiscMusicCover?.visibility = View.VISIBLE
+                else bind?.ivMusicCover?.visibility = View.VISIBLE
+                bind?.lrcView?.visibility = View.GONE*/
+                showLyricView(false)
+                coverViewClicked=false
+            }
+
             btnMainMenu?.setOnClickListener {
 
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
@@ -684,7 +711,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
-        checkCoverViewStyle()
+        if(!coverViewClicked)checkCoverViewStyle()
         checkPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
