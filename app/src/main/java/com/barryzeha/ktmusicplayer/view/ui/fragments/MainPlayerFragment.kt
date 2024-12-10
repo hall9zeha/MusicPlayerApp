@@ -1,5 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
+import android.animation.AnimatorInflater
+import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ServiceConnection
@@ -13,7 +15,6 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -51,10 +52,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.OutputStream
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
@@ -94,6 +91,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var forwardOrRewindRunnable:Runnable?=null
 
     private var coverViewClicked=false
+    private var frontAnimator:AnimatorSet?=null
+    private var backAnimator:AnimatorSet?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +110,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             setUpObservers()
             setUpListeners()
             setUpScrollOnTextViews()
+            setupAnimator()
             listener?.onFragmentReady()
 
     }
@@ -438,44 +438,34 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
         }
     }
-    private fun copyLrcFromAssetsToFile(context: Context, assetFileName: String): File {
-        // Crear un archivo temporal en el almacenamiento del dispositivo
-        val tempFile = File(context.cacheDir, assetFileName)
-
-        // Si el archivo ya existe, lo eliminamos
-        if (tempFile.exists()) {
-            tempFile.delete()
-        }
-
-        // Abrir el archivo en los assets
-        val assetInputStream: InputStream = context.assets.open(assetFileName)
-
-        // Abrir un OutputStream para escribir en el archivo temporal
-        val fileOutputStream: OutputStream = FileOutputStream(tempFile)
-
-        // Copiar el contenido del archivo de assets al archivo temporal
-        val buffer = ByteArray(1024)
-        var length: Int
-        while (assetInputStream.read(buffer).also { length = it } > 0) {
-            fileOutputStream.write(buffer, 0, length)
-        }
-
-        // Cerrar los streams
-        fileOutputStream.flush()
-        fileOutputStream.close()
-        assetInputStream.close()
-
-        return tempFile
-    }
     private fun showLyricView(enable:Boolean){
         if(enable) {
             if (discCoverViewIsEnable()) bind?.ivDiscMusicCover?.visibility = View.GONE
             else bind?.ivMusicCover?.visibility = View.GONE
-            bind?.lrcView?.visibility = View.VISIBLE
+
         }else{
             if (discCoverViewIsEnable()) bind?.ivDiscMusicCover?.visibility = View.VISIBLE
             else bind?.ivMusicCover?.visibility = View.VISIBLE
-            bind?.lrcView?.visibility = View.GONE
+
+        }
+    }
+    private fun setupAnimator(){
+        frontAnimator= AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.front_animator) as AnimatorSet
+        backAnimator = AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.back_animator) as AnimatorSet
+    }
+    private fun setRotateCoverViewAnimator(frontView:Any, backView:Any){
+        if(!coverViewClicked){
+            (backView as View).visibility = View.VISIBLE
+            frontAnimator?.setTarget(frontView)
+            backAnimator?.setTarget(backView)
+            frontAnimator?.start()
+            backAnimator?.start()
+        }else{
+            frontAnimator?.setTarget(backView)
+            backAnimator?.setTarget(frontView)
+            backAnimator?.start()
+            frontAnimator?.start()
+            (backView as View).visibility = View.GONE
         }
     }
     @SuppressLint("ResourceType", "ClickableViewAccessibility")
@@ -486,31 +476,32 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             bind?.tvSongAlbum?.setSelected(true)
             checkCoverViewStyle()
             ivMusicCover.setOnClickListener{
-                //TODO implementar animaciones para cambiar a lyric View
+
                 if(!coverViewClicked) {
                     showLyricView(true)
-                   /* if(discCoverViewIsEnable())bind?.ivDiscMusicCover?.visibility = View.GONE
-                    else bind?.ivMusicCover?.visibility = View.GONE
-
-                    bind?.lrcView?.visibility = View.VISIBLE*/
                     loadLyric()
+                    setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
+                    coverViewClicked=true
+                }
+            }
+            ivDiscMusicCover.setOnClickListener{
+                if(!coverViewClicked) {
+                    showLyricView(true)
+                    loadLyric()
+                    setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
                     coverViewClicked=true
                 }
             }
             //Cuando lrcView esté lleno podrá usarse el evento click de la vista
             lrcView?.setOnClickListener{
-                /*if(discCoverViewIsEnable())bind?.ivDiscMusicCover?.visibility = View.VISIBLE
-                else bind?.ivMusicCover?.visibility = View.VISIBLE
-                bind?.lrcView?.visibility = View.GONE*/
                 showLyricView(false)
+                setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
                 coverViewClicked=false
             }
             //Cuando lrcView  esté vacío solo el evento click en rootView funcionará
             lrcView?.rootView?.setOnClickListener{
-                /*if(discCoverViewIsEnable())bind?.ivDiscMusicCover?.visibility = View.VISIBLE
-                else bind?.ivMusicCover?.visibility = View.VISIBLE
-                bind?.lrcView?.visibility = View.GONE*/
                 showLyricView(false)
+                setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
                 coverViewClicked=false
             }
 
