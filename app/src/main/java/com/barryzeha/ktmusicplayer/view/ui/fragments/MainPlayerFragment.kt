@@ -523,7 +523,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
 
             btnMainMenu?.setOnClickListener {
-
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }
             btnMainPlay.setOnClickListener {
