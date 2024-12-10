@@ -190,7 +190,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
                                 BluetoothAdapter.STATE_OFF -> {
                                     Log.d("BLUETOOTH_STATE", "Bluetooth disconnected")
-                                    // Logica cuando se desconecta el Bluetooth
+                                    // Lógica cuando se desconecta el Bluetooth
                                     if (playingState()) {
                                         setPlayingState(false)
                                         bassManager?.channelPause()
@@ -326,7 +326,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                 KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                                     nextOrPrevTrack(PREVIOUS)
                                 }
-
                                 else -> {}
                             }
                         }
@@ -422,8 +421,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 _songController?.stop()
                 // Close application
                 _activity?.finish()
-
-
             }
             SongAction.Nothing -> {}
         }
@@ -436,11 +433,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     NEXT->nextSong()
                     PREVIOUS->prevSong()
                 }
-
             }
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
-
     }
 
    private fun initNotify(){
@@ -746,7 +741,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 }
 
             //}
-
         //}
         listIsShuffled = true
     }
