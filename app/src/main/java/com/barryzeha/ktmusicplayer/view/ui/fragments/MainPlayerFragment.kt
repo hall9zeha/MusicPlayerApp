@@ -495,13 +495,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             //Cuando lrcView esté lleno podrá usarse el evento click de la vista
             lrcView?.setOnClickListener{
                 showLyricView(false)
-                setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
+                setRotateCoverViewAnimator(ivMusicCover,lrcView)
                 coverViewClicked=false
             }
             //Cuando lrcView  esté vacío solo el evento click en rootView funcionará
             lrcView?.rootView?.setOnClickListener{
                 showLyricView(false)
-                setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
+                setRotateCoverViewAnimator(ivMusicCover,lrcView)
                 coverViewClicked=false
             }
 

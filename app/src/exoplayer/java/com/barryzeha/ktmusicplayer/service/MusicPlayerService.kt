@@ -506,7 +506,7 @@ class MusicPlayerService : Service(){
                 mediaSession.setMetadata(updateMediaMetadata)
                 // Reemplazamos temporalmente el nuevo id para la comparación
                 idSong = newState.idSong
-            }
+
             // Para android <=10
             if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
                 mediaPlayerNotify = notificationMediaPlayer(
@@ -521,6 +521,7 @@ class MusicPlayerService : Service(){
                 NOTIFICATION_ID,
                 mediaPlayerNotify
             )
+           }
         }
     }
     private fun initMusicStateLooper(){
