@@ -453,9 +453,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         frontAnimator= AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.front_animator) as AnimatorSet
         backAnimator = AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.back_animator) as AnimatorSet
     }
-    private fun setRotateCoverViewAnimator(frontView:Any, backView:Any){
+    private fun setRotateCoverViewAnimator(frontView:Any?, backView:Any?){
         if(!coverViewClicked){
-            (backView as View).visibility = View.VISIBLE
+            (backView as? View)?.visibility = View.VISIBLE
             frontAnimator?.setTarget(frontView)
             backAnimator?.setTarget(backView)
             frontAnimator?.start()
@@ -465,7 +465,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             backAnimator?.setTarget(frontView)
             backAnimator?.start()
             frontAnimator?.start()
-            (backView as View).visibility = View.GONE
+            (backView as? View)?.visibility = View.GONE
         }
     }
     @SuppressLint("ResourceType", "ClickableViewAccessibility")
@@ -475,21 +475,38 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             bind?.tvSongArtist?.setSelected(true)
             bind?.tvSongAlbum?.setSelected(true)
             checkCoverViewStyle()
+            btnLyric?.setOnClickListener{
+                lrcView?.let {
+                    if (!coverViewClicked) {
+                        showLyricView(true)
+                        loadLyric()
+                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
+                        coverViewClicked = true
+                    } else {
+                        showLyricView(false)
+                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
+                        coverViewClicked = false
+                    }
+                }
+            }
             ivMusicCover.setOnClickListener{
-
-                if(!coverViewClicked) {
-                    showLyricView(true)
-                    loadLyric()
-                    setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
-                    coverViewClicked=true
+                lrcView?.let {
+                    if (!coverViewClicked) {
+                        showLyricView(true)
+                        loadLyric()
+                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
+                        coverViewClicked = true
+                    }
                 }
             }
             ivDiscMusicCover.setOnClickListener{
-                if(!coverViewClicked) {
-                    showLyricView(true)
-                    loadLyric()
-                    setRotateCoverViewAnimator(ivMusicCover,lrcView as CoverLrcView)
-                    coverViewClicked=true
+                lrcView?.let {
+                    if (!coverViewClicked) {
+                        showLyricView(true)
+                        loadLyric()
+                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
+                        coverViewClicked = true
+                    }
                 }
             }
             //Cuando lrcView esté lleno podrá usarse el evento click de la vista
