@@ -181,7 +181,7 @@
         app:iconGravity="textStart"
         app:iconPadding="0dp"
 
-        app:iconSize="24dp"
+        app:iconSize="20dp"
         app:iconTint="@color/controls_colors"
         android:clickable="true"
         android:focusable="true"
@@ -197,7 +197,7 @@
         app:iconGravity="textStart"
         app:iconPadding="0dp"
 
-        app:iconSize="24dp"
+        app:iconSize="20dp"
         app:iconTint="@color/controls_colors"
         android:clickable="true"
         android:focusable="true"
@@ -212,7 +212,7 @@
             app:icon="@drawable/ic_favorite"
             app:iconGravity="textStart"
 
-            app:iconSize="24dp"
+            app:iconSize="20dp"
             app:iconTint="@color/controls_colors"
             android:clickable="true"
             android:focusable="true"
