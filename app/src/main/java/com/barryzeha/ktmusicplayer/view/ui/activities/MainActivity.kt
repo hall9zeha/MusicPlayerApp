@@ -197,7 +197,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         bind.navFooter.setNavigationItemSelectedListener { menuItem->
             when(menuItem.itemId) {
                 coreRes.id.aboutThis -> {
-
+                    startActivity(Intent(this,AboutThisActivity::class.java))
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                 }
             }

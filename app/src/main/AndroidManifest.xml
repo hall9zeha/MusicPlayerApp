@@ -16,8 +16,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission
         android:name="android.permission.BLUETOOTH_CONNECT"
         android:usesPermissionFlags="neverForLocation"
@@ -27,21 +26,23 @@
         android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:extractNativeLibs="true"
         android:fullBackupContent="@xml/backup_rules"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${appLabel}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme"
-        android:extractNativeLibs="true"
-        android:hardwareAccelerated="true"
-
         tools:targetApi="31">
+        <activity
+            android:name=".view.ui.activities.AboutThisActivity"
+            android:exported="false" />
         <activity
             android:name=".view.ui.activities.SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.With.Toolbar"
-            android:label="@string/title_activity_settings" />
+            android:label="@string/title_activity_settings"
+            android:theme="@style/Theme.With.Toolbar" />
         <activity
             android:name=".view.ui.activities.MainActivity"
             android:configChanges="orientation"
@@ -58,17 +59,15 @@
             android:name="com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity"
             android:exported="false" />
         <activity
-
             android:name="com.barryzeha.mfilepicker.ui.views.FilePickerActivity"
             android:exported="false"
-            android:theme="@style/Theme.With.Toolbar"
-            />
+            android:theme="@style/Theme.With.Toolbar" />
+
         <service
             android:name=".service.MusicPlayerService"
-            android:foregroundServiceType="mediaPlayback"
             android:enabled="true"
             android:exported="false"
-            >
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="com.barryzeha.ktmusicplayer.service.MusicPlayerService" />
             </intent-filter>
@@ -84,6 +83,7 @@
             </intent-filter>
             -->
         </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
