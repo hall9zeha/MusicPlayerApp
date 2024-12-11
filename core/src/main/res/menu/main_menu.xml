@@ -22,4 +22,5 @@
         android:title="@string/settings"
         android:checkable="true"
         />
+
 </menu>

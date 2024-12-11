@@ -32,6 +32,16 @@
         app:menu="@menu/main_menu"
         android:fitsSystemWindows="true"
         android:paddingTop="24dp"
+        >
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navFooter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:fitsSystemWindows="true"
+        android:layout_marginBottom="60dp"
+        app:menu="@menu/main_footer_menu"
         />
+    </com.google.android.material.navigation.NavigationView>
     <!--app:headerLayout="@layout/header_view"-->
  </androidx.drawerlayout.widget.DrawerLayout>

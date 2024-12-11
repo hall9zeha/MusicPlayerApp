@@ -255,7 +255,6 @@ class SongInfoDialogFragment : DialogFragment() {
     private fun editAudioFileMetadata(filePath: String?){
         filePath?.let{
             try{
-
                 val audioFile:AudioFile = if(Build.VERSION.SDK_INT<=Build.VERSION_CODES.Q) {
                     AudioFileIO.read(File(filePath))
                 }else{
@@ -303,7 +302,7 @@ class SongInfoDialogFragment : DialogFragment() {
 
                 }
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-                    //openDocumentTreeLauncher.launch(null)
+
                     if(mPrefs.directorySAFUri?.isEmpty()!!) {
                         openDocumentTreeLauncher.launch(null)
                     }else{
@@ -318,7 +317,7 @@ class SongInfoDialogFragment : DialogFragment() {
                             pathFile?.let{setFileInfo(it)}
                             viewModel.setIsSongTagEdited(songEntity!!)
                             },{
-                    })
+                            })
 
                 }}else {
                     audioFile.tag = tag
@@ -328,7 +327,7 @@ class SongInfoDialogFragment : DialogFragment() {
                     viewModel.setIsSongTagEdited(songEntity!!)
                     activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess, Snackbar.LENGTH_LONG)
                 }
-                //AudioFileIO.write(audioFile)
+
             }catch(ex:Exception){
                 isEditing = false
                 showEditViews(false)

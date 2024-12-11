@@ -6,6 +6,7 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -192,6 +193,16 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                 }
             }
             true
+        }
+        bind.navFooter.setNavigationItemSelectedListener { menuItem->
+            when(menuItem.itemId) {
+                coreRes.id.aboutThis -> {
+
+                    bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+                }
+            }
+            true
+
         }
     }
 
