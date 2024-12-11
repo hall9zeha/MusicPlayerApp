@@ -447,6 +447,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             if (discCoverViewIsEnable()) bind?.ivDiscMusicCover?.visibility = View.VISIBLE
             else bind?.ivMusicCover?.visibility = View.VISIBLE
 
+
         }
     }
     private fun setupAnimator(){
