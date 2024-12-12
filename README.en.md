@@ -53,5 +53,6 @@ A simple offline music player app written in Kotlin for Android. The app has two
 - [DiscCoverView](https://github.com/hall9zeha/DiscCoverView)
 - [Room](https://developer.android.com/jetpack/androidx/releases/room?gclid=EAIaIQobChMIh-Hoi7C_-gIVRxXUAR2kZAAsEAAYASAAEgJnivD_BwE&gclsrc=aw.ds)
 - [Jaudiotagger](https://www.jthink.net/jaudiotagger/)
+- [Fast scroll](https://github.com/L4Digital/FastScroll/tree/main)
 
 # Screenshots
