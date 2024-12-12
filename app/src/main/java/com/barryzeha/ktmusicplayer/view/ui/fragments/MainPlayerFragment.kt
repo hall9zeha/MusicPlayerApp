@@ -484,12 +484,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         loadLyric()
                         setRotateCoverViewAnimator(ivMusicCover, lrcView)
                         coverViewClicked = true
-
                     } else {
                         showLyricView(false)
                         setRotateCoverViewAnimator(ivMusicCover, lrcView)
                         coverViewClicked = false
-
                     }
                 }
             }

@@ -77,13 +77,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     lateinit var mPrefs:MyPreferences
     @Inject
     lateinit var effectsPrefs:EffectsPreferences
-
     private var songsList: MutableList<SongEntity> = mutableListOf()
     private  var bassManager:BassManager?=null
-
     private var currentSongPosition:Long=0
     private var indexOfSong:Int=0
-
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
     private lateinit var notificationManager: NotificationManager
@@ -147,7 +144,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                 mPrefs.nextOrPrevFromNotify = true
                                 mPrefs.controlFromNotify = true
                             }
-
                         }
                         Log.e("HEADSET_STATE","disconnect")
 
@@ -187,7 +183,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         BluetoothAdapter.ACTION_STATE_CHANGED -> {
                             val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
                             when (state) {
-
                                 BluetoothAdapter.STATE_OFF -> {
                                     Log.d("BLUETOOTH_STATE", "Bluetooth disconnected")
                                     // Lógica cuando se desconecta el Bluetooth
@@ -201,10 +196,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                             mPrefs.nextOrPrevFromNotify = true
                                             mPrefs.controlFromNotify = true
                                         }
-
                                     }
                                 }
-
                                 BluetoothAdapter.STATE_ON -> {
                                     Log.d("BluetoothReceiver", "Bluetooth adapter turned on")
 
@@ -306,7 +299,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                                     } else {
                                         _songController?.play()
                                     }
-
                                 }
 
                                 KeyEvent.KEYCODE_MEDIA_PAUSE -> {
@@ -472,7 +464,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
                 .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                 .build()
-
             mediaSession.setPlaybackState(playBackState)
             mediaSession.setMetadata(mediaMetadata)
 
@@ -545,7 +536,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
 
     }
-    private fun findItemSongIndexById(idSong:Long):Int?{
+   private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {
             val index = songsList.indexOfFirst{it.id == idSong}
             return  if(index>-1) index else  null
@@ -778,7 +769,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
 
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
-
             val song = songState.songEntity
             songEntity = song
             // Set info currentSongEntity
@@ -811,7 +801,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     }
     private fun fetchSong(song:SongEntity):MusicState?{
-
         try {
         val songPath = song.pathLocation.toString()
         val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!

@@ -12,7 +12,6 @@
         android:layout_height="60dp"
         android:src="@drawable/ktmusic_icon_original"
         android:scaleType="fitXY"
-
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_margin="16dp"/>
@@ -37,5 +36,52 @@
         app:layout_constraintTop_toBottomOf="@id/tvAppName"
 
         android:layout_marginStart="8dp"/>
-
+    <TextView
+        android:id="@+id/tvDevelop"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Programación:"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@id/ivAppInfo"
+        app:layout_constraintTop_toBottomOf="@id/ivAppInfo"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"/>
+    <TextView
+        android:id="@+id/tvDeveloper"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Barry Zea H."
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tvDevelop"
+        app:layout_constraintTop_toBottomOf="@id/tvDevelop"/>
+    <TextView
+        android:id="@+id/tvDesign"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Diseño:"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@id/ivAppInfo"
+        app:layout_constraintTop_toBottomOf="@id/tvDeveloper"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"/>
+    <TextView
+        android:id="@+id/tvDesigner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Barry Zea H."
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tvDesign"
+        app:layout_constraintTop_toBottomOf="@id/tvDesign"/>
+    <TextView
+        android:id="@+id/tvAboutThis"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Acerca de"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tvDesigner"
+        app:layout_constraintStart_toStartOf="@id/tvDesigner"
+        android:layout_marginTop="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
