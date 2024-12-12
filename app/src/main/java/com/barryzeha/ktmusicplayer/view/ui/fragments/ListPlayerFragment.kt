@@ -35,6 +35,7 @@ import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
+import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
@@ -148,8 +149,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
-
-            if(paths.isNotEmpty())bind?.pbLoad?.visibility=View.VISIBLE
+            if(paths.isNotEmpty()) {
+                bind?.pbLoad?.visibility = View.VISIBLE
+                //Mantenemos la pantalla encendida para evitar interrupciones mientras se procesa
+                keepScreenOn(requireActivity(), true)
+                //**********************************
+            }
             processSongPaths(paths ,{itemsCount->mainViewModel.setItemsCount(itemsCount)},{song->
                 CoroutineScope(Dispatchers.Main).launch {
                     bind?.pbLoad?.isIndeterminate=false
@@ -255,10 +260,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
-            // La actualización del adaptador debe ocurrir en el hilo principal siempre
-            // Dará problemas al recrearse la vista cuando rotemos la pantalla si no está en el
-            // hilo principal
+            //Removemos el estado de pantalla encendida permanentemente
+            keepScreenOn(requireActivity(),false)
 
+            // La actualización del adaptador debe ocurrir en el hilo principal.
+            // Caso contrario dará problemas al recrearse la vista cuando rotemos la pantalla
             sortPlayList(mPrefs.playListSortOption, songList
             ) { result ->
                 // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro

@@ -2,6 +2,7 @@ package com.barryzeha.core.common
 
 
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
@@ -11,6 +12,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.os.Build
+import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
@@ -301,4 +303,8 @@ fun getEmbeddedSyncedLyrics(pathFile:String):String?{
         return null
     }
     return null
+}
+fun keepScreenOn(activity:Activity, screenOn:Boolean){
+    if(screenOn)activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    else activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 }

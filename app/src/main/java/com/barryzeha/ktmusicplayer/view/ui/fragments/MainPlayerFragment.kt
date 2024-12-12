@@ -31,6 +31,7 @@ import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getEmbeddedSyncedLyrics
 import com.barryzeha.core.common.getSongMetadata
+import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
@@ -483,10 +484,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         loadLyric()
                         setRotateCoverViewAnimator(ivMusicCover, lrcView)
                         coverViewClicked = true
+
                     } else {
                         showLyricView(false)
                         setRotateCoverViewAnimator(ivMusicCover, lrcView)
                         coverViewClicked = false
+
                     }
                 }
             }
