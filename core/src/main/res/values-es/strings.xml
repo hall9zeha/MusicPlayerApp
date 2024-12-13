@@ -6,7 +6,10 @@
     <string name="sampleString">No hay canción reproduciéndose ahora</string>
     <string name="artist_placeholder">Artista</string>
     <string name="album_placeholder">Álbum</string>
+    <string name="aboutThisDescription">Reproductor de música offline multiformato con soporte para una amplia variedad de archivos de audio, incluyendo MP3, WAV, MIDI, APE, ALAC, AAC, FLAC, OGG y más. Disfruta de una experiencia personalizada con un ecualizador de 10 bandas en la versión BASS y un ecualizador de 5 bandas con la versión ExoPlayer. Además, la app incluye una herramienta para editar metadatos de etiquetas ID3, permitiéndote gestionar la información de tus canciones de forma fácil y eficiente.</string>
     <string name="delete_title">Eliminar</string>
+    <string name="design">Diseño</string>
+    <string name="develop">Programación</string>
     <string name="list">Lista</string>
     <string name="home">Inicio</string>
     <string name="settings">Configuración</string>

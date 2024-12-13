@@ -40,7 +40,7 @@
         android:id="@+id/tvDevelop"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Programación:"
+        android:text="@string/develop"
         android:textStyle="bold"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="@id/ivAppInfo"
@@ -59,7 +59,7 @@
         android:id="@+id/tvDesign"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Diseño:"
+        android:text="@string/design"
         android:textStyle="bold"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="@id/ivAppInfo"
@@ -78,10 +78,21 @@
         android:id="@+id/tvAboutThis"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Acerca de"
+        android:text="@string/aboutThis"
         android:textStyle="bold"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/tvDesigner"
         app:layout_constraintStart_toStartOf="@id/tvDesigner"
         android:layout_marginTop="8dp"/>
+    <TextView
+        android:id="@+id/tvDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/aboutThisDescription"
+        android:justificationMode="inter_word"
+        app:layout_constraintTop_toBottomOf="@id/tvAboutThis"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
