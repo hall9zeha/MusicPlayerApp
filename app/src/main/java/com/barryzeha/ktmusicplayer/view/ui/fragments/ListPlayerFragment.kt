@@ -799,9 +799,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         checkPermissions(requireContext(),permissionList){isGranted,permissions->
             if(isGranted) Log.e("GRANTED", "Completed granted" )
             else{
-                permissions.forEach {permission->
-                    if(!permission.second){
-                        launcherPermission.launch(permission.first)
+                permissions.forEach {(permission, granted)->
+                    if(!granted){
+                        launcherPermission.launch(permission)
                     }
                 }
             }

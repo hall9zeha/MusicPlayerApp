@@ -22,7 +22,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -105,7 +105,7 @@ dependencies {
     implementation(project(":di"))
     implementation(project(":features:mfilepicker"))
     implementation(project(":features:audioeffects"))
-    // Only bass flavor implementation
+    // Only will charge this module when using bass flavor implementation
     bassImplementation(project(":bass"))
 
 
