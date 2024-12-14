@@ -82,7 +82,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     val serviceInstance:LiveData<Pair<ServiceConnection,MusicPlayerService>> = _serviceInstance
 
     private var _processedRegistersInfo:SingleMutableLiveData<Pair<Int,Int>> = SingleMutableLiveData()
-    val processedRegisterInfo:LiveData<Pair<Int,Int>> = _processedRegistersInfo
+    val progressRegisterSaved:LiveData<Pair<Int,Int>> = _processedRegistersInfo
 
     private var _createdPlayList:SingleMutableLiveData<Long> = SingleMutableLiveData()
     val createdPlayList:LiveData<Long> = _createdPlayList

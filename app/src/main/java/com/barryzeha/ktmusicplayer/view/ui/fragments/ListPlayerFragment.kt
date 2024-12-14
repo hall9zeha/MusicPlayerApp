@@ -242,7 +242,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             setNumberOfTrack(scrollToPosition = prevOrNextClicked)
             prevOrNextClicked=false
         }
-        mainViewModel.processedRegisterInfo.observe(viewLifecycleOwner){(size, count)->
+        mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner){ (size, count)->
             bind?.pbLoad?.apply {
                 max=size
                 progress=count
