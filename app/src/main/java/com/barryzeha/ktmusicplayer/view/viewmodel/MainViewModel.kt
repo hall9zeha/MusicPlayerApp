@@ -14,10 +14,13 @@ import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.MyApp.Companion.mPrefs
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -99,20 +102,24 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
 
     init{
         initScope()
-        // trying
+
         CoroutineScope(Dispatchers.IO).launch {
-            fetchPlaylists()
+            awaitAll(
+                async{ getPlaylistWithSongsBy( mPrefs.playlistId,mPrefs.playListSortOption)},
+                async{ getPlayLists() }
+            )
         }
     }
-
     fun setItemsCount(itemsCount:Int){
         this.itemsCount = itemsCount.toLong()
     }
-
     fun fetchAllSong(){
       launch{
           _allSongs.value=repository.fetchAllSongs()
          }
+    }
+    private suspend fun getPlaylistWithSongsBy(playlistId:Int,field:Int){
+        _allSongs.postValue(repository.fetchPlaylistOrderBy(playlistId.toLong(), field))
     }
     fun fetchPlaylistWithSongsBy(playlistId:Int,field:Int){
         launch{
@@ -235,6 +242,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
         launch{
            _playLists.value= repository.fetchPlaylists()
         }
+    }
+    private suspend fun getPlayLists(){
+        _playLists.postValue(repository.fetchPlaylists())
     }
     // For playlist with songs cross ref
     fun savePlaylistWithSongRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef){

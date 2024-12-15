@@ -7,15 +7,20 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
@@ -113,6 +118,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             setUpScrollOnTextViews()
             setupAnimator()
             listener?.onFragmentReady()
+
 
     }
 
@@ -331,8 +337,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         musicPlayerService = bind.getService()
         this.serviceConnection=conn
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
-
-
     }
     override fun onServiceDisconnected() {
         super.onServiceDisconnected()
@@ -385,11 +389,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // porque genera un mal efecto en la vista al cargar la pista guardada
             // entre otros pequeños inconvenientes, ahora está en onResumen para actualizarse cuando cambiemos de lista
             // a main
-            //mainSeekBar.max = musicState.duration.toInt()
+
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
-            //tvSongTimeCompleted.text = createTime(musicState.duration).third
-            //Todo habilitar cuando se complete la implementación de la vista lyrics
             lrcView?.updateTime(musicState.currentDuration)
         }
     }
