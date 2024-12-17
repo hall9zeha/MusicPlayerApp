@@ -43,6 +43,7 @@
         <item name="windowNoTitle">false</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="colorPrimary">@color/color_primary</item>
+
        </style>
     <style name="checkBoxStyle" parent="Base.Theme.AppCompat">
         <item name="buttonTint">@color/controls_colors</item>
@@ -73,6 +74,7 @@
    <style name="myToolbarDrawerStyle" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
        <!-- <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>-->
       <!-- <item name="titleTextStyle">@style/CustomToolbarTitleStyle</item>-->
+
     </style>
     <!--<style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="color">@color/white</item>
@@ -84,5 +86,6 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/ktmusic_icon</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>
         <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/brand_text</item>
+
     </style>
 </resources>

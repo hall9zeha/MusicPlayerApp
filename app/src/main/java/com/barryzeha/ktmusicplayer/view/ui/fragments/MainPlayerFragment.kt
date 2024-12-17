@@ -7,20 +7,18 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
-import android.graphics.RenderEffect
-import android.graphics.Shader
-import android.os.Build
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
@@ -36,7 +34,6 @@ import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getEmbeddedSyncedLyrics
 import com.barryzeha.core.common.getSongMetadata
-import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
@@ -44,6 +41,7 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
+import com.barryzeha.core.util.BlurTransformation
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
@@ -52,6 +50,7 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.library.components.DiscCoverView
+import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -119,9 +118,17 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             setupAnimator()
             listener?.onFragmentReady()
 
-
     }
 
+   /* private fun tryBlurBackground(){
+        bind?.colorBackground?.let {
+            Glide.with(this)
+                .load(currentMusicState.albumArt)
+                .transform(BlurTransformation.Builder(requireContext()).blurRadius(20f).build())
+                .error(Glide.with(this).load(ColorDrawable(Color.DKGRAY)).fitCenter())
+                .into(bind?.colorBackground!!)
+        }
+    }*/
     override fun onAttach(context: Context) {
         super.onAttach(context)
         listener = context as? OnFragmentReadyListener
@@ -357,6 +364,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third
             currentMusicState = musicState
+
+            //tryBlurBackground()
             mainViewModel.saveStatePlaying(mPrefs.isPlaying)
             updateService()
             if(discCoverViewIsEnable()) {

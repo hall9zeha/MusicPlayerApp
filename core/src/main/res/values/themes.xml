@@ -6,8 +6,6 @@
         <item name="colorSurface">@color/surface</item>
         <item name="backgroundColor">@color/surface</item>
     </style>
-
-    <style name="Theme.KTMusicPlayer" parent="Base.Theme.KTMusicPlayer" />
     <style name="imageViewCornerStyle" parent="">
         <item name="cornerSize">6%</item>
     </style>

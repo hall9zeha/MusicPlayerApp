@@ -3,10 +3,14 @@ package com.barryzeha.ktmusicplayer.view.ui.activities
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
+import android.view.WindowInsetsController
+import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -54,6 +58,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     lateinit var mPrefs:MyPreferences
 
     private var serviceSongListener:ServiceSongListener?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
@@ -63,19 +68,18 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             }
         }
         bind= ActivityMainBinding.inflate(layoutInflater)
-        enableEdgeToEdge()
-
         setContentView(bind.root)
-        ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
+        enableEdgeToEdge()
+         ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         setUpViewPager()
         setUpObservers()
         setUpListeners()
         //mOnBackPressedDispatcher()
+
     }
 
     private fun setUpObservers(){

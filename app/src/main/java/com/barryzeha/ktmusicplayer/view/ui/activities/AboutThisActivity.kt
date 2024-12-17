@@ -13,7 +13,7 @@ import com.barryzeha.core.R as coreRes
 class AboutThisActivity : AppCompatActivity() {
     private lateinit var bind:ActivityAboutThisBinding
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(coreRes.style.Theme_KTMusicPlayer)
+        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         bind = ActivityAboutThisBinding.inflate(layoutInflater)
