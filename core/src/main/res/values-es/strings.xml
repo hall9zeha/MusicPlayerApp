@@ -39,4 +39,8 @@
     <string name="editFileSuccess">Editado correctamente</string>
     <string name="playlistCreatedMsg">Lista creada</string>
     <string name="addedToPlaylist">Agregada a la lista</string>
+    <string name="readMediaAudioMsg">Se necesita habilitar el permiso de Read Media Audio para que pueda agregar los directorios y archivos de audio de su dispositivo a la lista y poder reproducirlos</string>
+    <string name="writeExternaStorageMsg">Se necesita habilitar el permiso de Write External storage para realizar la escritura de metadatos y etiquetas de audio cuando use el editor de etiquetas en sus canciones</string>
+    <string name="notifyPermissionMsg">Se necesita habilitar el permiso de notificaciones para que la applicación pueda mostrarle la información de rerpoducción y  los controles multimedia en un mensaje con el cual podrá interactuar fácilmente</string>
+    <string name="bluetoothPermissionMsg">Se necesita habilitar este permiso para que pueda controlar la aplicación a través de dispositivos bluetooth, como audífonos y bocinas</string>
 </resources>

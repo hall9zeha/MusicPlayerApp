@@ -36,6 +36,14 @@
         android:theme="@style/splashScreenTheme"
         tools:targetApi="31">
         <activity
+            android:name=".view.ui.activities.MainPermissionsActivity"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".view.ui.activities.AboutThisActivity"
             android:exported="false" />
         <activity
@@ -49,11 +57,10 @@
             android:exported="true"
             android:label="${appLabel}"
             android:windowSoftInputMode="adjustResize">
-            <intent-filter>
+          <!--  <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>-->
         </activity>
         <activity
             android:name="com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity"
