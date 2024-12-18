@@ -94,7 +94,9 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var _songController: ServiceSongListener? = null
     val songController: ServiceSongListener get() = _songController!!
     private var isForegroundService = false
-    var currentMusicState = MusicState()
+    private var currentMusicState = MusicState()
+    val _currentMusicState:MusicState get() = currentMusicState
+
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
