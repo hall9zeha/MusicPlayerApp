@@ -149,20 +149,23 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
-            if(paths.isNotEmpty()) {
+            if (paths.isNotEmpty()) {
                 bind?.pbLoad?.visibility = View.VISIBLE
                 //Mantenemos la pantalla encendida para evitar interrupciones mientras se procesa
                 keepScreenOn(requireActivity(), true)
                 //**********************************
-            }
-            processSongPaths(paths ,{itemsCount->mainViewModel.setItemsCount(itemsCount)},{song->
-                CoroutineScope(Dispatchers.Main).launch {
-                    bind?.pbLoad?.isIndeterminate=false
-                }
-                mainViewModel.saveNewSong(song)
 
-            })
+                processSongPaths(paths,
+                    { itemsCount -> mainViewModel.setItemsCount(itemsCount) },
+                    { song ->
+                        CoroutineScope(Dispatchers.Main).launch {
+                            bind?.pbLoad?.isIndeterminate = false
+                        }
+                        mainViewModel.saveNewSong(song)
+
+                    })
             }
+        }
     }
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){

@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.common
 
 import android.content.Context
+import android.util.Log
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
@@ -87,28 +88,30 @@ private suspend fun processFile(
     context: Context,
     fileProcessed: (SongEntity) -> Unit
 ){
-    if (AudioFileType().verify(file.absolutePath)) {
+    if (AudioFileType().verify(file.name)) {
         operationsMutex.withLock {
             val realPathFromFile = file.absolutePath
             val parentDir = getParentDirectories(file.path.toString())
-            val metadata = fetchFileMetadata(context, realPathFromFile!!)
-
-           val song = SongEntity(
-                idPlaylistCreator = MyApp.mPrefs.playlistId.toLong(),
-                pathLocation = realPathFromFile,
-                parentDirectory = parentDir,
-                description = metadata!!.title,
-                duration = metadata!!.songLength,
-                bitrate = metadata!!.bitRate,
-                artist = metadata!!.artist!!,
-                album = metadata!!.album!!,
-                genre = metadata!!.genre!!,
-                timestamp = Date().time
-            )
-         // Guardar en el ViewModel si es necesario
-            withContext(Dispatchers.Main) {
-                metadata?.let {
-                    fileProcessed(song)
+            val metadata = fetchFileMetadata(context, realPathFromFile)
+            Log.e("SONG-ERROR", realPathFromFile)
+            metadata?.let {
+                val song = SongEntity(
+                    idPlaylistCreator = MyApp.mPrefs.playlistId.toLong(),
+                    pathLocation = realPathFromFile,
+                    parentDirectory = parentDir,
+                    description = metadata!!.title,
+                    duration = metadata!!.songLength,
+                    bitrate = metadata!!.bitRate,
+                    artist = metadata!!.artist!!,
+                    album = metadata!!.album!!,
+                    genre = metadata!!.genre!!,
+                    timestamp = Date().time
+                )
+                // Guardar en el ViewModel si es necesario
+                withContext(Dispatchers.Main) {
+                    metadata?.let {
+                        fileProcessed(song)
+                    }
                 }
             }
         }

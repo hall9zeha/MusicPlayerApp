@@ -149,13 +149,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             getSongById(idInserted)
            _processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
            Log.e("SAVE-NEW-SONG", "$itemsCount --: $countItemsInserted" )
+
         }
     }
 
     fun saveSongs(songList:List<SongEntity>){
         itemsCount=songList.size.toLong()
         launch(Dispatchers.IO){
-
                 songList.forEach { song ->
                     withContext(Dispatchers.Main){
                         saveNewSong(song)

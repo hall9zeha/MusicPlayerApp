@@ -60,13 +60,14 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     private var serviceSongListener:ServiceSongListener?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
-        installSplashScreen().apply {
+       /* installSplashScreen().apply {
             CoroutineScope(Dispatchers.IO).launch {
                 delay(1000)
                 setKeepOnScreenCondition{false}
             }
-        }
+        }*/
         bind= ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
         enableEdgeToEdge()

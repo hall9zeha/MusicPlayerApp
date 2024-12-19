@@ -78,7 +78,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="96dp"
+        android:layout_marginTop="86dp"
         app:layout_constraintWidth_percent="0.72"
         app:layout_constraintDimensionRatio="H,1:1">
 

@@ -78,7 +78,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 
     metadata?.let{
         val tag = metadata.tag
-        val nameFile=metadata.file.name.substringBeforeLast(".")
+        val nameFile=try{metadata.file.name.substringBeforeLast(".")}catch(e:Exception){"Without name"}
         // retrieve covert art of song file uncomment if you want implement,
         /*val coverArtData = try{
             tag.firstArtwork.binaryData
