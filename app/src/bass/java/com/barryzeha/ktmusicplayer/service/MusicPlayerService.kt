@@ -252,6 +252,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             initMusicStateLooper()
         }
     }
+    fun getStateSaved(){
+        if(!songState.isNullOrEmpty()){
+            val songEntity=songState[0].songEntity
+            if(songsList.contains(songEntity))setSongStateSaved(songState[0])
+        }
+    }
     private fun initMusicStateLooper(){
         initNotify()
         songRunnable = Runnable {

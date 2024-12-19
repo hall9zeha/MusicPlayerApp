@@ -217,7 +217,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
 
         mainViewModel.setServiceInstance(this,musicService!!)
-        mainViewModel.setCurrentTrack(musicService?._currentMusicState!!)
     }
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null

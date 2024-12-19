@@ -128,12 +128,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         filePickerActivityResult()
         audioEffectActivityResult()
         activityResultForPermission()
-        CoroutineScope(Dispatchers.IO).launch {
+        /*CoroutineScope(Dispatchers.IO).launch {
             initCheckPermission()
-        }
+        }*/
         setUpListeners()
         setupBottomSheet()
-
+        musicPlayerService?.getStateSaved()
 
     }
     private fun handleArgumentsSending(){
@@ -170,9 +170,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun activityResultForPermission(){
       launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
             if(it){
-                CoroutineScope(Dispatchers.IO).launch{
-                initCheckPermission()
-                }
+                //Todo lanzar file picker activity si se dieron los permisos de lectura
             }
         }
     }
@@ -444,18 +442,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         updateService()
 
     }
-
-
     private fun setUpListeners()= with(bind){
         var clicked=false
 
         val permissionList:List<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             listOf(Manifest.permission.READ_MEDIA_AUDIO)
         } else {
-            listOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.RECORD_AUDIO,
-            )
+            listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
         this?.let {
             tvPlayListName.setOnClickListener{
@@ -492,7 +485,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             mainViewModel.createPlayList(PlaylistEntity(playListName = name))
                         }
                     })
-
                 }
             }
             bottomPlayerControls.btnPlay.setOnClickListener {
@@ -787,7 +779,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun initCheckPermission(){
         val permissionList:MutableList<String> =  if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
             mutableListOf(Manifest.permission.POST_NOTIFICATIONS,
-                Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.READ_MEDIA_AUDIO,
                 // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
                 // cuando el servicio bluetooth del móvil esté activo.
@@ -796,8 +787,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             mutableListOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.BLUETOOTH_CONNECT)
+            )
         }
         checkPermissions(requireContext(),permissionList){isGranted,permissions->
             if(isGranted) Log.e("GRANTED", "Completed granted" )
