@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 class MainPermissionsActivity : AppCompatActivity() {
     private lateinit var launcherPermission: ActivityResultLauncher<String>
     private lateinit var bind:ActivityMainPermissionsBinding
-    val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
+    private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_MEDIA_AUDIO,
@@ -105,6 +105,7 @@ class MainPermissionsActivity : AppCompatActivity() {
                 bind.btnReadMediaPermission.text="Allowed";bind.btnReadMediaPermission.isClickable=false
                 bind.btnWriteStoragePermission.text="Allowed";bind.btnWriteStoragePermission.isClickable=false
                 bind.btnReadStoragePermission.text="Allowed";bind.btnReadStoragePermission.isClickable=false
+                bind.btnFinish.visibility = View.VISIBLE
             }else{
                 permissions.forEach {(permission, granted)->
                     if(!granted){

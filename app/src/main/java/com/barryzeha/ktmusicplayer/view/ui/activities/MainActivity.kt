@@ -62,12 +62,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
-       /* installSplashScreen().apply {
-            CoroutineScope(Dispatchers.IO).launch {
-                delay(1000)
-                setKeepOnScreenCondition{false}
-            }
-        }*/
+
         bind= ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
         enableEdgeToEdge()
@@ -80,8 +75,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         setUpObservers()
         setUpListeners()
         //mOnBackPressedDispatcher()
-
-
     }
 
     private fun setUpObservers(){
@@ -217,7 +210,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
         mainViewModel.setServiceInstance(this,musicService!!)
-        musicService!!.getStateSaved()
+        musicService?.getStateSaved()
 
     }
     override fun onServiceDisconnected(name: ComponentName?) {
