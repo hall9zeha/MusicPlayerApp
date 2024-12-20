@@ -133,7 +133,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }*/
         setUpListeners()
         setupBottomSheet()
-        musicPlayerService?.getStateSaved()
+
 
     }
     private fun handleArgumentsSending(){
@@ -234,6 +234,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
             serviceConnection=instance.first
             musicPlayerService=instance.second
+
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){musicState->
            updateUI(musicState)
@@ -242,6 +243,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             updateUIOnceTime(currentTRack)
             setNumberOfTrack(scrollToPosition = prevOrNextClicked)
             prevOrNextClicked=false
+
         }
         mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner){ (size, count)->
             bind?.pbLoad?.apply {
@@ -964,6 +966,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     override fun onResume() {
         super.onResume()
+
         checkPreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)

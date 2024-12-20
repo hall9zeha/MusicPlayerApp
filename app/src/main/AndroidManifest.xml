@@ -36,13 +36,32 @@
         android:theme="@style/splashScreenTheme"
         tools:targetApi="31">
         <activity
-            android:name=".view.ui.activities.MainPermissionsActivity"
-            android:exported="true" >
+            android:name=".view.ui.activities.MainEmptyActivity"
+            android:exported="true">
+            <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".view.ui.activities.MainActivity"
+            android:configChanges="orientation"
+            android:exported="true"
+            android:label="${appLabel}"
+            android:windowSoftInputMode="adjustResize">
+
+            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            -->
         </activity>
+        <activity
+            android:name=".view.ui.activities.MainPermissionsActivity"
+            android:exported="true"/>
         <activity
             android:name=".view.ui.activities.AboutThisActivity"
             android:exported="false" />
@@ -51,17 +70,7 @@
             android:exported="false"
             android:label="@string/title_activity_settings"
             android:theme="@style/Theme.With.Toolbar" />
-        <activity
-            android:name=".view.ui.activities.MainActivity"
-            android:configChanges="orientation"
-            android:exported="true"
-            android:label="${appLabel}"
-            android:windowSoftInputMode="adjustResize">
-          <!--  <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
-        </activity>
+
         <activity
             android:name="com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity"
             android:exported="false" />

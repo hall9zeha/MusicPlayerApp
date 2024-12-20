@@ -42,13 +42,9 @@ class MainPermissionsActivity : AppCompatActivity() {
     }
     private val permissionStatusMap = mutableMapOf<String, Boolean>()
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
-        installSplashScreen().apply {
-            CoroutineScope(Dispatchers.IO).launch {
-                delay(500)
-                setKeepOnScreenCondition{false}
-            }
-        }
+
         bind = ActivityMainPermissionsBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(bind.root)
@@ -104,7 +100,6 @@ class MainPermissionsActivity : AppCompatActivity() {
 
         checkPermissions(this,permissionList){isGranted,permissions->
             if(isGranted){
-                startActivity(Intent(this,MainActivity::class.java))
                 bind.btnBtPermission.text="Allowed";bind.btnBtPermission.isClickable=false
                 bind.btnNotifyPermission.text="Allowed"; bind.btnNotifyPermission.isClickable=false
                 bind.btnReadMediaPermission.text="Allowed";bind.btnReadMediaPermission.isClickable=false

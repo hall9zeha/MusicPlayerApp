@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         setUpListeners()
         //mOnBackPressedDispatcher()
 
+
     }
 
     private fun setUpObservers(){
@@ -215,8 +216,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         musicService?.setActivity(this)
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
-
         mainViewModel.setServiceInstance(this,musicService!!)
+        musicService!!.getStateSaved()
+
     }
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null

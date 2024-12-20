@@ -253,7 +253,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     fun getStateSaved(){
-        if(!songState.isNullOrEmpty()){
+        if(songState.isNotEmpty()){
             val songEntity=songState[0].songEntity
             if(songsList.contains(songEntity))setSongStateSaved(songState[0])
         }
