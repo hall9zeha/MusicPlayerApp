@@ -230,11 +230,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
     }
     private fun setUpObservers(){
-
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
             serviceConnection=instance.first
             musicPlayerService=instance.second
-
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){musicState->
            updateUI(musicState)
@@ -970,7 +968,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         checkPreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
-
         if(mPrefs.controlFromNotify){
             try {
                 val song = getSongOfAdapter(mPrefs.idSong)

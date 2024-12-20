@@ -207,11 +207,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicService = binder.getService()
         musicService?.setActivity(this)
+        mainViewModel.setServiceInstance(this,musicService!!)
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
-        mainViewModel.setServiceInstance(this,musicService!!)
-        musicService?.getStateSaved()
-
     }
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null
@@ -253,6 +251,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
     override fun onFragmentReady() {
         CoroutineScope(Dispatchers.Main).launch {
+            musicService?.getStateSaved()
             // Retrasamos 1.5 segundos la carga del segundo fragmento
             delay(1500)
             bind.mViewPager.offscreenPageLimit = 2
