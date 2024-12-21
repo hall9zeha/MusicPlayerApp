@@ -111,7 +111,7 @@
                     android:id="@+id/tvWriteStoragePermission"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/writeExternaStorageMsg"
+                    android:text="@string/writeExternalStorageMsg"
                     tools:maxLines="4"
                     android:justificationMode="inter_word"
                     android:layout_marginStart="16dp"

@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     private var playlists:List<PlaylistEntity> = arrayListOf()
     @Inject
     lateinit var mPrefs:MyPreferences
-
     private var serviceSongListener:ServiceSongListener?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
