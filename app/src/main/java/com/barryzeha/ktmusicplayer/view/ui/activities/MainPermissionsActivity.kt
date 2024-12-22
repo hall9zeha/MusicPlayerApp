@@ -83,7 +83,7 @@ class MainPermissionsActivity : AppCompatActivity() {
     }
     private fun setupListeners()=with(bind){
         btnFinish.setOnClickListener {
-            startActivity(Intent(this@MainPermissionsActivity,MainActivity::class.java))
+            finish()
         }
     }
     private fun checkPermissions(){

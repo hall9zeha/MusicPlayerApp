@@ -20,11 +20,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.telephony.PhoneStateListener
-import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -111,6 +108,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var listIsShuffled:Boolean=false
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
+    private var firstCallingToSongState:Boolean = true
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -252,12 +250,17 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             initMusicStateLooper()
         }
     }
-    fun getStateSaved(){
-        if(songState.isNotEmpty()){
-            val songEntity=songState[0].songEntity
-            if(songsList.contains(songEntity))setSongStateSaved(songState[0])
+    fun getStateSaved() {
+        if(firstCallingToSongState) {
+            if (songState.isNotEmpty()) {
+                val songEntity = songState[0].songEntity
+                if (songsList.contains(songEntity)) setSongStateSaved(songState[0])
+            }
         }
+        firstCallingToSongState=false
+
     }
+
     private fun initMusicStateLooper(){
         initNotify()
         songRunnable = Runnable {
@@ -536,10 +539,11 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                             currentMusicState
                         )
                     }
-                    notificationManager.notify(
-                        NOTIFICATION_ID,
-                        mediaPlayerNotify
-                    )
+
+                notificationManager.notify(
+                    NOTIFICATION_ID,
+                    mediaPlayerNotify
+                )
                 }
             }
 

@@ -1,9 +1,12 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.graphics.Color
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
@@ -26,6 +29,7 @@ import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
+import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.PlaylistEntity
@@ -57,6 +61,18 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     @Inject
     lateinit var mPrefs:MyPreferences
     private var serviceSongListener:ServiceSongListener?=null
+    private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
+        mutableListOf(
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.READ_MEDIA_AUDIO,
+            // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
+            // cuando el servicio bluetooth del móvil esté activo.
+            Manifest.permission.BLUETOOTH_CONNECT)
+    }else{
+        mutableListOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
@@ -73,9 +89,18 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         setUpViewPager()
         setUpObservers()
         setUpListeners()
+        initCheckPermission()
         //mOnBackPressedDispatcher()
     }
-
+    private fun initCheckPermission(){
+        checkPermissions(this,permissionList){isGranted,_->
+            val activity:Intent
+            if(!isGranted){
+                activity=Intent(this,MainPermissionsActivity::class.java)
+                startActivity(activity)
+            }
+        }
+    }
     private fun setUpObservers(){
 
         mainViewModel.fetchSongState()
@@ -163,6 +188,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             subMenu?.removeItem(itemId)
         }
     }
+
     // Usamos  la navegación sin el componente de navegación ya que necesitamos el viewPager para deslizarnos
     // y solo el menú para poder mostrar los índices del viewPager programaticamente
     private fun setUpListeners(){
@@ -209,6 +235,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         mainViewModel.setServiceInstance(this,musicService!!)
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
+
     }
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null
@@ -250,7 +277,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
     override fun onFragmentReady() {
         CoroutineScope(Dispatchers.Main).launch {
-            musicService?.getStateSaved()
+            //musicService?.getStateSaved()
             // Retrasamos 1.5 segundos la carga del segundo fragmento
             delay(1500)
             bind.mViewPager.offscreenPageLimit = 2

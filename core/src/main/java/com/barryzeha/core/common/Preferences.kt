@@ -23,6 +23,7 @@ private const val ID_SONG = "idSong"
 private const val CURRENT_VIEW = "currentView"
 private const val PLAY_LIST_SORT_OPTION="playListSortOption"
 private const val FIRST_EXECUTION = "firstExecution"
+
 private const val PLAYLIST_ID = "playlistId"
 private const val STORAGE_DIR_SAF_URI = "storageDirSAFUri"
 
@@ -46,6 +47,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var firstExecution:Boolean
         get()= myPreferences.getBoolean(FIRST_EXECUTION,false)
         set(value)=myPreferences.edit().putBoolean(FIRST_EXECUTION,value).apply()
+
     var currentIndexSong:Long
         get()=myPreferences.getLong(CURRENT_POSITION,-1)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()

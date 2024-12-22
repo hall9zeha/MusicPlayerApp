@@ -35,15 +35,6 @@
         android:supportsRtl="true"
         android:theme="@style/splashScreenTheme"
         tools:targetApi="31">
-        <activity
-            android:name=".view.ui.activities.MainEmptyActivity"
-            android:exported="true">
-            <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".view.ui.activities.MainActivity"
@@ -51,13 +42,10 @@
             android:exported="true"
             android:label="${appLabel}"
             android:windowSoftInputMode="adjustResize">
-
-            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            -->
         </activity>
         <activity
             android:name=".view.ui.activities.MainPermissionsActivity"
