@@ -107,6 +107,7 @@ class MusicPlayerService : Service(){
     private var bluetoothIsConnect:Boolean = false
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
+    private var firstCallingToSongState:Boolean = true
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -525,6 +526,16 @@ class MusicPlayerService : Service(){
             )
            }
         }
+    }
+    fun getStateSaved() {
+        if(firstCallingToSongState) {
+            if (songState.isNotEmpty()) {
+                val songEntity = songState[0].songEntity
+                if (songsList.contains(songEntity)) setSongStateSaved(songState[0])
+            }
+        }
+        firstCallingToSongState=false
+
     }
     private fun initMusicStateLooper(){
         initNotify()
