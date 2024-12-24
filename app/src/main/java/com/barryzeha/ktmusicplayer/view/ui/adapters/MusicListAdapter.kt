@@ -412,6 +412,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 originalList.filter { item ->
                     if (item is SongEntity) {
                         item.description.toString().lowercase().contains(input!!)
+                                || item.album.lowercase().contains(input)
+                                || item.artist.lowercase().contains(input)
                     } else {
                         false
                     }
