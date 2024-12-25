@@ -64,7 +64,7 @@ class MainPermissionsActivity : AppCompatActivity() {
             if(it){
 
                     val button =bind.root.findViewWithTag<Button>(requestedPermission)
-                    button.text="Allowed"
+                    button.text=getString(coreRes.string.granted)
                     button.isClickable=false
                     checkPermissions()
 
@@ -100,17 +100,17 @@ class MainPermissionsActivity : AppCompatActivity() {
 
         checkPermissions(this,permissionList){isGranted,permissions->
             if(isGranted){
-                bind.btnBtPermission.text="Allowed";bind.btnBtPermission.isClickable=false
-                bind.btnNotifyPermission.text="Allowed"; bind.btnNotifyPermission.isClickable=false
-                bind.btnReadMediaPermission.text="Allowed";bind.btnReadMediaPermission.isClickable=false
-                bind.btnWriteStoragePermission.text="Allowed";bind.btnWriteStoragePermission.isClickable=false
-                bind.btnReadStoragePermission.text="Allowed";bind.btnReadStoragePermission.isClickable=false
+                bind.btnBtPermission.text=getString(coreRes.string.granted);bind.btnBtPermission.isClickable=false
+                bind.btnNotifyPermission.text=getString(coreRes.string.granted); bind.btnNotifyPermission.isClickable=false
+                bind.btnReadMediaPermission.text=getString(coreRes.string.granted);bind.btnReadMediaPermission.isClickable=false
+                bind.btnWriteStoragePermission.text=getString(coreRes.string.granted);bind.btnWriteStoragePermission.isClickable=false
+                bind.btnReadStoragePermission.text=getString(coreRes.string.granted);bind.btnReadStoragePermission.isClickable=false
                 bind.btnFinish.visibility = View.VISIBLE
             }else{
                 permissions.forEach {(permission, granted)->
                     if(!granted){
                         val button=bind.root.findViewWithTag<Button>(permission)
-                        button.text="Allow"
+                        button.text=getString(coreRes.string.grant)
                         button.setOnClickListener {
                             permissionStatusMap[permission]=false
                             launcherPermission.launch(permission)

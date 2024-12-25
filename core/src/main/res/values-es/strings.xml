@@ -12,6 +12,9 @@
     <string name="develop">Programación</string>
     <string name="list">Lista</string>
     <string name="home">Inicio</string>
+    <string name="granted">Concedido</string>
+    <string name="grant">Permitir</string>
+    <string name="finish">Finalizar</string>
     <string name="settings">Configuración</string>
     <string name="aboutThis">Acerca de</string>
     <string name="themeSection">Tema</string>
