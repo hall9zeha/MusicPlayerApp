@@ -143,9 +143,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun audioEffectActivityResult(){
-        launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){
-
-        }
+        launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){ }
     }
     private fun filePickerActivityResult(){
         launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
@@ -322,8 +320,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 musicListAdapter?.removeAll()
                 mPrefs.clearIdSongInPrefs()
                 mPrefs.clearCurrentPosition()
-                setNumberOfTrack()
                 musicPlayerService?.clearPlayList(false)
+                setNumberOfTrack()
             }
         }
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
@@ -444,7 +442,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun setUpListeners()= with(bind){
         var clicked=false
-
         val permissionList:List<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             listOf(Manifest.permission.READ_MEDIA_AUDIO)
         } else {
@@ -776,31 +773,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         return null
     }
-    private fun initCheckPermission(){
-        val permissionList:MutableList<String> =  if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            mutableListOf(Manifest.permission.POST_NOTIFICATIONS,
-                Manifest.permission.READ_MEDIA_AUDIO,
-                // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
-                // cuando el servicio bluetooth del móvil esté activo.
-                Manifest.permission.BLUETOOTH_CONNECT)
-        }else{
-            mutableListOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            )
-        }
-        checkPermissions(requireContext(),permissionList){isGranted,permissions->
-            if(isGranted) Log.e("GRANTED", "Completed granted" )
-            else{
-                permissions.forEach {(permission, granted)->
-                    if(!granted){
-                        launcherPermission.launch(permission)
-                    }
-                }
-            }
-        }
-    }
-
     @SuppressLint("ResourceType")
     private fun checkPreferences()=with(bind){
         this?.let {
@@ -868,10 +840,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         })
 
     }
-
     private fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){
         val itemSong = musicListAdapter?.getSongById(mPrefs.idSong)
-
         itemSong?.let{
             val (numberedPos, realPos) = musicListAdapter?.getPositionByItem(itemSong)!!
             mPrefs.currentIndexSong = numberedPos.toLong()
@@ -882,12 +852,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bind?.seekbarControl?.tvNumberSong?.text =
             String.format("#%s/%s", if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0, (musicListAdapter?.getSongItemCount()!! + itemCount))
     }
-   private fun updateService(){
+    private fun updateService(){
         serviceConnection?.let{
        startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
 
     }
-
     override fun play() {
         super.play()
         bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
@@ -900,7 +869,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         musicPlayerService?.pausePlayer()
         mainViewModel.saveStatePlaying(false)
     }
-
     override fun next() {
         super.next()
         bind?.bottomPlayerControls?.btnNext?.performClick()
@@ -964,7 +932,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     override fun onResume() {
         super.onResume()
-
         checkPreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)

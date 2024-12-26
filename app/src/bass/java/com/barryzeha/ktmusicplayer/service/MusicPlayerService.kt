@@ -252,9 +252,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun getStateSaved() {
         if(firstCallingToSongState) {
-            if (songState.isNotEmpty()) {
-                val songEntity = songState[0].songEntity
-                if (songsList.contains(songEntity)) setSongStateSaved(songState[0])
+            if (!songState.isNullOrEmpty()) {
+                setSongStateSaved(songState[0])
             }
         }
         firstCallingToSongState=false

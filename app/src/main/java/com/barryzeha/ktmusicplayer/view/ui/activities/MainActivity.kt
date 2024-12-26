@@ -9,6 +9,7 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.Menu
 import android.view.WindowInsetsController
 import android.view.WindowManager
@@ -235,7 +236,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         mainViewModel.setServiceInstance(this,musicService!!)
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
-
     }
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null
@@ -277,7 +277,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
     override fun onFragmentReady() {
         CoroutineScope(Dispatchers.Main).launch {
-            //musicService?.getStateSaved()
             // Retrasamos 1.5 segundos la carga del segundo fragmento
             delay(1500)
             bind.mViewPager.offscreenPageLimit = 2
