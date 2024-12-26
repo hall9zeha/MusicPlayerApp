@@ -99,12 +99,12 @@ private suspend fun processFile(
                     idPlaylistCreator = MyApp.mPrefs.playlistId.toLong(),
                     pathLocation = realPathFromFile,
                     parentDirectory = parentDir,
-                    description = metadata!!.title,
-                    duration = metadata!!.songLength,
-                    bitrate = metadata!!.bitRate,
-                    artist = metadata!!.artist!!,
-                    album = metadata!!.album!!,
-                    genre = metadata!!.genre!!,
+                    description = metadata.title,
+                    duration = metadata.songLength,
+                    bitrate = metadata.bitRate,
+                    artist = metadata.artist,
+                    album = metadata.album,
+                    genre = metadata.genre,
                     timestamp = Date().time
                 )
                 // Guardar en el ViewModel si es necesario

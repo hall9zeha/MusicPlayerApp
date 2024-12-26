@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.3.2" type="baseline" client="gradle" dependencies="false" name="AGP (8.3.2)" variant="fatal" version="8.3.2">
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="          _allSongs.value=repository.fetchAllSongs()"
+        errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="118"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="        _allSongs.postValue(repository.fetchPlaylistOrderBy(playlistId.toLong(), field))"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="122"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _allSongs.value =repository.fetchPlaylistOrderBy(playlistId.toLong(), field)"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="126"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _allSongFromMain.value=repository.fetchAllSongs()"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="131"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _songState.value=repository.fetchSongState()"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="137"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _deletedRow.value = repository.deleteSong(songEntity.id)"
+        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="198"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _deleteAllRows.value = repository.deleteAllSongs()"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="213"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _songById.value=repository.fetchSongById(idSong)"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="219"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _createdPlayList.value = repository.createPlayList(playlistEntity)"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="238"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="           _playLists.value= repository.fetchPlaylists()"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="243"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="        _playLists.postValue(repository.fetchPlaylists())"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="247"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NullSafeMutableLiveData"
+        message="Expected non-nullable value"
+        errorLine1="            _playlistWithSongRefInserted.value=repository.savePlaylistWithSongCrossRef(playlistWithSongsCrossRef)"
+        errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/barryzeha/ktmusicplayer/view/viewmodel/MainViewModel.kt"
+            line="252"
+            column="48"/>
+    </issue>
+
+</issues>
