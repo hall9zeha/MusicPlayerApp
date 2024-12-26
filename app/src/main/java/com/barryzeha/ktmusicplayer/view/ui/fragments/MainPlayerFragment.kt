@@ -7,15 +7,12 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
@@ -41,7 +38,6 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
-import com.barryzeha.core.util.BlurTransformation
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
@@ -50,7 +46,6 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.library.components.DiscCoverView
-import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -393,7 +388,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private fun updateUI(musicState: MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
-            mPrefs.currentDuration = musicState.currentDuration
+            mPrefs.currentPosition = musicState.currentDuration
             // Quitamos esta propiedad de mainSeekBar.max en actualización constante
             // porque genera un mal efecto en la vista al cargar la pista guardada
             // entre otros pequeños inconvenientes, ahora está en onResumen para actualizarse cuando cambiemos de lista
@@ -772,7 +767,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
                     // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
                     // por el momento
-                    currentPosition = mPrefs.currentDuration
+                    currentPosition = mPrefs.currentPosition
                 )
             )
         }

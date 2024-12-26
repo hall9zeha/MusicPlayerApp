@@ -57,7 +57,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var musicStateJsonSaved:String?
         get()=myPreferences.getString(MUSIC_STATE,"")
         set(value)=myPreferences.edit().putString(MUSIC_STATE,value).apply()
-    var currentDuration:Long
+    var currentPosition:Long
         get()=myPreferences.getLong(CURRENT_DURATION,0)
         set(value)=myPreferences.edit().putLong(CURRENT_DURATION,value).apply()
     var songMode:Int

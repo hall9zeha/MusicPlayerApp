@@ -11,7 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
@@ -251,7 +250,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
             if (statePlay) {
-                //isPlaying = true
                 bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
             }else{
                 bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
@@ -288,7 +286,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             mPrefs.playListSortOption = selectedSort
             mainViewModel.fetchPlaylistWithSongsBy(mPrefs.playlistId,selectedSort)
             setUpPlayListName()
-
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             song?.let{
@@ -431,7 +428,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun updateUI(musicState: MusicState){
         currentMusicState = musicState
-        mPrefs.currentDuration = musicState.currentDuration
+        mPrefs.currentPosition = musicState.currentDuration
         //bind?.ivCover?.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
         bind?.seekbarControl?.loadSeekBar?.max = musicState.duration.toInt()
         bind?.seekbarControl?.tvEndTime?.text = createTime(musicState.duration).third
@@ -848,7 +845,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
-
         bind?.seekbarControl?.tvNumberSong?.text =
             String.format("#%s/%s", if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0, (musicListAdapter?.getSongItemCount()!! + itemCount))
     }
@@ -965,7 +961,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
                     // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
                     // por el momento
-                    currentPosition = mPrefs.currentDuration
+                    currentPosition = mPrefs.currentPosition
                 )
             )
 

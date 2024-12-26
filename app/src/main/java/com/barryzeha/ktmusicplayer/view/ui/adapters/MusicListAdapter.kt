@@ -18,7 +18,6 @@ import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.fetchShortFileMetadata
-import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
