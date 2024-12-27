@@ -20,8 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -keep class com.un4seen.bass.** {*;}
-# Excluir clases relacionadas con BufferedImage, ImageIO e ImageInputStream
--keep class org.jaudiotagger.tag.images.StandardArtwork { *; }
--dontwarn javax.imageio.**
--dontwarn java.awt.**
--dontwarn java.awt.image.**
+
+#Jaudiotagger
+-dontwarn org.jaudiotagger.**
+-dontwarn org.jcodec.**
+-keep class org.jaudiotagger.** { *; }
+-keep class org.jcodec.** { *; }

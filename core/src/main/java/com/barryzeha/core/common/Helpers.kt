@@ -12,12 +12,14 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.os.Build
+import android.util.Log
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
 import com.barryzeha.core.model.entities.MusicState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
@@ -73,9 +75,14 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 }
 
  fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata?{
-    val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
+     var metadata: AudioFile? = null
+     try {
+         metadata = AudioFileIO.read(File(pathFile))
+     } catch (e: Exception) {
+         metadata = null
+         Log.e("METADATA-FETCH", e.message.toString())
 
-
+     }
     metadata?.let{
         val tag = metadata.tag
         val nameFile=try{metadata.file.name.substringBeforeLast(".")}catch(e:Exception){"Without name"}

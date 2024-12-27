@@ -41,7 +41,7 @@
                 android:id="@+id/tvReadStorageTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                tools:text="Read external storage"
+                android:text="Read external storage"
                 tools:maxLines="4"
                 android:textSize="18sp"
                 android:textStyle="bold"

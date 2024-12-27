@@ -17,8 +17,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // For jaudiotagger repo find in bitbucket
-        maven ( url  ="https://dl.bintray.com/ijabz/maven" )
         // for jitpack libraries
         maven ( url = "https://jitpack.io" )
     }
