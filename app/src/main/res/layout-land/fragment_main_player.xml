@@ -268,6 +268,22 @@
         app:layout_constraintStart_toStartOf="@id/contentCover"
         android:layout_marginEnd="8dp"/>
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAbLoop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_ab_looper"
+        app:iconGravity="textStart"
+        app:iconTint="@null"
+        app:iconPadding="0dp"
+        app:iconSize="18dp"
+        android:clickable="true"
+        android:focusable="true"
+        style="@style/Widget.Material3.Button.IconButton"
+        app:layout_constraintStart_toEndOf="@id/btnInfo"
+       app:layout_constraintTop_toBottomOf="@id/contentCover"
+
+        />
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnFavorite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
