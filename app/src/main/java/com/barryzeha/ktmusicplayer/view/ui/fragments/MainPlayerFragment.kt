@@ -670,6 +670,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     //isFavorite=false
                 }
             }
+            btnAbLoop.setOnClickListener{
+                btnAbLoop.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
+            }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }

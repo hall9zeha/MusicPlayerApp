@@ -110,6 +110,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var idSong:Long=-1
     private var firstCallingToSongState:Boolean = true
 
+
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
@@ -731,6 +732,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun fastRewind(){
         bassManager?.fastForwardOrRewind(isForward=false){currentSongPosition=it}
     }
+    // A-B looper
+    fun setStartPositionForAbLoop() = bassManager?.setAbLoopStar()
+    fun setEndPositionAbLoop() = bassManager?.setAbLoopEnd()
+
     // Probamos nueva forma de implementar shuffle
     fun shuffleList(){
         //CoroutineScope(Dispatchers.IO).launch {

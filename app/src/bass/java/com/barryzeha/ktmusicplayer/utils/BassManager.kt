@@ -1,7 +1,5 @@
 package com.barryzeha.ktmusicplayer.utils
 
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -11,7 +9,6 @@ import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_INFO
 import java.io.File
 import java.util.Timer
-import java.util.TimerTask
 
 
 /**
@@ -29,6 +26,10 @@ private val handler = Handler(Looper.getMainLooper())
 private var checkRunnable: Runnable? = null
 private var updateTimer: Timer? = null
 private var idSong:Long?=null
+
+// For A-B looper
+private var startAbLoopPosition:Long=0
+private var endAbLopPosition:Long=0
 
 open class BassManager {
 
@@ -89,7 +90,6 @@ open class BassManager {
             override fun run() {
                 if (BASS.BASS_ChannelIsActive(getActiveChannel()) == BASS.BASS_ACTIVE_STOPPED) {
                     playbackManager?.onFinishPlayback()
-
                 }
                 handler.postDelayed(this,500)
             }
@@ -118,6 +118,15 @@ open class BassManager {
     }
     fun repeatSong(){
         BASS.BASS_ChannelPlay(getActiveChannel(), true);
+    }
+    fun startAbLoop(){
+        val currentPosition = getCurrentPositionInSeconds(getActiveChannel())
+        if(currentPosition >= endAbLopPosition){
+            BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
+        }
+        handler.postDelayed({
+            startAbLoop()
+        },500)
     }
     fun channelPlay(currentSongPosition:Long){
         BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)
@@ -154,6 +163,13 @@ open class BassManager {
     }
     fun setActiveChannel(channel:Int){
         mainChannel=channel
+    }
+    fun setAbLoopStar(){
+        startAbLoopPosition = getCurrentPositionInSeconds(getActiveChannel())
+    }
+    fun setAbLoopEnd(){
+        endAbLopPosition = getCurrentPositionInSeconds(getActiveChannel())
+        startAbLoop()
     }
     fun getActiveChannel():Int{
         return mainChannel?:0
