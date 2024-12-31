@@ -821,10 +821,17 @@ class MusicPlayerService : Service(){
         val newPosition = (currentPosition - 2000).coerceAtLeast(0)
         exoPlayer.seekTo(newPosition)
     }
-    // Solo en bass flavour
-    fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){
-
+    // A-B looper
+    //TODO implement for mediaplayer flavour
+    fun setStartPositionForAbLoop() {}
+    fun setEndPositionAbLoop() {}
+    fun stopAbLoop(){}
+    fun clearABLoopOfPreferences(){
+        if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
     }
+
+    // Solo en bass flavour
+    fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){}
     // Solo en bass flavour Reordenamos la lista nuevamente a su forma original
     fun sortList(){}
 
