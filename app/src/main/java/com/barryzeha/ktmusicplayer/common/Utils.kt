@@ -8,6 +8,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
 import android.os.Build
@@ -24,8 +25,11 @@ import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
+import com.barryzeha.core.common.COLOR_BACKGROUND
+import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
@@ -289,4 +293,15 @@ fun getPlayListName(mPrefs:MyPreferences, headerTextRes:(Int)->Unit){
 
         }
 
+}
+fun changeBackgroundColor(context:Context,colored:Boolean):ColorStateList{
+    return if(colored) {
+        ContextCompat.getColorStateList(
+            context,
+            R.color.primaryColor
+        )?.withAlpha(128)!!
+        }
+        else {ColorStateList.valueOf(
+        mColorList(context).getColor(COLOR_BACKGROUND, COLOR_TRANSPARENT))
+        }
 }

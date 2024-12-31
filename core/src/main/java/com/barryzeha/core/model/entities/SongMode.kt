@@ -10,5 +10,6 @@ package com.barryzeha.core.model.entities
 enum class SongMode {
  RepeatAll,
  RepeatOne,
- Shuffle
+ Shuffle,
+ AbLoop
 }

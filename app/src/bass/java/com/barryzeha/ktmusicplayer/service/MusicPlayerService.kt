@@ -27,7 +27,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
+import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.ACTION_CLOSE
+import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.DEFAULT_DIRECTION
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
@@ -712,6 +714,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             checkIfPhoneIsLock()
             mPrefs.currentIndexSong = indexOfSong.toLong()
         }
+        stopAbLoop()
+        clearABLoopOfPreferences()
     }
     fun prevSong(){
         if(songsList.isNotEmpty()){
@@ -725,6 +729,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 mPrefs.currentIndexSong = indexOfSong.toLong()
             }
         }
+        stopAbLoop()
+        clearABLoopOfPreferences()
     }
     fun fastForward(){
         bassManager?.fastForwardOrRewind(isForward=true){currentSongPosition=it}
@@ -735,7 +741,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // A-B looper
     fun setStartPositionForAbLoop() = bassManager?.setAbLoopStar()
     fun setEndPositionAbLoop() = bassManager?.setAbLoopEnd()
-
+    fun stopAbLoop() = bassManager?.stopAbLoop()
+    fun clearABLoopOfPreferences(){
+        if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
+    }
     // Probamos nueva forma de implementar shuffle
     fun shuffleList(){
         //CoroutineScope(Dispatchers.IO).launch {

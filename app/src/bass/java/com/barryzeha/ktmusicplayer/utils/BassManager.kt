@@ -23,6 +23,7 @@ private const val SAMPLE192 = 192000
 private const val TAG = "BASS-MANAGER"
 private var mainChannel:Int?=0
 private val handler = Handler(Looper.getMainLooper())
+private val aBLoopHandler = Handler(Looper.getMainLooper())
 private var checkRunnable: Runnable? = null
 private var updateTimer: Timer? = null
 private var idSong:Long?=null
@@ -124,10 +125,13 @@ open class BassManager {
         if(currentPosition >= endAbLopPosition){
             BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
         }
-        handler.postDelayed({
+        aBLoopHandler.postDelayed({
             startAbLoop()
         },500)
+
     }
+    fun stopAbLoop() = aBLoopHandler.removeCallbacksAndMessages(null)
+
     fun channelPlay(currentSongPosition:Long){
         BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)
         // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes

@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ServiceConnection
-import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -18,14 +17,11 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.CLEAR_MODE
-import com.barryzeha.core.common.COLOR_BACKGROUND
-import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
@@ -35,7 +31,6 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.keepScreenOn
-import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
@@ -44,6 +39,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.common.getPlayListName
 import com.barryzeha.ktmusicplayer.common.onMenuActionAddPopup
@@ -554,23 +550,22 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     SongMode.RepeatOne.ordinal -> {
                         //  Third: deactivate modes
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        bottomPlayerControls.btnRepeat.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                        bottomPlayerControls.btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
 
                         mPrefs.songMode = CLEAR_MODE
                     }
                     SongMode.RepeatAll.ordinal -> {
                         // Second: repeat one
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode = REPEAT_ONE
 
                     }
                     else -> {
                         // First: active repeat All
-                        bottomPlayerControls.btnRepeat.backgroundTintList=
-                            ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
-                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                        bottomPlayerControls.btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),true)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode= REPEAT_ALL
                     }
                 }
@@ -579,14 +574,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             bottomPlayerControls.btnShuffle.setOnClickListener {
                 when(mPrefs.songMode){
                     SongMode.Shuffle.ordinal->{
-                        bottomPlayerControls.btnShuffle.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode= CLEAR_MODE
                     }
                     else->{
-                        bottomPlayerControls.btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
+                        bottomPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),true)
                         mPrefs.songMode= SHUFFLE
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        bottomPlayerControls.btnRepeat.backgroundTintList=getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                        bottomPlayerControls.btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
                     }
                 }
             }
@@ -618,13 +613,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             btnMultipleSelect?.setOnClickListener{
                 if(clicked){
                     musicListAdapter?.showMultipleSelection(false)
-                    btnMultipleSelect.backgroundTintList = getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                    btnMultipleSelect.backgroundTintList = changeBackgroundColor(requireContext(),false)
                     clicked=false
                     visibleOrGoneBottomActions(true)
                     musicListAdapter?.clearListItemsForDelete()
                 }else{
                     musicListAdapter?.showMultipleSelection(true)
-                   btnMultipleSelect.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
+                   btnMultipleSelect.backgroundTintList=changeBackgroundColor(requireContext(),true)
                     clicked=true
                     visibleOrGoneBottomActions(false)
                 }
@@ -683,20 +678,17 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         })
     }
-    private fun getColorStateList(index:Int,defaultIndex:Int):ColorStateList{
-        return ColorStateList.valueOf(mColorList(requireContext()).getColor(index,defaultIndex))
-    }
     private fun showOrHideSearchbar()=with(bind){
         this?.let{
             if(!isFiltering){
                 visibleOrGoneViews(false)
-                btnSearch.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
+                btnSearch.backgroundTintList=changeBackgroundColor(requireContext(),true)
                 isFiltering=true
                 showKeyboard(true)
             }else {
                 visibleOrGoneViews(true)
                 edtSearch?.setText("")
-                btnSearch.backgroundTintList = getColorStateList(COLOR_BACKGROUND,COLOR_TRANSPARENT)
+                btnSearch.backgroundTintList = changeBackgroundColor(requireContext(),false)
                 isFiltering = false
                 showKeyboard(false)
             }
@@ -771,37 +763,24 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         return null
     }
     @SuppressLint("ResourceType")
-    private fun checkPreferences()=with(bind){
+    private fun checkPlayerSongPreferences()=with(bind){
         this?.let {
             when (mPrefs.songMode) {
                 SongMode.RepeatOne.ordinal -> {
 
                     bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                    bottomPlayerControls.btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
-                        requireContext(),
-                        coreRes.color.primaryColor
-                    )?.withAlpha(128)
+                    bottomPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
                 }
                 SongMode.RepeatAll.ordinal -> {
-                    bottomPlayerControls.btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
-                        requireContext(),
-                        coreRes.color.primaryColor
-                    )?.withAlpha(128)
+                    bottomPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
                 }
                 SongMode.Shuffle.ordinal ->{
-                    bottomPlayerControls.btnShuffle.backgroundTintList = ContextCompat.getColorStateList(
-                        requireContext(),
-                        coreRes.color.primaryColor
-                    )?.withAlpha(128)
+                    bottomPlayerControls.btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
                 }
                 else -> {
                     bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                    bottomPlayerControls.btnRepeat.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                    )
-                    bottomPlayerControls.btnShuffle.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                    )
+                    bottomPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    bottomPlayerControls.btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
 
                 }
             }
@@ -928,7 +907,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     override fun onResume() {
         super.onResume()
-        checkPreferences()
+        checkPlayerSongPreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.controlFromNotify){
@@ -951,6 +930,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mPrefs.controlFromNotify=false
     }
     override fun onStop() {
+        musicPlayerService?.clearABLoopOfPreferences()
         mPrefs.currentView = MAIN_FRAGMENT
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(

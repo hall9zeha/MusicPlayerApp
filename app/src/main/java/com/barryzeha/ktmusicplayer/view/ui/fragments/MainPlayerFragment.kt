@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
+import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.COLOR_BACKGROUND
 import com.barryzeha.core.common.COLOR_TRANSPARENT
@@ -39,6 +40,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -140,39 +142,35 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
 
     @SuppressLint("ResourceType")
-    private fun checkPreferences()=with(bind){
+    private fun checkPlayerSongPreferences()=with(bind){
         this?.let {
 
             when (mPrefs.songMode) {
                 SongMode.RepeatOne.ordinal -> {
 
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                    btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
-                        requireContext(),
-                        coreRes.color.primaryColor
-                    )?.withAlpha(128)
+                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
                 }
                 SongMode.RepeatAll.ordinal -> {
-                    btnRepeat.backgroundTintList = ContextCompat.getColorStateList(
-                        requireContext(),
-                        coreRes.color.primaryColor
-                    )?.withAlpha(128)
+                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
                 }
                 SongMode.Shuffle.ordinal ->{
-                    btnShuffle.backgroundTintList = ContextCompat.getColorStateList(
-                        requireContext(),
-                        coreRes.color.primaryColor
-                    )?.withAlpha(128)
+                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                }
+                SongMode.AbLoop.ordinal ->{
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
                 }
                 else -> {
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                    btnRepeat.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                    )
-                    btnShuffle.backgroundTintList = ColorStateList.valueOf(
-                        mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                    )
-
+                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
                 }
             }
         }
@@ -375,7 +373,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     }
                 }
             }
-
+            if(mPrefs.songMode != AB_LOOP)changeBackgroundColor(requireContext(),false)
         }
 
     }
@@ -604,34 +602,34 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }
             })
             btnRepeat.setOnClickListener {
-
+                    musicPlayerService?.stopAbLoop()
                     when (mPrefs.songMode) {
                         SongMode.RepeatOne.ordinal -> {
                             //  Third: deactivate modes
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                            btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                            )
-                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                            )
+                            btnRepeat.backgroundTintList= changeBackgroundColor(requireContext(),false)
+                            btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
+
                             mPrefs.songMode = CLEAR_MODE
+                            checkPlayerSongPreferences()
                             // For bass flavor
                             musicPlayerService?.sortList()
                         }
                         SongMode.RepeatAll.ordinal -> {
                             // Second: repeat one
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                            )
+                            btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode = REPEAT_ONE
+                            checkPlayerSongPreferences()
                             // For bass flavor
                             musicPlayerService?.sortList()
                         }
                         else -> {
                             // First: active repeat All
-                            btnRepeat.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
-                            btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                            )
+                            btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),true)
+                            btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode= REPEAT_ALL
+                            checkPlayerSongPreferences()
                             // For bass flavor
                             musicPlayerService?.sortList()
                         }
@@ -639,24 +637,23 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
             }
             btnShuffle.setOnClickListener {
+                musicPlayerService?.stopAbLoop()
                 when(mPrefs.songMode){
                         SongMode.Shuffle.ordinal->{
-                        btnShuffle.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
-                            mPrefs.songMode= CLEAR_MODE
+                            btnShuffle.backgroundTintList =changeBackgroundColor(requireContext(), false)
+                            mPrefs.songMode = CLEAR_MODE
                             // For bass flavor
                             musicPlayerService?.sortList()
-
+                            checkPlayerSongPreferences()
                     }
                     else->{
-                        btnShuffle.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
+                        btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),true)
                         btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        btnRepeat.backgroundTintList=ColorStateList.valueOf(mColorList(requireContext()).getColor(COLOR_BACKGROUND,COLOR_TRANSPARENT)
-                        )
+                        btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode= SHUFFLE
                         // For bass flavor
                         musicPlayerService?.shuffleList()
-
+                        checkPlayerSongPreferences()
                     }
                 }
             }
@@ -671,14 +668,28 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }
             }
             btnAbLoop.setOnClickListener{
-                btnAbLoop.backgroundTintList=ContextCompat.getColorStateList(requireContext(),coreRes.color.primaryColor)?.withAlpha(128)
-
+                //
+                if(mPrefs.songMode == AB_LOOP){
+                    musicPlayerService?.stopAbLoop()
+                    mPrefs.songMode = CLEAR_MODE
+                    checkPlayerSongPreferences()
+                }else {
+                    btnAbLoop.visibility = View.GONE
+                    btnALoop.visibility = View.VISIBLE
+                }
             }
             btnALoop?.setOnClickListener{
-
+                btnALoop.visibility = View.GONE
+                btnBLoop.visibility = View.VISIBLE
+                musicPlayerService?.setStartPositionForAbLoop()
             }
             btnBLoop?.setOnClickListener{
-
+                mPrefs.songMode = AB_LOOP
+                btnBLoop.visibility = View.GONE
+                btnAbLoop.visibility = View.VISIBLE
+                musicPlayerService?.setEndPositionAbLoop()
+                btnAbLoop.backgroundTintList=changeBackgroundColor(requireContext(),true)
+                checkPlayerSongPreferences()
             }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
@@ -733,11 +744,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
 
     }
+
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
         if(!coverViewClicked)checkCoverViewStyle()
-        checkPreferences()
+        checkPlayerSongPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
             try {
@@ -765,6 +777,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     override fun onStop() {
         super.onStop()
+        musicPlayerService?.clearABLoopOfPreferences()
         mPrefs.currentView = MAIN_FRAGMENT
         serviceConnection?.let{
        }
