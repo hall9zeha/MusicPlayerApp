@@ -103,7 +103,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             param2 = it.getString(ARG_PARAM2)
         }
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
             bind=FragmentMainPlayerBinding.bind(view)
@@ -116,7 +115,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             listener?.onFragmentReady()
 
     }
-
    /* private fun tryBlurBackground(){
         bind?.colorBackground?.let {
             Glide.with(this)
@@ -140,11 +138,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private fun discCoverViewIsEnable():Boolean{
         return defaultPrefs.getBoolean("coverStyle",false)
     }
-
     @SuppressLint("ResourceType")
     private fun checkPlayerSongPreferences()=with(bind){
         this?.let {
-
             when (mPrefs.songMode) {
                 SongMode.RepeatOne.ordinal -> {
 
@@ -176,7 +172,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
     private fun setUpObservers(){
-
         (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
         (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
         mainViewModel.fetchAllSongFromMain()
@@ -234,7 +229,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
         mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteAllRows->
             if(deleteAllRows>0){
-
                 setNumberOfTrack(currentMusicState.idSong)
             }
         }
@@ -253,31 +247,26 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
         }
     }
-
     override fun play() {
         super.play()
         bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
         musicPlayerService?.resumePlayer()
         mainViewModel.saveStatePlaying(true)
     }
-
     override fun pause() {
         super.pause()
         bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
         musicPlayerService?.pausePlayer()
         mainViewModel.saveStatePlaying(false)
     }
-
     override fun next() {
         super.next()
         bind?.btnMainNext?.performClick()
     }
-
     override fun previous() {
         super.previous()
         bind?.btnMainPrevious?.performClick()
     }
-
     override fun stop() {
         super.stop()
         activity?.finish()
@@ -287,10 +276,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         super.musicState(musicState)
         musicState?.let{
             mainViewModel.setMusicState(musicState)
-
           }
     }
-
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
         // TODO corregir el caso 2 y el caso 3 ya no será necesario si usamos la lista agregada al inicio en mediaItems
@@ -373,7 +360,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     }
                 }
             }
-            if(mPrefs.songMode != AB_LOOP)changeBackgroundColor(requireContext(),false)
+            if(mPrefs.songMode != AB_LOOP){
+                bind?.btnAbLoop?.backgroundTintList=changeBackgroundColor(requireContext(),false)}
         }
 
     }
@@ -678,17 +666,17 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     btnALoop.visibility = View.VISIBLE
                 }
             }
-            btnALoop?.setOnClickListener{
+            btnALoop.setOnClickListener{
                 btnALoop.visibility = View.GONE
                 btnBLoop.visibility = View.VISIBLE
                 musicPlayerService?.setStartPositionForAbLoop()
             }
-            btnBLoop?.setOnClickListener{
-                mPrefs.songMode = AB_LOOP
+            btnBLoop.setOnClickListener{
                 btnBLoop.visibility = View.GONE
                 btnAbLoop.visibility = View.VISIBLE
                 musicPlayerService?.setEndPositionAbLoop()
                 btnAbLoop.backgroundTintList=changeBackgroundColor(requireContext(),true)
+                mPrefs.songMode = AB_LOOP
                 checkPlayerSongPreferences()
             }
             btnMainEq?.setOnClickListener{
@@ -753,10 +741,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.nextOrPrevFromNotify){
             try {
-
                 val song = musicPlayerService?.getSongsList()?.find { mPrefs.idSong == it.id }
                 song?.let {
-
                     val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
                     val newState = MusicState(
                         songPath = song.pathLocation.toString(),
@@ -769,18 +755,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     mainViewModel.saveStatePlaying(mPrefs.isPlaying)
                 }
             }catch(ex:Exception){}
-
         }
         mPrefs.nextOrPrevFromNotify=false
         bind?.mainSeekBar?.max = currentMusicState.duration.toInt()
     }
-
     override fun onStop() {
         super.onStop()
-        musicPlayerService?.clearABLoopOfPreferences()
         mPrefs.currentView = MAIN_FRAGMENT
-        serviceConnection?.let{
-       }
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
                 SongState(
@@ -795,7 +776,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             )
         }
     }
-     companion object {
+   companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             MainPlayerFragment().apply {

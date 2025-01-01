@@ -930,7 +930,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mPrefs.controlFromNotify=false
     }
     override fun onStop() {
-        musicPlayerService?.clearABLoopOfPreferences()
+
         mPrefs.currentView = MAIN_FRAGMENT
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
@@ -944,11 +944,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     currentPosition = mPrefs.currentPosition
                 )
             )
-
         }
         super.onStop()
     }
-    companion object {
+     companion object {
         var musicListAdapter:MusicListAdapter?=null
         lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
         var btmSheetIsExpanded:Boolean = false

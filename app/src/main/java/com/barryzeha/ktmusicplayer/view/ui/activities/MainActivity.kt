@@ -25,6 +25,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
+import com.barryzeha.core.common.AB_LOOP
+import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.MAIN_FRAGMENT
@@ -78,7 +80,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
-
         bind= ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
         enableEdgeToEdge()

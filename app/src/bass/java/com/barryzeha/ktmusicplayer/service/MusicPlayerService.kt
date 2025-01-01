@@ -743,6 +743,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun setEndPositionAbLoop() = bassManager?.setAbLoopEnd()
     fun stopAbLoop() = bassManager?.stopAbLoop()
     fun clearABLoopOfPreferences(){
+        bassManager?.stopAbLoop()
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
     }
     // Probamos nueva forma de implementar shuffle
@@ -894,6 +895,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // no debemos sobreescribir onTaskRemoved - volveremos más tarde para implementar algo con eso
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        clearABLoopOfPreferences()
         cancelPersistentNotify(applicationContext)
         stopSelf()
         exitProcess(0)

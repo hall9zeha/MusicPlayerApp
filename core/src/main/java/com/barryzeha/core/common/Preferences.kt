@@ -62,7 +62,8 @@ class  MyPreferences @Inject constructor(private val context: Context){
         set(value)=myPreferences.edit().putLong(CURRENT_DURATION,value).apply()
     var songMode:Int
         get()=myPreferences.getInt(SONG_MODE,-1)
-        set(value)=myPreferences.edit().putInt(SONG_MODE,value).apply()
+        // Usamos commit() porque necesitamos que la escritura de valores sea síncrona en esta propiedad
+        set(value){myPreferences.edit().putInt(SONG_MODE,value).commit()}
     var currentView:Int
         get()=myPreferences.getInt(CURRENT_VIEW,-1)
         set(value)=myPreferences.edit().putInt(CURRENT_VIEW,value).apply()
