@@ -22,6 +22,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -32,7 +33,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.getEqualizerConfig
+import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.ACTION_CLOSE
+import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.getSongMetadata
@@ -108,6 +111,11 @@ class MusicPlayerService : Service(){
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
     private var firstCallingToSongState:Boolean = true
+    // For A-B looper
+    private var startAbLoopPosition:Long=0
+    private var endAbLopPosition:Long=0
+    val handler = Handler(Looper.getMainLooper())
+    var runnable: Runnable? = null
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -606,6 +614,7 @@ class MusicPlayerService : Service(){
 
     }
 
+    @OptIn(UnstableApi::class)
     private fun setUpExoplayerListener():Player.Listener?{
          playerListener = object : Player.Listener {
              override fun onPlaybackStateChanged(playbackState: Int) {
@@ -803,9 +812,11 @@ class MusicPlayerService : Service(){
     }
     fun nextSong(){
         exoPlayer.seekToNext()
+        clearABLoopOfPreferences()
     }
     fun prevSong(){
         exoPlayer.seekToPrevious()
+        clearABLoopOfPreferences()
             //exoPlayer.seekToPrevious()
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
@@ -823,11 +834,34 @@ class MusicPlayerService : Service(){
     }
     // A-B looper
     //TODO implement for mediaplayer flavour
-    fun setStartPositionForAbLoop() {}
-    fun setEndPositionAbLoop() {}
-    fun stopAbLoop(){}
-    fun clearABLoopOfPreferences(){
+    fun setStartPositionForAbLoop() {startAbLoopPosition = exoPlayer.currentPosition}
+    fun setEndPositionAbLoop() {
+        endAbLopPosition = exoPlayer.currentPosition
+        startAbLoop()
+    }
+    fun stopAbLoop(){
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
+        runnable?.let{
+            handler.removeCallbacks(it)
+        }
+    }
+    private fun startAbLoop(){
+        runnable = Runnable {
+            val currentPosition = exoPlayer.currentPosition
+            if (currentPosition >= endAbLopPosition) {
+                exoPlayer.seekTo(startAbLoopPosition)
+            }
+            handler.postDelayed(runnable!!, 500)
+        }
+        // Inicia el ciclo que revisará cada segundo
+        handler.postDelayed(runnable!!, 500)
+    }
+
+    private fun clearABLoopOfPreferences(){
+        if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
+        runnable?.let{
+            handler.removeCallbacks(it)
+        }
     }
 
     // Solo en bass flavour
@@ -920,6 +954,7 @@ class MusicPlayerService : Service(){
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         cancelPersistentNotify(applicationContext)
+        clearABLoopOfPreferences()
         stopSelf()
         exitProcess(0)
     }
