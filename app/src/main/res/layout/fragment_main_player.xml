@@ -194,8 +194,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lnTrackDescription"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         >
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAbLoop"
@@ -211,7 +211,7 @@
             style="@style/Widget.Material3.Button.IconButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-
+            app:layout_constraintBottom_toBottomOf="parent"
             />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnALoop"
@@ -221,7 +221,7 @@
             app:iconGravity="textStart"
             app:iconTint="@null"
             app:iconPadding="0dp"
-            app:iconSize="18dp"
+            app:iconSize="16dp"
             android:clickable="true"
             android:focusable="true"
             android:visibility="gone"
@@ -238,7 +238,7 @@
             app:iconGravity="textStart"
             app:iconTint="@null"
             app:iconPadding="0dp"
-            app:iconSize="18dp"
+            app:iconSize="16dp"
             android:visibility="gone"
             android:clickable="true"
             android:focusable="true"

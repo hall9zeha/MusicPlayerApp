@@ -6,13 +6,15 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
@@ -22,8 +24,6 @@ import androidx.fragment.app.viewModels
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
-import com.barryzeha.core.common.COLOR_BACKGROUND
-import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
@@ -33,7 +33,6 @@ import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getEmbeddedSyncedLyrics
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
-import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -447,6 +446,15 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         frontAnimator= AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.front_animator) as AnimatorSet
         backAnimator = AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.back_animator) as AnimatorSet
     }
+    private fun animateButtonsAbLoop(view:View){
+        val anim = AlphaAnimation(0.0f,1.0f)
+        anim.duration=300
+        anim.startOffset = 20
+        anim.repeatMode = Animation.REVERSE
+        anim.repeatCount = Animation.INFINITE
+        view.startAnimation(anim)
+
+    }
     private fun setRotateCoverViewAnimator(frontView:Any?, backView:Any?){
         if(!coverViewClicked){
             (backView as? View)?.visibility = View.VISIBLE
@@ -664,20 +672,25 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }else {
                     btnAbLoop.visibility = View.GONE
                     btnALoop.visibility = View.VISIBLE
+                    animateButtonsAbLoop(btnALoop)
                 }
             }
             btnALoop.setOnClickListener{
+                btnALoop.clearAnimation()
                 btnALoop.visibility = View.GONE
                 btnBLoop.visibility = View.VISIBLE
                 musicPlayerService?.setStartPositionForAbLoop()
+                animateButtonsAbLoop(btnBLoop)
             }
             btnBLoop.setOnClickListener{
+                btnBLoop.clearAnimation()
                 btnBLoop.visibility = View.GONE
                 btnAbLoop.visibility = View.VISIBLE
                 musicPlayerService?.setEndPositionAbLoop()
                 btnAbLoop.backgroundTintList=changeBackgroundColor(requireContext(),true)
                 mPrefs.songMode = AB_LOOP
                 checkPlayerSongPreferences()
+
             }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
