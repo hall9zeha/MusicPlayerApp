@@ -624,7 +624,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
         return _songController==null
     }
-    private fun playingState():Boolean{
+    fun playingState():Boolean{
         return mPrefs.isPlaying
     }
     private fun setPlayingState(state:Boolean){
@@ -874,7 +874,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 else->{
                     if (songsList.isNotEmpty()) setMusicForPlayer(songsList[0])
                     bassManager?.stopCheckingPlayback()
-
                 }
             }
 

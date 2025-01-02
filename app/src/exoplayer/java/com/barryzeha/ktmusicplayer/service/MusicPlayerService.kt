@@ -257,7 +257,7 @@ class MusicPlayerService : Service(){
                 if(_songController==null){
                     mPrefs.nextOrPrevFromNotify=true
                     mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = exoPlayer.isPlaying
+                    setPlayingState(exoPlayer.isPlaying)
                 }
             }
 
@@ -269,7 +269,7 @@ class MusicPlayerService : Service(){
                 if(_songController==null){
                     mPrefs.nextOrPrevFromNotify=true
                     mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = exoPlayer.isPlaying
+                    setPlayingState(exoPlayer.isPlaying)
                 }
             }
 
@@ -340,7 +340,7 @@ class MusicPlayerService : Service(){
                 if(_songController==null){
                     mPrefs.nextOrPrevFromNotify=true
                     mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = exoPlayer.isPlaying
+                    setPlayingState(exoPlayer.isPlaying)
                 }
             }
             SongAction.Resume -> {
@@ -350,7 +350,7 @@ class MusicPlayerService : Service(){
                 if(_songController==null){
                     mPrefs.nextOrPrevFromNotify=true
                     mPrefs.controlFromNotify = true
-                    mPrefs.isPlaying = exoPlayer.isPlaying
+                    setPlayingState(exoPlayer.isPlaying)
                 }
             }
             SongAction.Stop -> {
@@ -433,7 +433,7 @@ class MusicPlayerService : Service(){
             }
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
-            mPrefs.isPlaying = exoPlayer.isPlaying
+            setPlayingState(exoPlayer.isPlaying)
         }
     }
     private fun initNotify(){
@@ -611,6 +611,7 @@ class MusicPlayerService : Service(){
 
         exoPlayer.prepare()
         exoPlayer.play()
+        setPlayingState(exoPlayer.isPlaying)
 
     }
 
@@ -636,7 +637,7 @@ class MusicPlayerService : Service(){
 
                          }
                          executeOnceTime = true
-                         mPrefs.isPlaying = exoPlayer.isPlaying
+                         setPlayingState(exoPlayer.isPlaying)
                      positionReset=-1
 
                  }
@@ -665,8 +666,6 @@ class MusicPlayerService : Service(){
                     if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
                         if (songsList.isNotEmpty()) {
                             val song=songsList[newPosition.mediaItemIndex]
-
-
                             songEntity = song
                             fetchSong(song)?.let {songInfo->
                                 currentMusicState = songInfo.copy(
@@ -682,7 +681,7 @@ class MusicPlayerService : Service(){
                                 if(_songController == null){
                                     mPrefs.controlFromNotify = true
                                     mPrefs.nextOrPrevFromNotify = true
-                                    mPrefs.isPlaying = exoPlayer.isPlaying
+                                    setPlayingState(exoPlayer.isPlaying)
                                     mPrefs.idSong = song.id
 
                                 }
@@ -772,9 +771,15 @@ class MusicPlayerService : Service(){
     fun unregisterController(){
         _songController=null
     }
+    fun playingState():Boolean{
+        return mPrefs.isPlaying
+    }
+    private fun setPlayingState(state:Boolean){
+        mPrefs.isPlaying=state
+    }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
-            if(mPrefs.isPlaying){songHandler.post(songRunnable)}
+            if(playingState()){songHandler.post(songRunnable)}
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información  de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
@@ -784,10 +789,9 @@ class MusicPlayerService : Service(){
 
     }
     fun pausePlayer(){
-        if(exoPlayer.isPlaying){
+        if(playingState()){
             exoPlayer.pause()
-
-
+            setPlayingState(exoPlayer.isPlaying)
         }
     }
 
@@ -807,14 +811,17 @@ class MusicPlayerService : Service(){
             exoPlayer.prepare()
             exoPlayer.play()
             isFirstTime=false
+            setPlayingState(exoPlayer.isPlaying)
         }
 
     }
     fun nextSong(){
+        setPlayingState(exoPlayer.isPlaying)
         exoPlayer.seekToNext()
         clearABLoopOfPreferences()
     }
     fun prevSong(){
+        setPlayingState(exoPlayer.isPlaying)
         exoPlayer.seekToPrevious()
         clearABLoopOfPreferences()
             //exoPlayer.seekToPrevious()
@@ -917,7 +924,7 @@ class MusicPlayerService : Service(){
         // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
         // para evitarlo
         executeOnceTime = true
-        mPrefs.isPlaying = false
+        setPlayingState(false)
     }
     private fun fetchSong(song:SongEntity):MusicState?{
         try {

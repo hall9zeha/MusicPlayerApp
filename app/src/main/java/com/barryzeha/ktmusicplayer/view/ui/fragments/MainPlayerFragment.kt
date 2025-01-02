@@ -65,23 +65,17 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
 
     @Inject
     lateinit var defaultPrefs:SharedPreferences
-
     @Inject
     lateinit var mPrefs:MyPreferences
-
     private var param1: String? = null
     private var param2: String? = null
     private var bind:FragmentMainPlayerBinding ? = null
     private var isPlaying:Boolean = false
     private var currentMusicState = MusicState()
-
     private var currentSelectedPosition=0
-
     private val launcherAudioEffectActivity: ActivityResultLauncher<Int> = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
-
     private var isFavorite:Boolean = false
     private var serviceConnection:ServiceConnection?=null
-
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var musicPlayerService: MusicPlayerService?=null
@@ -91,11 +85,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var fastForwardingOrRewind = false
     private var fastForwardOrRewindHandler: Handler? = null
     private var forwardOrRewindRunnable:Runnable?=null
-
     private var coverViewClicked=false
     private var frontAnimator:AnimatorSet?=null
     private var backAnimator:AnimatorSet?=null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -105,6 +97,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+            instance=this
             bind=FragmentMainPlayerBinding.bind(view)
             currentSelectedPosition = mPrefs.currentIndexSong.toInt()
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
@@ -192,8 +185,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
            it?.let{currentTrack->
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                updateUIOnceTime(currentTrack)
-               setNumberOfTrack(currentTrack.idSong)
-
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
@@ -280,44 +271,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
-        // TODO corregir el caso 2 y el caso 3 ya no será necesario si usamos la lista agregada al inicio en mediaItems
-        // pero aún falta obtener los metadatos de la reproducción en curso si es automática
         musicState?.let{
-            if(!musicState.isPlaying){
-                if((musicPlayerService?.getSongsList()!!.size -1)  == mPrefs.currentIndexSong.toInt() && !musicState.latestPlayed) {
-                    bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
-                    mainViewModel.saveStatePlaying(false)
-                    //mainViewModel.setCurrentPosition(0)
-                    Log.e("CASO 1", "ACTIVO" )
-                }
-
-                else if(musicState.duration>0 && musicState.latestPlayed){
-                    bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
-                    mainViewModel.saveStatePlaying(false)
-                    mainViewModel.setCurrentTrack(musicState)
-                    // Obtenemos el número de la pista y el tamaño de la lista la primera vez desde el servicio
-                    val (songNumber, listSize) = musicPlayerService?.getNumberOfTrack()!!
-                    bind?.tvNumberSong?.text = String.format( "#%s/%s",songNumber,listSize)
-
-                }
-                else if(!musicState.latestPlayed && (mPrefs.songMode == SongMode.Shuffle.ordinal)){
-                     mainViewModel.setCurrentTrack(musicState)
-                 }
-                else {
-                    //TODO al usar los controles de next y prev directamente desde el servicio
-                    // nos vemos obligados e implementar esta sección, revisar su estabilidad
-                    mainViewModel.setCurrentTrack(musicState)
-                }
-            }else{
-                mainViewModel.saveStatePlaying(true)
-                mainViewModel.setCurrentTrack(musicState)
-                Log.e("CASO 4", "ACTIVO" )
-            }
-
+            mainViewModel.setCurrentTrack(musicState)
         }
-
     }
-
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
         super.onServiceConnected(conn, service)
         val bind = service as MusicPlayerService.MusicPlayerServiceBinder
@@ -346,7 +303,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             currentMusicState = musicState
 
             //tryBlurBackground()
-            mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+            mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             updateService()
             if(discCoverViewIsEnable()) {
                 // Detenemos la animación para cada cambio de canción para que la imágen
@@ -385,8 +342,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             lrcView?.updateTime(musicState.currentDuration)
         }
     }
-    private fun setNumberOfTrack(songId:Long? = null){
-
+    fun setNumberOfTrack(songId:Long? = null){
         CoroutineScope(Dispatchers.IO).launch {
         if(songId != null && songId >-1) {
                 val song = ListPlayerFragment.musicListAdapter?.getSongById(songId.toLong())
@@ -439,8 +395,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }else{
             if (discCoverViewIsEnable()) bind?.ivDiscMusicCover?.visibility = View.VISIBLE
             else bind?.ivMusicCover?.visibility = View.VISIBLE
-
-
         }
     }
     private fun setupAnimator(){
@@ -757,7 +711,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         album = songMetadata!!.album,
                         duration = songMetadata.duration
                     )
-                    updateUIOnceTime(newState)
+                    mainViewModel.setCurrentTrack(newState)
                     mainViewModel.saveStatePlaying(mPrefs.isPlaying)
                 }
             }catch(ex:Exception){}
@@ -783,9 +737,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
    companion object {
+       var instance:MainPlayerFragment?=null
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             MainPlayerFragment().apply {
+
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)

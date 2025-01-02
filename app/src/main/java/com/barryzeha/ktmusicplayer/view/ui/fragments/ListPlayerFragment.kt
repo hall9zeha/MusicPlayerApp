@@ -178,7 +178,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             adapter = musicListAdapter
             post {
                 setNumberOfTrack()
-
             }
         }
     }
@@ -266,8 +265,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 musicListAdapter?.addAll(result)
                 bind?.rvSongs?.post {
                     setNumberOfTrack()
+                    //TODO mejorar la obtención ddel número de pista/total pistas en el fragmento principal
+                    MainPlayerFragment.instance?.setNumberOfTrack(mPrefs.idSong)
                 }
-
                 bind?.pbLoad?.visibility=View.GONE
                 bind?.pbLoad?.isIndeterminate=true
                 mPrefs.firstExecution=false
@@ -417,7 +417,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
             }
             mainViewModel.checkIfIsFavorite(musicState.idSong)
-            mainViewModel.saveStatePlaying(mPrefs.isPlaying)
+            mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
 
         }
@@ -750,7 +750,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         song = if(idSong>-1){
             musicListAdapter?.getSongById(idSong)
         }else{
-            // En la posición 1 porque primero tendremos un item header en la posición 0
+            // Buscamos en la posición 1 porque primero tendremos un item header en la posición 0
             musicListAdapter?.getSongByPosition(1)
         }
         song?.let{
@@ -763,7 +763,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         return null
     }
     @SuppressLint("ResourceType")
-    private fun checkPlayerSongPreferences()=with(bind){
+    private fun checkPlayerSongModePreferences()=with(bind){
         this?.let {
             when (mPrefs.songMode) {
                 SongMode.RepeatOne.ordinal -> {
@@ -866,32 +866,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
         musicState?.let{
-            if(!musicState.isPlaying){
-                if((musicListAdapter?.itemCount!! -1)  == currentSelectedPosition && !musicState.latestPlayed) {
-                    bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
-                    mainViewModel.saveStatePlaying(false)
-
-                }
-                else if(musicState.currentDuration>0 && musicState.latestPlayed){
-                    bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
-                    mainViewModel.saveStatePlaying(false)
-                    mainViewModel.setCurrentTrack(musicState)
-
-                }
-                else if(!musicState.latestPlayed && mPrefs.songMode == SongMode.Shuffle.ordinal){
-                    mainViewModel.setCurrentTrack(musicState)
-                }
-                else{
-                    //TODO al usar los controles de next y prev directamente desde el servicio
-                    // nos vemos obligados e implementar esta sección, revisar su estabilidad
-                    mainViewModel.setCurrentTrack(musicState)
-                }
-            }else{
-                mainViewModel.saveStatePlaying(true)
-                mainViewModel.setCurrentTrack(musicState)
-
-            }
-
+            mainViewModel.setCurrentTrack(musicState)
         }
     }
     // El método sobreescrito onConnectedService no se dispara aquí debido a que se ejecuta después del primer fragmento
@@ -907,7 +882,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     override fun onResume() {
         super.onResume()
-        checkPlayerSongPreferences()
+        checkPlayerSongModePreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         if(mPrefs.controlFromNotify){
@@ -923,14 +898,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         duration = songMetadata.duration
                     )
                     mainViewModel.saveStatePlaying(mPrefs.isPlaying)
-                    updateUIOnceTime(newState)
+                    mainViewModel.setCurrentTrack(newState)
                 }
             }catch(ex:Exception){}
         }
         mPrefs.controlFromNotify=false
     }
     override fun onStop() {
-
         mPrefs.currentView = MAIN_FRAGMENT
         if(currentMusicState.idSong>0) {
             mainViewModel.saveSongState(
