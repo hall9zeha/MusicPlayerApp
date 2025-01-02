@@ -39,6 +39,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.animateButtonsAbLoop
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
@@ -446,15 +447,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         frontAnimator= AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.front_animator) as AnimatorSet
         backAnimator = AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.back_animator) as AnimatorSet
     }
-    private fun animateButtonsAbLoop(view:View){
-        val anim = AlphaAnimation(0.0f,1.0f)
-        anim.duration=300
-        anim.startOffset = 20
-        anim.repeatMode = Animation.REVERSE
-        anim.repeatCount = Animation.INFINITE
-        view.startAnimation(anim)
 
-    }
     private fun setRotateCoverViewAnimator(frontView:Any?, backView:Any?){
         if(!coverViewClicked){
             (backView as? View)?.visibility = View.VISIBLE

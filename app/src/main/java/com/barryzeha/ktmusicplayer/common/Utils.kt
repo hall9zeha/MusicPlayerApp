@@ -15,6 +15,8 @@ import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.annotation.RequiresApi
@@ -304,4 +306,13 @@ fun changeBackgroundColor(context:Context,colored:Boolean):ColorStateList{
         else {ColorStateList.valueOf(
         mColorList(context).getColor(COLOR_BACKGROUND, COLOR_TRANSPARENT))
         }
+}
+fun animateButtonsAbLoop(view:View){
+    val anim = AlphaAnimation(0.0f,1.0f)
+    anim.duration=300
+    anim.startOffset = 20
+    anim.repeatMode = Animation.REVERSE
+    anim.repeatCount = Animation.INFINITE
+    view.startAnimation(anim)
+
 }
