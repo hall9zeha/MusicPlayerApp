@@ -10,6 +10,8 @@ A simple offline music player app written in Kotlin for Android. The app has two
 - 10-band equalizer and volume control (in the BASS version)
 - 5-band equalizer (in the MediaPlayer version)
 - Modes: repeat one, repeat all, and shuffle.
+- A-B section repeat mode.
+- Display the lyrics of the song (if available in ID3 metadata)
 - Audio tag editor
 - Add to favorites
 - Filter by: Artist, Album, Genre, Favorites
