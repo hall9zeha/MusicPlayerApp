@@ -100,7 +100,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var fastForwardOrRewindHandler: Handler? = null
     private var forwardOrRewindRunnable:Runnable?=null
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -123,13 +122,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         filePickerActivityResult()
         audioEffectActivityResult()
         activityResultForPermission()
-        /*CoroutineScope(Dispatchers.IO).launch {
-            initCheckPermission()
-        }*/
         setUpListeners()
         setupBottomSheet()
-
-
     }
     private fun handleArgumentsSending(){
         arguments?.let{arg->
@@ -340,8 +334,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(insertedRow>0){
                 Toast.makeText(activity, coreRes.string.addedToPlaylist, Toast.LENGTH_SHORT).show()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                // Reiniciamos el valor para evitar inconvenientes, lo usaremos para nuestrá lógica de
-                // si es mayor que cero, agregar a lista y si es cero, cambiar entre listas
+                // Reiniciamos el valor para evitar inconvenientes, lo usaremos para nuestra lógica
+                // cuando es mayor que cero agregar a lista y si es cero, cambiar entre listas
                 idSongForSendToPlaylist = 0
                 // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
 
@@ -425,7 +419,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun updateUI(musicState: MusicState){
         currentMusicState = musicState
         mPrefs.currentPosition = musicState.currentDuration
-        //bind?.ivCover?.setImageBitmap(getSongCover(requireContext(), musicState.songPath)?.albumArt)
         bind?.seekbarControl?.loadSeekBar?.max = musicState.duration.toInt()
         bind?.seekbarControl?.tvEndTime?.text = createTime(musicState.duration).third
         bind?.seekbarControl?.tvInitTime?.text = createTime(musicState.currentDuration).third
@@ -648,6 +641,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     musicListAdapter?.removeAll()
                     mainViewModel.deleteAllSongs()
                 },{},{},{
+                    // Song info callback
                     SongInfoDialogFragment.newInstance(SongEntity(id=currentMusicState.idSong, pathLocation = currentMusicState.songPath ))
                         .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
                 })

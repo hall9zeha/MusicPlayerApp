@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         super.onCreate(savedInstanceState)
         bind= ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
          ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

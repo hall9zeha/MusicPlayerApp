@@ -6,6 +6,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -38,6 +40,7 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
+import com.barryzeha.core.util.BlurTransformation
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.animateButtonsAbLoop
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
@@ -48,6 +51,7 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.library.components.DiscCoverView
+import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -108,7 +112,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             listener?.onFragmentReady()
 
     }
-   /* private fun tryBlurBackground(){
+    /*private fun tryBlurBackground(){
         bind?.colorBackground?.let {
             Glide.with(this)
                 .load(currentMusicState.albumArt)
@@ -494,17 +498,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).resume()
                         }
                     }
-
                 }
             }
             btnMainPrevious.setOnClickListener {
                 checkCoverViewStyle()
                 if (currentSelectedPosition > 0) {
                        musicPlayerService?.prevSong()
-
                 }
             }
-
             btnMainNext.setOnClickListener {
                 checkCoverViewStyle()
                 if (currentSelectedPosition < ListPlayerFragment.musicListAdapter?.itemCount!! - 1) {
@@ -535,9 +536,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         userSelectPosition = progress
                     }
                 }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
                     mainSeekBar.progress = userSelectPosition
@@ -577,7 +576,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                             musicPlayerService?.sortList()
                         }
                     }
-
             }
             btnShuffle.setOnClickListener {
                 musicPlayerService?.stopAbLoop()
@@ -677,7 +675,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
            }?:run{
                 return null
             }
-
         }else{
             mainViewModel.setCurrentPosition(0)
             musicPlayerService?.getSongsList()?.let{songsList->
@@ -685,14 +682,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }?:run { return null }
 
        }
-
     }
     private fun updateService(){
         serviceConnection?.let{
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
 
     }
-
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
