@@ -1,8 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.KTMusicPlayer" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.KTMusicPlayer" parent="Theme.Material3.DynamicColors.Light">
         <!-- Customize your light theme here. -->
          <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="backgroundColor">@color/surface</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+    <style name="Theme.KTMusicPlayer.Material3" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorSurface">@color/surface</item>
         <item name="backgroundColor">@color/surface</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

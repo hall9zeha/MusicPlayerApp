@@ -290,7 +290,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         super.onServiceDisconnected()
         musicPlayerService=null
     }
-
     private fun updateUIOnceTime(musicState: MusicState)=with(bind){
         this?.let {
             val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
