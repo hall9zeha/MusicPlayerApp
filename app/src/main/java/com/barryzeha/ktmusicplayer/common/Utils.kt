@@ -309,7 +309,7 @@ fun changeBackgroundColor(context:Context,colored:Boolean):ColorStateList{
 }
 fun animateButtonsAbLoop(view:View){
     val anim = AlphaAnimation(0.0f,1.0f)
-    anim.duration=300
+    anim.duration=500
     anim.startOffset = 20
     anim.repeatMode = Animation.REVERSE
     anim.repeatCount = Animation.INFINITE
