@@ -10,6 +10,8 @@ Una aplicación sencilla para reproducción de música offline escrita en Kotlin
 - Equalizador de 10 bandas y control de volúmen (en la versión con BASS)
 - Equalizador de 5 bandas (en la versión con MediaPlayer)
 - Modo: repetir uno, repetir todo y aleatorio.
+- Modo repetición de sección A-B
+- Muestra la letra de la canción(si está disponible en los metadatos ID3)
 - Editor de etiquetas de audio
 - Agregar a favoritos
 - Filtro por: Artista, Álbum, Género, Favoritos
