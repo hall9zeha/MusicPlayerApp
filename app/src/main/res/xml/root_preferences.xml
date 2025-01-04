@@ -7,6 +7,12 @@
             app:defaultValue="false"
             app:widgetLayout="@layout/material_switch_layout"
             app:title="@string/themeMsg" />
+         <SwitchPreferenceCompat
+             app:key="materialTheme"
+             app:defaultValue="false"
+             app:singleLineTitle="false"
+             app:widgetLayout="@layout/material_switch_layout"
+             app:title="@string/dynamicTheme" />
 
     </PreferenceCategory>
     <PreferenceCategory app:title="Cover view style">

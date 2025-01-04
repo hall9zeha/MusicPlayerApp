@@ -1,9 +1,11 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
+import android.app.Activity
 import android.app.UiModeManager
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceFragmentCompat
@@ -11,8 +13,14 @@ import androidx.preference.SwitchPreference
 import androidx.preference.SwitchPreferenceCompat
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.SettingsKeys
+import com.barryzeha.core.common.getThemeResValue
+import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.MyApp.Companion.mPrefs
 import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.mfilepicker.common.Preferences
+import com.google.android.material.color.DynamicColors
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -23,6 +31,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTitle(coreRes.string.settings)
+        setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
         if (savedInstanceState == null) {
@@ -41,7 +50,8 @@ class SettingsActivity : AppCompatActivity() {
         }
         private fun setUpListeners(){
             val uiMode = context?.getSystemService(UiModeManager::class.java)
-            val themePref = findPreference<SwitchPreferenceCompat>("themeKey")
+            val themePref = findPreference<SwitchPreferenceCompat>(SettingsKeys.DEFAULT_THEME.value)
+            val materialYouTheme = findPreference<SwitchPreferenceCompat>(SettingsKeys.MATERIAL_YOU_THEME.value)
             themePref?.setOnPreferenceChangeListener {pref,newValue->
                 if(newValue as Boolean){
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -58,6 +68,21 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 true
             }
+            materialYouTheme?.setOnPreferenceChangeListener { preference, newValue ->
+                if(newValue as Boolean){
+                    DynamicColors.applyToActivityIfAvailable(requireActivity())
+                    mPrefs.globalTheme=SettingsKeys.MATERIAL_YOU_THEME.ordinal
+                    restartActivity()
+                }else{
+                    requireActivity().setTheme(coreRes.style.Theme_KTMusicPlayer_Material3)
+                    mPrefs.globalTheme=SettingsKeys.DEFAULT_THEME.ordinal
+                    restartActivity()
+                }
+                true
+            }
+        }
+        private fun restartActivity(){
+            requireActivity().recreate()
         }
     }
 

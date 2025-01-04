@@ -7,7 +7,8 @@
     android:layout_height="wrap_content"
     android:clickable="false"
     android:focusable="false"
-    tools:checked="false"
+    tools:checked="true"
+    app:trackTint="@color/surface"
     app:thumbTint="@color/switchTrackTint">
 
 </com.google.android.material.materialswitch.MaterialSwitch>

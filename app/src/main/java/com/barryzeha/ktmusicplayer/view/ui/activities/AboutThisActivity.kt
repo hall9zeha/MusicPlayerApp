@@ -5,6 +5,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.ktmusicplayer.BuildConfig
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ActivityAboutThisBinding
@@ -13,7 +14,7 @@ import com.barryzeha.core.R as coreRes
 class AboutThisActivity : AppCompatActivity() {
     private lateinit var bind:ActivityAboutThisBinding
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
+        setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         bind = ActivityAboutThisBinding.inflate(layoutInflater)

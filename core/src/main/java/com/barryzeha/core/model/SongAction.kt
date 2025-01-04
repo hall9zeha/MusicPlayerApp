@@ -7,7 +7,7 @@ package com.barryzeha.core.model
  * Copyright (c)  All rights reserved.
  **/
 
-enum class SongAction {
+enum class SongAction{
  Pause,
  Resume,
  Stop,

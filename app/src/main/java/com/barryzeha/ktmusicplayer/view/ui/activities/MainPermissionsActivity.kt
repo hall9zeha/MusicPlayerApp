@@ -16,6 +16,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.barryzeha.core.common.checkPermissions
+import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainPermissionsBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,7 +43,7 @@ class MainPermissionsActivity : AppCompatActivity() {
     }
     private val permissionStatusMap = mutableMapOf<String, Boolean>()
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
+        setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
 
         bind = ActivityMainPermissionsBinding.inflate(layoutInflater)

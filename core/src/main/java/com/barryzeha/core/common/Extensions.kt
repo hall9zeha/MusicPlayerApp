@@ -14,6 +14,7 @@ import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.ImageView
+import androidx.annotation.StyleRes
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.MusicState
@@ -122,4 +123,14 @@ fun RecyclerView.runWhenReady(action:()->Unit){
     }
     viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
 }
-
+@StyleRes
+fun Context.getThemeResValue():Int{
+    val globalTheme = MyPreferences(this).globalTheme
+    return when(globalTheme){
+        SettingsKeys.DEFAULT_THEME.ordinal->{R.style.Theme_KTMusicPlayer_Material3}
+        SettingsKeys.MATERIAL_YOU_THEME.ordinal->{R.style.Base_Theme_KTMusicPlayer}
+        else->{
+            R.style.Base_Theme_KTMusicPlayer
+        }
+    }
+}

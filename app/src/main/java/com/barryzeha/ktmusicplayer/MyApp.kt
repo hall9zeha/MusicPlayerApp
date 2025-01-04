@@ -11,6 +11,7 @@ import android.os.IBinder
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.SettingsKeys
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.ktmusicplayer.common.createNotificationChannel
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -54,7 +55,7 @@ class MyApp:Application() ,ServiceConnection{
     private fun setUpGlobalPreferences(){
 
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.S){
-            if(defaultPrefs.getBoolean("themeKey",false)){
+            if(defaultPrefs.getBoolean(SettingsKeys.DEFAULT_THEME.name,false)){
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             }else{
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)

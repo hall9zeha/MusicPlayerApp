@@ -35,9 +35,11 @@ import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
+import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.PlaylistEntity
+import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -80,7 +82,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
+        setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
         bind= ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)

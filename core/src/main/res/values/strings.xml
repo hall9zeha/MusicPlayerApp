@@ -19,6 +19,7 @@
     <string name="aboutThis">About this</string>
     <string name="themeSection">Theme</string>
     <string name="themeMsg">Enable dark theme</string>
+    <string name="dynamicTheme">Enable dynamic colors theme</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="default_title">Default</string>

@@ -37,6 +37,7 @@ import com.barryzeha.audioeffects.common.ROCK_PRESET
 import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.barryzeha.core.common.CHANNEL_OR_SESSION_ID_EXTRA
+import com.barryzeha.core.common.getThemeResValue
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -52,7 +53,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     private var channelIntent=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
+        setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
         bind = ActivityMainEqualizerBinding.inflate(layoutInflater)
         enableEdgeToEdge()

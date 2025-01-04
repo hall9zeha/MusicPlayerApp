@@ -315,3 +315,4 @@ fun keepScreenOn(activity:Activity, screenOn:Boolean){
     if(screenOn)activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     else activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 }
+
