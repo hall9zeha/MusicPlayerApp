@@ -34,6 +34,7 @@ class SettingsActivity : AppCompatActivity() {
         setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
+        //TODO, resolver la visualización del toolbar que no se muestra al aplicar setTheme(getThemeResValue())
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
