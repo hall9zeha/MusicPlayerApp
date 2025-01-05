@@ -254,7 +254,7 @@
             app:icon="@drawable/ic_lyric"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-
+            android:contentDescription="Letra"
             app:iconSize="20dp"
             app:iconTint="@color/controls_colors"
             android:clickable="true"

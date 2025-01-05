@@ -318,6 +318,10 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     }
     override fun onResume() {
         super.onResume()
+        if(mPrefs.themeChanged){
+            mPrefs.themeChanged=false
+            recreate()
+        }
         checkedSelectedMenuDrawerItems()
     }
 

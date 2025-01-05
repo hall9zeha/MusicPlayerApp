@@ -79,6 +79,7 @@ class SettingsActivity : AppCompatActivity() {
                     mPrefs.globalTheme=SettingsKeys.DEFAULT_THEME.ordinal
                     restartActivity()
                 }
+                mPrefs.themeChanged = true
                 true
             }
         }

@@ -27,6 +27,7 @@ private const val FIRST_EXECUTION = "firstExecution"
 private const val PLAYLIST_ID = "playlistId"
 private const val STORAGE_DIR_SAF_URI = "storageDirSAFUri"
 private const val GLOBAL_THEME = "globalTheme"
+private const val THEME_CHANGED = "themeChanged"
 
 
 class  MyPreferences @Inject constructor(private val context: Context){
@@ -39,7 +40,9 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var globalTheme:Int
         get() = myPreferences.getInt(GLOBAL_THEME, 0)
         set(value){myPreferences.edit().putInt(GLOBAL_THEME,value).commit()}
-
+    var themeChanged:Boolean
+        get() = myPreferences.getBoolean(THEME_CHANGED, false)
+        set(value) = myPreferences.edit().putBoolean(THEME_CHANGED,value).apply()
     var nextOrPrevFromNotify:Boolean
         get()= myPreferences.getBoolean(PREV_OR_NEXT,false)
         set(value)=myPreferences.edit().putBoolean(PREV_OR_NEXT,value).apply()
