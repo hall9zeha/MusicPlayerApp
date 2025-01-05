@@ -46,4 +46,5 @@
     <string name="writeExternalStorageMsg">Write External storage permission needs to be enabled to write metadata and audio tags when using the tag editor on your songs</string>
     <string name="notifyPermissionMsg">Notifications permission needs to be enabled so the app can show you playback information and media controls in a message that you can easily interact with.</string>
     <string name="bluetoothPermissionMsg">This permission needs to be enabled so you can control the app through Bluetooth devices such as headphones and speakers.</string>
+    <string name="welcomeToApp">Welcome to </string>
 </resources>

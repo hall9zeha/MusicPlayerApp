@@ -10,7 +10,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
+        <TextView
+            android:id="@+id/tvWelcomeToApp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:padding="4dp"
+            tools:text="Bienvenido a KTMusic player"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            />
     <LinearLayout
         android:id="@+id/ctlOldPermissions"
         android:layout_width="match_parent"
@@ -63,7 +74,7 @@
                 android:layout_marginEnd="16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvReadStorageTitle"
-                app:layout_constraintEnd_toStartOf="@id/btnReadStoragePermission"
+                app:layout_constraintEnd_toEndOf="parent"
                 />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReadStoragePermission"
@@ -74,10 +85,10 @@
                 android:tag="android.permission.READ_EXTERNAL_STORAGE"
                 app:cornerRadius="6dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintTop_toBottomOf="@id/tvReadStoragePermission"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tvReadStoragePermission"
-                app:layout_constraintBottom_toBottomOf="@id/tvReadStoragePermission"
-                app:layout_constraintStart_toEndOf="@id/tvReadStoragePermission"/>
+                />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.card.MaterialCardView
@@ -119,7 +130,7 @@
                     android:layout_marginEnd="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvWriteStorageTitle"
-                    app:layout_constraintEnd_toStartOf="@id/btnWriteStoragePermission"
+                    app:layout_constraintEnd_toEndOf="parent"
                     />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnWriteStoragePermission"
@@ -130,10 +141,9 @@
                     android:tag="android.permission.WRITE_EXTERNAL_STORAGE"
                     app:cornerRadius="6dp"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginTop="4dp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/tvWriteStoragePermission"
-                    app:layout_constraintBottom_toBottomOf="@id/tvWriteStoragePermission"
-                    app:layout_constraintStart_toEndOf="@id/tvWriteStoragePermission"/>
+                    app:layout_constraintTop_toBottomOf="@id/tvWriteStoragePermission"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -187,7 +197,7 @@
                     android:layout_marginEnd="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvNotifyPermissionTitle"
-                    app:layout_constraintEnd_toStartOf="@id/btnNotifyPermission"
+                    app:layout_constraintEnd_toEndOf="parent"
                     />
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnNotifyPermission"
@@ -198,10 +208,9 @@
                     android:tag="android.permission.POST_NOTIFICATIONS"
                     app:cornerRadius="6dp"
                     android:layout_marginEnd="8dp"
+                    android:layout_marginTop="4dp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/tvNotifyPermission"
-                    app:layout_constraintBottom_toBottomOf="@id/tvNotifyPermission"
-                    app:layout_constraintStart_toEndOf="@id/tvNotifyPermission"/>
+                    app:layout_constraintTop_toBottomOf="@id/tvNotifyPermission"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -244,7 +253,7 @@
                 android:layout_marginEnd="16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvReadMediaTitle"
-                app:layout_constraintEnd_toStartOf="@id/btnReadMediaPermission"
+                app:layout_constraintEnd_toEndOf="parent"
                 />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReadMediaPermission"
@@ -255,10 +264,9 @@
                 android:tag="android.permission.READ_MEDIA_AUDIO"
                 app:cornerRadius="6dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginTop="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tvReadMediaPermission"
-                app:layout_constraintBottom_toBottomOf="@id/tvReadMediaPermission"
-                app:layout_constraintStart_toEndOf="@id/tvReadMediaPermission"/>
+                app:layout_constraintTop_toBottomOf="@id/tvReadMediaPermission"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.card.MaterialCardView
@@ -300,7 +308,7 @@
                 android:layout_marginEnd="16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tvBtTitle"
-                app:layout_constraintEnd_toStartOf="@id/btnBtPermission"
+                app:layout_constraintEnd_toEndOf="parent"
                 />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBtPermission"
@@ -311,10 +319,9 @@
                 android:tag="android.permission.BLUETOOTH_CONNECT"
                 app:cornerRadius="6dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginTop="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tvBtPermission"
-                app:layout_constraintBottom_toBottomOf="@id/tvBtPermission"
-                app:layout_constraintStart_toEndOf="@id/tvBtPermission"/>
+                app:layout_constraintTop_toBottomOf="@id/tvBtPermission"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -333,7 +340,7 @@
         app:cornerRadius="6dp"
 
         android:layout_gravity="end|bottom"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         />
