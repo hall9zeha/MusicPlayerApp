@@ -8,7 +8,9 @@ import android.graphics.Color
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.WindowInsetsController
@@ -232,7 +234,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                 }
             }
             true
-
         }
     }
 

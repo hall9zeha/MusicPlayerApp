@@ -31,6 +31,7 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.keepScreenOn
+import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
@@ -389,14 +390,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
-
-            bind?.ivCover?.setImageBitmap(
-                getSongMetadata(
-                    requireContext(),
-                    musicState.songPath
-                )?.albumArt
-            )
-
+            bind?.ivCover?.loadImage(musicState.albumArt)
             seekbarControl.tvEndTime.text = createTime(musicState.duration).third
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third

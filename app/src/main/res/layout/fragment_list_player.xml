@@ -186,16 +186,18 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="8dp"/>
            <com.google.android.material.imageview.ShapeableImageView
-            android:layout_width="54dp"
-            android:layout_height="54dp"
-            android:id="@+id/ivCover"
-            tools:src="@mipmap/ic_launcher"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+               android:id="@+id/ivCover"
+               android:layout_width="54dp"
+               android:layout_height="54dp"
                android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
+               android:layout_marginEnd="8dp"
+               android:scaleType="centerCrop"
+               app:layout_constraintBottom_toBottomOf="parent"
+               app:layout_constraintEnd_toEndOf="parent"
+               app:layout_constraintTop_toTopOf="parent"
                app:shapeAppearanceOverlay="@style/imageViewCornerStyle"
+               tools:src="@mipmap/ic_launcher"
+               app:layout_constraintDimensionRatio="H,1:1"
             />
 
         <com.google.android.material.button.MaterialButton

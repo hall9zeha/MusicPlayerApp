@@ -30,8 +30,8 @@ class SettingsActivity : AppCompatActivity() {
     lateinit var mPrefs:MyPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTitle(coreRes.string.settings)
         setTheme(getThemeResValue())
+        setTitle(coreRes.string.settings)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
         //TODO, resolver la visualización del toolbar que no se muestra al aplicar setTheme(getThemeResValue())
