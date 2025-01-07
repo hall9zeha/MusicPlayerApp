@@ -27,15 +27,18 @@ import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_FAVORITE
 import com.barryzeha.core.common.BY_GENRE
+import com.barryzeha.core.common.COLOR_ACCENT
 import com.barryzeha.core.common.COLOR_BACKGROUND
 import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.SettingsKeys
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.databinding.ActionAddMenuPopupBinding
 import com.barryzeha.ktmusicplayer.databinding.CreatePlaylistLayoutBinding
 import com.barryzeha.ktmusicplayer.databinding.WindowPopupMenuBinding
@@ -298,9 +301,8 @@ fun getPlayListName(mPrefs:MyPreferences, headerTextRes:(Int)->Unit){
 }
 fun changeBackgroundColor(context:Context,colored:Boolean):ColorStateList{
     return if(colored) {
-        ContextCompat.getColorStateList(
-            context,
-            R.color.primaryColor
+        ColorStateList.valueOf(
+            if(MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(COLOR_ACCENT, COLOR_TRANSPARENT)else ContextCompat.getColor(context,R.color.primaryColor)
         )?.withAlpha(128)!!
         }
         else {ColorStateList.valueOf(

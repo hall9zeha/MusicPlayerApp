@@ -390,20 +390,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
-            bind?.ivCover?.loadImage(musicState.albumArt)
+            ivCover.loadImage(musicState.albumArt)
             seekbarControl.tvEndTime.text = createTime(musicState.duration).third
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
 
             musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
-
-            activity?.let {
-                val songMetadata = getSongMetadata(requireActivity(), musicState.songPath)
-                songMetadata?.let {
-                    ivCover.setImageBitmap(it.albumArt)
-                }
-
-            }
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())

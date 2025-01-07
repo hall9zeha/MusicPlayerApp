@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,10 +12,14 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.Filter
 import android.widget.Filterable
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.barryzeha.core.common.COLOR_ACCENT
 import com.barryzeha.core.common.COLOR_PRIMARY
+import com.barryzeha.core.common.COLOR_TRANSPARENT
+import com.barryzeha.core.common.SettingsKeys
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.fetchShortFileMetadata
@@ -22,6 +27,7 @@ import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
 import com.barryzeha.ktmusicplayer.databinding.ListItemHeaderBinding
 import com.l4digital.fastscroll.FastScroller
@@ -141,7 +147,15 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 notifyItemChanged(
                     selectedPos,
                     ItemSongChangePayload.BackgroundColor(
-                        mColorList(context).getColor(COLOR_PRIMARY, 0).adjustAlpha(0.3f)
+                        if (MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal) mColorList(
+                            context
+                        ).getColor(
+                            COLOR_ACCENT, COLOR_TRANSPARENT
+                        ).adjustAlpha(0.3f) else ContextCompat.getColor(
+                            context,
+                            com.barryzeha.core.R.color.primaryColor
+                        )
+                            .adjustAlpha(0.3f)
                     )
                 )
             }
