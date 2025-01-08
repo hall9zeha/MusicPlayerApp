@@ -17,9 +17,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.common.COLOR_ACCENT
+import com.barryzeha.core.common.COLOR_ON_PRIMARY
 import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.SettingsKeys
+import com.barryzeha.core.common.TEXT_COLOR_PRIMARY_INVERSE_NO_DISABLE
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.fetchShortFileMetadata
@@ -412,8 +414,11 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             val colorWithAlpha = (alpha shl 24) or (mColorList(context).getColor(COLOR_PRIMARY,
                 COLOR_PRIMARY) and 0x00FFFFFF)
             //this.root.setBackgroundColor(colorWithAlpha)
-            tvHeaderDescription.setTextColor(mColorList(context).getColor(COLOR_PRIMARY,
-                COLOR_PRIMARY))
+            val textHeaderColor = if(MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(
+                COLOR_ACCENT,COLOR_PRIMARY)else mColorList(context).getColor(COLOR_PRIMARY,COLOR_PRIMARY)
+            tvHeaderDescription.setTextColor(textHeaderColor)
+            divider.dividerColor = textHeaderColor
+
         }
     }
     // Filter
