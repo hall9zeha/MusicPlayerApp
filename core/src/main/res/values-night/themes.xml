@@ -112,7 +112,7 @@
         <item name="colorOnPrimary">@color/white</item>
     </style>-->
     <style name="splashScreenTheme" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/surface</item>
+        <item name="windowSplashScreenBackground">?attr/colorPrimary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ktmusic_icon</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>
         <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/brand_text</item>
