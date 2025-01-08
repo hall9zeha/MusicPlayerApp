@@ -134,3 +134,15 @@ fun Context.getThemeResValue():Int{
         }
     }
 }
+@StyleRes
+fun Context.getThemeWithActionBarResValue():Int{
+    val globalTheme = MyPreferences(this).globalTheme
+    return when(globalTheme){
+        SettingsKeys.DEFAULT_THEME.ordinal->{R.style.Theme_KTMusicPlayer_ActionBar}
+        SettingsKeys.MATERIAL_YOU_THEME.ordinal->{R.style.Base_Theme_KTMusicPlayer_ActionBar}
+        else->{
+            R.style.Base_Theme_KTMusicPlayer_ActionBar
+        }
+    }
+}
+

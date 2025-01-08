@@ -16,6 +16,7 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.getThemeResValue
+import com.barryzeha.core.common.getThemeWithActionBarResValue
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.common.Preferences
 import com.barryzeha.mfilepicker.common.util.COMMON_DIR
@@ -46,7 +47,7 @@ class FilePickerActivity : AppCompatActivity() {
     private var isSelectedAll:Boolean=false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(getThemeResValue())
+        setTheme(getThemeWithActionBarResValue())
         super.onCreate(savedInstanceState)
         bind = ActivityFilePickerBinding.inflate(layoutInflater)
 

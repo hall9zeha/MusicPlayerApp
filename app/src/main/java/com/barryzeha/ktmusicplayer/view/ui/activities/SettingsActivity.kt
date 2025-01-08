@@ -15,6 +15,7 @@ import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SettingsKeys
 import com.barryzeha.core.common.getThemeResValue
+import com.barryzeha.core.common.getThemeWithActionBarResValue
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.MyApp.Companion.mPrefs
 import com.barryzeha.core.R as coreRes
@@ -30,11 +31,11 @@ class SettingsActivity : AppCompatActivity() {
     lateinit var mPrefs:MyPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(getThemeResValue())
+        setTheme(getThemeWithActionBarResValue())
         setTitle(coreRes.string.settings)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
-        //TODO, resolver la visualización del toolbar que no se muestra al aplicar setTheme(getThemeResValue())
+
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
