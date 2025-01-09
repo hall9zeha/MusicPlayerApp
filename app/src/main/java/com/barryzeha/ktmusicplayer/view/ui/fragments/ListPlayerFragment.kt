@@ -32,6 +32,7 @@ import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.showOrHideKeyboard
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
@@ -112,7 +113,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         bind = FragmentListPlayerBinding.bind(view)
         currentSelectedPosition = mPrefs.currentIndexSong.toInt()
         setUpAdapter()
@@ -142,7 +142,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 //Mantenemos la pantalla encendida para evitar interrupciones mientras se procesa
                 keepScreenOn(requireActivity(), true)
                 //**********************************
-
                 processSongPaths(paths,
                     { itemsCount -> mainViewModel.setItemsCount(itemsCount) },
                     { song ->
@@ -150,7 +149,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             bind?.pbLoad?.isIndeterminate = false
                         }
                         mainViewModel.saveNewSong(song)
-
                     })
             }
         }
@@ -162,7 +160,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
-
     private fun setUpAdapter(){
 
         musicListAdapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
@@ -184,7 +181,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 mainViewModel.savePlaylistWithSongRef(
                     PlaylistWithSongsCrossRef(playlistEntity.idPlaylist,idSongForSendToPlaylist)
                 )
-
             }else{
             // Cargamos la lista de reproducción seleccionada
                 getPlaylist(playlistEntity.idPlaylist.toInt())
@@ -199,14 +195,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         },{playlist->
             // Cambiar nombre de una playlist
             mainViewModel.updatePlaylist(playlist)
-
         })
         bind?.bottomSheetView?.rvPlaylists?.apply{
             setHasFixedSize(true)
             setItemViewCacheSize(10)
             layoutManager = LinearLayoutManager(context)
             adapter = playListAdapter
-
         }
         playListAdapter!!.add(PlaylistEntity(0,"Default"))
     }
@@ -228,7 +222,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             updateUIOnceTime(currentTRack)
             setNumberOfTrack(scrollToPosition = prevOrNextClicked)
             prevOrNextClicked=false
-
         }
         mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner){ (size, count)->
             bind?.pbLoad?.apply {
@@ -244,7 +237,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }else{
                 bind?.bottomPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
             }
-
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
             //Removemos el estado de pantalla encendida permanentemente
@@ -268,7 +260,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 mPrefs.firstExecution=false
             }
         }
-
         mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
             musicListAdapter?.removeAll()
             // probando eliminar la lista de media items para cargar la lista nueva, ya que tendrá un orden distinto
@@ -287,7 +278,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             currentSelectedPosition = positionSelected
             positionSelected?.let{
                 musicListAdapter?.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
-
             }
         }
         mainViewModel.deletedRow.observe(viewLifecycleOwner){deletedRow->
@@ -321,7 +311,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(insertedRow >0){
                 Toast.makeText(activity, coreRes.string.playlistCreatedMsg, Toast.LENGTH_SHORT).show()
                 mainViewModel.fetchPlaylists()
-
             }
         }
         mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
@@ -339,7 +328,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 // cuando es mayor que cero agregar a lista y si es cero, cambiar entre listas
                 idSongForSendToPlaylist = 0
                 // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
-
             }
         }
         mainViewModel.isSongTagEdited.observe(viewLifecycleOwner){song->
@@ -381,7 +369,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
-
     private fun setUpPlayListName()=with(bind){
         this?.let{
             getPlayListName(mPrefs){headerTextRes->tvPlayListName.text=getString(headerTextRes)}
@@ -399,7 +386,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
-
         }
     }
     private fun updateUI(musicState: MusicState){
@@ -410,7 +396,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bind?.seekbarControl?.tvInitTime?.text = createTime(musicState.currentDuration).third
         bind?.seekbarControl?.loadSeekBar?.progress = musicState.currentDuration.toInt()
         updateService()
-
     }
     private fun setUpListeners()= with(bind){
         var clicked=false
@@ -467,7 +452,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         if (isPlaying) {
                             musicPlayerService?.pausePlayer()
                             mainViewModel.saveStatePlaying(false)
-
                         } else {
                             musicPlayerService?.resumePlayer()
                             mainViewModel.saveStatePlaying(true)
@@ -512,11 +496,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         userSelectPosition = progress
                     }
                 }
-
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
                     isUserSeeking = true
                 }
-
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     isUserSeeking = false
                     musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
@@ -539,7 +521,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
                         bottomPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode = REPEAT_ONE
-
                     }
                     else -> {
                         // First: active repeat All
@@ -548,7 +529,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         mPrefs.songMode= REPEAT_ALL
                     }
                 }
-
             }
             bottomPlayerControls.btnShuffle.setOnClickListener {
                 when(mPrefs.songMode){
@@ -571,25 +551,17 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             btnSearch.setOnClickListener{
                showOrHideSearchbar()
             }
-            btnClose?.setOnClickListener {
+            btnClose.setOnClickListener {
                showOrHideSearchbar()
             }
-            edtSearch?.addTextChangedListener (object: TextWatcher{
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-
-                }
+            edtSearch.addTextChangedListener (object: TextWatcher{
+                override fun beforeTextChanged( s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     musicListAdapter?.filter?.filter(s)
                 }
-                override fun afterTextChanged(s: Editable?) {
-                }
+                override fun afterTextChanged(s: Editable?) {}
             })
-            btnMultipleSelect?.setOnClickListener{
+            btnMultipleSelect.setOnClickListener{
                 if(clicked){
                     musicListAdapter?.showMultipleSelection(false)
                     btnMultipleSelect.backgroundTintList = changeBackgroundColor(requireContext(),false)
@@ -603,7 +575,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     visibleOrGoneBottomActions(false)
                 }
             }
-            btnFilter?.setOnClickListener{
+            btnFilter.setOnClickListener{
                 OrderByDialog().show(parentFragmentManager,OrderByDialog::class.simpleName)
             }
             btnDelete?.setOnClickListener {
@@ -614,14 +586,12 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     musicListAdapter?.removeItemsForMultipleSelectedAction()
                 }
             }
-            btnMainEq?.setOnClickListener{
+            btnMainEq.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
-
             }
-            btnMore?.setOnClickListener{view->
+            btnMore.setOnClickListener{view->
                 onMenuItemPopup(onItemClick=false,requireActivity(),view,{
                     // Delete item callback
-
                 },{
                     // Delete all items callback
                     musicListAdapter?.removeAll()
@@ -642,7 +612,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun setupBottomSheet(){
         bottomSheetBehavior = BottomSheetBehavior.from(bind?.bottomSheetView?.listsBottomSheet!!)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-
         bottomSheetBehavior.addBottomSheetCallback(object :BottomSheetBehavior.BottomSheetCallback(){
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when(newState){
@@ -653,9 +622,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         btmSheetIsExpanded=false
                     }
                 }
-            } override fun onSlide(bottomSheet: View, slideOffset: Float) {
-
-            }
+            } override fun onSlide(bottomSheet: View, slideOffset: Float) { }
         })
     }
     private fun showOrHideSearchbar()=with(bind){
@@ -664,13 +631,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 visibleOrGoneViews(false)
                 btnSearch.backgroundTintList=changeBackgroundColor(requireContext(),true)
                 isFiltering=true
-                showKeyboard(true)
+                showKeyboard(true, edtSearch)
             }else {
                 visibleOrGoneViews(true)
                 edtSearch?.setText("")
                 btnSearch.backgroundTintList = changeBackgroundColor(requireContext(),false)
                 isFiltering = false
-                showKeyboard(false)
+                showKeyboard(false, edtSearch)
             }
         }
     }
@@ -678,7 +645,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         this?.let {
             tilSearch?.visibility = if(isVisible)View.GONE else View.VISIBLE
             btnClose?.visibility = if(isVisible)View.GONE else View.VISIBLE
-
             btnMenu?.visibility = if(isVisible)View.VISIBLE else View.GONE
             btnFilter?.visibility = if(isVisible)View.VISIBLE else View.GONE
             btnMainEq?.visibility = if(isVisible)View.VISIBLE else View.GONE
@@ -691,23 +657,18 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             btnFavorite.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
             btnSearch.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
             btnMore.visibility = if(isVisible) View.VISIBLE else View.INVISIBLE
-
             btnDelete?.visibility = if(isVisible)View.GONE else View.VISIBLE
         }
     }
-    private fun showKeyboard(show:Boolean){
-        val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-        if(show) {
+    private fun showKeyboard(show:Boolean, view:View){
+        activity?.showOrHideKeyboard(show,view,{ // isShown
             bind?.edtSearch?.requestFocus()
-            imm!!.showSoftInput(bind?.edtSearch, InputMethodManager.SHOW_IMPLICIT)
-
-        }else{
-            imm!!.hideSoftInputFromWindow(bind?.edtSearch?.windowToken,0)
+        },{ // isHide
             CoroutineScope(Dispatchers.Main).launch {
                 delay(1000)
                 musicListAdapter?.changeBackgroundColorSelectedItem( mPrefs.idSong)
             }
-        }
+        })
     }
     private fun fastForwardOrRewind(isForward:Boolean){
         fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
@@ -721,15 +682,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!)
             }
             fastForwardOrRewindHandler?.postDelayed(forwardOrRewindRunnable!!,200)
-
         }
         fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
     }
     private fun getSongOfAdapter(idSong: Long):SongEntity?{
-        var song:SongEntity?=null
-        song = if(idSong>-1){
-            musicListAdapter?.getSongById(idSong)
-        }else{
+        val song = if(idSong>-1){ musicListAdapter?.getSongById(idSong)}else{
             // Buscamos en la posición 1 porque primero tendremos un item header en la posición 0
             musicListAdapter?.getSongByPosition(1)
         }
@@ -747,7 +704,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         this?.let {
             when (mPrefs.songMode) {
                 SongMode.RepeatOne.ordinal -> {
-
                     bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
                     bottomPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
                 }
@@ -761,7 +717,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     bottomPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                     bottomPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
                     bottomPlayerControls.btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
-
                 }
             }
         }
@@ -774,16 +729,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {
-        onMenuItemPopup(true,requireActivity(),view,{
-            // Delete item callback
+        onMenuItemPopup(true,requireActivity(),view,{ // Delete item callback
             mainViewModel.deleteSong(selectedSong)
             this.song=selectedSong
-        },{
-            // Delete all items callback
+        },{ // Delete all items callback
             musicListAdapter?.removeAll()
             mainViewModel.deleteAllSongs()
-        },{
-            // Send to playlist callback
+        },{ // Send to playlist callback
             if(playListAdapter?.itemCount!! > 0){
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 idSongForSendToPlaylist = selectedSong.id
@@ -794,7 +746,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             SongInfoDialogFragment.newInstance(SongEntity(id=selectedSong.id, pathLocation = selectedSong.pathLocation))
                 .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
         })
-
     }
     private fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){
         val itemSong = musicListAdapter?.getSongById(mPrefs.idSong)
@@ -808,9 +759,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             String.format("#%s/%s", if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0, (musicListAdapter?.getSongItemCount()!! + itemCount))
     }
     private fun updateService(){
-        serviceConnection?.let{
-       startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
-
+        serviceConnection?.let{startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
     }
     override fun play() {
         super.play()
@@ -835,19 +784,14 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun stop() {
         super.stop()
         activity?.finish()
-
     }
     override fun musicState(musicState: MusicState?) {
         super.musicState(musicState)
-        musicState?.let {
-            mainViewModel.setMusicState(musicState)
-        }
+        musicState?.let {mainViewModel.setMusicState(musicState)}
     }
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
-        musicState?.let{
-            mainViewModel.setCurrentTrack(musicState)
-        }
+        musicState?.let{mainViewModel.setCurrentTrack(musicState)}
     }
     // El método sobreescrito onConnectedService no se dispara aquí debido a que se ejecuta después del primer fragmento
     // La conexión al servicio la obtenemos a través del view model enviado desde main activity
@@ -855,7 +799,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onServiceDisconnected()
         musicPlayerService = null
     }
-
     override fun onPause() {
         super.onPause()
         setNumberOfTrack()
@@ -912,7 +855,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     putInt(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
                 }
-
             }
     }
 }

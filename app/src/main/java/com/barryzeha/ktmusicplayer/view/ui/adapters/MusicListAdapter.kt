@@ -382,7 +382,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                                 )
                         }
                     }
-
                     root.setOnClickListener {
                         // La marcación del item se hará cuando se lance current track en nuestra interface
                         //changeBackgroundColorSelectedItem(bindingAdapterPosition, song.id)
@@ -418,7 +417,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 COLOR_ACCENT,COLOR_PRIMARY)else mColorList(context).getColor(COLOR_PRIMARY,COLOR_PRIMARY)
             tvHeaderDescription.setTextColor(textHeaderColor)
             divider.dividerColor = textHeaderColor
-
         }
     }
     // Filter

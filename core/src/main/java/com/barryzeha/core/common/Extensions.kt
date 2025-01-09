@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.annotation.StyleRes
 import androidx.recyclerview.widget.RecyclerView
@@ -42,6 +43,16 @@ fun Activity.showSnackBar(view: View, msg:String, duration:Int = Snackbar.LENGTH
 
 fun Activity.showSnackBar(view: View, msg:Int, duration:Int = Snackbar.LENGTH_SHORT)=
     Snackbar.make(view,msg,duration).show()
+fun Activity.showOrHideKeyboard(show:Boolean,view:View, isShow:()->Unit, isHide:()->Unit){
+    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+    if(show){
+        isShow()
+        imm!!.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }else{
+        imm!!.hideSoftInputFromWindow(view.windowToken,0)
+        isHide()
+    }
+}
 
 @Suppress("DEPRECATION")
 fun <T> Context.isServiceRunning(service:Class<T>):Boolean{

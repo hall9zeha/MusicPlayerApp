@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
@@ -13,6 +14,8 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -23,6 +26,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
+import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
@@ -59,6 +64,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.abs
 import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
@@ -82,7 +88,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var serviceConnection:ServiceConnection?=null
     private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
-    private var musicPlayerService: MusicPlayerService?=null
+    internal var musicPlayerService: MusicPlayerService?=null
     private var listener: OnFragmentReadyListener? = null
 
     // Forward and rewind
@@ -110,7 +116,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             setUpScrollOnTextViews()
             setupAnimator()
             listener?.onFragmentReady()
-
     }
     /*private fun tryBlurBackground(){
         bind?.colorBackground?.let {
@@ -175,7 +180,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
             serviceConnection= instance.first
             musicPlayerService= instance.second
-
         }
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             CoroutineScope(Dispatchers.IO).launch {
@@ -184,7 +188,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 }
             }
         }
-
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
            it?.let{currentTrack->
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
@@ -235,7 +238,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         title = meta.title,
                         album = meta.album,
                         artist = meta.artist)
-
                     mainViewModel.setCurrentTrack(updateSongInfo)
                     musicPlayerService?.updateNotify(updateSongInfo)
                 }
@@ -266,7 +268,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         super.stop()
         activity?.finish()
     }
-
     override fun musicState(musicState: MusicState?) {
         super.musicState(musicState)
         musicState?.let{
@@ -323,7 +324,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             if(mPrefs.songMode != AB_LOOP){
                 bind?.btnAbLoop?.backgroundTintList=changeBackgroundColor(requireContext(),false)}
         }
-
     }
     private fun checkIfDiscCoverViewIsRotating(isPlaying:Boolean){
         if(discCoverViewIsEnable()) {
@@ -339,7 +339,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // porque genera un mal efecto en la vista al cargar la pista guardada
             // entre otros pequeños inconvenientes, ahora está en onResumen para actualizarse cuando cambiemos de lista
             // a main
-
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             lrcView?.updateTime(musicState.currentDuration)
@@ -679,13 +678,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             musicPlayerService?.getSongsList()?.let{songsList->
                 return songsList[0]
             }?:run { return null }
-
        }
     }
     private fun updateService(){
         serviceConnection?.let{
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
-
     }
     override fun onResume() {
         super.onResume()
@@ -735,7 +732,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             MainPlayerFragment().apply {
-
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
