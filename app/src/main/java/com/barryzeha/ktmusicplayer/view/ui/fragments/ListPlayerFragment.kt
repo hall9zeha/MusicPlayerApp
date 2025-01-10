@@ -661,8 +661,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun showKeyboard(show:Boolean, view:View){
-        activity?.showOrHideKeyboard(show,view,{ // isShown
-            bind?.edtSearch?.requestFocus()
+        activity?.showOrHideKeyboard(show,view,{ _->// isShown
+            view.requestFocus()
         },{ // isHide
             CoroutineScope(Dispatchers.Main).launch {
                 delay(1000)

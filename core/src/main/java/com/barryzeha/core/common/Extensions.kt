@@ -43,10 +43,10 @@ fun Activity.showSnackBar(view: View, msg:String, duration:Int = Snackbar.LENGTH
 
 fun Activity.showSnackBar(view: View, msg:Int, duration:Int = Snackbar.LENGTH_SHORT)=
     Snackbar.make(view,msg,duration).show()
-fun Activity.showOrHideKeyboard(show:Boolean,view:View, isShow:()->Unit, isHide:()->Unit){
+fun Activity.showOrHideKeyboard(show:Boolean,view:View, isShow:(imm:InputMethodManager?)->Unit, isHide:()->Unit){
     val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
     if(show){
-        isShow()
+        isShow(imm)
         imm!!.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
     }else{
         imm!!.hideSoftInputFromWindow(view.windowToken,0)
