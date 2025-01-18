@@ -26,7 +26,7 @@ class  CustomSeekBar @JvmOverloads constructor(
 
  private var rect: Rect = Rect()
  private var paint: Paint = Paint()
- private var seekbarHeight: Int = 12
+ private var seekbarHeight: Int = 8
 
  @Synchronized
  override fun onDraw(canvas: Canvas) {

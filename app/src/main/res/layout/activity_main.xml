@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:fitsSystemWindows="true"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="48dp"
         app:menu="@menu/main_footer_menu"
         />
     </com.google.android.material.navigation.NavigationView>

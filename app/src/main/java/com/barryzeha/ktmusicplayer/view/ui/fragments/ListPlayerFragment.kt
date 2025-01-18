@@ -414,6 +414,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     }
                 }
             }
+
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }

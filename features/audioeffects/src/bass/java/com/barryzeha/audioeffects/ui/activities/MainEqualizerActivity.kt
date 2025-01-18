@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -247,12 +246,37 @@ class MainEqualizerActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                EqualizerManager.updateFX(seekBar.tag.toString().toInt(),progress)
+               val textViewDb =  bind.lnContentBands.findViewWithTag<TextView>("Dbs${seekBar.tag}")
+               textViewDb?.text = getBandValue(progress)
             }
         }
+
         val frequencies = arrayOf("32 Hz", "64 Hz", "125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "8 kHz", "16 kHz", "")
         for(i in 0 until fxArray.size-1){
             val seekId=i
             val seekProgress= mPrefs.getSeekBandValue(effectType,seekId)
+           // probe
+            val linearLayoutSeekbar = LinearLayout(this).apply{
+                orientation = LinearLayout.HORIZONTAL
+            }
+
+            val layoutParamsForSeekbar = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                0.1f
+            ).apply {
+                topMargin = 2
+                bottomMargin = 2
+            }
+            val layoutParamsForTvDbs = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                0.9f
+            ).apply {
+                topMargin = 2
+                bottomMargin = 2
+            }
+            // probe
            val seekBar = CustomSeekBar(this@MainEqualizerActivity)
             seekBar.apply {
                 id=seekId
@@ -264,12 +288,22 @@ class MainEqualizerActivity : AppCompatActivity() {
                 setOnSeekBarChangeListener(osbcl)
             }
             val textView = TextView(this@MainEqualizerActivity)
-
             textView.gravity = Gravity.CENTER // Centrar el texto
             textView.layoutParams=layoutParams0
             textView.text=frequencies[i]
-            textView.textSize = 12f
-            bind.lnContentBands.addView(seekBar)
+            textView.textSize = 11f
+            //probe
+            val textViewDb = TextView(this@MainEqualizerActivity)
+            textViewDb.gravity = Gravity.CENTER // Centrar el texto
+            textViewDb.layoutParams=layoutParamsForTvDbs
+            textViewDb.text=getBandValue(if(seekProgress != 20) seekProgress else getEqualizerBandPreConfig(effectType,seekId))
+            textViewDb.tag="Dbs$seekId"
+            textViewDb.textSize = 10f
+            seekBar.layoutParams=layoutParamsForSeekbar
+            linearLayoutSeekbar.addView(seekBar)
+            linearLayoutSeekbar.addView(textViewDb)
+            //probe
+            bind.lnContentBands.addView(linearLayoutSeekbar)
             bind.lnContentBands.addView(textView)
         }
         val reverbProgress = mPrefs.getReverbSeekBandValue(effectType, coreRes.id.reverb)
@@ -324,6 +358,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         bind.lnContentBands.addView(volumeSeekBar)
         bind.lnContentBands.addView(volumeTextView)
     }
+    private fun getBandValue(value:Int)="${value-10}"
     // Por ahora no debe retornar nada
     class MainEqualizerContract:ActivityResultContract<Int,Unit>(){
         override fun createIntent(context: Context, sessionId: Int): Intent {
