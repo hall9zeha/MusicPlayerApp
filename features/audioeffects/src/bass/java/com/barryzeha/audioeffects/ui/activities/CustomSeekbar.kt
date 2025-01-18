@@ -36,8 +36,8 @@ class  CustomSeekBar @JvmOverloads constructor(
   canvas.drawRect(rect, paint)
 
   //for right side
-  if (this.progress > 10) {
-   rect[(width / 2), height / 2 - seekbarHeight / 2, (width / 2 + width / 20 * (progress - 10))-40] =
+  if (this.progress > 15) {
+   rect[(width / 2), height / 2 - seekbarHeight / 2, (width / 2 + width / 30 * (progress - 15))-40] =
     height / 2 + seekbarHeight / 2
 
    paint.color = Color.GREEN
@@ -45,8 +45,8 @@ class  CustomSeekBar @JvmOverloads constructor(
   }
 
   //for left side
-  if (this.progress < 10) {
-   rect[(width / 2)- ((width / 20 )* (10-progress)-40), height / 2 - seekbarHeight / 2, (width / 2)] =
+  if (this.progress < 15) {
+   rect[(width / 2)- ((width / 30 )* (15-progress)-40), height / 2 - seekbarHeight / 2, (width / 2)] =
     height / 2 + seekbarHeight / 2
 
    paint.color = Color.RED

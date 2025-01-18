@@ -25,7 +25,7 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
         mPreferences.edit().putInt("$effectType$SEEK_BAND$seekId",seekValue).apply()
     }
     fun getSeekBandValue(effectType: Int,seekId: Int):Int{
-        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",20)
+        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",30)
     }
     var effectsIsEnabled:Boolean
         get()=mPreferences.getBoolean(ENABLE_EFFECTS,false)

@@ -281,8 +281,8 @@ class MainEqualizerActivity : AppCompatActivity() {
             seekBar.apply {
                 id=seekId
                 tag=seekId
-                max=20
-                progress= if(seekProgress != 20) seekProgress else getEqualizerBandPreConfig(effectType,seekId)
+                max=30
+                progress= if(seekProgress != 30) seekProgress else getEqualizerBandPreConfig(effectType,seekId)
                 thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
                 progressDrawable=ColorDrawable(Color.TRANSPARENT)
                 setOnSeekBarChangeListener(osbcl)
@@ -296,7 +296,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             val textViewDb = TextView(this@MainEqualizerActivity)
             textViewDb.gravity = Gravity.CENTER // Centrar el texto
             textViewDb.layoutParams=layoutParamsForTvDbs
-            textViewDb.text=getBandValue(if(seekProgress != 20) seekProgress else getEqualizerBandPreConfig(effectType,seekId))
+            textViewDb.text=getBandValue(if(seekProgress != 30) seekProgress else getEqualizerBandPreConfig(effectType,seekId))
             textViewDb.tag="Dbs$seekId"
             textViewDb.textSize = 10f
             seekBar.layoutParams=layoutParamsForSeekbar
@@ -310,7 +310,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         val reverbSeekBar = SeekBar(this@MainEqualizerActivity).apply {
             id = coreRes.id.reverb
             tag = fxArray.size-1
-            max = 20
+            max = 30
             progress = if(reverbProgress !=0) reverbProgress else 0
             thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
             layoutParams = LinearLayout.LayoutParams(
@@ -358,7 +358,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         bind.lnContentBands.addView(volumeSeekBar)
         bind.lnContentBands.addView(volumeTextView)
     }
-    private fun getBandValue(value:Int)="${value-10}"
+    private fun getBandValue(value:Int)="${value-15}"
     // Por ahora no debe retornar nada
     class MainEqualizerContract:ActivityResultContract<Int,Unit>(){
         override fun createIntent(context: Context, sessionId: Int): Intent {
