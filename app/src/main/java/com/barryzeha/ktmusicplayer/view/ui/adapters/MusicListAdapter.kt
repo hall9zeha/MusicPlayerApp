@@ -384,9 +384,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                     }
                     root.setOnClickListener {
                         // La marcación del item se hará cuando se lance current track en nuestra interface
-                        //changeBackgroundColorSelectedItem(bindingAdapterPosition, song.id)
                         onItemClick(position, song)
-
                     }
                     chkItemSong.setOnClickListener {view->
                         if((view as CheckBox).isChecked){

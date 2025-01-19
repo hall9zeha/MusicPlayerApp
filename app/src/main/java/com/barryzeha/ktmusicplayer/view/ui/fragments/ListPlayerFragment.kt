@@ -161,7 +161,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
     }
     private fun setUpAdapter(){
-
         musicListAdapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
         bind?.rvSongs?.apply {
             setHasFixedSize(true)

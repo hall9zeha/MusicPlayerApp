@@ -253,7 +253,7 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
     return MusicState(
         artist = "Unknown",
         album ="Album Unknown",
-        albumArt = BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+        albumArt = BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
         )
 }
 fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):Bitmap?{
@@ -262,7 +262,7 @@ fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):
         if (isForNotify) scaleBitmap(originalBitmap, 156, 156)
         else originalBitmap
     }?:run{
-       BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))
+       BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
     }
 }
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {

@@ -174,8 +174,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         }
     }
     private fun setUpObservers(){
-        (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
-        (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.drawable.placeholder_cover)
+        (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
+        (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
         mainViewModel.fetchAllSongFromMain()
         mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
             serviceConnection= instance.first
