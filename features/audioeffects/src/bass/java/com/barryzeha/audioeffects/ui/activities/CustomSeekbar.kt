@@ -31,13 +31,13 @@ class  CustomSeekBar @JvmOverloads constructor(
  @Synchronized
  override fun onDraw(canvas: Canvas) {
   // for seek bar line
-  rect[0 + 40, height / 2 - seekbarHeight / 2, width - 40] = height / 2 + seekbarHeight / 2
+  rect[0 + 30, height / 2 - seekbarHeight / 2, width - 30] = height / 2 + seekbarHeight / 2
   paint.color = Color.DKGRAY
   canvas.drawRect(rect, paint)
 
   //for right side
   if (this.progress > 15) {
-   rect[(width / 2), height / 2 - seekbarHeight / 2, (width / 2 + width / 30 * (progress - 15))-40] =
+   rect[(width / 2), height / 2 - seekbarHeight / 2, (width / 2 + width / 30 * (progress - 15))-30] =
     height / 2 + seekbarHeight / 2
 
    paint.color = Color.GREEN

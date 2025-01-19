@@ -39,6 +39,6 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
         return mPreferences.getInt("$effectType$SEEK_BAND$seekId",0)
     }
     fun getVolumeSeekBandValue(effectType: Int,seekId: Int):Int{
-        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",10)
+        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",15)
     }
 }

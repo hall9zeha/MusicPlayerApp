@@ -263,7 +263,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             val layoutParamsForSeekbar = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                0.1f
+                0.09f
             ).apply {
                 topMargin = 2
                 bottomMargin = 2
@@ -271,7 +271,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             val layoutParamsForTvDbs = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                0.9f
+                0.91f
             ).apply {
                 topMargin = 2
                 bottomMargin = 2
@@ -335,13 +335,14 @@ class MainEqualizerActivity : AppCompatActivity() {
         // Agregar SeekBar para volumen
 
         val volumeProgress = mPrefs.getVolumeSeekBandValue(effectType,coreRes.id.volume)
-        val volumeSeekBar = SeekBar(this@MainEqualizerActivity).apply {
+        val volumeSeekBar = CustomSeekBar(this@MainEqualizerActivity).apply {
             id = coreRes.id.volume
             tag = 11
-            max = 20
-            progress = if(volumeProgress !=10) volumeProgress else 10
+            max = 30
+            progress = if(volumeProgress !=15) volumeProgress else 15
             thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
             layoutParams = layoutParams1
+            progressDrawable=ColorDrawable(Color.TRANSPARENT)
             setOnSeekBarChangeListener(osbcl)
         }
         val volumeTextView = TextView(this@MainEqualizerActivity).apply {
@@ -358,7 +359,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         bind.lnContentBands.addView(volumeSeekBar)
         bind.lnContentBands.addView(volumeTextView)
     }
-    private fun getBandValue(value:Int)="${value-15}"
+    private fun getBandValue(value:Int)="${value-15}db"
     // Por ahora no debe retornar nada
     class MainEqualizerContract:ActivityResultContract<Int,Unit>(){
         override fun createIntent(context: Context, sessionId: Int): Intent {
