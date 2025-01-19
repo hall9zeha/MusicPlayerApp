@@ -107,48 +107,17 @@ class MainEqualizerActivity : AppCompatActivity() {
 
             val chip = group.findViewById<Chip>(checkedIds[0])
             when(group.indexOfChild(chip)){
-            CUSTOM_PRESET->{lnContentBands.removeAllViews(); createView(CUSTOM_PRESET)
-
-                setEffect()
-            }
-            ROCK_PRESET->{lnContentBands.removeAllViews(); createView(ROCK_PRESET)
-                setEffect()
-            }
-            POP_PRESET->{lnContentBands.removeAllViews(); createView(POP_PRESET)
-
-                setEffect()
-            }
-            BASS_PRESET->{lnContentBands.removeAllViews(); createView(BASS_PRESET)
-
-                setEffect()
-            }
-            FLAT_PRESET->{lnContentBands.removeAllViews(); createView(FLAT_PRESET)
-
-                setEffect()
-            }
-            JAZZ_PRESET->{lnContentBands.removeAllViews(); createView(JAZZ_PRESET)
-
-                setEffect()
-            }
-            CLASSICAL_PRESET->{lnContentBands.removeAllViews(); createView(CLASSICAL_PRESET)
-
-                setEffect()
-            }
-            HIP_HOP_PRESET->{lnContentBands.removeAllViews(); createView(HIP_HOP_PRESET)
-
-                setEffect()
-            }
-            ELECTRONIC_PRESET->{lnContentBands.removeAllViews(); createView(ELECTRONIC_PRESET)
-
-                setEffect()
-            }
-            FULL_SOUND_PRESET->{lnContentBands.removeAllViews(); createView(FULL_SOUND_PRESET)
-
-                setEffect()
-            }
-            FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews();createView(
-                FULL_BASS_AND_TREBLE_PRESET)
-                setEffect()
+            CUSTOM_PRESET->{lnContentBands.removeAllViews(); createView(CUSTOM_PRESET);setEffect()}
+            ROCK_PRESET->{lnContentBands.removeAllViews(); createView(ROCK_PRESET);setEffect()}
+            POP_PRESET->{lnContentBands.removeAllViews(); createView(POP_PRESET);setEffect()}
+            BASS_PRESET->{lnContentBands.removeAllViews(); createView(BASS_PRESET);setEffect()}
+            FLAT_PRESET->{lnContentBands.removeAllViews(); createView(FLAT_PRESET);setEffect()}
+            JAZZ_PRESET->{lnContentBands.removeAllViews(); createView(JAZZ_PRESET);setEffect()}
+            CLASSICAL_PRESET->{lnContentBands.removeAllViews(); createView(CLASSICAL_PRESET);setEffect()}
+            HIP_HOP_PRESET->{lnContentBands.removeAllViews(); createView(HIP_HOP_PRESET);setEffect()}
+            ELECTRONIC_PRESET->{lnContentBands.removeAllViews(); createView(ELECTRONIC_PRESET);setEffect()}
+            FULL_SOUND_PRESET->{lnContentBands.removeAllViews(); createView(FULL_SOUND_PRESET);setEffect()}
+            FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews();createView(FULL_BASS_AND_TREBLE_PRESET);setEffect()
             }
         }
         }
@@ -255,7 +224,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         for(i in 0 until fxArray.size-1){
             val seekId=i
             val seekProgress= mPrefs.getSeekBandValue(effectType,seekId)
-           // probe
+
             val linearLayoutSeekbar = LinearLayout(this).apply{
                 orientation = LinearLayout.HORIZONTAL
             }
@@ -276,7 +245,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                 topMargin = 2
                 bottomMargin = 2
             }
-            // probe
+
            val seekBar = CustomSeekBar(this@MainEqualizerActivity)
             seekBar.apply {
                 id=seekId
@@ -292,7 +261,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             textView.layoutParams=layoutParams0
             textView.text=frequencies[i]
             textView.textSize = 11f
-            //probe
+
             val textViewDb = TextView(this@MainEqualizerActivity)
             textViewDb.gravity = Gravity.CENTER // Centrar el texto
             textViewDb.layoutParams=layoutParamsForTvDbs
@@ -302,7 +271,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             seekBar.layoutParams=layoutParamsForSeekbar
             linearLayoutSeekbar.addView(seekBar)
             linearLayoutSeekbar.addView(textViewDb)
-            //probe
+
             bind.lnContentBands.addView(linearLayoutSeekbar)
             bind.lnContentBands.addView(textView)
         }
