@@ -27,4 +27,5 @@ data class AudioMetadata(
     val format:String="",
     val freq:String="",
     val fileSize:String="",
+    val channels:String=""
 )

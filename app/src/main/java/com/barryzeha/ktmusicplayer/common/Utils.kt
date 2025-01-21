@@ -284,7 +284,6 @@ private fun createPopUpWindow(dialogView:ViewBinding,parentView:View, activity: 
              dialog.dismiss()
          }
          .setNegativeButton(R.string.cancel, null)
-
      dialog.show()
  }
 fun getPlayListName(mPrefs:MyPreferences, headerTextRes:(Int)->Unit){

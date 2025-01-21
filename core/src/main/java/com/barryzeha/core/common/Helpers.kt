@@ -110,12 +110,12 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
         val discNumber = getTagField(FieldKey.DISC_NO, "Unknown")
         val composer = getTagField(FieldKey.COMPOSER, "Unknown")
         val artistSort = getTagField(FieldKey.ARTIST_SORT, "")
-
         // Extract audio header data with default values
         val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
         val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong() } catch (ex: Exception) { 0L }
         val songLengthFormatted = try { getTimeOfSong(songLength) } catch (ex: Exception) { "0" }
         val format = try { metadata.audioHeader.format } catch (ex: Exception) { "unknown" }
+        val channels = try { metadata.audioHeader.channels } catch (ex: Exception) { "unknown" }
 
         val sampleRate = try {metadata.audioHeader.sampleRate}catch(ex:Exception){0}
         val fileSizeBytes = File(pathFile).length()
@@ -137,7 +137,8 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
             songLength = songLength,
             format = format,
             freq = sampleRate.toString(),
-            fileSize = fileSizeFormatted
+            fileSize = fileSizeFormatted,
+            channels = channels
             //coverArt = bitmapCoverArt
         )
 

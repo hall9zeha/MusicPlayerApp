@@ -189,7 +189,9 @@ class SongInfoDialogFragment : DialogFragment() {
                 toolbarInfo.subtitle=meta.title
                 songInfo?.let { ivSongDetail.loadImage(songInfo.albumArt) }
                 tvDuration.text = createTime(meta.songLength).third
-                tvBitrate.text=getString(coreRes.string.file_meta_info,meta.bitRate,meta.freq,"Stereo")
+                tvBitrate.text=getString(coreRes.string.file_meta_info,meta.bitRate)
+                tvFreq.text = "${meta.freq} Khz"
+                tvChannel.text= meta.channels
                 tvSizeFile.text=meta.fileSize
                 tvFileFormat.text=inputFile.extension.uppercase()
                 edtTitle.setText(meta.title)

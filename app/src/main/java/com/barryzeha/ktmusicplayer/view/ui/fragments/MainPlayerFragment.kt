@@ -633,7 +633,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                 btnAbLoop.backgroundTintList=changeBackgroundColor(requireContext(),true)
                 mPrefs.songMode = AB_LOOP
                 checkPlayerSongPreferences()
-
+                btnAbLoop.iconTint
             }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)

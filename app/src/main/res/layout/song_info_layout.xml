@@ -66,6 +66,18 @@
             android:text="44 KHz, 320 kbps, Stereo"
             />
         <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvFreq"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="44000 KHz"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvChannel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Stereo"
+            />
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tvSizeFile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
