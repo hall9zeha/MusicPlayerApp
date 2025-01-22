@@ -82,7 +82,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     private var bind:FragmentMainPlayerBinding ? = null
     private var isPlaying:Boolean = false
     private var currentMusicState = MusicState()
-    private var currentSelectedPosition=0
     private val launcherAudioEffectActivity: ActivityResultLauncher<Int> = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var isFavorite:Boolean = false
     private var serviceConnection:ServiceConnection?=null
@@ -109,7 +108,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         super.onViewCreated(view, savedInstanceState)
             instance=this
             bind=FragmentMainPlayerBinding.bind(view)
-            currentSelectedPosition = mPrefs.currentIndexSong.toInt()
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
             setUpObservers()
             setUpListeners()
@@ -207,7 +205,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){currentPosition->
-            currentSelectedPosition=currentPosition
+            musicPlayerService?.setCurrentSongPosition(currentPosition)
         }
         mainViewModel.songById.observe(viewLifecycleOwner){song->
             // Si se agregó una pista nueva desde la lista del segundo fragmento
@@ -479,7 +477,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             btnMainPlay.setOnClickListener {
                 if (musicPlayerService?.getSongsList()?.size!! > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
-                        getSongOfList(currentSelectedPosition)?.let{song->
+                        getSongOfList(musicPlayerService?.getCurrentSongPosition()!!)?.let{song->
                             musicPlayerService?.startPlayer(song)
                             btnMainPlay.setIconResource(coreRes.drawable.ic_circle_pause)
                         }
@@ -500,13 +498,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             }
             btnMainPrevious.setOnClickListener {
                 checkCoverViewStyle()
-                if (currentSelectedPosition > 0) {
+                if (musicPlayerService?.getCurrentSongPosition()!! > 0) {
                        musicPlayerService?.prevSong()
                 }
             }
             btnMainNext.setOnClickListener {
                 checkCoverViewStyle()
-                if (currentSelectedPosition < ListPlayerFragment.musicListAdapter?.itemCount!! - 1) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < ListPlayerFragment.musicListAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
                     getSongOfList(0)?.let{song->
@@ -700,6 +698,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                         title = songMetadata!!.title,
                         artist = songMetadata!!.artist,
                         album = songMetadata!!.album,
+                        albumArt = songMetadata.albumArt,
                         duration = songMetadata.duration
                     )
                     mainViewModel.setCurrentTrack(newState)

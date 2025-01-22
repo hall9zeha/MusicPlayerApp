@@ -193,25 +193,6 @@ fun formatFileSize(bytes: Long): String {
         else -> "$bytes Bytes"
     }
 }
-fun fetchFileMetadata(pathFile:String):AudioMetadata?{
-    val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
-
-    metadata?.let{
-        val tag = metadata.tag
-        val nameFile=metadata.file.name.substringBeforeLast(".")
-
-        fun getTagField(fieldKey: FieldKey, defaultValue: String)=
-            try {
-                tag?.getFirst(fieldKey)?.takeIf { it.isNotEmpty() } ?: defaultValue
-            } catch (ex: Exception) {
-                defaultValue
-            }
-
-        val title = getTagField(FieldKey.TITLE, nameFile)
-        return AudioMetadata(title = title,)}
-    return null
-}
-
 fun getTimeOfSong(duration:Long):String{
     return String.format(
         Locale.ROOT,"::%02d:%02d",

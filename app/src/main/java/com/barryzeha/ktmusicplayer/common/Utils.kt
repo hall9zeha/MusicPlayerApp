@@ -63,7 +63,7 @@ const val NOTIFICATION_ID = 202405
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)
+    val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         channel.setAllowBubbles(false)
     }

@@ -89,7 +89,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var isUserSeeking=false
     private var userSelectPosition=0
     private var serviceConnection:ServiceConnection?=null
-    private  var currentSelectedPosition:Int =0
     private var currentMusicState = MusicState()
     private var song:SongEntity?=null
     private var musicPlayerService: MusicPlayerService?=null
@@ -114,7 +113,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bind = FragmentListPlayerBinding.bind(view)
-        currentSelectedPosition = mPrefs.currentIndexSong.toInt()
         setUpAdapter()
         setUpPlayListAdapters()
         setUpObservers()
@@ -274,7 +272,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
-            currentSelectedPosition = positionSelected
+            musicPlayerService?.setCurrentSongPosition(positionSelected)
             positionSelected?.let{
                 musicListAdapter?.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
             }
@@ -376,7 +374,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
-            ivCover.loadImage(musicState.albumArt)
+            val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
+            ivCover.loadImage(albumArt!!)
             seekbarControl.tvEndTime.text = createTime(musicState.duration).third
             seekbarControl.loadSeekBar.max = musicState.duration.toInt()
             seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
@@ -459,13 +458,13 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 }
             }
             bottomPlayerControls.btnPrevious.setOnClickListener {
-                if (currentSelectedPosition > 0) {
+                if (musicPlayerService?.getCurrentSongPosition()!! > 0) {
                         musicPlayerService?.prevSong()
                         prevOrNextClicked=true
                 }
             }
             bottomPlayerControls.btnNext.setOnClickListener {
-                if (currentSelectedPosition < musicListAdapter?.itemCount!! - 1) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < musicListAdapter?.itemCount!! - 1) {
                        musicPlayerService?.nextSong()
                         prevOrNextClicked=true
                     }
@@ -817,6 +816,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                         title = songMetadata!!.title,
                         artist = songMetadata!!.artist,
                         album = songMetadata!!.album,
+                        albumArt = songMetadata.albumArt,
                         duration = songMetadata.duration
                     )
                     mainViewModel.saveStatePlaying(mPrefs.isPlaying)

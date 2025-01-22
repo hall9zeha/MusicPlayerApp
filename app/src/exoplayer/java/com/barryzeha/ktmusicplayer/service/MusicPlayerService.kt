@@ -879,6 +879,8 @@ class MusicPlayerService : Service(){
     fun getSongsList():List<SongEntity>{
         return songsList
     }
+    fun getCurrentSongPosition():Int = mPrefs.currentIndexSong.toInt()?:0
+    fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     fun setPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
     }
@@ -892,7 +894,6 @@ class MusicPlayerService : Service(){
         }
     }
     private fun setSongStateSaved(songState: SongStateWithDetail){
-
         val song=songState.songEntity
         songEntity = song
         // Set info currentSongEntity
@@ -901,7 +902,6 @@ class MusicPlayerService : Service(){
                 currentDuration = songState.songState.currentPosition,
                 latestPlayed = true
             )
-
         }
 
         // Al agregar todos los items de la lista al inicio, no necesitamos agregar uno nuevo,

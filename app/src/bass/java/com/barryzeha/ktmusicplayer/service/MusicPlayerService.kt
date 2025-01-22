@@ -779,6 +779,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun getSongsList():List<SongEntity>{
         return songsList
     }
+    fun getCurrentSongPosition():Int = mPrefs.currentIndexSong.toInt()?:0
+    fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
         if (mPrefs.isPlaying)play(songsList[indexOfSong])
         else setMusicForPlayer(songsList[indexOfSong], animDirection)
