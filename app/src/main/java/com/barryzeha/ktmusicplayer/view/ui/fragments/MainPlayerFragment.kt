@@ -688,43 +688,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         if(!coverViewClicked)checkCoverViewStyle()
         checkPlayerSongPreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
-        if(mPrefs.nextOrPrevFromNotify){
-            try {
-                val song = musicPlayerService?.getSongsList()?.find { mPrefs.idSong == it.id }
-                song?.let {
-                    val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
-                    val newState = MusicState(
-                        songPath = song.pathLocation.toString(),
-                        title = songMetadata!!.title,
-                        artist = songMetadata!!.artist,
-                        album = songMetadata!!.album,
-                        albumArt = songMetadata.albumArt,
-                        duration = songMetadata.duration
-                    )
-                    mainViewModel.setCurrentTrack(newState)
-                    mainViewModel.saveStatePlaying(mPrefs.isPlaying)
-                }
-            }catch(ex:Exception){}
-        }
-        mPrefs.nextOrPrevFromNotify=false
+        mainViewModel.reloadSongInfo()
         bind?.mainSeekBar?.max = currentMusicState.duration.toInt()
     }
     override fun onStop() {
         super.onStop()
         mPrefs.currentView = MAIN_FRAGMENT
-        if(currentMusicState.idSong>0) {
-            mainViewModel.saveSongState(
-                SongState(
-                    idSongState = 1,
-                    idSong = currentMusicState.idSong,
-                    songDuration = currentMusicState.duration,
-                    // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
-                    // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
-                    // por el momento
-                    currentPosition = mPrefs.currentPosition
-                )
-            )
-        }
+        mainViewModel.saveCurrentStateSong(currentMusicState)
     }
    companion object {
        var instance:MainPlayerFragment?=null

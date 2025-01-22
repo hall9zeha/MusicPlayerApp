@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
+import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
@@ -295,6 +296,46 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
     fun setIsSongTagEdited(songEntity:SongEntity){
         launch{
             _isSongTagEdited.value = songEntity
+        }
+    }
+    // Recargar la información de la pista
+    fun reloadSongInfo(){
+        launch {
+            if (mPrefs.controlFromNotify) {
+                try {
+                    val song = repository.fetchSongById(mPrefs.idSong)
+                    song?.let {
+                        val songMetadata = getSongMetadata(MyApp.context, song.pathLocation)
+                        val newState = MusicState(
+                            songPath = song.pathLocation.toString(),
+                            title = songMetadata!!.title,
+                            artist = songMetadata!!.artist,
+                            album = songMetadata!!.album,
+                            duration = songMetadata.duration
+                        )
+                        saveStatePlaying(mPrefs.isPlaying)
+                        setCurrentTrack(newState)
+                    }
+                } catch (ex: Exception) {
+                }
+            }
+            mPrefs.controlFromNotify = false
+        }
+    }
+    // Guardar el estado de la pista actual
+    fun saveCurrentStateSong(currentMusicState: MusicState){
+        if(currentMusicState.idSong>0) {
+            saveSongState(
+                SongState(
+                    idSongState = 1,
+                    idSong = currentMusicState.idSong,
+                    songDuration = currentMusicState.duration,
+                    // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
+                    // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
+                    // por el momento
+                    currentPosition = mPrefs.currentPosition
+                )
+            )
         }
     }
     override fun onCleared() {

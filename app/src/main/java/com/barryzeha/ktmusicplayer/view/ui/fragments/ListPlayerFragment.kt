@@ -66,7 +66,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
-
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
@@ -806,41 +805,11 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         checkPlayerSongModePreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
-        if(mPrefs.controlFromNotify){
-            try {
-                val song = getSongOfAdapter(mPrefs.idSong)
-                song?.let {
-                    val songMetadata = getSongMetadata(requireContext(), song.pathLocation)
-                    val newState = MusicState(
-                        songPath = song.pathLocation.toString(),
-                        title = songMetadata!!.title,
-                        artist = songMetadata!!.artist,
-                        album = songMetadata!!.album,
-                        albumArt = songMetadata.albumArt,
-                        duration = songMetadata.duration
-                    )
-                    mainViewModel.saveStatePlaying(mPrefs.isPlaying)
-                    mainViewModel.setCurrentTrack(newState)
-                }
-            }catch(ex:Exception){}
-        }
-        mPrefs.controlFromNotify=false
+        mainViewModel.reloadSongInfo()
     }
     override fun onStop() {
         mPrefs.currentView = MAIN_FRAGMENT
-        if(currentMusicState.idSong>0) {
-            mainViewModel.saveSongState(
-                SongState(
-                    idSongState = 1,
-                    idSong = currentMusicState.idSong,
-                    songDuration = currentMusicState.duration,
-                    // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
-                    // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
-                    // por el momento
-                    currentPosition = mPrefs.currentPosition
-                )
-            )
-        }
+        mainViewModel.saveCurrentStateSong(currentMusicState)
         super.onStop()
     }
      companion object {
