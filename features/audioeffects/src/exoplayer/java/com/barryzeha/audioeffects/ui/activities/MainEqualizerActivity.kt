@@ -36,6 +36,7 @@ import com.barryzeha.audioeffects.common.getEqualizerBandPreConfig
 import com.barryzeha.audioeffects.databinding.ActivityMainEqualizerBinding
 import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
+import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.mColorList
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar

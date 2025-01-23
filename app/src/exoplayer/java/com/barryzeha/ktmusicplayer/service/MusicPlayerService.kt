@@ -38,6 +38,7 @@ import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.SongAction
@@ -466,7 +467,7 @@ class MusicPlayerService : Service(){
                 .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
                 .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
                 .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, getBitmap(this,newState.songPath, isForNotify = true))
                 .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                 .build()
 
@@ -509,7 +510,7 @@ class MusicPlayerService : Service(){
                     .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
                     .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
                     .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, getBitmap(this,newState.songPath, isForNotify = true))
                     .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                     .build()
 
@@ -936,7 +937,7 @@ class MusicPlayerService : Service(){
             title = songMetadata.title,
             artist = songMetadata.artist,
             album = songMetadata.album,
-            albumArt = songMetadata.albumArt,
+            //albumArt = songMetadata.albumArt,
             duration = songMetadata.duration,
             songPath = songPath,
             latestPlayed = false
