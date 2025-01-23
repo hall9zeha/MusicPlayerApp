@@ -38,6 +38,8 @@ import com.barryzeha.core.common.PREVIOUS
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
+import com.barryzeha.core.common.getBiteArrayOfImageEmbedded
+import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.ServiceSongListener
@@ -474,7 +476,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
                 .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
                 .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART,  getBitmap(this,newState.songPath, isForNotify = true))
                 .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                 .build()
             mediaSession.setPlaybackState(playBackState)
@@ -522,7 +524,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
                         .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
                         .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, newState.albumArt)
+                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, getBitmap(this,newState.songPath, isForNotify = true))
                         .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                         .build()
 
@@ -548,7 +550,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 )
                 }
             }
-
     }
    private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {
@@ -838,7 +839,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             title = songMetadata.title,
             artist = songMetadata.artist,
             album = songMetadata.album,
-            albumArt = songMetadata.albumArt,
+            //albumArt = songMetadata.albumArt,
             duration = songMetadata.duration,
             songPath = songPath,
             latestPlayed = false

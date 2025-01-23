@@ -215,12 +215,18 @@ fun createTime(duration: Long): Triple<Int,Int,String> {
     val formattedDuration = String.format("%02d:%02d", minutes, seconds)
     return Triple(minutes.toInt(),seconds.toInt(),formattedDuration)
 }
-
+fun getBiteArrayOfImageEmbedded(pathFile: String?):ByteArray?{
+    return if(!pathFile.isNullOrEmpty()){
+        mmr.setDataSource(pathFile)
+        mmr.embeddedPicture
+    }else{
+        null
+    }
+}
 fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
         val metadata=fetchFileMetadata(context,path)
-        mmr.setDataSource(path)
-        val bitmap = getBitmap(context,mmr.embeddedPicture,isForNotify)!!
+        val bitmap = getBitmap(context,path,isForNotify)!!
         metadata?.let {
             return MusicState(
                 title = metadata?.title!!,
@@ -238,13 +244,16 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
         albumArt = BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
         )
 }
-fun getBitmap(context: Context,byteArray:ByteArray?,isForNotify: Boolean=false):Bitmap?{
-    return byteArray?.let {
-        val originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-        if (isForNotify) scaleBitmap(originalBitmap, 156, 156)
-        else originalBitmap
+fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitmap?{
+    return pathFile?.let {
+        val byteArrayImage = getBiteArrayOfImageEmbedded(pathFile)
+        byteArrayImage?.let {
+            val originalBitmap = BitmapFactory.decodeByteArray(byteArrayImage, 0, byteArrayImage.size)
+            if (isForNotify) scaleBitmap(originalBitmap, 156, 156)
+            else originalBitmap
+        }
     }?:run{
-       BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
+        BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
     }
 }
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {

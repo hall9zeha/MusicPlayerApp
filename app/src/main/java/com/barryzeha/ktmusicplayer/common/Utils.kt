@@ -9,9 +9,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
 import android.os.Build
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +35,8 @@ import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SettingsKeys
+import com.barryzeha.core.common.getBiteArrayOfImageEmbedded
+import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.showDialog
 import com.barryzeha.core.model.SongAction
@@ -49,6 +53,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.log
 
 
 /**
@@ -60,6 +65,7 @@ import kotlinx.coroutines.withContext
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 const val NOTIFICATION_ID = 202405
+private  var _idSong:Long?=null
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -75,7 +81,7 @@ fun createNotificationChannel(context: Context){
 
 @Suppress("Deprecation")
 fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyle, state: MusicState): Notification {
-
+    val albumCoverArt:Bitmap = getBitmap(context,state.songPath,isForNotify = true)!!
     val pMainIntent = PendingIntent.getActivity(
         context,
         123,
@@ -153,7 +159,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     return builder
         .setStyle(mediaStyle)
         .setSmallIcon(R.drawable.ic_play)
-        .setLargeIcon(state.albumArt)
+        .setLargeIcon(albumCoverArt)
         .setOnlyAlertOnce(true)
         .setOngoing(true)
         .setContentIntent(pMainIntent)
