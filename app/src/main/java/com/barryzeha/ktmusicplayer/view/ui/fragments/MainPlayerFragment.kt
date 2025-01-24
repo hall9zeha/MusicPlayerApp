@@ -26,6 +26,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
@@ -429,11 +430,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     if (!coverViewClicked) {
                         showLyricView(true)
                         loadLyric()
-                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
+                        setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView, lrcView)
                         coverViewClicked = true
                     } else {
                         showLyricView(false)
-                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
+                        setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView, lrcView)
                         coverViewClicked = false
                     }
                 }
@@ -441,9 +442,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             ivMusicCover.setOnClickListener{
                 lrcView?.let {
                     if (!coverViewClicked) {
+                        setRotateCoverViewAnimator(cardCoverView, lrcView)
                         showLyricView(true)
                         loadLyric()
-                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
                         coverViewClicked = true
                     }
                 }
@@ -453,7 +454,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     if (!coverViewClicked) {
                         showLyricView(true)
                         loadLyric()
-                        setRotateCoverViewAnimator(ivMusicCover, lrcView)
+                        setRotateCoverViewAnimator(ivDiscMusicCover, lrcView)
                         coverViewClicked = true
                     }
                 }
@@ -461,13 +462,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             //Cuando lrcView esté lleno podrá usarse el evento click de la vista
             lrcView?.setOnClickListener{
                 showLyricView(false)
-                setRotateCoverViewAnimator(ivMusicCover,lrcView)
+                setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
                 coverViewClicked=false
             }
             //Cuando lrcView  esté vacío solo el evento click en rootView funcionará
             contentCover.setOnClickListener{
                 showLyricView(false)
-                setRotateCoverViewAnimator(ivMusicCover,lrcView)
+                setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
                 coverViewClicked=false
             }
 

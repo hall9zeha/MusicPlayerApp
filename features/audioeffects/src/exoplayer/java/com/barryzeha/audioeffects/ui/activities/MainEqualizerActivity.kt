@@ -49,7 +49,6 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     @Inject
     lateinit var mPrefs:EffectsPreferences
-
     private var numberFrequencyBands: Short?=null
     private var lowerEqualizerBandLevel: Short?=null
     private var upperEqualizerBandLevel: Short?=null
@@ -84,7 +83,6 @@ class MainEqualizerActivity : AppCompatActivity() {
         sessionId?.let{
            EqualizerManager.initEqualizer(it)
         }
-
         // setup FX
 
         bind.main.setPadding(0, 0, 0, 20)
@@ -223,8 +221,6 @@ class MainEqualizerActivity : AppCompatActivity() {
 
             seekBar.layoutParams = layoutParams
             seekBar.max = (upperEqualizerBandLevel!!) - (lowerEqualizerBandLevel!!)
-
-
             //            set the progress for this seekBar
             val seek_id = i.toInt()
             val progressBar: Int = mPrefs.getSeekBandValue(effectType,seek_id)
@@ -258,7 +254,6 @@ class MainEqualizerActivity : AppCompatActivity() {
                     //properties.edit_preferences.putInt("position", 0).commit()
                 }
             })
-
             val equalizer = ContextCompat.getDrawable(this,coreRes.drawable.ic_square_minus)
 
             seekBar.thumb = equalizer
@@ -288,7 +283,6 @@ class MainEqualizerActivity : AppCompatActivity() {
                     putExtra(MUSIC_PLAYER_SESSION,sessionId)
                 }
         }
-
         override fun parseResult(resultCode: Int, intent: Intent?) {
             // Por ahora no debe retornar nada
         }
