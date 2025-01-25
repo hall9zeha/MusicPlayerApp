@@ -92,7 +92,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var song:SongEntity?=null
     private var musicPlayerService: MusicPlayerService?=null
     private var isFavorite:Boolean=false
-    private var isFiltering:Boolean=false
+
     private var prevOrNextClicked:Boolean =false
     private var idSongForSendToPlaylist:Long =0
     // Forward and rewind
@@ -112,6 +112,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bind = FragmentListPlayerBinding.bind(view)
+        instance = this
         setUpAdapter()
         setUpPlayListAdapters()
         setUpObservers()
@@ -631,7 +632,18 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 showKeyboard(true, edtSearch)
             }else {
                 visibleOrGoneViews(true)
-                edtSearch?.setText("")
+                edtSearch.setText("")
+                btnSearch.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                isFiltering = false
+                showKeyboard(false, edtSearch)
+            }
+        }
+    }
+    fun hideSearchBar()=with(bind){
+        this?.let {
+            if (isFiltering) {
+                visibleOrGoneViews(true)
+                edtSearch.setText("")
                 btnSearch.backgroundTintList = changeBackgroundColor(requireContext(),false)
                 isFiltering = false
                 showKeyboard(false, edtSearch)
@@ -813,17 +825,20 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         super.onStop()
     }
      companion object {
-        var musicListAdapter:MusicListAdapter?=null
-        lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-        var btmSheetIsExpanded:Boolean = false
-        @JvmStatic
-        fun newInstance(param1: Int, param2: String) =
-            ListPlayerFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+         var instance: ListPlayerFragment? = null
+         var musicListAdapter: MusicListAdapter? = null
+         lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+         var isFiltering: Boolean = false
+         var btmSheetIsExpanded: Boolean = false
+
+         @JvmStatic
+         fun newInstance(param1: Int, param2: String) =
+             ListPlayerFragment().apply {
+                 arguments = Bundle().apply {
+                     putInt(ARG_PARAM1, param1)
+                     putString(ARG_PARAM2, param2)
+                 }
+             }
     }
 }
 

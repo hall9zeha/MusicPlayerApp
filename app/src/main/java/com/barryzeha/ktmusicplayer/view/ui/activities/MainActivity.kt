@@ -302,7 +302,11 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     override fun onBackPressed() {
         if(bind.mainDrawerLayout.isOpen){
             bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
-        }else{
+        }
+        else if(ListPlayerFragment.isFiltering){
+            ListPlayerFragment.instance?.hideSearchBar()
+        }
+        else{
             checkedSelectedMenuDrawerItems()
             if(mPrefs.currentView == SONG_LIST_FRAGMENT){
                 if (ListPlayerFragment.btmSheetIsExpanded)ListPlayerFragment.bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
