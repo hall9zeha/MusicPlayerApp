@@ -166,7 +166,7 @@
         android:layout_height="?attr/actionBarSize"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/seekbarControl">
+        app:layout_constraintBottom_toTopOf="@id/bottomPlayerControls">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAdd"
             android:layout_width="wrap_content"
@@ -288,14 +288,6 @@
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <include layout="@layout/seekbar_layout"
-        android:id="@+id/seekbarControl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottomPlayerControls"/>
-
     <include layout="@layout/small_player_controls"
         android:id="@+id/bottomPlayerControls"
         android:layout_width="match_parent"

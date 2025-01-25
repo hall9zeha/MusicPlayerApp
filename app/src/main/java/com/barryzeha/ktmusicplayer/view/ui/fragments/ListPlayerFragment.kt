@@ -376,9 +376,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             currentMusicState = musicState
             val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
             ivCover.loadImage(albumArt!!)
-            seekbarControl.tvEndTime.text = createTime(musicState.duration).third
-            seekbarControl.loadSeekBar.max = musicState.duration.toInt()
-            seekbarControl.tvInitTime.text = createTime(musicState.currentDuration).third
+            bottomPlayerControls.tvEndTime.text = createTime(musicState.duration).third
+            bottomPlayerControls.loadSeekBar.max = musicState.duration.toInt()
+            bottomPlayerControls.tvInitTime.text = createTime(musicState.currentDuration).third
 
             musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
             mainViewModel.checkIfIsFavorite(musicState.idSong)
@@ -389,10 +389,10 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun updateUI(musicState: MusicState){
         currentMusicState = musicState
         mPrefs.currentPosition = musicState.currentDuration
-        bind?.seekbarControl?.loadSeekBar?.max = musicState.duration.toInt()
-        bind?.seekbarControl?.tvEndTime?.text = createTime(musicState.duration).third
-        bind?.seekbarControl?.tvInitTime?.text = createTime(musicState.currentDuration).third
-        bind?.seekbarControl?.loadSeekBar?.progress = musicState.currentDuration.toInt()
+        bind?.bottomPlayerControls?.loadSeekBar?.max = musicState.duration.toInt()
+        bind?.bottomPlayerControls?.tvEndTime?.text = createTime(musicState.duration).third
+        bind?.bottomPlayerControls?.tvInitTime?.text = createTime(musicState.currentDuration).third
+        bind?.bottomPlayerControls?.loadSeekBar?.progress = musicState.currentDuration.toInt()
         updateService()
     }
     private fun setUpListeners()= with(bind){
@@ -482,7 +482,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 fastForwardOrRewind(false)
                 true
             }
-            seekbarControl.loadSeekBar.setOnSeekBarChangeListener(object :
+            bottomPlayerControls.loadSeekBar.setOnSeekBarChangeListener(object :
                 SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(
                     seekBar: SeekBar?,
@@ -490,7 +490,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     fromUser: Boolean
                 ) {
                     if (fromUser) {
-                        seekbarControl.tvInitTime.text = createTime(progress.toLong()).third
+                        bottomPlayerControls.tvInitTime.text = createTime(progress.toLong()).third
                         userSelectPosition = progress
                     }
                 }
@@ -500,7 +500,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     isUserSeeking = false
                     musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
-                    seekbarControl.loadSeekBar.progress = userSelectPosition
+                    bottomPlayerControls.loadSeekBar.progress = userSelectPosition
                 }
             })
             bottomPlayerControls.btnRepeat.setOnClickListener {
@@ -764,7 +764,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
-        bind?.seekbarControl?.tvNumberSong?.text =
+        bind?.bottomPlayerControls?.tvNumberSong?.text =
             String.format("#%s/%s", if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0, (musicListAdapter?.getSongItemCount()!! + itemCount))
     }
     private fun updateService(){

@@ -4,6 +4,50 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <SeekBar
+        android:id="@+id/loadSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:progress="50"
+        android:thumb="@drawable/seekbar_thumb"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+        android:id="@+id/tvInitTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="0:20"
+        android:textSize="11sp"
+        app:layout_constraintStart_toStartOf="@id/loadSeekBar"
+        app:layout_constraintTop_toBottomOf="@id/loadSeekBar"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp"/>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvNumberSong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="#12/125"
+        android:textSize="11sp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toEndOf="@id/tvInitTime"
+        app:layout_constraintEnd_toStartOf="@id/tvEndTime"
+        app:layout_constraintTop_toBottomOf="@id/loadSeekBar"/>
+    <TextView
+        android:id="@+id/tvEndTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="3:20"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="@id/loadSeekBar"
+        app:layout_constraintTop_toBottomOf="@id/loadSeekBar"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"/>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnShuffle"
         android:layout_width="wrap_content"
@@ -16,7 +60,7 @@
         android:clickable="true"
         android:focusable="true"
         style="@style/Widget.Material3.Button.IconButton"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnPlay"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnPrevious"
 
@@ -54,7 +98,7 @@
         style="@style/Widget.Material3.Button.IconButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvNumberSong"
         app:layout_constraintBottom_toBottomOf="parent"
         />
 
@@ -88,7 +132,7 @@
         android:clickable="true"
         android:focusable="true"
         style="@style/Widget.Material3.Button.IconButton"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnPlay"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/btnNext"
 
