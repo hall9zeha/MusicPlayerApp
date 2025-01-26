@@ -166,7 +166,7 @@
         android:layout_height="?attr/actionBarSize"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottomPlayerControls">
+        app:layout_constraintBottom_toTopOf="@id/miniPlayerControls">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAdd"
             android:layout_width="wrap_content"
@@ -289,7 +289,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
     <include layout="@layout/small_player_controls"
-        android:id="@+id/bottomPlayerControls"
+        android:id="@+id/miniPlayerControls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"

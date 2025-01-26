@@ -176,7 +176,7 @@
         app:layout_constraintTop_toBottomOf="@id/ivCover"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideLine"
-        app:layout_constraintBottom_toTopOf="@id/bottomPlayerControls">
+        app:layout_constraintBottom_toTopOf="@id/miniPlayerControls">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAdd"
             android:layout_width="wrap_content"
@@ -268,7 +268,7 @@
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
     <include layout="@layout/small_player_controls"
-        android:id="@+id/bottomPlayerControls"
+        android:id="@+id/miniPlayerControls"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
