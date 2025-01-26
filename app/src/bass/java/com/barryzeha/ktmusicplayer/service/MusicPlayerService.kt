@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_CONFIGURATION_CHANGED
 import android.content.IntentFilter
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -20,9 +21,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.telephony.PhoneStateListener
+import android.telephony.PhoneStateListener.LISTEN_CALL_STATE
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import com.barryzeha.audioeffects.common.EffectsPreferences
@@ -113,15 +118,17 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
     private var firstCallingToSongState:Boolean = true
+    // Thelephony manager para controlar la reproducción en las llamadas
+    private var phoneCallStateReceiver:BroadcastReceiver?=null
+    private var telephonyManager: TelephonyManager?=null
 
 
-    @SuppressLint("ForegroundServiceType")
+
     override fun onCreate() {
         super.onCreate()
 
         bassManager = BassManager()
         bassManager?.getInstance(this)
-
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mPrefs.firstExecution=true
@@ -131,6 +138,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         mediaSession.setCallback(mediaSessionCallback())
         setUpRepository()
         setUpHeadsetAndBluetoothReceiver()
+
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
         headsetReceiver = object:BroadcastReceiver(){
@@ -223,6 +231,28 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         }
         registerReceiver(bluetoothReceiver,bluetoothFilter)
+    }
+
+    //TODO implementar control de reproducción al recibir llamadas
+    fun setupPhoneStateReceiver(){
+        Log.d("PHONE_MANAGER", "IDLE")
+        phoneCallStateReceiver = object: BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                telephonyManager = context?.getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+            }
+        }
+        val phoneStateListener = object: PhoneStateListener(){
+            override fun onCallStateChanged(state: Int, phoneNumber: String?) {
+                super.onCallStateChanged(state, phoneNumber)
+                when (state) {
+                    TelephonyManager.CALL_STATE_IDLE -> Log.d("PHONE_MANAGER", "IDLE")
+                    TelephonyManager.CALL_STATE_OFFHOOK -> Log.d("PHONE_MANAGER", "OFF-HOOK")
+                    TelephonyManager.CALL_STATE_RINGING -> Log.d("PHONE_MANAGER", "RINGING")
+                }
+            }
+        }
+        telephonyManager?.listen(phoneStateListener, LISTEN_CALL_STATE)
+        registerReceiver(phoneCallStateReceiver, IntentFilter(ACTION_CONFIGURATION_CHANGED))
     }
 
     @OptIn(UnstableApi::class)

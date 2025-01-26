@@ -13,6 +13,7 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
@@ -22,6 +23,8 @@ import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.ktmusicplayer.BuildConfig
 import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainPermissionsBinding
+import com.barryzeha.ktmusicplayer.service.MusicPlayerService
+import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -33,16 +36,22 @@ import kotlinx.coroutines.launch
 class MainPermissionsActivity : AppCompatActivity() {
     private lateinit var launcherPermission: ActivityResultLauncher<String>
     private lateinit var bind:ActivityMainPermissionsBinding
+    private val mainViewModel:MainViewModel by viewModels()
+    private  var musicPlayerService:MusicPlayerService?=null
+
     private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_MEDIA_AUDIO,
             // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
             // cuando el servicio bluetooth del móvil esté activo.
-            Manifest.permission.BLUETOOTH_CONNECT)
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.READ_PHONE_STATE
+        )
     }else{
         mutableListOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
     private val permissionStatusMap = mutableMapOf<String, Boolean>()
@@ -64,6 +73,9 @@ class MainPermissionsActivity : AppCompatActivity() {
         setupListeners()
         initCheckPermission()
         activityResultForPermission()
+        mainViewModel.serviceInstance.observe(this){(_, mServiceInstance)->
+            musicPlayerService = mServiceInstance
+        }
     }
     private fun activityResultForPermission(){
         launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
@@ -98,7 +110,7 @@ class MainPermissionsActivity : AppCompatActivity() {
         }
     }
     private fun checkPermissions(){
-        checkPermissions(this,permissionList){isGranted,permissions->
+        checkPermissions(this,permissionList){isGranted,permission->
             if(isGranted){
                 bind.btnFinish.visibility = View.VISIBLE
             }else{
@@ -131,7 +143,12 @@ class MainPermissionsActivity : AppCompatActivity() {
                 bind.btnReadStoragePermission.setIconResource(coreRes.drawable.ic_check_rounded)
                 bind.btnReadStoragePermission.iconGravity= MaterialButton.ICON_GRAVITY_END
 
+                bind.btnPhonePermission.text=getString(coreRes.string.granted);bind.btnReadStoragePermission.isClickable=false
+                bind.btnPhonePermission.setIconResource(coreRes.drawable.ic_check_rounded)
+                bind.btnPhonePermission.iconGravity= MaterialButton.ICON_GRAVITY_END
+
                 bind.btnFinish.visibility = View.VISIBLE
+
             }else{
                 permissions.forEach {(permission, granted)->
                     if(!granted){
@@ -141,6 +158,10 @@ class MainPermissionsActivity : AppCompatActivity() {
                             permissionStatusMap[permission]=false
                             launcherPermission.launch(permission)
                         }
+                    }
+                    if(permission==Manifest.permission.READ_PHONE_STATE && granted){
+                        Log.d("PHONE_MANAGER", "IDLE")
+                        musicPlayerService?.setupPhoneStateReceiver()
                     }
                 }
             }

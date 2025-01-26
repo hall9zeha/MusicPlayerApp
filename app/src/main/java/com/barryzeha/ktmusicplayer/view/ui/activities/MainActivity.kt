@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
@@ -74,14 +75,17 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_PHONE_STATE,
             // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
             // cuando el servicio bluetooth del móvil esté activo.
             Manifest.permission.BLUETOOTH_CONNECT)
     }else{
         mutableListOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(getThemeResValue())
@@ -102,12 +106,18 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         initCheckPermission()
         //mOnBackPressedDispatcher()
     }
+
+
     private fun initCheckPermission(){
         checkPermissions(this,permissionList){isGranted,_->
             val activity:Intent
             if(!isGranted){
                 activity=Intent(this,MainPermissionsActivity::class.java)
                 startActivity(activity)
+            }else{
+                //TODO mejorar la implementación
+                Log.d("PHONE_MANAGER", (musicService==null).toString())
+                musicService?.setupPhoneStateReceiver()
             }
         }
     }
