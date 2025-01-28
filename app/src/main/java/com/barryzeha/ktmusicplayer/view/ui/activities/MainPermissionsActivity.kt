@@ -151,13 +151,17 @@ class MainPermissionsActivity : AppCompatActivity() {
 
             }else{
                 permissions.forEach {(permission, granted)->
+                    val button:MaterialButton=bind.root.findViewWithTag<Button>(permission) as MaterialButton
                     if(!granted){
-                        val button=bind.root.findViewWithTag<Button>(permission)
                         button.text=getString(coreRes.string.grant)
                         button.setOnClickListener {
                             permissionStatusMap[permission]=false
                             launcherPermission.launch(permission)
                         }
+                    }else{
+                        button.text=getString(coreRes.string.granted);button.isClickable=false
+                        button.setIconResource(coreRes.drawable.ic_check_rounded)
+                        button.iconGravity= MaterialButton.ICON_GRAVITY_END
                     }
                     if(permission==Manifest.permission.READ_PHONE_STATE && granted){
                         Log.d("PHONE_MANAGER", "IDLE")

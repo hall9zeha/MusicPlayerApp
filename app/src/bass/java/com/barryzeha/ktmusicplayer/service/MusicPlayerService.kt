@@ -673,41 +673,48 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     private fun play(song:SongEntity?){
             if (songsList.isNotEmpty()) {
-                song?.let {
-                    songEntity = it
-                    currentSongPosition = 0
-                    bassManager?.streamCreateFile(song)
-                    findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
-                    executeOnceTime = true
-                } ?: run {
-                    bassManager?.streamCreateFile(songEntity)
-                    executeOnceTime = false
-                }
-                if (bassManager?.getActiveChannel() != 0) {
-                    bassManager?.channelPlay(currentSongPosition)
-                    bassManager?.startCheckingPlayback()
+                //try {
+                    song?.let {
+                        songEntity = it
+                        currentSongPosition = 0
+                        bassManager?.streamCreateFile(song)
+                        findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
+                        executeOnceTime = true
+                    } ?: run {
+                        bassManager?.streamCreateFile(songEntity)
+                        executeOnceTime = false
+                    }
+                    if (bassManager?.getActiveChannel() != 0) {
+                        bassManager?.channelPlay(currentSongPosition)
+                        bassManager?.startCheckingPlayback()
 
-                    setPlayingState(true)
-                    mPrefs.idSong = songEntity.id
-                    currentMusicState = fetchSong(songEntity)?.copy(
-                        isPlaying = playingState(),
-                        idSong = songEntity.id,
-                        latestPlayed = false,
-                        nextOrPrev = nextOrPrevAnimValue
-                    )!!
+                        setPlayingState(true)
+                        mPrefs.idSong = songEntity.id
+                        currentMusicState = fetchSong(songEntity)?.copy(
+                            isPlaying = playingState(),
+                            idSong = songEntity.id,
+                            latestPlayed = false,
+                            nextOrPrev = nextOrPrevAnimValue
+                        )!!
 
-                    EqualizerManager.applyEqualizer(bassManager?.getActiveChannel()!!, effectsPrefs)
+                        EqualizerManager.applyEqualizer(
+                            bassManager?.getActiveChannel()!!,
+                            effectsPrefs
+                        )
 
-                } else {
-                    _activity?.showSnackBar(
-                        _activity?.findViewById(android.R.id.content)!!,
-                        "Can't player this file, will be deleted or error format",
-                        Snackbar.LENGTH_LONG
-                    )
-                }
-                song?.let {
-                    if (executeOnceTime) _songController?.currentTrack(currentMusicState)
-                }
+                    } else {
+                        _activity?.showSnackBar(
+                            _activity?.findViewById(android.R.id.content)!!,
+                            "Can't player this file, will be deleted or error format",
+                            Snackbar.LENGTH_LONG
+                        )
+                    }
+                    song?.let {
+                        if (executeOnceTime) _songController?.currentTrack(currentMusicState)
+                    }
+               /* }catch(ex:Exception){
+                    Log.e("PLAY-ERROR", ex.message.toString() )
+                }*/
             }
     }
     fun pausePlayer(){
