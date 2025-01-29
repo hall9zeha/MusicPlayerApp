@@ -20,6 +20,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.telephony.PhoneStateListener
+import android.telephony.PhoneStateListener.LISTEN_CALL_STATE
+import android.telephony.TelephonyCallback
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
@@ -117,6 +121,11 @@ class MusicPlayerService : Service(){
     private var endAbLopPosition:Long=0
     val handler = Handler(Looper.getMainLooper())
     var runnable: Runnable? = null
+
+    // Thelephony manager para controlar la reproducción en las llamadas
+    private var phoneCallStateReceiver:BroadcastReceiver?=null
+    private var telephonyManager: TelephonyManager?=null
+    private var isPlayingBeforeCallPhone:Boolean = false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -228,6 +237,65 @@ class MusicPlayerService : Service(){
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
 
+    fun setupPhoneStateReceiver(){
+        telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+
+        phoneCallStateReceiver = object: BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.S){
+                    telephonyManager?.registerTelephonyCallback(context?.mainExecutor!!,object:
+                        TelephonyCallback(), TelephonyCallback.CallStateListener{
+                        override fun onCallStateChanged(state: Int) {
+                            when (state) {
+                                TelephonyManager.CALL_STATE_IDLE -> {
+                                    if(!playingState() && isPlayingBeforeCallPhone){
+                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        else _songController?.play()
+                                        isPlayingBeforeCallPhone = false
+                                    }
+                                }
+                                TelephonyManager.CALL_STATE_OFFHOOK -> {
+                                }
+                                TelephonyManager.CALL_STATE_RINGING -> {
+                                    if(playingState()){
+                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        else _songController?.pause()
+                                        isPlayingBeforeCallPhone = true
+
+                                    }
+                                }
+                            }
+                        }
+                    })
+                }else {
+                    val phoneStateListener = object : PhoneStateListener() {
+                        override fun onCallStateChanged(state: Int, phoneNumber: String?) {
+                            super.onCallStateChanged(state, phoneNumber)
+                            when (state) {
+                                TelephonyManager.CALL_STATE_IDLE -> {
+                                    if(!playingState() && isPlayingBeforeCallPhone){
+                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        else _songController?.play()
+                                        isPlayingBeforeCallPhone = false
+                                    }
+                                }
+                                TelephonyManager.CALL_STATE_OFFHOOK -> Log.d("PHONE_MANAGER","OFF-HOOK")
+                                TelephonyManager.CALL_STATE_RINGING -> {
+                                    if(playingState()){
+                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        else _songController?.pause()
+                                        isPlayingBeforeCallPhone = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    telephonyManager?.listen(phoneStateListener, LISTEN_CALL_STATE)
+                }
+            }
+        }
+        registerReceiver(phoneCallStateReceiver, IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED))
+    }
     private fun mediaSessionCallback():MediaSession.Callback{
         return object:MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -250,7 +318,6 @@ class MusicPlayerService : Service(){
                 super.onSeekTo(pos)
                 exoPlayer.seekTo(pos)
             }
-
             override fun onPause() {
                 super.onPause()
                 _songController?.pause()
@@ -261,7 +328,6 @@ class MusicPlayerService : Service(){
                     setPlayingState(exoPlayer.isPlaying)
                 }
             }
-
             override fun onPlay() {
                 super.onPlay()
                 _songController?.play()
@@ -273,19 +339,16 @@ class MusicPlayerService : Service(){
                     setPlayingState(exoPlayer.isPlaying)
                 }
             }
-
             override fun onSkipToNext() {
                 super.onSkipToNext()
                 _songController?.next()
                 nextOrPrevTRack(mPrefs.currentIndexSong.toInt() +1)
             }
-
             override fun onSkipToPrevious() {
                 super.onSkipToPrevious()
                 _songController?.previous()
                 nextOrPrevTRack(mPrefs.currentIndexSong.toInt() -1)
             }
-
             override fun onStop() {
                 super.onStop()
             }
@@ -295,7 +358,6 @@ class MusicPlayerService : Service(){
                     exoPlayer.stop()
                     exoPlayer.release()
                     songHandler.removeCallbacks(songRunnable)
-
                     // Remove notification of foreground service process
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
@@ -305,7 +367,6 @@ class MusicPlayerService : Service(){
                     exitProcess(0)
                 }
             }
-
         }
     }
     private fun setUpEqualizer(sessionId:Int){
@@ -320,15 +381,10 @@ class MusicPlayerService : Service(){
                 )
                 listOfBands.forEachIndexed { index, value ->
                     EqualizerManager.setBand(index.toShort(),value)
-
                 }
             }
         }
-        else{
-            EqualizerManager.setEnabled(false)
-
-        }
-
+        else{ EqualizerManager.setEnabled(false)}
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -771,6 +827,13 @@ class MusicPlayerService : Service(){
     }
     fun unregisterController(){
         _songController=null
+    }
+    private fun checkIfPhoneIsLock():Boolean{
+        if(_songController==null){
+            mPrefs.nextOrPrevFromNotify=true
+            mPrefs.controlFromNotify = true
+        }
+        return _songController==null
     }
     fun playingState():Boolean{
         return mPrefs.isPlaying
