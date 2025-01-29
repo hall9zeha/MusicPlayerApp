@@ -246,7 +246,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             true
         }
     }
-
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicService = binder.getService()
@@ -254,6 +253,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         mainViewModel.setServiceInstance(this,musicService!!)
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
+        //musicService?.setupPhoneStateReceiver()
     }
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null

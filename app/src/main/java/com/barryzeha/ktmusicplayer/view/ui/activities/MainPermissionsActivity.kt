@@ -164,7 +164,8 @@ class MainPermissionsActivity : AppCompatActivity() {
                         button.iconGravity= MaterialButton.ICON_GRAVITY_END
                     }
                     if(permission==Manifest.permission.READ_PHONE_STATE && granted){
-                        Log.d("PHONE_MANAGER", "IDLE")
+                        // Inicializamos el receiver para detectar cuando se recibe una llamada telefónica
+                        // y pausar o continuar la reproducción
                         musicPlayerService?.setupPhoneStateReceiver()
                     }
                 }

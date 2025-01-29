@@ -23,6 +23,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.telephony.PhoneStateListener
 import android.telephony.PhoneStateListener.LISTEN_CALL_STATE
+import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
@@ -121,6 +122,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // Thelephony manager para controlar la reproducción en las llamadas
     private var phoneCallStateReceiver:BroadcastReceiver?=null
     private var telephonyManager: TelephonyManager?=null
+    private var isPlayingBeforeCallPhone:Boolean = false
 
 
 
@@ -233,26 +235,63 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
 
-    //TODO implementar control de reproducción al recibir llamadas
     fun setupPhoneStateReceiver(){
-        Log.d("PHONE_MANAGER", "IDLE")
+        telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+
         phoneCallStateReceiver = object: BroadcastReceiver(){
             override fun onReceive(context: Context?, intent: Intent?) {
-                telephonyManager = context?.getSystemService(TELEPHONY_SERVICE) as TelephonyManager
-            }
-        }
-        val phoneStateListener = object: PhoneStateListener(){
-            override fun onCallStateChanged(state: Int, phoneNumber: String?) {
-                super.onCallStateChanged(state, phoneNumber)
-                when (state) {
-                    TelephonyManager.CALL_STATE_IDLE -> Log.d("PHONE_MANAGER", "IDLE")
-                    TelephonyManager.CALL_STATE_OFFHOOK -> Log.d("PHONE_MANAGER", "OFF-HOOK")
-                    TelephonyManager.CALL_STATE_RINGING -> Log.d("PHONE_MANAGER", "RINGING")
+                if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.S){
+                    telephonyManager?.registerTelephonyCallback(context?.mainExecutor!!,object:TelephonyCallback(),TelephonyCallback.CallStateListener{
+                        override fun onCallStateChanged(state: Int) {
+                            when (state) {
+                                TelephonyManager.CALL_STATE_IDLE -> {
+                                    if(!playingState() && isPlayingBeforeCallPhone){
+                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        else _songController?.play()
+                                        isPlayingBeforeCallPhone = false
+                                    }
+                                }
+                                TelephonyManager.CALL_STATE_OFFHOOK -> {
+                                }
+                                TelephonyManager.CALL_STATE_RINGING -> {
+                                    if(playingState()){
+                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        else _songController?.pause()
+                                        isPlayingBeforeCallPhone = true
+
+                                    }
+                                }
+                            }
+                        }
+                    })
+                }else {
+                    val phoneStateListener = object : PhoneStateListener() {
+                        override fun onCallStateChanged(state: Int, phoneNumber: String?) {
+                            super.onCallStateChanged(state, phoneNumber)
+                            when (state) {
+                                TelephonyManager.CALL_STATE_IDLE -> {
+                                    if(!playingState() && isPlayingBeforeCallPhone){
+                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        else _songController?.play()
+                                        isPlayingBeforeCallPhone = false
+                                    }
+                                }
+                                TelephonyManager.CALL_STATE_OFFHOOK -> Log.d("PHONE_MANAGER","OFF-HOOK")
+                                TelephonyManager.CALL_STATE_RINGING -> {
+                                    if(playingState()){
+                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        else _songController?.pause()
+                                        isPlayingBeforeCallPhone = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    telephonyManager?.listen(phoneStateListener, LISTEN_CALL_STATE)
                 }
             }
         }
-        telephonyManager?.listen(phoneStateListener, LISTEN_CALL_STATE)
-        registerReceiver(phoneCallStateReceiver, IntentFilter(ACTION_CONFIGURATION_CHANGED))
+        registerReceiver(phoneCallStateReceiver, IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED))
     }
 
     @OptIn(UnstableApi::class)
@@ -534,7 +573,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(){
-
             currentMusicState?.let { newState ->
                 val updatePlaybackState = playBackState?.let {
                     PlaybackState.Builder(it)
