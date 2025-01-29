@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -21,6 +22,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     }else{
         mutableListOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            //Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 
@@ -106,27 +108,19 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         initCheckPermission()
         //mOnBackPressedDispatcher()
     }
-
-
     private fun initCheckPermission(){
         checkPermissions(this,permissionList){isGranted,_->
             val activity:Intent
             if(!isGranted){
                 activity=Intent(this,MainPermissionsActivity::class.java)
                 startActivity(activity)
-            }else{
-                //TODO mejorar la implementación
-                Log.d("PHONE_MANAGER", (musicService==null).toString())
-                musicService?.setupPhoneStateReceiver()
             }
         }
     }
     private fun setUpObservers(){
-
         mainViewModel.fetchSongState()
         mainViewModel.playLists.observe(this){lists->
             this.playlists = lists
-
         }
     }
     private fun setUpViewPager(){
@@ -253,7 +247,9 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         mainViewModel.setServiceInstance(this,musicService!!)
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
-        //musicService?.setupPhoneStateReceiver()
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
+             musicService?.setupPhoneStateReceiver()
+        }
     }
     override fun onServiceDisconnected(name: ComponentName?) {
          musicService = null
