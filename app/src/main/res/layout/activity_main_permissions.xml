@@ -183,7 +183,6 @@
                     android:layout_margin="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                    app:layout_constraintTop_toTopOf="parent"
-
                     />
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/tvNotifyPermission"
@@ -211,7 +210,6 @@
                     android:layout_marginTop="4dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvNotifyPermission"/>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.card.MaterialCardView
@@ -349,13 +347,12 @@
                     android:layout_margin="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-
                     />
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/tvPhonePermission"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/bluetoothPermissionMsg"
+                    android:text="@string/callStatePhonePermissionMsg"
                     tools:maxLines="4"
                     android:justificationMode="inter_word"
                     android:layout_marginStart="16dp"

@@ -47,5 +47,6 @@
     <string name="writeExternalStorageMsg">Se necesita habilitar el permiso de Write External storage para realizar la escritura de metadatos y etiquetas de audio cuando use el editor de etiquetas en sus canciones</string>
     <string name="notifyPermissionMsg">Se necesita habilitar el permiso de notificaciones para que la applicación pueda mostrarle la información de rerpoducción y  los controles multimedia en un mensaje con el cual podrá interactuar fácilmente</string>
     <string name="bluetoothPermissionMsg">Se necesita habilitar este permiso para que pueda controlar la aplicación a través de dispositivos bluetooth, como audífonos y bocinas</string>
+    <string name="callStatePhonePermissionMsg">Se necesita habilitar este permiso para pausar o reanudar el reproductor durante una llamada</string>
     <string name="welcomeToApp">Bienvenido a </string>
 </resources>
