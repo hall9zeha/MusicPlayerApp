@@ -3,6 +3,8 @@ package com.barryzeha.core.common
 
 
 import android.app.Activity
+import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
@@ -13,6 +15,8 @@ import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.util.Log
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
@@ -276,12 +280,12 @@ fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitm
                // mmr.release()
             }
         }?:run{
-           /* val parent = File(pathFile).parentFile
+            /*val parent = File(pathFile).parentFile
             for (fallback in FALLBACKS) {
                 val cover = File(parent, fallback)
                 if (cover.exists()) {
                     return try {
-                       BitmapFactory.decodeStream(FileInputStream(cover))
+                      BitmapFactory.decodeStream(FileInputStream(cover))
                     }catch(e:Exception){
                         Log.e("FIS_ERROR", e.message.toString())
                         BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
@@ -294,6 +298,7 @@ fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitm
        BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
     }
 }
+
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     val originalWidth = bitmap.width
     val originalHeight = bitmap.height

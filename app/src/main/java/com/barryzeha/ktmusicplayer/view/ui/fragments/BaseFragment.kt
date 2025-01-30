@@ -68,7 +68,6 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     override fun musicState(musicState: MusicState?) {}
     override fun currentTrack(musicState: MusicState?) {}
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
-
     }
     override fun onServiceDisconnected() {}
 
