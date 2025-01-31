@@ -5,35 +5,20 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-import android.util.Log
 import android.view.Menu
-import android.view.WindowInsetsController
-import android.view.WindowManager
-import android.widget.Toast
-import androidx.activity.SystemBarStyle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.get
 import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
-import com.barryzeha.core.common.AB_LOOP
-import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.MAIN_FRAGMENT
@@ -44,7 +29,6 @@ import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.PlaylistEntity
-import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -248,7 +232,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         serviceSongListener?.onServiceConnected(this,service)
         serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-             musicService?.setupPhoneStateReceiver()
+             musicService?.setupPhoneCallStateReceiver()
         }
     }
     override fun onServiceDisconnected(name: ComponentName?) {

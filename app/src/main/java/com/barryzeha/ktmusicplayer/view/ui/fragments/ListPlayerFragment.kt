@@ -229,11 +229,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             isPlaying=statePlay
-            if (statePlay) {
-                bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
-            }else{
-                bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
-            }
+            if (statePlay)bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
+            else bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
             //Removemos el estado de pantalla encendida permanentemente
@@ -249,7 +246,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 musicListAdapter?.addAll(result)
                 bind?.rvSongs?.post {
                     setNumberOfTrack()
-                    //TODO mejorar la obtención ddel número de pista/total pistas en el fragmento principal
+                    //TODO mejorar la obtención del número de pista/total pistas en el fragmento principal
                     MainPlayerFragment.instance?.setNumberOfTrack(mPrefs.idSong)
                 }
                 bind?.pbLoad?.visibility=View.GONE
@@ -295,7 +292,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 musicListAdapter?.removeAll()
                 mPrefs.clearIdSongInPrefs()
                 mPrefs.clearCurrentPosition()
-                musicPlayerService?.clearPlayList(false)
+                musicPlayerService?.clearPlayList(isSort=false)
                 setNumberOfTrack()
             }
         }

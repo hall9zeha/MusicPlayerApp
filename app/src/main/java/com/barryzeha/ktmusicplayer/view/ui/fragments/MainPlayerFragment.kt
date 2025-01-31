@@ -3,32 +3,20 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.ServiceConnection
 import android.content.SharedPreferences
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.viewpager.widget.ViewPager
-import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
@@ -45,8 +33,6 @@ import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
-import com.barryzeha.core.model.entities.SongState
-import com.barryzeha.core.util.BlurTransformation
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.animateButtonsAbLoop
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
@@ -57,7 +43,6 @@ import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.library.components.DiscCoverView
-import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +50,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.math.abs
 import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
@@ -403,7 +387,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
         backAnimator = AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.back_animator) as AnimatorSet
     }
 
-    private fun setRotateCoverViewAnimator(frontView:Any?, backView:Any?){
+    private fun setAlbumCoverViewAnimator(frontView:Any?, backView:Any?){
         if(!coverViewClicked){
             (backView as? View)?.visibility = View.VISIBLE
             frontAnimator?.setTarget(frontView)
@@ -430,11 +414,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     if (!coverViewClicked) {
                         showLyricView(true)
                         loadLyric()
-                        setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView, lrcView)
+                        setAlbumCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView, lrcView)
                         coverViewClicked = true
                     } else {
                         showLyricView(false)
-                        setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView, lrcView)
+                        setAlbumCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView, lrcView)
                         coverViewClicked = false
                     }
                 }
@@ -442,7 +426,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             ivMusicCover.setOnClickListener{
                 lrcView?.let {
                     if (!coverViewClicked) {
-                        setRotateCoverViewAnimator(cardCoverView, lrcView)
+                        setAlbumCoverViewAnimator(cardCoverView, lrcView)
                         showLyricView(true)
                         loadLyric()
                         coverViewClicked = true
@@ -454,7 +438,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
                     if (!coverViewClicked) {
                         showLyricView(true)
                         loadLyric()
-                        setRotateCoverViewAnimator(ivDiscMusicCover, lrcView)
+                        setAlbumCoverViewAnimator(ivDiscMusicCover, lrcView)
                         coverViewClicked = true
                     }
                 }
@@ -462,13 +446,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             //Cuando lrcView esté lleno podrá usarse el evento click de la vista
             lrcView?.setOnClickListener{
                 showLyricView(false)
-                setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
+                setAlbumCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
                 coverViewClicked=false
             }
             //Cuando lrcView  esté vacío solo el evento click en rootView funcionará
             contentCover.setOnClickListener{
                 showLyricView(false)
-                setRotateCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
+                setAlbumCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
                 coverViewClicked=false
             }
 

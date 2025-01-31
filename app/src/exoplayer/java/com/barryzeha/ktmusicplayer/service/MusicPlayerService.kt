@@ -237,7 +237,7 @@ class MusicPlayerService : Service(){
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
 
-    fun setupPhoneStateReceiver(){
+    fun setupPhoneCallStateReceiver(){
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
 
         phoneCallStateReceiver = object: BroadcastReceiver(){
@@ -680,7 +680,7 @@ class MusicPlayerService : Service(){
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
                         val song=if(positionReset>-1) songsList[positionReset] else songEntity
                          // Set info currentSongEntity
-                         fetchSong(song)?.let{
+                         fetchSongMetadata(song)?.let{
                              currentMusicState=it
                              // Para encontrar la posición del item en la lista de nuestra vista
                              // por su id
@@ -724,7 +724,7 @@ class MusicPlayerService : Service(){
                         if (songsList.isNotEmpty()) {
                             val song=songsList[newPosition.mediaItemIndex]
                             songEntity = song
-                            fetchSong(song)?.let {songInfo->
+                            fetchSongMetadata(song)?.let { songInfo->
                                 currentMusicState = songInfo.copy(
                                     isPlaying = exoPlayer.isPlaying,
                                     currentPosition = newPosition.mediaItemIndex.toLong(),
@@ -961,7 +961,7 @@ class MusicPlayerService : Service(){
         val song=songState.songEntity
         songEntity = song
         // Set info currentSongEntity
-        fetchSong(song)?.let{musicState->
+        fetchSongMetadata(song)?.let{ musicState->
             currentMusicState = musicState.copy(
                 currentDuration = songState.songState.currentPosition,
                 latestPlayed = true
@@ -990,7 +990,7 @@ class MusicPlayerService : Service(){
         executeOnceTime = true
         setPlayingState(false)
     }
-    private fun fetchSong(song:SongEntity):MusicState?{
+    private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {
         val songPath = song.pathLocation.toString()
         val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!

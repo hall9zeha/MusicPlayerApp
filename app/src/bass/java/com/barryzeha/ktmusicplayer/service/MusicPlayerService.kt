@@ -10,7 +10,6 @@ import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.ACTION_CONFIGURATION_CHANGED
 import android.content.IntentFilter
 import android.media.MediaMetadata
 import android.media.session.MediaSession
@@ -28,7 +27,6 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import com.barryzeha.audioeffects.common.EffectsPreferences
@@ -44,7 +42,6 @@ import com.barryzeha.core.common.PREVIOUS
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
-import com.barryzeha.core.common.getBiteArrayOfImageEmbedded
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.showSnackBar
@@ -119,7 +116,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
     private var firstCallingToSongState:Boolean = true
-    // Thelephony manager para controlar la reproducción en las llamadas
+    // Thelephony manager para controlar la reproducción durante las llamadas
     private var phoneCallStateReceiver:BroadcastReceiver?=null
     private var telephonyManager: TelephonyManager?=null
     private var isPlayingBeforeCallPhone:Boolean = false
@@ -235,7 +232,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
 
-    fun setupPhoneStateReceiver(){
+    fun setupPhoneCallStateReceiver(){
         telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
 
         phoneCallStateReceiver = object: BroadcastReceiver(){
@@ -662,7 +659,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }?:run{
                 indexOfSong = 0
                 withContext(Dispatchers.Main) {
-                    setMusicForPlayer(songsList[0])
+                    setMusicForPlay(songsList[0])
                 }
             }
             if(mPrefs.songMode == SHUFFLE)shuffleList()
@@ -728,7 +725,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
                         setPlayingState(true)
                         mPrefs.idSong = songEntity.id
-                        currentMusicState = fetchSong(songEntity)?.copy(
+                        currentMusicState = fetchSongMetadata(songEntity)?.copy(
                             isPlaying = playingState(),
                             idSong = songEntity.id,
                             latestPlayed = false,
@@ -859,10 +856,10 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
         if (mPrefs.isPlaying)play(songsList[indexOfSong])
-        else setMusicForPlayer(songsList[indexOfSong], animDirection)
+        else setMusicForPlay(songsList[indexOfSong], animDirection)
 
     }
-    private fun setMusicForPlayer(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
+    private fun setMusicForPlay(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
         val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
         mPrefs.idSong = song.id
         setSongStateSaved(songState, animDirection)
@@ -876,7 +873,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             val song = songState.songEntity
             songEntity = song
             // Set info currentSongEntity
-            fetchSong(song)?.let { musicState ->
+            fetchSongMetadata(song)?.let { musicState ->
                 currentMusicState = musicState.copy(
                     currentDuration = songState.songState.currentPosition,
                     latestPlayed = true,
@@ -904,7 +901,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             executeOnceTime = true
 
     }
-    private fun fetchSong(song:SongEntity):MusicState?{
+    private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {
         val songPath = song.pathLocation.toString()
         val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!
@@ -950,7 +947,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     }
                 }
                 else->{
-                    if (songsList.isNotEmpty()) setMusicForPlayer(songsList[0])
+                    if (songsList.isNotEmpty()) setMusicForPlay(songsList[0])
                     bassManager?.stopCheckingPlayback()
                 }
             }

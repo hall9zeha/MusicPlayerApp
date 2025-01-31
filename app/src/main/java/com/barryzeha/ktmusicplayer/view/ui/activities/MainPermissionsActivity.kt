@@ -1,12 +1,8 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
 import android.Manifest
-import android.content.Intent
-import android.os.Build
 import android.os.Build.*
 import android.os.Bundle
-import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import androidx.activity.addCallback
@@ -15,22 +11,16 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getThemeResValue
-import com.barryzeha.ktmusicplayer.BuildConfig
 import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainPermissionsBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainPermissionsActivity : AppCompatActivity() {
@@ -166,7 +156,7 @@ class MainPermissionsActivity : AppCompatActivity() {
                     if(permission==Manifest.permission.READ_PHONE_STATE && granted){
                         // Inicializamos el receiver para detectar cuando se recibe una llamada telefónica
                         // y pausar o continuar la reproducción
-                        musicPlayerService?.setupPhoneStateReceiver()
+                        musicPlayerService?.setupPhoneCallStateReceiver()
                     }
                 }
             }
