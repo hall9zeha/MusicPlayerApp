@@ -19,11 +19,17 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.WindowManager
+import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
 import com.barryzeha.core.model.entities.MusicState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.audio.exceptions.CannotReadException
@@ -40,6 +46,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import java.util.prefs.Preferences
 import kotlin.math.min
 
 /**
@@ -59,12 +66,6 @@ const val COLOR_ON_PRIMARY=3
 const val COLOR_SURFACE=4
 const val COLOR_BACKGROUND=5
 const val COLOR_TRANSPARENT=6
-
-val FALLBACKS = arrayOf(
-    "cover.jpg", "album.jpg", "folder.jpg",
-    "cover.png", "album.png", "folder.png",
-    "cover.webp", "album.webp", "folder.webp"
-)
 
 val mmr = MediaMetadataRetriever()
 fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Boolean, List<Pair<String,Boolean>>) ->Unit){
@@ -280,25 +281,12 @@ fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitm
                // mmr.release()
             }
         }?:run{
-            /*val parent = File(pathFile).parentFile
-            for (fallback in FALLBACKS) {
-                val cover = File(parent, fallback)
-                if (cover.exists()) {
-                    return try {
-                      BitmapFactory.decodeStream(FileInputStream(cover))
-                    }catch(e:Exception){
-                        Log.e("FIS_ERROR", e.message.toString())
-                        BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
-                    }
-                }
-            }*/
-            BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
+           BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
         }
     }?:run{
        BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
     }
 }
-
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     val originalWidth = bitmap.width
     val originalHeight = bitmap.height

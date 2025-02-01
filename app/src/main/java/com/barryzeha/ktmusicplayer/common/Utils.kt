@@ -43,6 +43,7 @@ import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
+import com.barryzeha.ktmusicplayer.MyApp.Companion.mPrefs
 import com.barryzeha.ktmusicplayer.databinding.ActionAddMenuPopupBinding
 import com.barryzeha.ktmusicplayer.databinding.CreatePlaylistLayoutBinding
 import com.barryzeha.ktmusicplayer.databinding.WindowPopupMenuBinding

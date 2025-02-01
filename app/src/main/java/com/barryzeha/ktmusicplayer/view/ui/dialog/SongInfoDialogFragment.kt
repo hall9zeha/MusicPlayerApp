@@ -391,7 +391,7 @@ class SongInfoDialogFragment : DialogFragment() {
 
                 val contentResolver: ContentResolver = requireContext().contentResolver
 
-                // Crear un archivo de entrada a partir de tu archivo editado (directorio interno)
+                // Crear un archivo de entrada a partir del archivo editado (directorio interno)
                 val inputFile = songFileInternalPath
                 if (!inputFile.exists()) {
                     throw IOException("El archivo original no existe")

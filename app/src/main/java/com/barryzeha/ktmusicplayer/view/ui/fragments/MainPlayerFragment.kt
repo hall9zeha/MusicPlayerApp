@@ -280,7 +280,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             tvSongAlbum.text = musicState.album
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
-
+            /*fetchFallbackCover(requireContext(),musicState.songPath,mPrefs)?.let{
+                (ivMusicCover as ImageView).loadImage(it,musicState.nextOrPrev)
+            }*/
             (ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
             (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
 
