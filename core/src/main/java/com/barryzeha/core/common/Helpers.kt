@@ -267,7 +267,6 @@ fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false):
         )
 }
 fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitmap?{
-    //TODO reparar cuando la imagen embebida nos es del formato correcto getBiteArrayOfImageEmbedded
     return pathFile?.let {
         val byteArrayImage = try{getBiteArrayOfImageEmbedded(pathFile)}catch(ex:Exception){null}
         byteArrayImage?.let {
