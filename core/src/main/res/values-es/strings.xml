@@ -49,4 +49,5 @@
     <string name="bluetoothPermissionMsg">Se necesita habilitar este permiso para que pueda controlar la aplicación a través de dispositivos bluetooth, como audífonos y bocinas</string>
     <string name="callStatePhonePermissionMsg">Se necesita habilitar este permiso para pausar o reanudar el reproductor durante una llamada</string>
     <string name="welcomeToApp">Bienvenido a </string>
+    <string name="cantPlayMsg">No se puede reproducir la pista, archivo removido o formato incompatible</string>
 </resources>

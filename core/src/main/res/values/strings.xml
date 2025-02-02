@@ -48,4 +48,5 @@
     <string name="bluetoothPermissionMsg">This permission needs to be enabled so you can control the app through Bluetooth devices such as headphones and speakers.</string>
     <string name="callStatePhonePermissionMsg">This permission needs to be enabled to pause or resume the player during a call</string>
     <string name="welcomeToApp">Welcome to </string>
+    <string name="cantPlayMsg">Can\'t player this file, will be deleted or error format </string>
 </resources>

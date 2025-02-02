@@ -66,7 +66,7 @@ import kotlin.math.log
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 const val NOTIFICATION_ID = 202405
-private  var _idSong:Long?=null
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

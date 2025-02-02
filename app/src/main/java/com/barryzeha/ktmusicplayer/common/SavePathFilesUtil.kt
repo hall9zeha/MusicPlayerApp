@@ -93,7 +93,6 @@ private suspend fun processFile(
             val realPathFromFile = file.absolutePath
             val parentDir = getParentDirectories(file.path.toString())
             val metadata = fetchFileMetadata(context, realPathFromFile)
-            Log.e("SONG-ERROR", realPathFromFile)
             metadata?.let {
                 val song = SongEntity(
                     idPlaylistCreator = MyApp.mPrefs.playlistId.toLong(),

@@ -52,6 +52,7 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
+import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
@@ -96,11 +97,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var _activity:AppCompatActivity?= null
 
     private var _songController: ServiceSongListener? = null
-    val songController: ServiceSongListener get() = _songController!!
     private var isForegroundService = false
     private var currentMusicState = MusicState()
-    val _currentMusicState:MusicState get() = currentMusicState
-
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
@@ -328,7 +326,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
         }
         firstCallingToSongState=false
-
     }
 
     private fun initMusicStateLooper(){
@@ -461,7 +458,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         musicState = intent?.getParcelableExtra<MusicState>("musicState")
-
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
                 setPlayingState(false)
@@ -499,7 +495,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
       return START_NOT_STICKY
     }
-
     private fun nextOrPrevTrack(action:Int){
             if(songsList.isNotEmpty()) {
                 when(action){
@@ -740,7 +735,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     } else {
                         _activity?.showSnackBar(
                             _activity?.findViewById(android.R.id.content)!!,
-                            "Can't player this file, will be deleted or error format",
+                            coreRes.string.cantPlayMsg,
                             Snackbar.LENGTH_LONG
                         )
                     }
@@ -761,25 +756,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun getSessionOrChannelId(): Int {
         return bassManager?.getActiveChannel()!!
     }
-    fun getNumberOfTrack():Pair<Int,Int>{
-        if(songsList.isNotEmpty()) {
-            val indexOfSong = songsList.indexOf(songEntity)
-            return Pair((indexOfSong + 1),songsList.size)
-        }
-        return Pair(0,0)
-    }
     fun resumePlayer(){
         play(null)
     }
     fun nextSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong < songsList.size - 1 ) {
-                /*if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
-                else indexOfSong  += 1*/
                 indexOfSong +=1
             }else{
-               /* if(mPrefs.songMode == SHUFFLE){indexOfSong = (songsList.indices).random()}
-                else indexOfSong = 0*/
                 indexOfSong = 0
             }
             nextOrPrevAnimValue = NEXT
@@ -793,8 +777,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun prevSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong > 0) {
-                /*if(mPrefs.songMode == SHUFFLE)indexOfSong = (songsList.indices).random()
-                else indexOfSong -=1*/
                 indexOfSong -=1
                 nextOrPrevAnimValue = PREVIOUS
                 setOrPlaySong(indexOfSong, PREVIOUS)
@@ -815,7 +797,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun setStartPositionForAbLoop() = bassManager?.setAbLoopStar()
     fun setEndPositionAbLoop() = bassManager?.setAbLoopEnd()
     fun stopAbLoop() = bassManager?.stopAbLoop()
-    fun clearABLoopOfPreferences(){
+    private fun clearABLoopOfPreferences(){
         bassManager?.stopAbLoop()
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
     }

@@ -73,10 +73,7 @@ open class BassManager {
         val pluginsList = File(nativeDir).list { dir, name -> name.matches("libbass.+\\.so|libtags\\.so".toRegex()) }
         pluginsList?.forEach { plugin->
              BASS.BASS_PluginLoad(plugin,0)
-            Log.e("NATIVE-LIB", plugin )
          }
-         Log.e("NATIVE-LIB", pluginsList.size.toString())
-         Log.e("NATIVE-LIB", nativeDir)
         return instance
     }
     private fun configure(){
