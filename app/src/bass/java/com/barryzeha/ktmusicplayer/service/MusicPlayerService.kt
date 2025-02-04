@@ -119,8 +119,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var telephonyManager: TelephonyManager?=null
     private var isPlayingBeforeCallPhone:Boolean = false
 
-
-
     override fun onCreate() {
         super.onCreate()
 
