@@ -49,4 +49,8 @@
     <string name="callStatePhonePermissionMsg">This permission needs to be enabled to pause or resume the player during a call</string>
     <string name="welcomeToApp">Welcome to </string>
     <string name="cantPlayMsg">Can\'t player this file, will be deleted or error format </string>
+    <string name="volume">Volume</string>
+    <string name="reverb">Reverb</string>
+    <string name="enableEffects">Enable effects</string>
+    <string name="reset">Reset</string>
 </resources>

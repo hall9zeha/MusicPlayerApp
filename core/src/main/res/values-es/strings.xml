@@ -50,4 +50,8 @@
     <string name="callStatePhonePermissionMsg">Se necesita habilitar este permiso para pausar o reanudar el reproductor durante una llamada</string>
     <string name="welcomeToApp">Bienvenido a </string>
     <string name="cantPlayMsg">No se puede reproducir la pista, archivo removido o formato incompatible</string>
+    <string name="volume">Volumen</string>
+    <string name="reverb">Reverberación</string>
+    <string name="enableEffects">Activar efectos</string>
+    <string name="reset">Reiniciar</string>
 </resources>

@@ -293,7 +293,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             setOnSeekBarChangeListener(osbcl)
         }
         val reverbTextView = TextView(this@MainEqualizerActivity).apply {
-            text = "Reverb"
+            text = getString(coreRes.string.reverb)
             layoutParams=layoutParams1
             gravity = Gravity.CENTER
         }
@@ -315,7 +315,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             setOnSeekBarChangeListener(osbcl)
         }
         val volumeTextView = TextView(this@MainEqualizerActivity).apply {
-            text = "Volume"
+            text = getString(coreRes.string.volume)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
