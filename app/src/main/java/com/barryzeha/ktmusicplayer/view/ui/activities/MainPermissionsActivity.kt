@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build.*
 import android.os.Bundle
 import android.view.View
@@ -49,7 +50,7 @@ class MainPermissionsActivity : AppCompatActivity() {
         setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
         // Para evitar que se vuelva a la actividad principal
-        onBackPressedDispatcher.addCallback(this){}
+        //onBackPressedDispatcher.addCallback(this){}
 
         bind = ActivityMainPermissionsBinding.inflate(layoutInflater)
         enableEdgeToEdge()
@@ -96,7 +97,7 @@ class MainPermissionsActivity : AppCompatActivity() {
     private fun setupListeners()=with(bind){
         btnFinish.setOnClickListener {
             finish()
-            //startActivity(Intent(this@MainPermissionsActivity, MainActivity::class.java))
+            startActivity(Intent(this@MainPermissionsActivity, MainActivity::class.java))
         }
     }
     private fun checkPermissions(){

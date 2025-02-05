@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             if(!isGranted){
                 activity=Intent(this,MainPermissionsActivity::class.java)
                 startActivity(activity)
+                finish()
             }
         }
     }
@@ -122,7 +123,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                 }
                 bind.navView.menu[position].setChecked(true)
             }
-
         })
         menu = bind.navView.menu
 
@@ -286,7 +286,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     }
     override fun onDestroy() {
         super.onDestroy()
-        unbindService(this)
+        musicService?.let{unbindService(this)}
     }
     @Suppress("DEPRECATION")
     override fun onBackPressed() {

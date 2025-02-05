@@ -79,13 +79,12 @@ fun ImageView.loadImage(bitmap:Bitmap, animDirection:Int=-1) {
         .setListener(null)
 
 }
-
 // El placeholder solo se usa para la carátula del fragmento principal
 fun ImageView.loadImage(resource:Int)=
     Glide.with(this.context)
         .load(resource)
         .fitCenter()
-        .placeholder(R.drawable.placeholder_cover)
+        .placeholder(R.mipmap.ic_launcher)
         .into(this)
 fun ImageView.loadImage(url:String)=
     Glide.with(this.context)
@@ -96,7 +95,7 @@ fun ImageView.loadImage(url:String)=
         // aunque se haya desabilitado con (DiskCacheStrategy.NONE)
         .skipMemoryCache(true)
 
-        .placeholder(R.drawable.placeholder_cover)
+        .placeholder(R.mipmap.ic_launcher)
         .into(this)
 fun Int.adjustAlpha(factor: Float): Int =
     (this.ushr(24) * factor).roundToInt() shl 24 or (0x00FFFFFF and this)

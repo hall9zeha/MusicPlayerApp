@@ -13,6 +13,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -56,7 +57,7 @@ private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
-class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
+class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlayerFragment.OnFinishedLoadSongs {
 
     @Inject
     lateinit var defaultPrefs:SharedPreferences
@@ -96,7 +97,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
             setUpObservers()
             setUpListeners()
-            setUpScrollOnTextViews()
+            //setUpScrollOnTextViews()
             setupAnimator()
             listener?.onFragmentReady()
     }
@@ -405,9 +406,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     @SuppressLint("ResourceType", "ClickableViewAccessibility")
     private fun setUpListeners()=with(bind){
         this?.let {
-            bind?.tvSongDescription?.setSelected(true)
+          /*  bind?.tvSongDescription?.setSelected(true)
             bind?.tvSongArtist?.setSelected(true)
-            bind?.tvSongAlbum?.setSelected(true)
+            bind?.tvSongAlbum?.setSelected(true)*/
             checkCoverViewStyle()
             btnLyric?.setOnClickListener{
                 lrcView?.let {
@@ -633,17 +634,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
             if(isForward)fastForwardingOrRewind = bind?.btnMainNext?.isPressed!!
             else  fastForwardingOrRewind = bind?.btnMainPrevious?.isPressed!!
             if(fastForwardingOrRewind){
-                if(isForward){
-                    musicPlayerService?.fastForward()
-                }
-                else{
-                   musicPlayerService?.fastRewind()
-                }
-            }else{
-                fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!)
-            }
+                if(isForward){musicPlayerService?.fastForward()}
+                else{ musicPlayerService?.fastRewind() }
+            }else{fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!) }
             fastForwardOrRewindHandler?.postDelayed(forwardOrRewindRunnable!!,200)
-
         }
         fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
     }
@@ -694,5 +688,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player) {
     }
     interface OnFragmentReadyListener{
         fun onFragmentReady()
+    }
+
+    override fun onFinishLoad() {
+        setUpScrollOnTextViews()
     }
 }

@@ -2,7 +2,6 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -39,7 +37,6 @@ import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
-import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
@@ -100,6 +97,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var fastForwardOrRewindHandler: Handler? = null
     private var forwardOrRewindRunnable:Runnable?=null
 
+    private var onFinisLoadSongsListener:OnFinishedLoadSongs?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -112,6 +111,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bind = FragmentListPlayerBinding.bind(view)
+        onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
         setUpAdapter()
         setUpPlayListAdapters()
@@ -248,6 +248,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     setNumberOfTrack()
                     //TODO mejorar la obtención del número de pista/total pistas en el fragmento principal
                     MainPlayerFragment.instance?.setNumberOfTrack(mPrefs.idSong)
+                    onFinisLoadSongsListener?.onFinishLoad()
                 }
                 bind?.pbLoad?.visibility=View.GONE
                 bind?.pbLoad?.isIndeterminate=true
@@ -425,7 +426,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                             permissionsList.forEach { (permission,granted)->
                                 if (!granted) {
                                     launcherPermission.launch(permission)
-
                                 }
                             }
                         }
@@ -836,6 +836,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                      putString(ARG_PARAM2, param2)
                  }
              }
+    }
+    interface OnFinishedLoadSongs{
+        fun onFinishLoad()
     }
 }
 
