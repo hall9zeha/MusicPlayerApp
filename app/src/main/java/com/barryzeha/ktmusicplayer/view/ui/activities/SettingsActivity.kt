@@ -88,7 +88,6 @@ class SettingsActivity : AppCompatActivity() {
             requireActivity().recreate()
         }
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
             android.R.id.home->{
@@ -98,7 +97,6 @@ class SettingsActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-
     override fun onStop() {
         super.onStop()
         mPrefs.currentView = MAIN_FRAGMENT

@@ -10,13 +10,16 @@ import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.HOME_PLAYER
@@ -57,6 +60,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     @Inject
     lateinit var mPrefs:MyPreferences
     private var serviceSongListener:ServiceSongListener?=null
+    private var loadedFinish = true
     private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
@@ -71,11 +75,15 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
+        installSplashScreen().apply{
+            lifecycleScope.launch {
+                delay(1500)
+                setKeepOnScreenCondition{false}
+            }
+        }
         bind= ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
         //enableEdgeToEdge()
@@ -85,7 +93,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
 
             insets
         }
-
         setUpViewPager()
         setUpObservers()
         setUpListeners()
