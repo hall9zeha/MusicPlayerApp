@@ -59,10 +59,6 @@ private const val ARG_PARAM2 = "param2"
 @AndroidEntryPoint
 class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlayerFragment.OnFinishedLoadSongs {
 
-    @Inject
-    lateinit var defaultPrefs:SharedPreferences
-    @Inject
-    lateinit var mPrefs:MyPreferences
     private var param1: String? = null
     private var param2: String? = null
     private var bind:FragmentMainPlayerBinding ? = null
@@ -70,10 +66,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     private var currentMusicState = MusicState()
     private val launcherAudioEffectActivity: ActivityResultLauncher<Int> = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var isFavorite:Boolean = false
-    private var serviceConnection:ServiceConnection?=null
-    private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     //private val mainViewModel:MainViewModel by activityViewModels()
-    internal var musicPlayerService: MusicPlayerService?=null
     private var listener: OnFragmentReadyListener? = null
 
     // Forward and rewind
@@ -161,10 +154,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
         (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
         (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
         mainViewModel.fetchAllSongFromMain()
-        mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
-            serviceConnection= instance.first
-            musicPlayerService= instance.second
-        }
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             CoroutineScope(Dispatchers.IO).launch {
                  withContext(Dispatchers.Main) {

@@ -4,6 +4,7 @@ import android.content.ServiceConnection
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
 import com.barryzeha.core.common.getSongMetadata
@@ -15,7 +16,6 @@ import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
-import com.barryzeha.ktmusicplayer.MyApp.Companion.mPrefs
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +34,7 @@ import javax.inject.Inject
  **/
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val repository:MainRepository):ScopedViewModel() {
+class MainViewModel @Inject constructor(private val repository:MainRepository, private val mPrefs:MyPreferences):ScopedViewModel() {
 
     private var countItemsInserted:Long=0
     private var itemsCount:Long=0
@@ -270,8 +270,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository):S
             MyApp.mPrefs.currentIndexSong=position.toLong()
         }
     }
-
-
     fun setMusicState(musicState: MusicState){
         launch {
             _musicState.value = musicState

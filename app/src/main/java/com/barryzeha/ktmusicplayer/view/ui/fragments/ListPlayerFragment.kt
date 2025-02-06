@@ -69,12 +69,9 @@ private const val ARG_PARAM2 = "param2"
 @AndroidEntryPoint
 class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
 
-    @Inject
-    lateinit var mPrefs:MyPreferences
     private var param1: String? = null
     private var param2: String? = null
     private var bind:FragmentListPlayerBinding? = null
-    private val mainViewModel:MainViewModel by viewModels(ownerProducer = {requireActivity()})
     private var playListAdapter:PlayListsAdapter?=null
 
 
@@ -84,10 +81,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var isPlaying = false
     private var isUserSeeking=false
     private var userSelectPosition=0
-    private var serviceConnection:ServiceConnection?=null
     private var currentMusicState = MusicState()
     private var song:SongEntity?=null
-    private var musicPlayerService: MusicPlayerService?=null
     private var isFavorite:Boolean=false
 
     private var prevOrNextClicked:Boolean =false
@@ -208,10 +203,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
     }
     private fun setUpObservers(){
-        mainViewModel.serviceInstance.observe(viewLifecycleOwner){instance->
-            serviceConnection=instance.first
-            musicPlayerService=instance.second
-        }
+
         mainViewModel.musicState.observe(viewLifecycleOwner){musicState->
            updateUI(musicState)
         }
@@ -220,9 +212,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             setNumberOfTrack(scrollToPosition = prevOrNextClicked)
             prevOrNextClicked=false
         }
-        mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner){ (size, count)->
+        mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner){ (totalRegisters, count)->
             bind?.pbLoad?.apply {
-                max=size
+                max=totalRegisters
                 progress=count
                 setNumberOfTrack(itemCount = count)
             }

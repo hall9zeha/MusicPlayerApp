@@ -1,8 +1,6 @@
 package com.barryzeha.mfilepicker.di
 
-import android.app.Application
 import android.content.Context
-import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.mfilepicker.common.Preferences
 import dagger.Module
 import dagger.Provides
@@ -18,7 +16,7 @@ import javax.inject.Singleton
  **/
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+class FilePickerModule {
  /*@Provides
  @Singleton
  fun contextProviders(app:Application):Context = app.applicationContext*/
