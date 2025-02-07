@@ -52,7 +52,6 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     override fun onDetach() {
         super.onDetach()
         baseActivity = null
-
     }
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

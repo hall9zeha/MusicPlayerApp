@@ -11,6 +11,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowActionBarOverlay">true</item>
         <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
     <style name="Base.Theme.KTMusicPlayer.ActionBar" parent="Theme.Material3.DynamicColors.Dark">
         <!-- Customize your dark theme here. -->
