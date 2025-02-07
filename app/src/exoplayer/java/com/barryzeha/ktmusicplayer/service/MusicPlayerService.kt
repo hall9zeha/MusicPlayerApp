@@ -592,6 +592,35 @@ class MusicPlayerService : Service(){
            }
         }
     }
+    private fun updateNotifyForLegacySdkVersions(){
+        // Para android <=10
+        currentMusicState?.let { newState ->
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                val updatePlaybackState = playBackState?.let {
+                    PlaybackState.Builder(it)
+                        .setState(
+                            if (playingState()) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                            currentMusicState.currentDuration,
+                            1f
+                        )
+                        .build()
+                }
+                // Actualizamos el progreso y estado de reproducción de la canción
+                mediaSession.setPlaybackState(updatePlaybackState)
+                mediaPlayerNotify = notificationMediaPlayer(
+                    this,
+                    MediaStyle()
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowActionsInCompactView(0, 1, 2),
+                    currentMusicState.copy(isPlaying = playingState())
+                )
+                notificationManager.notify(
+                    NOTIFICATION_ID,
+                    mediaPlayerNotify
+                )
+            }
+        }
+    }
     fun getStateSaved() {
         if(firstCallingToSongState) {
             if (songState.isNotEmpty()) {
@@ -857,6 +886,7 @@ class MusicPlayerService : Service(){
             exoPlayer.pause()
             setPlayingState(exoPlayer.isPlaying)
         }
+        updateNotifyForLegacySdkVersions()
     }
 
     @androidx.annotation.OptIn(UnstableApi::class)
@@ -877,7 +907,7 @@ class MusicPlayerService : Service(){
             isFirstTime=false
             setPlayingState(exoPlayer.isPlaying)
         }
-
+        updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
         setPlayingState(exoPlayer.isPlaying)
@@ -891,8 +921,8 @@ class MusicPlayerService : Service(){
             //exoPlayer.seekToPrevious()
             // retrocede al principio de la pista hay que hacer click dos veces
             // para que retroceda a la pista anterior
-    }
 
+    }
     fun fastForward(){
         val currentPosition = exoPlayer.currentPosition
         val newPosition = (currentPosition + 2000).coerceAtMost(exoPlayer.duration)

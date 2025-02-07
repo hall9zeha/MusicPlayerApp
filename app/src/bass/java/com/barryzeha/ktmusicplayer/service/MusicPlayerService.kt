@@ -417,7 +417,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             override fun onPlay() {
                 super.onPlay()
                 if(_songController !=null)_songController?.play()
-                else play(null)
+                else resumePlayer()
                 checkIfPhoneIsLock()
             }
             override fun onSkipToNext() {
@@ -465,7 +465,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             }
             SongAction.Resume -> {
                 if(_songController !=null)_songController?.play()
-                else play(null)
+                else resumePlayer()
                 checkIfPhoneIsLock()
             }
             SongAction.Stop -> {
@@ -609,6 +609,35 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 }
             }
     }
+    private fun updateNotifyForLegacySdkVersions(){
+        // Para android <=10
+        currentMusicState?.let { newState ->
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                val updatePlaybackState = playBackState?.let {
+                    PlaybackState.Builder(it)
+                        .setState(
+                            if (playingState()) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                            currentMusicState.currentDuration,
+                            1f
+                        )
+                        .build()
+                }
+                // Actualizamos el progreso y estado de reproducción de la canción
+                mediaSession.setPlaybackState(updatePlaybackState)
+                    mediaPlayerNotify = notificationMediaPlayer(
+                        this,
+                        MediaStyle()
+                            .setMediaSession(mediaSession.sessionToken)
+                            .setShowActionsInCompactView(0, 1, 2),
+                        currentMusicState.copy(isPlaying = playingState())
+                    )
+                notificationManager.notify(
+                    NOTIFICATION_ID,
+                    mediaPlayerNotify
+                )
+            }
+        }
+    }
    private fun findItemSongIndexById(idSong:Long):Int?{
         if(songsList.isNotEmpty()) {
             val index = songsList.indexOfFirst{it.id == idSong}
@@ -750,12 +779,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         currentSongPosition=bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0
         bassManager?.channelPause()
         bassManager?.stopCheckingPlayback()
+        updateNotifyForLegacySdkVersions()
     }
     fun getSessionOrChannelId(): Int {
         return bassManager?.getActiveChannel()!!
     }
     fun resumePlayer(){
         play(null)
+        updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
         if(songsList.isNotEmpty()){
