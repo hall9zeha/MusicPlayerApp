@@ -133,7 +133,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         mediaSession.setCallback(mediaSessionCallback())
         setUpRepository()
         setUpHeadsetAndBluetoothReceiver()
-
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
         headsetReceiver = object:BroadcastReceiver(){
@@ -948,7 +947,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     if(playingState())nextSong()
                 }
             }
-
         }else{
             when(mPrefs.songMode){
                 REPEAT_ALL->{ play(songsList[0])}

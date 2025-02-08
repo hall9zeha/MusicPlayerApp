@@ -315,6 +315,15 @@ fun changeBackgroundColor(context:Context,colored:Boolean):ColorStateList{
         mColorList(context).getColor(COLOR_BACKGROUND, COLOR_TRANSPARENT))
         }
 }
+fun changeColorOfIcon(context:Context, colored: Boolean):ColorStateList{
+    return if(colored) {
+        ColorStateList.valueOf(
+            if(mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(COLOR_ACCENT, COLOR_TRANSPARENT)else ContextCompat.getColor(context,R.color.primaryColor)
+        )
+    }
+    else {ColorStateList.valueOf(ContextCompat.getColor(context,R.color.controls_colors))
+    }
+}
 fun animateButtonsAbLoop(view:View){
     val anim = AlphaAnimation(0.0f,1.0f)
     anim.duration=500

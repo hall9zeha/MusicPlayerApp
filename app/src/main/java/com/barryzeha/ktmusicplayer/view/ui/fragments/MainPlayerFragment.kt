@@ -37,6 +37,7 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.animateButtonsAbLoop
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
+import com.barryzeha.ktmusicplayer.common.changeColorOfIcon
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -125,18 +126,22 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
 
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
                 }
                 SongMode.RepeatAll.ordinal -> {
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
                 }
                 SongMode.Shuffle.ordinal ->{
                     btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
                 }
                 SongMode.AbLoop.ordinal ->{
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),true)
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
                     btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
@@ -145,7 +150,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
                     btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
                 }
             }
         }
@@ -603,10 +609,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
                 btnBLoop.visibility = View.GONE
                 btnAbLoop.visibility = View.VISIBLE
                 musicPlayerService?.setEndPositionAbLoop()
-                btnAbLoop.backgroundTintList=changeBackgroundColor(requireContext(),true)
+                //btnAbLoop.backgroundTintList=changeBackgroundColor(requireContext(),true)
+
                 mPrefs.songMode = AB_LOOP
                 checkPlayerSongPreferences()
-                btnAbLoop.iconTint
+                btnAbLoop.iconTint= changeColorOfIcon(requireContext(),true)
             }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
