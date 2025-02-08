@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.barryzeha.core.common.*
+import com.barryzeha.ktmusicplayer.view.ui.fragments.AlbumDetailFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
