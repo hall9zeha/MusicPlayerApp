@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -31,6 +32,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _bind = FragmentAlbumDetailBinding.bind(view)
+
     }
 
     companion object {
