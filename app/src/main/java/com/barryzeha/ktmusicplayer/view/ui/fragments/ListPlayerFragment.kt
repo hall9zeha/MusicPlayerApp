@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
@@ -27,6 +28,7 @@ import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.getFragment
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
@@ -52,6 +54,7 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -73,27 +76,24 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var param2: String? = null
     private var bind:FragmentListPlayerBinding? = null
     private var playListAdapter:PlayListsAdapter?=null
-
+    private var playbackControlsFragment:PlaybackControlsFragment?=null
 
     private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
     private lateinit var launcherPermission:ActivityResultLauncher<String>
     private lateinit var launcherAudioEffectActivity:ActivityResultLauncher<Int>
-    private var isPlaying = false
-    private var isUserSeeking=false
-    private var userSelectPosition=0
+
     private var currentMusicState = MusicState()
     private var song:SongEntity?=null
     private var isFavorite:Boolean=false
 
-    private var prevOrNextClicked:Boolean =false
     private var idSongForSendToPlaylist:Long =0
     // Forward and rewind
     private var fastForwardingOrRewind = false
     private var fastForwardOrRewindHandler: Handler? = null
     private var forwardOrRewindRunnable:Runnable?=null
+    //private var musicListAdapter:MusicListAdapter?=null
 
     private var onFinisLoadSongsListener:OnFinishedLoadSongs?=null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -111,7 +111,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         setUpAdapter()
         setUpPlayListAdapters()
         setUpObservers()
-
+        setupSubFragments()
         setUpPlayListName()
         filePickerActivityResult()
         audioEffectActivityResult()
@@ -153,6 +153,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
     }
+    private fun setupSubFragments(){
+        playbackControlsFragment = getFragment(R.id.miniPlayerControls)
+    }
     private fun setUpAdapter(){
         musicListAdapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
         bind?.rvSongs?.apply {
@@ -164,6 +167,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 setNumberOfTrack()
             }
         }
+        playbackControlsFragment?.setAdapterInstance(musicListAdapter!!)
     }
     private fun setUpPlayListAdapters(){
         playListAdapter = PlayListsAdapter({playlistEntity ->
@@ -220,9 +224,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
-            isPlaying=statePlay
-            if (statePlay)bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
-            else bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
+            playbackControlsFragment?.updatePlayerStateUI(statePlay)
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
             //Removemos el estado de pantalla encendida permanentemente
@@ -366,10 +368,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             currentMusicState = musicState
             val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
             ivCover.loadImage(albumArt!!)
-            miniPlayerControls.tvEndTime.text = createTime(musicState.duration).third
-            miniPlayerControls.loadSeekBar.max = musicState.duration.toInt()
-            miniPlayerControls.tvInitTime.text = createTime(musicState.currentDuration).third
-
+            playbackControlsFragment?.updateUIOnceTime(musicState)
             musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
@@ -379,10 +378,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun updateUI(musicState: MusicState){
         currentMusicState = musicState
         mPrefs.currentPosition = musicState.currentDuration
-        bind?.miniPlayerControls?.loadSeekBar?.max = musicState.duration.toInt()
-        bind?.miniPlayerControls?.tvEndTime?.text = createTime(musicState.duration).third
-        bind?.miniPlayerControls?.tvInitTime?.text = createTime(musicState.currentDuration).third
-        bind?.miniPlayerControls?.loadSeekBar?.progress = musicState.currentDuration.toInt()
+        playbackControlsFragment?.updateUI(musicState)
         updateService()
     }
     private fun setUpListeners()= with(bind){
@@ -428,109 +424,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                     })
                 }
             }
-            miniPlayerControls.btnPlay.setOnClickListener {
-                if (musicListAdapter?.itemCount!! > 0) {
-                    if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) getSongOfAdapter(
-                        mPrefs.idSong
-                    )?.let { song ->
-                        musicPlayerService?.startPlayer(song)
-                    }
-                    else {
-                        if (isPlaying) {
-                            musicPlayerService?.pausePlayer()
-                            mainViewModel.saveStatePlaying(false)
-                        } else {
-                            musicPlayerService?.resumePlayer()
-                            mainViewModel.saveStatePlaying(true)
-                        }
-                    }
-                }
-            }
-            miniPlayerControls.btnPrevious.setOnClickListener {
-                if (musicPlayerService?.getCurrentSongPosition()!! > 0) {
-                        musicPlayerService?.prevSong()
-                        prevOrNextClicked=true
-                }
-            }
-            miniPlayerControls.btnNext.setOnClickListener {
-                if (musicPlayerService?.getCurrentSongPosition()!! < musicListAdapter?.itemCount!! - 1) {
-                       musicPlayerService?.nextSong()
-                        prevOrNextClicked=true
-                    }
-                else {
-                    getSongOfAdapter(0)?.let { song ->
-                        musicPlayerService?.startPlayer(song)
-                    }
-                }
-            }
-            miniPlayerControls.btnNext.setOnLongClickListener {
-                fastForwardOrRewind(true)
-                true
-            }
-            miniPlayerControls.btnPrevious.setOnLongClickListener {
-                fastForwardOrRewind(false)
-                true
-            }
-            miniPlayerControls.loadSeekBar.setOnSeekBarChangeListener(object :
-                SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
-                ) {
-                    if (fromUser) {
-                        miniPlayerControls.tvInitTime.text = createTime(progress.toLong()).third
-                        userSelectPosition = progress
-                    }
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    isUserSeeking = true
-                }
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    isUserSeeking = false
-                    musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
-                    miniPlayerControls.loadSeekBar.progress = userSelectPosition
-                }
-            })
-            miniPlayerControls.btnRepeat.setOnClickListener {
 
-                when (mPrefs.songMode) {
-                    SongMode.RepeatOne.ordinal -> {
-                        //  Third: deactivate modes
-                        miniPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        miniPlayerControls.btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
-                        miniPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
-
-                        mPrefs.songMode = CLEAR_MODE
-                    }
-                    SongMode.RepeatAll.ordinal -> {
-                        // Second: repeat one
-                        miniPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                        miniPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
-                        mPrefs.songMode = REPEAT_ONE
-                    }
-                    else -> {
-                        // First: active repeat All
-                        miniPlayerControls.btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),true)
-                        miniPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
-                        mPrefs.songMode= REPEAT_ALL
-                    }
-                }
-            }
-            miniPlayerControls.btnShuffle.setOnClickListener {
-                when(mPrefs.songMode){
-                    SongMode.Shuffle.ordinal->{
-                        miniPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
-                        mPrefs.songMode= CLEAR_MODE
-                    }
-                    else->{
-                        miniPlayerControls.btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),true)
-                        mPrefs.songMode= SHUFFLE
-                        miniPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        miniPlayerControls.btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
-                    }
-                }
-            }
             btnFavorite.setOnClickListener {
                  if (!isFavorite) {mainViewModel.updateFavoriteSong(true, mPrefs.idSong)}
                  else {mainViewModel.updateFavoriteSong(false,mPrefs.idSong) }
@@ -671,8 +565,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private fun fastForwardOrRewind(isForward:Boolean){
         fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
         forwardOrRewindRunnable = Runnable{
-            fastForwardingOrRewind = if(isForward) bind?.miniPlayerControls?.btnNext?.isPressed!!
-            else bind?.miniPlayerControls?.btnPrevious?.isPressed!!
+         /*   fastForwardingOrRewind = if(isForward) bind?.miniPlayerControls?.btnNext?.isPressed!!
+            else bind?.miniPlayerControls?.btnPrevious?.isPressed!!*/
             if(fastForwardingOrRewind){
                 if(isForward){musicPlayerService?.fastForward()}
                 else{musicPlayerService?.fastRewind()}
@@ -697,28 +591,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         return null
     }
-    @SuppressLint("ResourceType")
-    private fun checkPlayerSongModePreferences()=with(bind){
-        this?.let {
-            when (mPrefs.songMode) {
-                SongMode.RepeatOne.ordinal -> {
-                    miniPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                    miniPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                }
-                SongMode.RepeatAll.ordinal -> {
-                    miniPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                }
-                SongMode.Shuffle.ordinal ->{
-                    miniPlayerControls.btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                }
-                else -> {
-                    miniPlayerControls.btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                    miniPlayerControls.btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    miniPlayerControls.btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                }
-            }
-        }
-    }
+
     private fun onItemClick(position:Int,song: SongEntity){
        musicListAdapter?.getPositionByItem(song)?.let { pos->
             musicPlayerService?.startPlayer(song)
@@ -753,31 +626,31 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
-        bind?.miniPlayerControls?.tvNumberSong?.text =
-            String.format("#%s/%s", if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0, (musicListAdapter?.getSongItemCount()!! + itemCount))
+        playbackControlsFragment?.setNumberOfTracks((if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0).toInt(),(musicListAdapter?.getSongItemCount()!! + itemCount))
+
     }
     private fun updateService(){
         serviceConnection?.let{startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
     }
     override fun play() {
         super.play()
-        bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
+        //bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
         musicPlayerService?.resumePlayer()
         mainViewModel.saveStatePlaying(true)
     }
     override fun pause() {
         super.pause()
-        bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
+        //bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
         musicPlayerService?.pausePlayer()
         mainViewModel.saveStatePlaying(false)
     }
     override fun next() {
         super.next()
-        bind?.miniPlayerControls?.btnNext?.performClick()
+        //bind?.miniPlayerControls?.btnNext?.performClick()
     }
     override fun previous() {
         super.previous()
-        bind?.miniPlayerControls?.btnPrevious?.performClick()
+        //bind?.miniPlayerControls?.btnPrevious?.performClick()
     }
     override fun stop() {
         super.stop()
@@ -785,6 +658,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     override fun musicState(musicState: MusicState?) {
         super.musicState(musicState)
+        Log.e("UPDATE-12", "updateUIOnceTime" )
         musicState?.let {mainViewModel.setMusicState(musicState)}
     }
     override fun currentTrack(musicState: MusicState?) {
@@ -803,7 +677,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     override fun onResume() {
         super.onResume()
-        checkPlayerSongModePreferences()
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         mainViewModel.reloadSongInfo()

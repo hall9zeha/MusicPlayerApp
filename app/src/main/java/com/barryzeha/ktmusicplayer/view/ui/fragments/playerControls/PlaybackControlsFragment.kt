@@ -1,0 +1,247 @@
+package com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls
+
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.SeekBar
+import androidx.fragment.app.Fragment
+import com.barryzeha.core.common.CLEAR_MODE
+import com.barryzeha.core.common.REPEAT_ALL
+import com.barryzeha.core.common.REPEAT_ONE
+import com.barryzeha.core.common.SHUFFLE
+import com.barryzeha.core.common.createTime
+import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongMode
+import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.core.R as coreRes
+import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
+import com.barryzeha.ktmusicplayer.databinding.SmallPlayerControlsBinding
+import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
+import kotlin.math.log
+
+
+/**
+ * Project KTMusicPlayer
+ * Created by Barry Zea H. on 9/2/25.
+ * Copyright (c)  All rights reserved.
+ **/
+
+class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_player_controls){
+    private var _bind:SmallPlayerControlsBinding?=null
+    private val bind:SmallPlayerControlsBinding get() = _bind!!
+    // Forward and rewind
+    private var fastForwardingOrRewind = false
+    private var fastForwardOrRewindHandler: Handler? = null
+    private var forwardOrRewindRunnable:Runnable?=null
+    private var musicListAdapter:MusicListAdapter?=null
+    private var isPlaying:Boolean=false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _bind = SmallPlayerControlsBinding.bind(view)
+        setupListeners()
+    }
+    fun setNumberOfTracks(currentTrack:Int, totalTracks:Int){
+        bind.tvNumberSong.text=String.format("#%s/%s", currentTrack, totalTracks)
+    }
+    fun setAdapterInstance(musicAdapter:MusicListAdapter){
+        musicListAdapter=musicAdapter
+    }
+    private fun setupListeners()=with(bind){
+         btnPlay.setOnClickListener {
+             if (musicPlayerService?.playListSize()!! > 0) {
+                 if (!musicPlayerService!!.playingState() && musicPlayerService?.currentSongState()!!.duration <= 0) getSongOfAdapter(
+                     mPrefs.idSong
+                 )?.let { song ->
+                     musicPlayerService?.startPlayer(song)
+                 }
+                 else {
+                     if (isPlaying) {
+                         musicPlayerService?.pausePlayer()
+                         mainViewModel.saveStatePlaying(false)
+                     } else {
+                         musicPlayerService?.resumePlayer()
+                         mainViewModel.saveStatePlaying(true)
+                     }
+                 }
+             }
+         }
+         btnPrevious.setOnClickListener {
+             if (musicPlayerService?.getCurrentSongPosition()!! > 0) {
+                     musicPlayerService?.prevSong()
+                     prevOrNextClicked=true
+             }
+         }
+         btnNext.setOnClickListener {
+             if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!! - 1) {
+                    musicPlayerService?.nextSong()
+                     prevOrNextClicked=true
+                 }
+             else {
+                 getSongOfAdapter(0)?.let { song ->
+                     musicPlayerService?.startPlayer(song)
+                 }
+             }
+         }
+         btnNext.setOnLongClickListener {
+             fastForwardOrRewind(true)
+             true
+         }
+         btnPrevious.setOnLongClickListener {
+             fastForwardOrRewind(false)
+             true
+         }
+         loadSeekBar.setOnSeekBarChangeListener(object :
+             SeekBar.OnSeekBarChangeListener {
+             override fun onProgressChanged(
+                 seekBar: SeekBar?,
+                 progress: Int,
+                 fromUser: Boolean
+             ) {
+                 if (fromUser) {
+                     tvInitTime.text = createTime(progress.toLong()).third
+                     userSelectPosition = progress
+                 }
+             }
+             override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                 isUserSeeking = true
+             }
+             override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                 isUserSeeking = false
+                 musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
+                 loadSeekBar.progress = userSelectPosition
+             }
+         })
+         btnRepeat.setOnClickListener {
+
+             when (mPrefs.songMode) {
+                 SongMode.RepeatOne.ordinal -> {
+                     //  Third: deactivate modes
+                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                     btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
+                     btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
+
+                     mPrefs.songMode = CLEAR_MODE
+                 }
+                 SongMode.RepeatAll.ordinal -> {
+                     // Second: repeat one
+                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
+                     btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
+                     mPrefs.songMode = REPEAT_ONE
+                 }
+                 else -> {
+                     // First: active repeat All
+                     btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),true)
+                     btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
+                     mPrefs.songMode= REPEAT_ALL
+                 }
+             }
+         }
+          btnShuffle.setOnClickListener {
+              when(mPrefs.songMode){
+                  SongMode.Shuffle.ordinal->{
+                      btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
+                      mPrefs.songMode= CLEAR_MODE
+                  }
+                  else->{
+                      btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),true)
+                      mPrefs.songMode= SHUFFLE
+                      btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                      btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
+                  }
+              }
+          }
+    }
+    private fun fastForwardOrRewind(isForward:Boolean){
+        fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
+        forwardOrRewindRunnable = Runnable{
+            /*   fastForwardingOrRewind = if(isForward) bind?.miniPlayerControls?.btnNext?.isPressed!!
+               else bind?.miniPlayerControls?.btnPrevious?.isPressed!!*/
+            if(fastForwardingOrRewind){
+                if(isForward){musicPlayerService?.fastForward()}
+                else{musicPlayerService?.fastRewind()}
+            }else{
+                fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!)
+            }
+            fastForwardOrRewindHandler?.postDelayed(forwardOrRewindRunnable!!,200)
+        }
+        fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
+    }
+    private fun getSongOfAdapter(idSong: Long): SongEntity?{
+        val song = if(idSong>-1){ musicListAdapter?.getSongById(idSong)}else{
+            // Buscamos en la posición 1 porque primero tendremos un item header en la posición 0
+            musicListAdapter?.getSongByPosition(1)
+        }
+        song?.let{
+            val pos =  musicListAdapter?.getPositionByItem(it)
+            mainViewModel.setCurrentPosition(pos!!.second)
+            mPrefs.currentIndexSong = pos.first.toLong()
+            //bind?.rvSongs?.scrollToPosition(pos.second)
+            return song
+        }
+        return null
+    }
+    fun updatePlayerStateUI(statePlay:Boolean)=with(bind){
+        isPlaying=statePlay
+        if (statePlay)btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
+        else btnPlay?.setIconResource(coreRes.drawable.ic_play)
+    }
+    fun updateUI(musicState: MusicState)=with(bind){
+        loadSeekBar.max = musicState.duration.toInt()
+        tvEndTime.text = createTime(musicState.duration).third
+        tvInitTime.text = createTime(musicState.currentDuration).third
+        loadSeekBar.progress = musicState.currentDuration.toInt()
+        Log.e("UPDATE-1", "updateUIOnceTime" )
+
+    }
+    fun updateUIOnceTime(musicState: MusicState)=with(bind){
+        tvEndTime.text = createTime(musicState.duration).third
+        loadSeekBar.max = musicState.duration.toInt()
+        tvInitTime.text = createTime(musicState.currentDuration).third
+    }
+    @SuppressLint("ResourceType")
+    private fun checkPlayerSongModePreferences()=with(bind){
+        this?.let {
+            when (mPrefs.songMode) {
+                SongMode.RepeatOne.ordinal -> {
+                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
+                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                }
+                SongMode.RepeatAll.ordinal -> {
+                   btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                }
+                SongMode.Shuffle.ordinal ->{
+                   btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                }
+                else -> {
+                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
+                }
+            }
+        }
+    }
+    //Todo revisar porqué se necesita implementar algunos métodos y no solamente usar el viewModel del fragment base
+    override fun musicState(musicState: MusicState?) {
+        super.musicState(musicState)
+        musicState?.let{
+        mainViewModel.setMusicState(musicState)}
+    }
+    override fun currentTrack(musicState: MusicState?) {
+        super.currentTrack(musicState)
+        musicState?.let { mainViewModel.setCurrentTrack(musicState) }
+    }
+    override fun onResume() {
+        super.onResume()
+        checkPlayerSongModePreferences()
+    }
+}

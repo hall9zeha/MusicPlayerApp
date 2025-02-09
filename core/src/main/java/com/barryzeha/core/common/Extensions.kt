@@ -15,7 +15,10 @@ import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import androidx.annotation.IdRes
 import androidx.annotation.StyleRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.MusicState
@@ -154,5 +157,13 @@ fun Context.getThemeWithActionBarResValue():Int{
             R.style.Base_Theme_KTMusicPlayer_ActionBar
         }
     }
+}
+@Suppress("UNCHECKED_CAST")
+fun <T> AppCompatActivity.getFragment(@IdRes id: Int): T {
+    return supportFragmentManager.findFragmentById(id) as T
+}
+@Suppress("UNCHECKED_CAST")
+fun <T> Fragment.getFragment(@IdRes id: Int): T {
+    return childFragmentManager.findFragmentById(id) as T
 }
 

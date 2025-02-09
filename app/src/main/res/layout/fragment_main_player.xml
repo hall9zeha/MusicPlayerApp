@@ -210,7 +210,7 @@
             android:id="@+id/btnAbLoop"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:icon="@drawable/ic_ab_loop_variant"
+            app:icon="@drawable/ic_ab_looper"
             app:iconGravity="textStart"
             app:iconTint="@null"
             app:iconPadding="0dp"

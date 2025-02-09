@@ -711,6 +711,12 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
         return _songController==null
     }
+    fun currentSongState():MusicState{
+        return currentMusicState
+    }
+    fun playListSize():Int{
+        return if(songsList.isNotEmpty()) songsList.size else 0
+    }
     fun playingState():Boolean{
         return mPrefs.isPlaying
     }

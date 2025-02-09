@@ -288,16 +288,23 @@
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <include layout="@layout/small_player_controls"
+    <!--<include layout="@layout/small_player_controls"
         android:id="@+id/miniPlayerControls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        />
-
-
+        />-->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/miniPlayerControls"
+        android:name="com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout="@layout/small_player_controls" />
 </androidx.constraintlayout.widget.ConstraintLayout>
     <include layout="@layout/bottom_sheet_playlists_layout"
         android:id="@+id/bottomSheetView"

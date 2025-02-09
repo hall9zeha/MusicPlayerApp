@@ -16,6 +16,7 @@ import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
+import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -39,6 +40,10 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     protected val mainViewModel: MainViewModel by viewModels(ownerProducer = {requireActivity()})
     protected var serviceConnection:ServiceConnection?=null
     protected var musicPlayerService: MusicPlayerService?=null
+    protected var isUserSeeking=false
+    protected var userSelectPosition=0
+    protected var prevOrNextClicked:Boolean =false
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
