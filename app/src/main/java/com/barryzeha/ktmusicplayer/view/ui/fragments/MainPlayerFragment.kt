@@ -126,22 +126,21 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
 
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+
                 }
                 SongMode.RepeatAll.ordinal -> {
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+
                 }
                 SongMode.Shuffle.ordinal ->{
                     btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+
                 }
                 SongMode.AbLoop.ordinal ->{
-                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),true)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),true)
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
                     btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
@@ -150,8 +149,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                     btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
                     btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    //btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnAbLoop.iconTint = changeColorOfIcon(requireContext(),false)
+                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
+
                 }
             }
         }
@@ -609,11 +608,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
                 btnBLoop.visibility = View.GONE
                 btnAbLoop.visibility = View.VISIBLE
                 musicPlayerService?.setEndPositionAbLoop()
-                //btnAbLoop.backgroundTintList=changeBackgroundColor(requireContext(),true)
-
                 mPrefs.songMode = AB_LOOP
                 checkPlayerSongPreferences()
-                btnAbLoop.iconTint= changeColorOfIcon(requireContext(),true)
             }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
