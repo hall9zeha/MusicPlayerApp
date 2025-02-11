@@ -42,7 +42,6 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     protected var musicPlayerService: MusicPlayerService?=null
     protected var isUserSeeking=false
     protected var userSelectPosition=0
-    protected var prevOrNextClicked:Boolean =false
 
 
     override fun onAttach(context: Context) {

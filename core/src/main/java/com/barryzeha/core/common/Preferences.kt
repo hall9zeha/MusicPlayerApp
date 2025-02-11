@@ -28,6 +28,7 @@ private const val PLAYLIST_ID = "playlistId"
 private const val STORAGE_DIR_SAF_URI = "storageDirSAFUri"
 private const val GLOBAL_THEME = "globalTheme"
 private const val THEME_CHANGED = "themeChanged"
+private const val SCROLL_TO_POSITION = "scrollToPosition"
 
 
 class  MyPreferences @Inject constructor(private val context: Context){
@@ -84,6 +85,9 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var directorySAFUri:String?
         get()=myPreferences.getString(STORAGE_DIR_SAF_URI,"")
         set(value)=myPreferences.edit().putString(STORAGE_DIR_SAF_URI,value).apply()
+    var scrollToPosition:Boolean
+        get()= myPreferences.getBoolean(SCROLL_TO_POSITION,false)
+        set(value)=myPreferences.edit().putBoolean(SCROLL_TO_POSITION,value).apply()
 
     fun clearIdSongInPrefs(){
         myPreferences.edit().remove(ID_SONG).apply()

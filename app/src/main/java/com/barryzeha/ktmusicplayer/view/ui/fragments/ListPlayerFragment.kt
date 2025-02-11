@@ -1,33 +1,22 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
-import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MAIN_FRAGMENT
-import com.barryzeha.core.common.MyPreferences
-import com.barryzeha.core.common.REPEAT_ALL
-import com.barryzeha.core.common.REPEAT_ONE
-import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.checkPermissions
-import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.getFragment
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.keepScreenOn
@@ -38,7 +27,6 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
-import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
@@ -55,7 +43,6 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
-import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,18 +50,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
-class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
+class ListPlayerFragment : AbsBaseFragment(R.layout.fragment_list_player){
+    private var bind:FragmentListPlayerBinding? = null
+    private val binding:FragmentListPlayerBinding get() = bind!!
+
+    override val recyclerView: RecyclerView?
+        get() = binding.rvSongs
 
     private var param1: String? = null
     private var param2: String? = null
-    private var bind:FragmentListPlayerBinding? = null
+
     private var playListAdapter:PlayListsAdapter?=null
     private var playbackControlsFragment:PlaybackControlsFragment?=null
 
@@ -87,10 +78,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var isFavorite:Boolean=false
 
     private var idSongForSendToPlaylist:Long =0
-    // Forward and rewind
-    private var fastForwardingOrRewind = false
-    private var fastForwardOrRewindHandler: Handler? = null
-    private var forwardOrRewindRunnable:Runnable?=null
     //private var musicListAdapter:MusicListAdapter?=null
 
     private var onFinisLoadSongsListener:OnFinishedLoadSongs?=null
@@ -155,6 +142,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     private fun setupSubFragments(){
         playbackControlsFragment = getFragment(R.id.miniPlayerControls)
+        playbackControlsFragment?.let{it.setListMusicFragmentInstance(this)}
     }
     private fun setUpAdapter(){
         musicListAdapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
@@ -213,8 +201,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
             updateUIOnceTime(currentTRack)
-            setNumberOfTrack(scrollToPosition = prevOrNextClicked)
-            prevOrNextClicked=false
+            setNumberOfTrack(false)
         }
         mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner){ (totalRegisters, count)->
             bind?.pbLoad?.apply {
@@ -347,7 +334,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 } else {
                     recyclerViewHeight // Si no hay items, usar la altura del RecyclerView
                 }
-
                 // Ajusta la altura del BottomSheet
                 val layoutParams = bind?.bottomSheetView?.listsBottomSheet?.layoutParams
                 layoutParams?.height = totalHeight
@@ -373,6 +359,9 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
+            //Mover al principio de la lista cuando acabe la reproducción
+            if(musicPlayerService?.getCurrentSongPosition()!! >= musicPlayerService?.playListSize()!!-1) rvSongs.scrollToPosition(0)
+
         }
     }
     private fun updateUI(musicState: MusicState){
@@ -562,36 +551,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             }
         })
     }
-    private fun fastForwardOrRewind(isForward:Boolean){
-        fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
-        forwardOrRewindRunnable = Runnable{
-         /*   fastForwardingOrRewind = if(isForward) bind?.miniPlayerControls?.btnNext?.isPressed!!
-            else bind?.miniPlayerControls?.btnPrevious?.isPressed!!*/
-            if(fastForwardingOrRewind){
-                if(isForward){musicPlayerService?.fastForward()}
-                else{musicPlayerService?.fastRewind()}
-            }else{
-                fastForwardOrRewindHandler?.removeCallbacks(forwardOrRewindRunnable!!)
-            }
-            fastForwardOrRewindHandler?.postDelayed(forwardOrRewindRunnable!!,200)
-        }
-        fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
-    }
-    private fun getSongOfAdapter(idSong: Long):SongEntity?{
-        val song = if(idSong>-1){ musicListAdapter?.getSongById(idSong)}else{
-            // Buscamos en la posición 1 porque primero tendremos un item header en la posición 0
-            musicListAdapter?.getSongByPosition(1)
-        }
-        song?.let{
-            val pos =  musicListAdapter?.getPositionByItem(it)
-            mainViewModel.setCurrentPosition(pos!!.second)
-            mPrefs.currentIndexSong = pos.first.toLong()
-            bind?.rvSongs?.scrollToPosition(pos.second)
-            return song
-        }
-        return null
-    }
-
     private fun onItemClick(position:Int,song: SongEntity){
        musicListAdapter?.getPositionByItem(song)?.let { pos->
             musicPlayerService?.startPlayer(song)
@@ -618,7 +577,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                 .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
         })
     }
-    private fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){
+    fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){
         val itemSong = musicListAdapter?.getSongById(mPrefs.idSong)
         itemSong?.let{
             val (numberedPos, realPos) = musicListAdapter?.getPositionByItem(itemSong)!!
@@ -627,30 +586,19 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
         }
         playbackControlsFragment?.setNumberOfTracks((if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0).toInt(),(musicListAdapter?.getSongItemCount()!! + itemCount))
-
     }
     private fun updateService(){
         serviceConnection?.let{startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
     }
     override fun play() {
         super.play()
-        //bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
         musicPlayerService?.resumePlayer()
         mainViewModel.saveStatePlaying(true)
     }
     override fun pause() {
         super.pause()
-        //bind?.miniPlayerControls?.btnPlay?.setIconResource(coreRes.drawable.ic_play)
         musicPlayerService?.pausePlayer()
         mainViewModel.saveStatePlaying(false)
-    }
-    override fun next() {
-        super.next()
-        //bind?.miniPlayerControls?.btnNext?.performClick()
-    }
-    override fun previous() {
-        super.previous()
-        //bind?.miniPlayerControls?.btnPrevious?.performClick()
     }
     override fun stop() {
         super.stop()
@@ -658,7 +606,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     override fun musicState(musicState: MusicState?) {
         super.musicState(musicState)
-        Log.e("UPDATE-12", "updateUIOnceTime" )
+        Log.e("UPDATE-UI-LIST-FRAGMENT", "updateUIOnceTime" )
         musicState?.let {mainViewModel.setMusicState(musicState)}
     }
     override fun currentTrack(musicState: MusicState?) {

@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments
 
 import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 
 
@@ -12,4 +13,5 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 
 abstract class AbsBaseFragment(@LayoutRes layout:Int):BaseFragment(layout) {
  open val musicAdapter: MusicListAdapter? = null
+ open val recyclerView:RecyclerView?=null
 }

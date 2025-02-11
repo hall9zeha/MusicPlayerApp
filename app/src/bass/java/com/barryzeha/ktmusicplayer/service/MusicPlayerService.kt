@@ -763,7 +763,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                             bassManager?.getActiveChannel()!!,
                             effectsPrefs
                         )
-
+                        //TODO trial
+                        mPrefs.currentIndexSong = indexOfSong.toLong()
                     } else {
                         _activity?.showSnackBar(
                             _activity?.findViewById(android.R.id.content)!!,

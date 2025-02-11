@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.REPEAT_ALL
@@ -23,8 +24,8 @@ import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.SmallPlayerControlsBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
+import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import kotlin.math.log
-
 
 /**
  * Project KTMusicPlayer
@@ -41,6 +42,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     private var forwardOrRewindRunnable:Runnable?=null
     private var musicListAdapter:MusicListAdapter?=null
     private var isPlaying:Boolean=false
+    private var parentFragment:ListPlayerFragment?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +57,9 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     }
     fun setAdapterInstance(musicAdapter:MusicListAdapter){
         musicListAdapter=musicAdapter
+    }
+    fun setListMusicFragmentInstance(instance:Any){
+        parentFragment = if(instance is ListPlayerFragment) instance else null
     }
     private fun setupListeners()=with(bind){
          btnPlay.setOnClickListener {
@@ -78,13 +83,13 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
          btnPrevious.setOnClickListener {
              if (musicPlayerService?.getCurrentSongPosition()!! > 0) {
                      musicPlayerService?.prevSong()
-                     prevOrNextClicked=true
+                     parentFragment?.setNumberOfTrack(true)
              }
          }
          btnNext.setOnClickListener {
              if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!! - 1) {
                     musicPlayerService?.nextSong()
-                     prevOrNextClicked=true
+                    parentFragment?.setNumberOfTrack(true)
                  }
              else {
                  getSongOfAdapter(0)?.let { song ->
@@ -164,8 +169,8 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     private fun fastForwardOrRewind(isForward:Boolean){
         fastForwardOrRewindHandler = Handler(Looper.getMainLooper())
         forwardOrRewindRunnable = Runnable{
-            /*   fastForwardingOrRewind = if(isForward) bind?.miniPlayerControls?.btnNext?.isPressed!!
-               else bind?.miniPlayerControls?.btnPrevious?.isPressed!!*/
+            fastForwardingOrRewind = if(isForward) bind.btnNext.isPressed
+            else bind.btnPrevious.isPressed
             if(fastForwardingOrRewind){
                 if(isForward){musicPlayerService?.fastForward()}
                 else{musicPlayerService?.fastRewind()}
@@ -182,10 +187,11 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
             musicListAdapter?.getSongByPosition(1)
         }
         song?.let{
-            val pos =  musicListAdapter?.getPositionByItem(it)
-            mainViewModel.setCurrentPosition(pos!!.second)
-            mPrefs.currentIndexSong = pos.first.toLong()
-            //bind?.rvSongs?.scrollToPosition(pos.second)
+            val (numberedPosition, realPosition) =  musicListAdapter?.getPositionByItem(it)!!
+            mainViewModel.setCurrentPosition(realPosition)
+            mPrefs.currentIndexSong = numberedPosition.toLong()
+            parentFragment?.setNumberOfTrack(true)
+            recyclerView?.scrollToPosition(realPosition)
             return song
         }
         return null
@@ -200,7 +206,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         tvEndTime.text = createTime(musicState.duration).third
         tvInitTime.text = createTime(musicState.currentDuration).third
         loadSeekBar.progress = musicState.currentDuration.toInt()
-        Log.e("UPDATE-1", "updateUIOnceTime" )
+        Log.e("UPDATE-UI", "updateUIOnceTime" )
 
     }
     fun updateUIOnceTime(musicState: MusicState)=with(bind){
@@ -239,6 +245,14 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
         musicState?.let { mainViewModel.setCurrentTrack(musicState) }
+    }
+    override fun next() {
+        super.next()
+        bind.btnNext.performClick()
+    }
+    override fun previous() {
+        super.previous()
+       bind.btnPrevious.performClick()
     }
     override fun onResume() {
         super.onResume()
