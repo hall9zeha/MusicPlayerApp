@@ -12,6 +12,5 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
  **/
 
 abstract class AbsBaseFragment(@LayoutRes layout:Int):BaseFragment(layout) {
- open val musicAdapter: MusicListAdapter? = null
- open val recyclerView:RecyclerView?=null
+  open val recyclerView:RecyclerView?=null
 }

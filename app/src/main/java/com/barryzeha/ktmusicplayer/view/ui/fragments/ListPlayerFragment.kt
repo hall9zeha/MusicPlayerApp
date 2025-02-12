@@ -606,7 +606,6 @@ class ListPlayerFragment : AbsBaseFragment(R.layout.fragment_list_player){
     }
     override fun musicState(musicState: MusicState?) {
         super.musicState(musicState)
-        Log.e("UPDATE-UI-LIST-FRAGMENT", "updateUIOnceTime" )
         musicState?.let {mainViewModel.setMusicState(musicState)}
     }
     override fun currentTrack(musicState: MusicState?) {

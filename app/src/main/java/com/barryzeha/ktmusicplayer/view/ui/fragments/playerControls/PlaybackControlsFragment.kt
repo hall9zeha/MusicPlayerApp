@@ -44,9 +44,6 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     private var isPlaying:Boolean=false
     private var parentFragment:ListPlayerFragment?=null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _bind = SmallPlayerControlsBinding.bind(view)
@@ -201,18 +198,17 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         if (statePlay)btnPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
         else btnPlay?.setIconResource(coreRes.drawable.ic_play)
     }
+    fun updateUIOnceTime(musicState: MusicState)=with(bind){
+        tvEndTime.text = createTime(musicState.duration).third
+        loadSeekBar.max = musicState.duration.toInt()
+        tvInitTime.text = createTime(musicState.currentDuration).third
+    }
     fun updateUI(musicState: MusicState)=with(bind){
         loadSeekBar.max = musicState.duration.toInt()
         tvEndTime.text = createTime(musicState.duration).third
         tvInitTime.text = createTime(musicState.currentDuration).third
         loadSeekBar.progress = musicState.currentDuration.toInt()
-        Log.e("UPDATE-UI", "updateUIOnceTime" )
 
-    }
-    fun updateUIOnceTime(musicState: MusicState)=with(bind){
-        tvEndTime.text = createTime(musicState.duration).third
-        loadSeekBar.max = musicState.duration.toInt()
-        tvInitTime.text = createTime(musicState.currentDuration).third
     }
     @SuppressLint("ResourceType")
     private fun checkPlayerSongModePreferences()=with(bind){
