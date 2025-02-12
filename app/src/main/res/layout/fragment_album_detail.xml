@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".view.ui.fragments.AlbumDetailFragment">
+    tools:context=".view.ui.fragments.albumDetail.AlbumDetailFragment">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCoverView"
