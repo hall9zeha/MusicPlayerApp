@@ -867,6 +867,13 @@ class MusicPlayerService : Service(){
     fun playingState():Boolean{
         return mPrefs.isPlaying
     }
+
+    fun currentSongState():MusicState{
+        return currentMusicState
+    }
+    fun playListSize():Int{
+        return if(songsList.isNotEmpty()) songsList.size else 0
+    }
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
@@ -934,7 +941,6 @@ class MusicPlayerService : Service(){
         exoPlayer.seekTo(newPosition)
     }
     // A-B looper
-    //TODO implement for mediaplayer flavour
     fun setStartPositionForAbLoop() {startAbLoopPosition = exoPlayer.currentPosition}
     fun setEndPositionAbLoop() {
         endAbLopPosition = exoPlayer.currentPosition
