@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/action_playlist"
+    >
+    <fragment
+        android:id="@+id/playlistFragment"
+        android:name="com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment"
+        android:label="PlayListFragment"
+        tools:layout="@layout/fragment_playlist">
+    </fragment>
+    <fragment
+        android:id="@+id/albumDetailFragment"
+        android:name="com.barryzeha.ktmusicplayer.view.ui.fragments.albumDetail.AlbumDetailFragment"
+        android:label="AlbumDetailFragment"
+        tools:layout="@layout/fragment_album_detail">
+        <argument
+            android:name="extra_album"
+            app:argType="string"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/action_playlist"
+        android:name="com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment"
+        android:label=""
+        tools:layout="@layout/fragment_playlist"/>
+
+</navigation>

@@ -25,6 +25,7 @@ import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.SmallPlayerControlsBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import kotlin.math.log
 
 /**
@@ -42,12 +43,21 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     private var forwardOrRewindRunnable:Runnable?=null
     private var musicListAdapter:MusicListAdapter?=null
     private var isPlaying:Boolean=false
-    private var parentFragment:ListPlayerFragment?=null
+    private var parentFragment:ListFragment?=null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _bind = SmallPlayerControlsBinding.bind(view)
         setupListeners()
+        mainViewModel.currentTrack.observe(viewLifecycleOwner){
+            updateUIOnceTime(it)
+        }
+        mainViewModel.musicState.observe(viewLifecycleOwner){
+            updateUI(it)
+        }
+        mainViewModel.isPlaying.observe(viewLifecycleOwner){
+            updatePlayerStateUI(it)
+        }
     }
     fun setNumberOfTracks(currentTrack:Int, totalTracks:Int){
         bind.tvNumberSong.text=String.format("#%s/%s", currentTrack, totalTracks)
@@ -56,8 +66,9 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         musicListAdapter=musicAdapter
     }
     fun setListMusicFragmentInstance(instance:Any){
-        parentFragment = if(instance is ListPlayerFragment) instance else null
+        parentFragment = if(instance is ListFragment) instance else null
     }
+
     private fun setupListeners()=with(bind){
          btnPlay.setOnClickListener {
              if (musicPlayerService?.playListSize()!! > 0) {
@@ -247,7 +258,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     }
     override fun previous() {
         super.previous()
-       bind.btnPrevious.performClick()
+        bind.btnPrevious.performClick()
     }
     override fun onResume() {
         super.onResume()

@@ -45,6 +45,7 @@ import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.library.components.DiscCoverView
 import dagger.hilt.android.AndroidEntryPoint
@@ -326,9 +327,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     fun setNumberOfTrack(songId:Long? = null){
         CoroutineScope(Dispatchers.IO).launch {
         if(songId != null && songId >-1) {
-                val song = ListPlayerFragment.musicListAdapter?.getSongById(songId.toLong())
+                val song = ListFragment.musicListAdapter?.getSongById(songId.toLong())
             song?.let {
-               val (itemNumOnList, _) = ListPlayerFragment.musicListAdapter?.getPositionByItem(song as SongEntity)
+               val (itemNumOnList, _) = ListFragment.musicListAdapter?.getPositionByItem(song as SongEntity)
                     ?: Pair(0, 0)
                 withContext(Dispatchers.Main) {
                     bind?.tvNumberSong?.text = String.format(
@@ -485,7 +486,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
             }
             btnMainNext.setOnClickListener {
                 checkCoverViewStyle()
-                if (musicPlayerService?.getCurrentSongPosition()!! < ListPlayerFragment.musicListAdapter?.itemCount!! - 1) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < ListFragment.musicListAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
                     getSongOfList(0)?.let{song->

@@ -12,6 +12,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.GravityCompat
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
@@ -67,19 +69,8 @@ class ListPlayerFragment : AbsBaseFragment(R.layout.fragment_list_player){
     private var param1: String? = null
     private var param2: String? = null
 
-    private var playListAdapter:PlayListsAdapter?=null
     private var playbackControlsFragment:PlaybackControlsFragment?=null
 
-    private lateinit var launcherFilePickerActivity:ActivityResultLauncher<Unit>
-    private lateinit var launcherPermission:ActivityResultLauncher<String>
-    private lateinit var launcherAudioEffectActivity:ActivityResultLauncher<Int>
-
-    private var currentMusicState = MusicState()
-    private var song:SongEntity?=null
-    private var isFavorite:Boolean=false
-
-    private var idSongForSendToPlaylist:Long =0
-    //private var musicListAdapter:MusicListAdapter?=null
 
     private var onFinisLoadSongsListener:OnFinishedLoadSongs?=null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +79,7 @@ class ListPlayerFragment : AbsBaseFragment(R.layout.fragment_list_player){
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-        handleArgumentsSending()
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -96,551 +87,23 @@ class ListPlayerFragment : AbsBaseFragment(R.layout.fragment_list_player){
         bind = FragmentListPlayerBinding.bind(view)
         onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
-        setUpAdapter()
-        setUpPlayListAdapters()
-        setUpObservers()
         setupSubFragments()
-        setUpPlayListName()
-        filePickerActivityResult()
-        audioEffectActivityResult()
-        activityResultForPermission()
-        setUpListeners()
-        setupBottomSheet()
+      setupNavigation()
     }
-    private fun handleArgumentsSending(){
-        arguments?.let{arg->
-            val playlistId = arg.getInt(ARG_PARAM1)
-            getPlaylist(playlistId)
-        }
-    }
-    private fun audioEffectActivityResult(){
-        launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){ }
-    }
-    private fun filePickerActivityResult(){
-        launcherFilePickerActivity = registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
-            if (paths.isNotEmpty()) {
-                bind?.pbLoad?.visibility = View.VISIBLE
-                //Mantenemos la pantalla encendida para evitar interrupciones mientras se procesa
-                keepScreenOn(requireActivity(), true)
-                //**********************************
-                processSongPaths(paths,
-                    { itemsCount -> mainViewModel.setItemsCount(itemsCount) },
-                    { song ->
-                        CoroutineScope(Dispatchers.Main).launch {
-                            bind?.pbLoad?.isIndeterminate = false
-                        }
-                        mainViewModel.saveNewSong(song)
-                    })
-            }
-        }
-    }
-    private fun activityResultForPermission(){
-      launcherPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()){
-            if(it){
-                //Todo lanzar file picker activity si se dieron los permisos de lectura
-            }
-        }
+    private fun setupNavigation(){
+        val fragment = childFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+        val navController = fragment.navController
+        val navInflater = navController.navInflater
+        val navGraph = navInflater.inflate(R.navigation.main_graph)
+        navController.graph = navGraph
     }
     private fun setupSubFragments(){
         playbackControlsFragment = getFragment(R.id.miniPlayerControls)
         playbackControlsFragment?.let{it.setListMusicFragmentInstance(this)}
     }
-    private fun setUpAdapter(){
-        musicListAdapter = MusicListAdapter(::onItemClick,::onMenuItemClick)
-        bind?.rvSongs?.apply {
-            setHasFixedSize(true)
-            setItemViewCacheSize(10)
-            layoutManager = LinearLayoutManager(context)
-            adapter = musicListAdapter
-            post {
-                setNumberOfTrack()
-            }
-        }
-        playbackControlsFragment?.setAdapterInstance(musicListAdapter!!)
-    }
-    private fun setUpPlayListAdapters(){
-        playListAdapter = PlayListsAdapter({playlistEntity ->
-            // Guardamos los ids de playlist y de la canción al hacer click en un item de la lista
-            // que representa nuestras listas creadas
-            if(idSongForSendToPlaylist>0){
-                mainViewModel.savePlaylistWithSongRef(
-                    PlaylistWithSongsCrossRef(playlistEntity.idPlaylist,idSongForSendToPlaylist)
-                )
-            }else{
-            // Cargamos la lista de reproducción seleccionada
-                getPlaylist(playlistEntity.idPlaylist.toInt())
-            }
-        },{playlist->
-            // Al eliminar un item
-            mainViewModel.deletePlayList(playlist.idPlaylist)
-            playListAdapter?.remove(playlist)
-            resizeBottomSheet()
-            (activity as? MainActivity)?.removeMenuItemDrawer(playlist.idPlaylist.toInt())
 
-        },{playlist->
-            // Cambiar nombre de una playlist
-            mainViewModel.updatePlaylist(playlist)
-        })
-        bind?.bottomSheetView?.rvPlaylists?.apply{
-            setHasFixedSize(true)
-            setItemViewCacheSize(10)
-            layoutManager = LinearLayoutManager(context)
-            adapter = playListAdapter
-        }
-        playListAdapter!!.add(PlaylistEntity(0,"Default"))
-    }
-    private fun getPlaylist(playlistId:Int){
-        mPrefs.playlistId = playlistId
-        musicPlayerService?.clearPlayList(false)
-        mainViewModel.fetchPlaylistWithSongsBy(playlistId,mPrefs.playListSortOption)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-    }
-    private fun setUpObservers(){
-
-        mainViewModel.musicState.observe(viewLifecycleOwner){musicState->
-           updateUI(musicState)
-        }
-        mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTRack->
-            updateUIOnceTime(currentTRack)
-            setNumberOfTrack(false)
-        }
-        mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner){ (totalRegisters, count)->
-            bind?.pbLoad?.apply {
-                max=totalRegisters
-                progress=count
-                setNumberOfTrack(itemCount = count)
-            }
-        }
-        mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
-            playbackControlsFragment?.updatePlayerStateUI(statePlay)
-        }
-        mainViewModel.allSongs.observe(viewLifecycleOwner){songList->
-            //Removemos el estado de pantalla encendida permanentemente
-            keepScreenOn(requireActivity(),false)
-
-            // La actualización del adaptador debe ocurrir en el hilo principal.
-            // Caso contrario dará problemas al recrearse la vista cuando rotemos la pantalla
-            sortPlayList(mPrefs.playListSortOption, songList
-            ) { result ->
-                // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro
-                if(!mPrefs.firstExecution)musicPlayerService?.populatePlayList(songList)
-                // ************
-                musicListAdapter?.addAll(result)
-                bind?.rvSongs?.post {
-                    setNumberOfTrack()
-                    //TODO mejorar la obtención del número de pista/total pistas en el fragmento principal
-                    MainPlayerFragment.instance?.setNumberOfTrack(mPrefs.idSong)
-                    onFinisLoadSongsListener?.onFinishLoad()
-                }
-                bind?.pbLoad?.visibility=View.GONE
-                bind?.pbLoad?.isIndeterminate=true
-                mPrefs.firstExecution=false
-            }
-        }
-        mainViewModel.orderBySelection.observe(viewLifecycleOwner){selectedSort->
-            musicListAdapter?.removeAll()
-            // probando eliminar la lista de media items para cargar la lista nueva, ya que tendrá un orden distinto
-            musicPlayerService?.clearPlayList(isSort = true)
-            // ********
-            mPrefs.playListSortOption = selectedSort
-            mainViewModel.fetchPlaylistWithSongsBy(mPrefs.playlistId,selectedSort)
-            setUpPlayListName()
-        }
-        mainViewModel.songById.observe(viewLifecycleOwner){song->
-            song?.let{
-                musicPlayerService?.setNewMediaItem(song)
-            }
-        }
-        mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){positionSelected->
-            musicPlayerService?.setCurrentSongPosition(positionSelected)
-            positionSelected?.let{
-                musicListAdapter?.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
-            }
-        }
-        mainViewModel.deletedRow.observe(viewLifecycleOwner){deletedRow->
-            if(deletedRow>0) song?.let{song->
-                musicListAdapter?.remove(song)
-                if(song.id == mPrefs.idSong){
-                    mainViewModel.removeSongState(song.id)
-                    mPrefs.clearIdSongInPrefs()
-                    //Si eliminamos la pista que está en reproducción, pasamos a la siguiente
-                    musicPlayerService?.nextSong()
-                }
-                musicPlayerService?.removeMediaItem(song)
-                setNumberOfTrack(scrollToPosition = false)
-            }
-        }
-        mainViewModel.deleteAllRows.observe(viewLifecycleOwner){deleteRows->
-            if(deleteRows>0){
-                musicListAdapter?.removeAll()
-                mPrefs.clearIdSongInPrefs()
-                mPrefs.clearCurrentPosition()
-                musicPlayerService?.clearPlayList(isSort=false)
-                setNumberOfTrack()
-            }
-        }
-        mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
-            this.isFavorite = isFavorite
-            bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
-        }
-        // Playlist
-        mainViewModel.createdPlayList.observe(viewLifecycleOwner){insertedRow->
-            if(insertedRow >0){
-                Toast.makeText(activity, coreRes.string.playlistCreatedMsg, Toast.LENGTH_SHORT).show()
-                mainViewModel.fetchPlaylists()
-            }
-        }
-        mainViewModel.playLists.observe(viewLifecycleOwner){playLists->
-            playListAdapter?.let{
-                it.addAll(playLists)
-                resizeBottomSheet()
-                (activity as? MainActivity)?.addItemOnMenuDrawer(playLists)
-            }
-        }
-        mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner){insertedRow->
-            if(insertedRow>0){
-                Toast.makeText(activity, coreRes.string.addedToPlaylist, Toast.LENGTH_SHORT).show()
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                // Reiniciamos el valor para evitar inconvenientes, lo usaremos para nuestra lógica
-                // cuando es mayor que cero agregar a lista y si es cero, cambiar entre listas
-                idSongForSendToPlaylist = 0
-                // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
-            }
-        }
-        mainViewModel.isSongTagEdited.observe(viewLifecycleOwner){song->
-            song?.let{
-               musicListAdapter?.update(song)
-            }
-        }
-    }
-    private fun resizeBottomSheet(){
-        if (btmSheetIsExpanded) {
-            val behavior = BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
-            val itemCount = playListAdapter?.itemCount ?: 0
-
-            if (itemCount > 0) {
-                // Obtener la altura de un solo item en el RecyclerView
-                var itemHeight = bind?.bottomSheetView?.rvPlaylists?.getChildAt(0)?.height?.plus(24) ?: 0
-                val recyclerViewHeight = bind?.bottomSheetView?.rvPlaylists?.height ?: 0
-
-                // Cálculo para el padding
-                val paddingTop = bind?.bottomSheetView?.rvPlaylists?.paddingTop ?: 0
-                val paddingBottom = bind?.bottomSheetView?.rvPlaylists?.paddingBottom ?: 0
-                itemHeight += paddingTop
-
-                // Calcula la altura total de acuerdo a la cantidad de elementos en la lista
-                val totalHeight: Int = if (itemCount > 0) {
-                    // Multiplica la altura del item por la cantidad de items
-                    (itemHeight * itemCount) + paddingTop + paddingBottom
-                } else {
-                    recyclerViewHeight // Si no hay items, usar la altura del RecyclerView
-                }
-                // Ajusta la altura del BottomSheet
-                val layoutParams = bind?.bottomSheetView?.listsBottomSheet?.layoutParams
-                layoutParams?.height = totalHeight
-
-                // Actualiza el estado del BottomSheet
-                behavior.peekHeight = 0 // Esta es la altura del BottomSheet cuando está minimizado
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-    }
-    private fun setUpPlayListName()=with(bind){
-        this?.let{
-            getPlayListName(mPrefs){headerTextRes->tvPlayListName.text=getString(headerTextRes)}
-        }
-    }
-    private fun updateUIOnceTime(musicState:MusicState)=with(bind){
-        this?.let {
-            currentMusicState = musicState
-            val albumArt = getBitmap(requireContext(),musicState.songPath)
-            ivCover.loadImage(albumArt!!)
-            playbackControlsFragment?.updateUIOnceTime(musicState)
-            musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
-            mainViewModel.checkIfIsFavorite(musicState.idSong)
-            mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
-            mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
-            //Mover al principio de la lista cuando acabe la reproducción
-            if(musicPlayerService?.getCurrentSongPosition()!! >= musicPlayerService?.playListSize()!!-1) rvSongs.scrollToPosition(0)
-
-        }
-    }
-    private fun updateUI(musicState: MusicState){
-        currentMusicState = musicState
-        mPrefs.currentPosition = musicState.currentDuration
-        playbackControlsFragment?.updateUI(musicState)
-        updateService()
-    }
-    private fun setUpListeners()= with(bind){
-        var clicked=false
-        val permissionList:List<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            listOf(Manifest.permission.READ_MEDIA_AUDIO)
-        } else {
-            listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        this?.let {
-            tvPlayListName.setOnClickListener{
-                if(btmSheetIsExpanded) bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
-                else {bottomSheetBehavior.state=BottomSheetBehavior.STATE_EXPANDED
-                    CoroutineScope(Dispatchers.Main).launch {
-                        delay(500)
-                        resizeBottomSheet()
-                    }
-                }
-            }
-            btnMenu?.setOnClickListener {
-                (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
-            }
-            btnAdd.setOnClickListener {
-                checkPermissions(
-                    requireContext(),
-                    permissionList
-                ) { isGranted, permissionsList ->
-                    onMenuActionAddPopup(requireActivity(),btnAdd,{
-                        if (isGranted) {
-                            launcherFilePickerActivity.launch(Unit)
-
-                        } else {
-                            permissionsList.forEach { (permission,granted)->
-                                if (!granted) {
-                                    launcherPermission.launch(permission)
-                                }
-                            }
-                        }
-                    },{
-                        createNewPlayListDialog(requireActivity()){name->
-                            mainViewModel.createPlayList(PlaylistEntity(playListName = name))
-                        }
-                    })
-                }
-            }
-
-            btnFavorite.setOnClickListener {
-                 if (!isFavorite) {mainViewModel.updateFavoriteSong(true, mPrefs.idSong)}
-                 else {mainViewModel.updateFavoriteSong(false,mPrefs.idSong) }
-            }
-            btnSearch.setOnClickListener{
-               showOrHideSearchbar()
-            }
-            btnClose.setOnClickListener {
-               showOrHideSearchbar()
-            }
-            edtSearch.addTextChangedListener (object: TextWatcher{
-                override fun beforeTextChanged( s: CharSequence?, start: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    musicListAdapter?.filter?.filter(s)
-                }
-                override fun afterTextChanged(s: Editable?) {}
-            })
-            btnMultipleSelect.setOnClickListener{
-                if(clicked){
-                    musicListAdapter?.showMultipleSelection(false)
-                    btnMultipleSelect.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    clicked=false
-                    visibleOrGoneBottomActions(true)
-                    musicListAdapter?.clearListItemsForDelete()
-                }else{
-                    musicListAdapter?.showMultipleSelection(true)
-                   btnMultipleSelect.backgroundTintList=changeBackgroundColor(requireContext(),true)
-                    clicked=true
-                    visibleOrGoneBottomActions(false)
-                }
-            }
-            btnFilter.setOnClickListener{
-                OrderByDialog().show(parentFragmentManager,OrderByDialog::class.simpleName)
-            }
-            btnDelete?.setOnClickListener {
-                val listForDeleted = musicListAdapter?.getListItemsForDelete()?.toList()
-                listForDeleted?.let {
-                    mainViewModel.deleteSong(listForDeleted)
-                    musicPlayerService?.removeMediaItems(listForDeleted)
-                    musicListAdapter?.removeItemsForMultipleSelectedAction()
-                }
-            }
-            btnMainEq.setOnClickListener{
-                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
-            }
-            btnMore.setOnClickListener{view->
-                onMenuItemPopup(onItemClick=false,requireActivity(),view,{
-                    // Delete item callback
-                },{
-                    // Delete all items callback
-                    musicListAdapter?.removeAll()
-                    mainViewModel.deleteAllSongs()
-                },{},{},{
-                    // Song info callback
-                    SongInfoDialogFragment.newInstance(SongEntity(id=currentMusicState.idSong, pathLocation = currentMusicState.songPath ))
-                        .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
-                })
-            }
-            bottomSheetView.btnAdd.setOnClickListener{
-                createNewPlayListDialog(requireActivity()){playlistName ->
-                    mainViewModel.createPlayList(PlaylistEntity(playListName = playlistName))
-                }
-            }
-        }
-    }
-    private fun setupBottomSheet(){
-        bottomSheetBehavior = BottomSheetBehavior.from(bind?.bottomSheetView?.listsBottomSheet!!)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        bottomSheetBehavior.addBottomSheetCallback(object :BottomSheetBehavior.BottomSheetCallback(){
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                when(newState){
-                    BottomSheetBehavior.STATE_EXPANDED->{btmSheetIsExpanded=true}
-                    BottomSheetBehavior.STATE_COLLAPSED->{
-                        val behavior= BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
-                        behavior.peekHeight = 0
-                        btmSheetIsExpanded=false
-                    }
-                }
-            } override fun onSlide(bottomSheet: View, slideOffset: Float) { }
-        })
-    }
-    private fun showOrHideSearchbar()=with(bind){
-        this?.let{
-            if(!isFiltering){
-                visibleOrGoneViews(false)
-                btnSearch.backgroundTintList=changeBackgroundColor(requireContext(),true)
-                isFiltering=true
-                showKeyboard(true, edtSearch)
-            }else {
-                visibleOrGoneViews(true)
-                edtSearch.setText("")
-                btnSearch.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                isFiltering = false
-                showKeyboard(false, edtSearch)
-            }
-        }
-    }
-    fun hideSearchBar()=with(bind){
-        this?.let {
-            if (isFiltering) {
-                visibleOrGoneViews(true)
-                edtSearch.setText("")
-                btnSearch.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                isFiltering = false
-                showKeyboard(false, edtSearch)
-            }
-        }
-    }
-    private fun visibleOrGoneViews(isVisible:Boolean)=with(bind){
-        this?.let {
-            tilSearch?.visibility = if(isVisible)View.GONE else View.VISIBLE
-            btnClose?.visibility = if(isVisible)View.GONE else View.VISIBLE
-            btnMenu?.visibility = if(isVisible)View.VISIBLE else View.GONE
-            btnFilter?.visibility = if(isVisible)View.VISIBLE else View.GONE
-            btnMainEq?.visibility = if(isVisible)View.VISIBLE else View.GONE
-            tvPlayListName?.visibility = if(isVisible)View.VISIBLE else View.GONE
-        }
-    }
-    private fun visibleOrGoneBottomActions(isVisible:Boolean)=with(bind){
-        this?.let{
-            btnAdd.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
-            btnFavorite.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
-            btnSearch.visibility = if(isVisible)View.VISIBLE else View.INVISIBLE
-            btnMore.visibility = if(isVisible) View.VISIBLE else View.INVISIBLE
-            btnDelete?.visibility = if(isVisible)View.GONE else View.VISIBLE
-        }
-    }
-    private fun showKeyboard(show:Boolean, view:View){
-        activity?.showOrHideKeyboard(show,view,{ _->// isShown
-            view.requestFocus()
-        },{ // isHide
-            CoroutineScope(Dispatchers.Main).launch {
-                delay(1000)
-                musicListAdapter?.changeBackgroundColorSelectedItem( mPrefs.idSong)
-            }
-        })
-    }
-    private fun onItemClick(position:Int,song: SongEntity){
-       musicListAdapter?.getPositionByItem(song)?.let { pos->
-            musicPlayerService?.startPlayer(song)
-            mPrefs.idSong = song.id
-            mainViewModel.setCurrentPosition(pos.first)
-        }
-    }
-    private fun onMenuItemClick(view:View, position: Int, selectedSong: SongEntity) {
-        onMenuItemPopup(true,requireActivity(),view,{ // Delete item callback
-            mainViewModel.deleteSong(selectedSong)
-            this.song=selectedSong
-        },{ // Delete all items callback
-            musicListAdapter?.removeAll()
-            mainViewModel.deleteAllSongs()
-        },{ // Send to playlist callback
-            if(playListAdapter?.itemCount!! > 0){
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                idSongForSendToPlaylist = selectedSong.id
-            }
-        },{
-            mainViewModel.updateSong(selectedSong.copy(favorite = true))
-        },{
-            SongInfoDialogFragment.newInstance(SongEntity(id=selectedSong.id, pathLocation = selectedSong.pathLocation))
-                .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
-        })
-    }
-    fun setNumberOfTrack(scrollToPosition:Boolean=true,itemCount:Int=0){
-        val itemSong = musicListAdapter?.getSongById(mPrefs.idSong)
-        itemSong?.let{
-            val (numberedPos, realPos) = musicListAdapter?.getPositionByItem(itemSong)!!
-            mPrefs.currentIndexSong = numberedPos.toLong()
-            musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
-            if(scrollToPosition)bind?.rvSongs?.scrollToPosition(realPos)
-        }
-        playbackControlsFragment?.setNumberOfTracks((if(mPrefs.currentIndexSong>-1)mPrefs.currentIndexSong else 0).toInt(),(musicListAdapter?.getSongItemCount()!! + itemCount))
-    }
-    private fun updateService(){
-        serviceConnection?.let{startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
-    }
-    override fun play() {
-        super.play()
-        musicPlayerService?.resumePlayer()
-        mainViewModel.saveStatePlaying(true)
-    }
-    override fun pause() {
-        super.pause()
-        musicPlayerService?.pausePlayer()
-        mainViewModel.saveStatePlaying(false)
-    }
-    override fun stop() {
-        super.stop()
-        activity?.finish()
-    }
-    override fun musicState(musicState: MusicState?) {
-        super.musicState(musicState)
-        musicState?.let {mainViewModel.setMusicState(musicState)}
-    }
-    override fun currentTrack(musicState: MusicState?) {
-        super.currentTrack(musicState)
-        musicState?.let{mainViewModel.setCurrentTrack(musicState)}
-    }
-    // El método sobreescrito onConnectedService no se dispara aquí debido a que se ejecuta después del primer fragmento
-    // La conexión al servicio la obtenemos a través del view model enviado desde main activity
-    override fun onServiceDisconnected() {
-        super.onServiceDisconnected()
-        musicPlayerService = null
-    }
-    override fun onPause() {
-        super.onPause()
-        setNumberOfTrack()
-    }
-    override fun onResume() {
-        super.onResume()
-        setNumberOfTrack()
-        mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
-        mainViewModel.reloadSongInfo()
-    }
-    override fun onStop() {
-        mPrefs.currentView = MAIN_FRAGMENT
-        mainViewModel.saveCurrentStateSong(currentMusicState)
-        super.onStop()
-    }
      companion object {
          var instance: ListPlayerFragment? = null
-         var musicListAdapter: MusicListAdapter? = null
-         lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-         var isFiltering: Boolean = false
-         var btmSheetIsExpanded: Boolean = false
-
          @JvmStatic
          fun newInstance(param1: Int, param2: String) =
              ListPlayerFragment().apply {
@@ -650,6 +113,33 @@ class ListPlayerFragment : AbsBaseFragment(R.layout.fragment_list_player){
                  }
              }
     }
+
+    override fun currentTrack(musicState: MusicState?) {
+        super.currentTrack(musicState)
+        mainViewModel.setCurrentTrack(musicState!!)
+    }
+
+    override fun musicState(musicState: MusicState?) {
+        super.musicState(musicState)
+        mainViewModel.setMusicState(musicState!!)
+    }
+    override fun play() {
+        super.play()
+        musicPlayerService?.resumePlayer()
+        mainViewModel.saveStatePlaying(true)
+    }
+
+    override fun pause() {
+        super.pause()
+        musicPlayerService?.pausePlayer()
+        mainViewModel.saveStatePlaying(false)
+    }
+
+    override fun stop() {
+        super.stop()
+        activity?.finish()
+    }
+
     interface OnFinishedLoadSongs{
         fun onFinishLoad()
     }

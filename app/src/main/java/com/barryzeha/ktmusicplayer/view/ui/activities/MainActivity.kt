@@ -38,6 +38,7 @@ import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
@@ -300,13 +301,13 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         if(bind.mainDrawerLayout.isOpen){
             bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
         }
-        else if(ListPlayerFragment.isFiltering){
-            ListPlayerFragment.instance?.hideSearchBar()
+        else if(ListFragment.isFiltering){
+            ListFragment.instance?.hideSearchBar()
         }
         else{
             checkedSelectedMenuDrawerItems()
             if(mPrefs.currentView == SONG_LIST_FRAGMENT){
-                if (ListPlayerFragment.btmSheetIsExpanded)ListPlayerFragment.bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
+                if (ListFragment.btmSheetIsExpanded)ListFragment.bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
                 else {
                     bind.mViewPager.setCurrentItem(MAIN_FRAGMENT, true)
                     bind.navView.menu[MAIN_FRAGMENT].setChecked(true)

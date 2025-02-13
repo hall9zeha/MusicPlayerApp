@@ -101,6 +101,10 @@ dependencies {
     implementation(libs.disc.cover.view)
     // Splash screen
     implementation(libs.core.splashscreen)
+    // Navigation
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.runtime.ktx)
     // Modules
     implementation(project(":core"))
     implementation(project(":data"))
