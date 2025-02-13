@@ -42,6 +42,7 @@ import com.barryzeha.core.common.PREVIOUS
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
+import com.barryzeha.core.common.fetchShortFileMetadata
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.showSnackBar
@@ -921,15 +922,14 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {
         val songPath = song.pathLocation.toString()
-        val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!
+        val songMetadata = fetchShortFileMetadata(applicationContext!!, songPath)!!
         return MusicState(
             idSong = song.id,
             isPlaying = playingState(),
             title = songMetadata.title,
             artist = songMetadata.artist,
             album = songMetadata.album,
-            //albumArt = songMetadata.albumArt,
-            duration = songMetadata.duration,
+            duration = songMetadata.songLength,
             songPath = songPath,
             latestPlayed = false
         )

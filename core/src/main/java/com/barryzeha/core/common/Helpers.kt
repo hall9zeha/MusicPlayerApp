@@ -191,7 +191,7 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
 
         // Extract audio header data with default values
         val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
-        val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong() } catch (ex: Exception) { 0L }
+        val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong()} catch (ex: Exception) { 0L }
         val songLengthFormatted = try { getTimeOfSong(songLength) } catch (ex: Exception) { "0" }
 
         return AudioMetadata(
@@ -221,19 +221,13 @@ fun getTimeOfSong(duration:Long):String{
         TimeUnit.MILLISECONDS.toSeconds(duration) -
         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)))
 }
-fun getBitrate(pathFile: String): Int? {
-    val retriever = MediaMetadataRetriever()
-    retriever.setDataSource(pathFile)
-    val bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toInt()
-    retriever.release()
-    return bitrate?.div(1000)
-}
+
 fun createTime(duration: Long): Triple<Int,Int,String> {
     val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
     val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) -
             TimeUnit.MINUTES.toSeconds(minutes)
     // Formatear la duración en un String
-    val formattedDuration = String.format("%02d:%02d", minutes, seconds)
+    val formattedDuration = String.format(Locale.ROOT,"%02d:%02d", minutes, seconds)
     return Triple(minutes.toInt(),seconds.toInt(),formattedDuration)
 }
 fun getBiteArrayOfImageEmbedded(pathFile: String?):ByteArrayInputStream?{
@@ -245,18 +239,23 @@ fun getBiteArrayOfImageEmbedded(pathFile: String?):ByteArrayInputStream?{
             null
         }
 }
-fun getSongMetadata(context: Context, path: String?, isForNotify:Boolean=false): MusicState? {
+fun getSongMetadata(context: Context, path: String?,withBitmap:Boolean=false, isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
         val metadata=fetchFileMetadata(context,path)
-        val bitmap = getBitmap(context,path,isForNotify)!!
+        val bitmap = if(withBitmap)getBitmap(context,path,isForNotify)!!else null
         metadata?.let {
-            return MusicState(
+            return if(bitmap !=null) MusicState(
                 title = metadata?.title!!,
                 artist = metadata?.artist!!,
                 album = metadata?.album!!,
                 duration = metadata.songLength,
                 albumArt = bitmap
-            )
+            )else   MusicState(
+                    title = metadata?.title!!,
+                    artist = metadata?.artist!!,
+                    album = metadata?.album!!,
+                    duration = metadata.songLength)
+
         }
         return null
     }

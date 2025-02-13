@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
+import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getFragment
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.keepScreenOn
@@ -352,7 +353,7 @@ class ListPlayerFragment : AbsBaseFragment(R.layout.fragment_list_player){
     private fun updateUIOnceTime(musicState:MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
-            val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
+            val albumArt = getBitmap(requireContext(),musicState.songPath)
             ivCover.loadImage(albumArt!!)
             playbackControlsFragment?.updateUIOnceTime(musicState)
             musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)

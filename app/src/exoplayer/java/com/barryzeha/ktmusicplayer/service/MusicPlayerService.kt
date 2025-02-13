@@ -42,6 +42,7 @@ import com.barryzeha.core.common.ACTION_CLOSE
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.fetchShortFileMetadata
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.model.ServiceSongListener
@@ -1028,8 +1029,8 @@ class MusicPlayerService : Service(){
     }
     private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {
-        val songPath = song.pathLocation.toString()
-        val songMetadata = getSongMetadata(applicationContext!!, songPath, isForNotify = true)!!
+            val songPath = song.pathLocation.toString()
+            val songMetadata = fetchShortFileMetadata(applicationContext!!, songPath)!!
         return MusicState(
             idSong = song.id,
             isPlaying = exoPlayer.isPlaying,
@@ -1037,7 +1038,7 @@ class MusicPlayerService : Service(){
             artist = songMetadata.artist,
             album = songMetadata.album,
             //albumArt = songMetadata.albumArt,
-            duration = songMetadata.duration,
+            duration = songMetadata.songLength,
             songPath = songPath,
             latestPlayed = false
         )

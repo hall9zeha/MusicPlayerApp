@@ -205,7 +205,6 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     }
     fun updateUI(musicState: MusicState)=with(bind){
         loadSeekBar.max = musicState.duration.toInt()
-        tvEndTime.text = createTime(musicState.duration).third
         tvInitTime.text = createTime(musicState.currentDuration).third
         loadSeekBar.progress = musicState.currentDuration.toInt()
 

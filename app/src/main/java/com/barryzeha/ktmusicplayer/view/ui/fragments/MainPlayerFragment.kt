@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -27,6 +28,7 @@ import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getEmbeddedSyncedLyrics
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
@@ -271,11 +273,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     }
     private fun updateUIOnceTime(musicState: MusicState)=with(bind){
         this?.let {
-            val albumArt = getSongMetadata(requireContext(), musicState.songPath)?.albumArt
+            val albumArt = getBitmap(requireContext(),musicState.songPath)
             tvSongAlbum.text = musicState.album
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
-
             (ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
             (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
 
