@@ -5,12 +5,10 @@ import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ServiceConnection
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -18,12 +16,10 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.viewModels
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MAIN_FRAGMENT
-import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
@@ -39,14 +35,12 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.animateButtonsAbLoop
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
-import com.barryzeha.ktmusicplayer.common.changeColorOfIcon
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
-import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.library.components.DiscCoverView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -54,7 +48,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
@@ -72,7 +65,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     private var isFavorite:Boolean = false
     //private val mainViewModel:MainViewModel by activityViewModels()
     private var listener: OnFragmentReadyListener? = null
-
     // Forward and rewind
     private var fastForwardingOrRewind = false
     private var fastForwardOrRewindHandler: Handler? = null
@@ -80,6 +72,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     private var coverViewClicked=false
     private var frontAnimator:AnimatorSet?=null
     private var backAnimator:AnimatorSet?=null
+    private var listFragmentInstance:ListFragment?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -161,6 +155,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     private fun setUpObservers(){
         (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
         (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
+        mainViewModel.fragmentInstance.observe(viewLifecycleOwner){instance->
+            if(instance is ListFragment) listFragmentInstance = instance as ListFragment
+        }
         mainViewModel.fetchAllSongFromMain()
         mainViewModel.allSongFromMain.observe(viewLifecycleOwner){songs->
             CoroutineScope(Dispatchers.IO).launch {
@@ -173,6 +170,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
            it?.let{currentTrack->
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                updateUIOnceTime(currentTrack)
+               setNumberOfTrack(mPrefs.idSong)
            }
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
@@ -327,9 +325,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     fun setNumberOfTrack(songId:Long? = null){
         CoroutineScope(Dispatchers.IO).launch {
         if(songId != null && songId >-1) {
-                val song = ListFragment.musicListAdapter?.getSongById(songId.toLong())
-            song?.let {
-               val (itemNumOnList, _) = ListFragment.musicListAdapter?.getPositionByItem(song as SongEntity)
+                val song = listFragmentInstance?.musicListAdapter?.getSongById(songId.toLong())
+               song?.let {
+               val (itemNumOnList, _) = listFragmentInstance?.musicListAdapter?.getPositionByItem(song as SongEntity)
                     ?: Pair(0, 0)
                 withContext(Dispatchers.Main) {
                     bind?.tvNumberSong?.text = String.format(
@@ -486,7 +484,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
             }
             btnMainNext.setOnClickListener {
                 checkCoverViewStyle()
-                if (musicPlayerService?.getCurrentSongPosition()!! < ListFragment.musicListAdapter?.itemCount!! - 1) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < listFragmentInstance?.musicListAdapter?.itemCount!! - 1) {
                       musicPlayerService?.nextSong()
                 } else {
                     getSongOfList(0)?.let{song->

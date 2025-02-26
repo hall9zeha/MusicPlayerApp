@@ -4,13 +4,9 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
@@ -24,9 +20,7 @@ import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.SmallPlayerControlsBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
-import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
-import kotlin.math.log
 
 /**
  * Project KTMusicPlayer
@@ -43,14 +37,38 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     private var forwardOrRewindRunnable:Runnable?=null
     private var musicListAdapter:MusicListAdapter?=null
     private var isPlaying:Boolean=false
-    private var parentFragment:ListFragment?=null
+    private var listFragmentInstance:ListFragment?=null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _bind = SmallPlayerControlsBinding.bind(view)
+        mainViewModel.sharedControlsPlayerFragmentInstance(this)
         setupListeners()
+        setupObservers()
+
+    }
+    fun setNumberOfTracks(){
+        listFragmentInstance?.setNumberOfTrack()?.let{(currentTrack, totalTracks)->
+            bind.tvNumberSong.text=String.format("#%s/%s", currentTrack, totalTracks)
+        }
+    }
+    fun setAdapterInstance(musicAdapter:MusicListAdapter){
+        musicListAdapter=musicAdapter
+    }
+    fun setListMusicFragmentInstance(instance:Any){
+        listFragmentInstance = if(instance is ListFragment) instance else null
+        listFragmentInstance?.setNumberOfTrack()
+    }
+    private fun setupObservers(){
+        mainViewModel.fragmentInstance.observe(viewLifecycleOwner){instance->
+            if(instance is ListFragment) {
+                listFragmentInstance = instance as ListFragment
+                setNumberOfTracks()
+            }
+        }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
             updateUIOnceTime(it)
+            setNumberOfTracks()
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
             updateUI(it)
@@ -58,15 +76,6 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         mainViewModel.isPlaying.observe(viewLifecycleOwner){
             updatePlayerStateUI(it)
         }
-    }
-    fun setNumberOfTracks(currentTrack:Int, totalTracks:Int){
-        bind.tvNumberSong.text=String.format("#%s/%s", currentTrack, totalTracks)
-    }
-    fun setAdapterInstance(musicAdapter:MusicListAdapter){
-        musicListAdapter=musicAdapter
-    }
-    fun setListMusicFragmentInstance(instance:Any){
-        parentFragment = if(instance is ListFragment) instance else null
     }
 
     private fun setupListeners()=with(bind){
@@ -91,17 +100,20 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
          btnPrevious.setOnClickListener {
              if (musicPlayerService?.getCurrentSongPosition()!! > 0) {
                      musicPlayerService?.prevSong()
-                     parentFragment?.setNumberOfTrack(true)
+                     listFragmentInstance?.setNumberOfTrack(true)
+                 setNumberOfTracks()
              }
          }
          btnNext.setOnClickListener {
              if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!! - 1) {
                     musicPlayerService?.nextSong()
-                    parentFragment?.setNumberOfTrack(true)
+                    listFragmentInstance?.setNumberOfTrack(true)
+                 setNumberOfTracks()
                  }
              else {
                  getSongOfAdapter(0)?.let { song ->
                      musicPlayerService?.startPlayer(song)
+                     setNumberOfTracks()
                  }
              }
          }
@@ -198,7 +210,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
             val (numberedPosition, realPosition) =  musicListAdapter?.getPositionByItem(it)!!
             mainViewModel.setCurrentPosition(realPosition)
             mPrefs.currentIndexSong = numberedPosition.toLong()
-            parentFragment?.setNumberOfTrack(true)
+            listFragmentInstance?.setNumberOfTrack(true)
             recyclerView?.scrollToPosition(realPosition)
             return song
         }
@@ -214,7 +226,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         loadSeekBar.max = musicState.duration.toInt()
         tvInitTime.text = createTime(musicState.currentDuration).third
     }
-    fun updateUI(musicState: MusicState)=with(bind){
+    private fun updateUI(musicState: MusicState)=with(bind){
         loadSeekBar.max = musicState.duration.toInt()
         tvInitTime.text = createTime(musicState.currentDuration).third
         loadSeekBar.progress = musicState.currentDuration.toInt()
@@ -242,26 +254,36 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
             }
         }
     }
-    //Todo revisar porqué se necesita implementar algunos métodos y no solamente usar el viewModel del fragment base
-    override fun musicState(musicState: MusicState?) {
-        super.musicState(musicState)
-        musicState?.let{
-        mainViewModel.setMusicState(musicState)}
+    override fun play() {
+        super.play()
+        musicPlayerService?.resumePlayer()
+        mainViewModel.saveStatePlaying(true)
     }
-    override fun currentTrack(musicState: MusicState?) {
-        super.currentTrack(musicState)
-        musicState?.let { mainViewModel.setCurrentTrack(musicState) }
+
+    override fun pause() {
+        super.pause()
+        musicPlayerService?.pausePlayer()
+        mainViewModel.saveStatePlaying(false)
+
     }
+    override fun stop() {
+        super.stop()
+        activity?.finish()
+    }
+
     override fun next() {
         super.next()
-        bind.btnNext.performClick()
+        setNumberOfTracks()
     }
+
     override fun previous() {
         super.previous()
-        bind.btnPrevious.performClick()
+        setNumberOfTracks()
     }
+
     override fun onResume() {
         super.onResume()
         checkPlayerSongModePreferences()
+        setNumberOfTracks()
     }
 }

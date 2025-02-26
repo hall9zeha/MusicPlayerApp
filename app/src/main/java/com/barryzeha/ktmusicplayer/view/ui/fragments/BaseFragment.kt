@@ -15,6 +15,7 @@ import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
+import com.barryzeha.ktmusicplayer.view.ui.activities.AbsMusicServiceActivity
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
@@ -35,9 +36,10 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
 
     @Inject
     lateinit var mPrefs:MyPreferences
-    var baseActivity: MainActivity? = null
+    var baseActivity: AbsMusicServiceActivity? = null
         private set
     protected val mainViewModel: MainViewModel by viewModels(ownerProducer = {requireActivity()})
+    private val mMusicPlayerServiceListeners = ArrayList<ServiceSongListener>()
     protected var serviceConnection:ServiceConnection?=null
     protected var musicPlayerService: MusicPlayerService?=null
     protected var isUserSeeking=false
@@ -47,7 +49,7 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
-            baseActivity = context as MainActivity?
+            baseActivity = context as AbsMusicServiceActivity?
 
         } catch (e: ClassCastException) {
             Log.e("EXCEPTION", e.message.toString())
@@ -68,31 +70,39 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
             musicPlayerService=serviceInst
         }
     }
+
     @CallSuper
     override fun onResume() {
         super.onResume()
-        baseActivity?.registerSongListener(this)
-
+        baseActivity?.registerMusicServiceListener(this)
     }
     @CallSuper
     override fun onPause() {
         super.onPause()
-        baseActivity?.unregisterSongListener()
+        baseActivity?.unregisterMusicServiceListener(this)
     }
     @CallSuper
     override fun onDestroyView() {
         super.onDestroyView()
-        baseActivity?.unregisterSongListener()
+        baseActivity?.unregisterMusicServiceListener(this)
     }
-    override fun play() {}
-    override fun pause() {}
-    override fun next() {}
-    override fun previous() {}
-    override fun stop() {}
-    override fun musicState(musicState: MusicState?) {}
-    override fun currentTrack(musicState: MusicState?) {}
+    override fun play() {
+    }
+    override fun pause() {
+    }
+    override fun next() {
+    }
+    override fun previous() {
+    }
+    override fun stop() {
+    }
+    override fun musicState(musicState: MusicState?) {
+    }
+    override fun currentTrack(musicState: MusicState?) {
+    }
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
     }
-    override fun onServiceDisconnected() {}
+    override fun onServiceDisconnected() {
+    }
 
 }

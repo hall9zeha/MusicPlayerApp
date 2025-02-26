@@ -11,12 +11,13 @@
         tools:progress="50"
         android:thumb="@drawable/seekbar_thumb"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="0dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnRepeat"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="@id/btnPlay"
+        app:layout_constraintBottom_toBottomOf="@id/btnPlay"
+        />
     <TextView
         android:id="@+id/tvInitTime"
         android:layout_width="wrap_content"
@@ -59,7 +60,9 @@
         app:iconTint="@color/controls_colors"
         android:clickable="true"
         android:focusable="true"
+        android:layout_marginStart="4dp"
         style="@style/Widget.Material3.Button.IconButton"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/btnPlay"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnPrevious"
@@ -78,6 +81,7 @@
         app:iconSize="30dp"
         app:iconTint="@color/controls_colors"
         style="@style/Widget.Material3.Button.IconButton"
+        app:layout_constraintStart_toEndOf="@id/btnShuffle"
         app:layout_constraintEnd_toStartOf="@id/btnPlay"
         app:layout_constraintTop_toTopOf="@id/btnPlay"
         app:layout_constraintBottom_toBottomOf="@id/btnPlay"
@@ -96,9 +100,9 @@
         app:iconSize="48dp"
         app:iconTint="@color/controls_colors"
         style="@style/Widget.Material3.Button.IconButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvNumberSong"
+        app:layout_constraintStart_toEndOf="@id/btnPrevious"
+        app:layout_constraintEnd_toStartOf="@id/btnNext"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
 

@@ -24,7 +24,7 @@
     <fragment
         android:id="@+id/action_playlist"
         android:name="com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment"
-        android:label=""
+        android:label="ListFragment"
         tools:layout="@layout/fragment_playlist"/>
 
 </navigation>

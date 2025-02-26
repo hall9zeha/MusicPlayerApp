@@ -156,8 +156,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                         ).adjustAlpha(0.3f) else ContextCompat.getColor(
                             context,
                             com.barryzeha.core.R.color.primaryColor
-                        )
-                            .adjustAlpha(0.3f)
+                        ).adjustAlpha(0.3f)
                     )
                 )
             }
@@ -180,7 +179,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         this.originalList=songs.toMutableList()
         setUpSongEntitiesIndices()
         submitList(songs)
-
     }
 
     fun update(song:SongEntity){

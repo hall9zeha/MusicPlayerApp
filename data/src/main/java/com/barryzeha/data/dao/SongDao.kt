@@ -45,6 +45,11 @@ interface  SongDao {
     @Transaction
     @Query("select * from SongEntity where id = :idSong")
     suspend fun fetchSongById(idSong:Long): SongEntity
+
+    @Transaction
+    @Query("select * from SongEntity where album=:albumName")
+    suspend fun fetchSongsByAlbum(albumName:String):List<SongEntity>
+
     @Transaction
     @Insert
     suspend fun saveNewSong(song: SongEntity):Long

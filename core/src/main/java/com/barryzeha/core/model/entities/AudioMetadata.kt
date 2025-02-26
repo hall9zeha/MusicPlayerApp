@@ -12,6 +12,7 @@ import android.graphics.Bitmap
 data class AudioMetadata(
     val artist: String="",
     val album: String="",
+    val albumArtist:String="",
     val genre:String="",
     val title: String="",
     val comment: String="",

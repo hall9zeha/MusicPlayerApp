@@ -4,6 +4,7 @@ import android.content.ServiceConnection
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
@@ -17,6 +18,7 @@ import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
+import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,8 +41,14 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var countItemsInserted:Long=0
     private var itemsCount:Long=0
 
+    private var _navControllerInstance:MutableLiveData<NavController> = MutableLiveData()
+    val navControllerInstance:LiveData<NavController> = _navControllerInstance
+
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
+
+    private var _songsByAlbum:SingleMutableLiveData<List<SongEntity>> = SingleMutableLiveData()
+    val songsByAlbum:LiveData<List<SongEntity>> = _songsByAlbum
 
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
     val songState:LiveData<List<SongStateWithDetail>> = _songState
@@ -66,7 +74,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
 
     private var _deleteAllRows:SingleMutableLiveData<Int> = SingleMutableLiveData()
     val deleteAllRows:LiveData<Int> = _deleteAllRows
-
+    private var _deletePlayList:SingleMutableLiveData<Int> = SingleMutableLiveData()
+    val deletePlayList:LiveData<Int> = _deletePlayList
     private var _songById:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 
@@ -101,6 +110,13 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var _isSongTagEdited:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val isSongTagEdited:LiveData<SongEntity> = _isSongTagEdited
 
+    // Shared fragments instance
+    private var _fragmentInstance:MutableLiveData<Any> = MutableLiveData()
+    val fragmentInstance:LiveData<Any> = _fragmentInstance
+
+    private var _controlsFragmentInstance:MutableLiveData<PlaybackControlsFragment> = MutableLiveData()
+    val controlsFragmentInstance:LiveData<PlaybackControlsFragment> = _controlsFragmentInstance
+
     init{
         initScope()
 
@@ -132,6 +148,12 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
             _allSongFromMain.value=repository.fetchAllSongs()
         }
     }
+    fun fetchSongsByAlbum(album:String){
+        launch{
+            _songsByAlbum.value = repository.fetchSongsByAlbum(album)
+        }
+    }
+
     // SongState
     fun fetchSongState(){
         launch{
@@ -255,7 +277,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     }
     fun deletePlayList(playlistId: Long){
         launch{
-            repository.deletePlaylist(playlistId)
+            _deletePlayList.value = repository.deletePlaylist(playlistId)
         }
     }
     fun updatePlaylist(playlistEntity: PlaylistEntity){
@@ -294,6 +316,23 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     fun setIsSongTagEdited(songEntity:SongEntity){
         launch{
             _isSongTagEdited.value = songEntity
+        }
+    }
+    // Fragment instance
+    fun sharedFragmentInstance(fragmentInstance: Any){
+        launch{
+            _fragmentInstance.value=fragmentInstance
+        }
+    }
+    fun sharedControlsPlayerFragmentInstance(fragmentInstance:PlaybackControlsFragment){
+        launch {
+            _controlsFragmentInstance.value = fragmentInstance
+        }
+    }
+    // Nav controller instance
+    fun saveNavControllerInstance(navController: NavController){
+        launch{
+            _navControllerInstance.value = navController
         }
     }
     // Recargar la información de la pista
@@ -340,7 +379,4 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
         destroyScope()
         super.onCleared()
     }
-
-
-
 }

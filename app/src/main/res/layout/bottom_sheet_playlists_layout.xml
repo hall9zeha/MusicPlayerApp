@@ -9,7 +9,6 @@
     app:behavior_hideable="true"
     app:behavior_skipCollapsed = "false"
     android:paddingBottom="16dp"
-    android:background="@drawable/bottom_sheet_bg"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     >
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -9,15 +10,15 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.GravityCompat
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getBitmap
-import com.barryzeha.core.common.getFragment
+import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.showOrHideKeyboard
@@ -27,6 +28,7 @@ import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.LIST_FRAGMENT
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.common.getPlayListName
@@ -34,17 +36,15 @@ import com.barryzeha.ktmusicplayer.common.onMenuActionAddPopup
 import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
 import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.common.sortPlayList
-import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.databinding.FragmentPlaylistBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
+import com.barryzeha.ktmusicplayer.view.ui.dialog.PlaylistDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
-
-import com.barryzeha.ktmusicplayer.view.ui.fragments.AbsBaseFragment
-import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.BaseFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
@@ -63,12 +63,10 @@ import kotlinx.coroutines.launch
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
+class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     private var bind: FragmentPlaylistBinding? = null
     private val binding: FragmentPlaylistBinding get() = bind!!
-
-    override val recyclerView: RecyclerView?
-        get() = binding.rvSongs
+    var musicListAdapter: MusicListAdapter? = null
 
     private var param1: String? = null
     private var param2: String? = null
@@ -85,6 +83,7 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
     private var isFavorite: Boolean = false
 
     private var idSongForSendToPlaylist: Long = 0
+
     //private var musicListAdapter:MusicListAdapter?=null
 
     private var onFinisLoadSongsListener: OnFinishedLoadSongs? = null
@@ -98,23 +97,32 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        activity?.setTheme(requireContext().getThemeResValue())
         super.onViewCreated(view, savedInstanceState)
         bind = FragmentPlaylistBinding.bind(view)
         //TODO implementar luego o en un viewModel la finalización de carga de la lista si es necesario
         //onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
+        navController=findNavController()
+        setupSubFragments()
         setUpAdapter()
         setUpPlayListAdapters()
         setUpObservers()
-        setupSubFragments()
         setUpPlayListName()
         filePickerActivityResult()
         audioEffectActivityResult()
         activityResultForPermission()
         setUpListeners()
-        setupBottomSheet()
+        mainViewModel.sharedFragmentInstance(this)
     }
+    private fun setupSubFragments(){
 
+       /* playbackControlsFragment = parentFragmentManager.findFragmentById(R.id.miniPlayerControls) as PlaybackControlsFragment
+        playbackControlsFragment?.let{
+            it.setListMusicFragmentInstance(this)
+            playbackControlsCallback = it
+        }*/
+    }
     private fun handleArgumentsSending() {
         arguments?.let { arg ->
             val playlistId = arg.getInt(ARG_PARAM1)
@@ -155,12 +163,6 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
                 }
             }
     }
-
-    private fun setupSubFragments() {
-        playbackControlsFragment = getFragment(R.id.miniPlayerControls)
-        playbackControlsFragment?.let { it.setListMusicFragmentInstance(this) }
-    }
-
     private fun setUpAdapter() {
         musicListAdapter = MusicListAdapter(::onItemClick, ::onMenuItemClick)
         bind?.rvSongs?.apply {
@@ -172,7 +174,6 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
                 setNumberOfTrack()
             }
         }
-        playbackControlsFragment?.setAdapterInstance(musicListAdapter!!)
     }
 
     private fun setUpPlayListAdapters() {
@@ -191,7 +192,6 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
             // Al eliminar un item
             mainViewModel.deletePlayList(playlist.idPlaylist)
             playListAdapter?.remove(playlist)
-            resizeBottomSheet()
             (activity as? MainActivity)?.removeMenuItemDrawer(playlist.idPlaylist.toInt())
 
         }, { playlist ->
@@ -211,16 +211,19 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
         mPrefs.playlistId = playlistId
         musicPlayerService?.clearPlayList(false)
         mainViewModel.fetchPlaylistWithSongsBy(playlistId, mPrefs.playListSortOption)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
     }
 
     private fun setUpObservers() {
-
+        mainViewModel.controlsFragmentInstance.observe(viewLifecycleOwner){instance->
+            playbackControlsFragment = instance
+        }
         mainViewModel.musicState.observe(viewLifecycleOwner) { musicState ->
             updateUI(musicState)
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner) { currentTRack ->
             updateUIOnceTime(currentTRack)
+            playbackControlsFragment?.setNumberOfTracks()
             setNumberOfTrack(false)
         }
         mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner) { (totalRegisters, count) ->
@@ -251,6 +254,7 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
                     //TODO mejorar la obtención del número de pista/total pistas en el fragmento principal
                     MainPlayerFragment.instance?.setNumberOfTrack(mPrefs.idSong)
                     onFinisLoadSongsListener?.onFinishLoad()
+                    mainViewModel.sharedFragmentInstance(this@ListFragment)
                 }
                 bind?.pbLoad?.visibility = View.GONE
                 bind?.pbLoad?.isIndeterminate = true
@@ -303,80 +307,12 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if (isFavorite) com.barryzeha.core.R.drawable.ic_favorite_fill else com.barryzeha.core.R.drawable.ic_favorite)
         }
-        // Playlist
-        mainViewModel.createdPlayList.observe(viewLifecycleOwner) { insertedRow ->
-            if (insertedRow > 0) {
-                Toast.makeText(
-                    activity,
-                    com.barryzeha.core.R.string.playlistCreatedMsg,
-                    Toast.LENGTH_SHORT
-                ).show()
-                mainViewModel.fetchPlaylists()
-            }
-        }
-        mainViewModel.playLists.observe(viewLifecycleOwner) { playLists ->
-            playListAdapter?.let {
-                it.addAll(playLists)
-                resizeBottomSheet()
-                (activity as? MainActivity)?.addItemOnMenuDrawer(playLists)
-            }
-        }
-        mainViewModel.playlistWithSongRefInserted.observe(viewLifecycleOwner) { insertedRow ->
-            if (insertedRow > 0) {
-                Toast.makeText(
-                    activity,
-                    com.barryzeha.core.R.string.addedToPlaylist,
-                    Toast.LENGTH_SHORT
-                ).show()
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-                // Reiniciamos el valor para evitar inconvenientes, lo usaremos para nuestra lógica
-                // cuando es mayor que cero agregar a lista y si es cero, cambiar entre listas
-                idSongForSendToPlaylist = 0
-                // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
-            }
-        }
         mainViewModel.isSongTagEdited.observe(viewLifecycleOwner) { song ->
             song?.let {
                 musicListAdapter?.update(song)
             }
         }
     }
-
-    private fun resizeBottomSheet() {
-        if (btmSheetIsExpanded) {
-            val behavior =
-                BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
-            val itemCount = playListAdapter?.itemCount ?: 0
-
-            if (itemCount > 0) {
-                // Obtener la altura de un solo item en el RecyclerView
-                var itemHeight =
-                    bind?.bottomSheetView?.rvPlaylists?.getChildAt(0)?.height?.plus(24) ?: 0
-                val recyclerViewHeight = bind?.bottomSheetView?.rvPlaylists?.height ?: 0
-
-                // Cálculo para el padding
-                val paddingTop = bind?.bottomSheetView?.rvPlaylists?.paddingTop ?: 0
-                val paddingBottom = bind?.bottomSheetView?.rvPlaylists?.paddingBottom ?: 0
-                itemHeight += paddingTop
-
-                // Calcula la altura total de acuerdo a la cantidad de elementos en la lista
-                val totalHeight: Int = if (itemCount > 0) {
-                    // Multiplica la altura del item por la cantidad de items
-                    (itemHeight * itemCount) + paddingTop + paddingBottom
-                } else {
-                    recyclerViewHeight // Si no hay items, usar la altura del RecyclerView
-                }
-                // Ajusta la altura del BottomSheet
-                val layoutParams = bind?.bottomSheetView?.listsBottomSheet?.layoutParams
-                layoutParams?.height = totalHeight
-
-                // Actualiza el estado del BottomSheet
-                behavior.peekHeight = 0 // Esta es la altura del BottomSheet cuando está minimizado
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-    }
-
     private fun setUpPlayListName() = with(bind) {
         this?.let {
             getPlayListName(mPrefs) { headerTextRes ->
@@ -384,7 +320,6 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
             }
         }
     }
-
     private fun updateUIOnceTime(musicState: MusicState) = with(bind) {
         this?.let {
             currentMusicState = musicState
@@ -406,7 +341,6 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
     private fun updateUI(musicState: MusicState) {
         currentMusicState = musicState
         mPrefs.currentPosition = musicState.currentDuration
-        playbackControlsFragment?.updateUI(musicState)
         updateService()
     }
 
@@ -420,15 +354,7 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
             }
         this?.let {
             tvPlayListName.setOnClickListener {
-                if (btmSheetIsExpanded) bottomSheetBehavior.state =
-                    BottomSheetBehavior.STATE_COLLAPSED
-                else {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                    CoroutineScope(Dispatchers.Main).launch {
-                        delay(500)
-                        resizeBottomSheet()
-                    }
-                }
+                PlaylistDialogFragment().show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
             }
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
@@ -531,40 +457,10 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
                         )
                     )
                         .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
-                })
-            }
-            bottomSheetView.btnAdd.setOnClickListener {
-                createNewPlayListDialog(requireActivity()) { playlistName ->
-                    mainViewModel.createPlayList(PlaylistEntity(playListName = playlistName))
-                }
+                },{})
             }
         }
     }
-
-    private fun setupBottomSheet() {
-        bottomSheetBehavior = BottomSheetBehavior.from(bind?.bottomSheetView?.listsBottomSheet!!)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        bottomSheetBehavior.addBottomSheetCallback(object :
-            BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                when (newState) {
-                    BottomSheetBehavior.STATE_EXPANDED -> {
-                        btmSheetIsExpanded = true
-                    }
-
-                    BottomSheetBehavior.STATE_COLLAPSED -> {
-                        val behavior =
-                            BottomSheetBehavior.from<ConstraintLayout>(bind?.bottomSheetView?.listsBottomSheet!!)
-                        behavior.peekHeight = 0
-                        btmSheetIsExpanded = false
-                    }
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-        })
-    }
-
     private fun showOrHideSearchbar() = with(bind) {
         this?.let {
             if (!isFiltering) {
@@ -629,8 +525,10 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
     private fun onItemClick(position: Int, song: SongEntity) {
         musicListAdapter?.getPositionByItem(song)?.let { pos ->
             musicPlayerService?.startPlayer(song)
+            musicPlayerService?.clearABLoopOfPreferences()
             mPrefs.idSong = song.id
             mainViewModel.setCurrentPosition(pos.first)
+
         }
     }
 
@@ -643,8 +541,7 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
             mainViewModel.deleteAllSongs()
         }, { // Send to playlist callback
             if (playListAdapter?.itemCount!! > 0) {
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                idSongForSendToPlaylist = selectedSong.id
+                PlaylistDialogFragment.newInstance(selectedSong.id).show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
             }
         }, {
             mainViewModel.updateSong(selectedSong.copy(favorite = true))
@@ -656,10 +553,16 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
                 )
             )
                 .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
+        },{
+
+            val bundle = Bundle().apply {
+                putString("extra_album", selectedSong.album)
+            }
+            navController?.navigate(R.id.albumDetailFragment,bundle)
         })
     }
 
-    fun setNumberOfTrack(scrollToPosition: Boolean = true, itemCount: Int = 0) {
+    fun setNumberOfTrack(scrollToPosition: Boolean = true, itemCount: Int = 0):Pair<Int,Int> {
         val itemSong = musicListAdapter?.getSongById(mPrefs.idSong)
         itemSong?.let {
             val (numberedPos, realPos) = musicListAdapter?.getPositionByItem(itemSong)!!
@@ -667,12 +570,13 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
             musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if (scrollToPosition) bind?.rvSongs?.scrollToPosition(realPos)
         }
-        playbackControlsFragment?.setNumberOfTracks(
+       /* playbackControlsFragment?.setNumberOfTracks(
             (if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),
             (musicListAdapter?.getSongItemCount()!! + itemCount)
-        )
+        )*/
+        val numbersOfTrack=Pair((if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),(musicListAdapter?.getSongItemCount()!! + itemCount))
+        return numbersOfTrack
     }
-
     private fun updateService() {
         serviceConnection?.let {
             startOrUpdateService(
@@ -681,29 +585,10 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
             )
         }
     }
-
-    override fun play() {
-        super.play()
-        musicPlayerService?.resumePlayer()
-        mainViewModel.saveStatePlaying(true)
-    }
-
-    override fun pause() {
-        super.pause()
-        musicPlayerService?.pausePlayer()
-        mainViewModel.saveStatePlaying(false)
-    }
-
-    override fun stop() {
-        super.stop()
-        activity?.finish()
-    }
-
     override fun musicState(musicState: MusicState?) {
         super.musicState(musicState)
         musicState?.let { mainViewModel.setMusicState(musicState) }
     }
-
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
         musicState?.let { mainViewModel.setCurrentTrack(musicState) }
@@ -726,6 +611,7 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
         setNumberOfTrack()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         mainViewModel.reloadSongInfo()
+        mPrefs.saveFragmentOfNav = LIST_FRAGMENT
     }
 
     override fun onStop() {
@@ -736,10 +622,10 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
 
     companion object {
         var instance: ListFragment? = null
-        var musicListAdapter: MusicListAdapter? = null
-        lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+        @SuppressLint("StaticFieldLeak")
         var isFiltering: Boolean = false
         var btmSheetIsExpanded: Boolean = false
+        var navController:NavController?=null
 
         @JvmStatic
         fun newInstance(param1: Int, param2: String) =
@@ -750,7 +636,6 @@ class ListFragment : AbsBaseFragment(R.layout.fragment_playlist) {
                 }
             }
     }
-
     interface OnFinishedLoadSongs {
         fun onFinishLoad()
     }

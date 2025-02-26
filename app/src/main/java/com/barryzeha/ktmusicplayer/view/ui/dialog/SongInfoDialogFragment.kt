@@ -184,7 +184,7 @@ class SongInfoDialogFragment : DialogFragment() {
         filePath?.let {
             val inputFile = File(filePath)
             val metadata = fetchFileMetadata(requireContext(),filePath)
-            val songInfo = getSongMetadata(requireContext(),filePath)
+            val songInfo = getSongMetadata(requireContext(),filePath, withBitmap = true)
             metadata?.let{meta->
                 toolbarInfo.subtitle=meta.title
                 songInfo?.let { ivSongDetail.loadImage(songInfo.albumArt) }

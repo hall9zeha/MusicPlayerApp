@@ -66,6 +66,8 @@ import kotlin.math.log
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 const val NOTIFICATION_ID = 202405
+const val LIST_FRAGMENT = 0
+const val ALBUM_DETAIL_FRAGMENT = 1
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
@@ -221,7 +223,8 @@ fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
                     deleteAllItemsCallback:()->Unit,
                     sendToPlaylistCallback:()->Unit,
                     addToFavoriteCallback:()->Unit,
-                    songInfoCallback:()->Unit
+                    songInfoCallback:()->Unit,
+                    goToAlbum:()->Unit
                     ){
 
     val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
@@ -251,6 +254,10 @@ fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
         }
         popupView.btnInfo.setOnClickListener {
             songInfoCallback()
+            popupWindow.dismiss()
+        }
+        popupView.btnGoToAlbum.setOnClickListener {
+            goToAlbum()
             popupWindow.dismiss()
         }
     }

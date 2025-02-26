@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".view.ui.fragments.albumDetail.AlbumDetailFragment">
-
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:overScrollMode="always"
+            >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCoverView"
             android:layout_width="0dp"
@@ -14,10 +24,10 @@
             app:cardCornerRadius="16dp"
             app:strokeWidth="0dp"
             android:layout_marginTop="24dp"
-            app:layout_constraintWidth_percent="0.76"
+            app:layout_constraintWidth_percent="0.46"
             app:layout_constraintDimensionRatio="H,1:1"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="16dp"
             app:layout_constraintTop_toTopOf="parent"
             >
             <com.google.android.material.imageview.ShapeableImageView
@@ -38,10 +48,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="Nombre del álbum"
-            android:textSize="22sp"
+            android:textSize="16sp"
             android:textStyle="bold"
+            android:maxLines="3"
+            android:ellipsize="end"
             android:gravity="center"
-            android:layout_margin="16dp"
+            android:layout_margin="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardCoverView"/>
@@ -50,12 +62,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="Total songs 24 duration 45:00"
-            android:gravity="center"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/cardCoverView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvAlbumName"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="@id/cardCoverView"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPlaying"
@@ -66,8 +78,8 @@
             style="@style/Widget.Material3.Button.OutlinedButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnShuffle"
-            app:layout_constraintTop_toBottomOf="@id/tvDetailAlbum"
-            android:layout_marginTop="24dp"/>
+            app:layout_constraintTop_toBottomOf="@id/tvAlbumName"
+            android:layout_marginTop="16dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnShuffle"
@@ -78,17 +90,22 @@
             style="@style/Widget.Material3.Button.OutlinedButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/btnPlaying"
-            app:layout_constraintTop_toBottomOf="@id/tvDetailAlbum"
-            android:layout_marginTop="24dp"/>
+            app:layout_constraintTop_toBottomOf="@id/tvAlbumName"
+            android:layout_marginTop="16dp"/>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvAlbumDetail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             tools:listitem="@layout/item_song"
+            android:layout_marginTop="16dp"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@id/btnPlaying"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
 
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

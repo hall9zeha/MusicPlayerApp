@@ -49,6 +49,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
         songDao.fetchSongById(idSong)
     }
 
+    override suspend fun fetchSongsByAlbum(album: String): List<SongEntity> = withContext(Dispatchers.IO){
+        songDao.fetchSongsByAlbum(album)
+    }
+
     override suspend fun saveNewSong(song: SongEntity): Long = withContext(Dispatchers.IO) {
         songDao.saveNewSong(song)
     }

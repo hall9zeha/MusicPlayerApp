@@ -84,5 +84,4 @@ interface PlaylistDAO {
  suspend fun fetchPlaylistByFavorites(idPlaylist: Long):List<SongEntity>
 
 
-
 }

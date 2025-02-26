@@ -123,6 +123,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
         // Extract metadata with default values
         val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
         val album = getTagField(FieldKey.ALBUM, "Album Unknown")
+        val albumArtist = getTagField(FieldKey.ALBUM_ARTIST, "")
         val genre = getTagField(FieldKey.GENRE, "Unknown Genre")
         val title = getTagField(FieldKey.TITLE, nameFile)
         val comment = getTagField(FieldKey.COMMENT, "No Comment")
@@ -145,6 +146,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
         return AudioMetadata(
             artist = artist,
             album = album,
+            albumArtist=albumArtist,
             genre = genre,
             title = title,
             comment = comment,
@@ -165,6 +167,23 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 
     }
      return null
+}
+fun fetchTimeOfSong(pathFile: String?):AudioMetadata?{
+    var metadata: AudioFile? = null
+    try {
+        metadata = AudioFileIO.read(File(pathFile))
+    } catch (e: Exception) {
+        metadata = null
+        Log.e("METADATA-FETCH", e.message.toString())
+
+    }
+    metadata?.let{
+        val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong() } catch (ex: Exception) { 0L }
+        return AudioMetadata(
+             songLength = songLength)
+
+    }
+    return null
 }
 fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
     val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
@@ -223,11 +242,16 @@ fun getTimeOfSong(duration:Long):String{
 }
 
 fun createTime(duration: Long): Triple<Int,Int,String> {
-    val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) -
-            TimeUnit.MINUTES.toSeconds(minutes)
+    val hours = TimeUnit.MILLISECONDS.toHours(duration)
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(duration) - TimeUnit.HOURS.toMinutes(hours)
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours)
     // Formatear la duración en un String
-    val formattedDuration = String.format(Locale.ROOT,"%02d:%02d", minutes, seconds)
+
+    val formattedDuration = if(hours>0){
+        String.format(Locale.ROOT,"%02d:%02d:%02d",hours, minutes, seconds)}
+    else{
+        String.format(Locale.ROOT,"%02d:%02d", minutes, seconds)
+    }
     return Triple(minutes.toInt(),seconds.toInt(),formattedDuration)
 }
 fun getBiteArrayOfImageEmbedded(pathFile: String?):ByteArrayInputStream?{

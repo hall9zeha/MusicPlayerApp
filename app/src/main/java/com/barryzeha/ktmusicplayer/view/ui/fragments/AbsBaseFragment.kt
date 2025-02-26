@@ -3,6 +3,8 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
+import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 
 
 /**

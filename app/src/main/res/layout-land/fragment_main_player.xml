@@ -170,8 +170,8 @@
         android:layout_marginEnd="24dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnShuffle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
         app:icon="@drawable/ic_shuffle"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
@@ -230,8 +230,8 @@
         android:layout_marginStart="16dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRepeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
         app:icon="@drawable/ic_repeat_all"
         app:iconGravity="textStart"
         app:iconPadding="0dp"

@@ -476,7 +476,7 @@ class MusicPlayerService : Service(){
             }
             if(!songState.isNullOrEmpty()) {
                 val songEntity=songState[0].songEntity
-                if(songsList.contains(songEntity))setSongStateSaved(songState[0])
+                //if(songsList.contains(songEntity))setSongStateSaved(songState[0])
 
             }
             setUpExoplayerListener()
@@ -624,13 +624,12 @@ class MusicPlayerService : Service(){
     }
     fun getStateSaved() {
         if(firstCallingToSongState) {
-            if (songState.isNotEmpty()) {
-                val songEntity = songState[0].songEntity
-                if (songsList.contains(songEntity)) setSongStateSaved(songState[0])
+            CoroutineScope(Dispatchers.IO).launch {
+                songState = repository.fetchSongState()
+                if(songState.isNotEmpty())setSongStateSaved(songState[0])
             }
         }
-        firstCallingToSongState=false
-
+        //firstCallingToSongState=false
     }
     private fun initMusicStateLooper(){
         initNotify()
@@ -965,7 +964,7 @@ class MusicPlayerService : Service(){
         handler.postDelayed(runnable!!, 500)
     }
 
-    private fun clearABLoopOfPreferences(){
+    fun clearABLoopOfPreferences(){
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
         runnable?.let{
             handler.removeCallbacks(it)

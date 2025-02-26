@@ -11,8 +11,8 @@ import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
@@ -20,23 +20,24 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.viewpager2.widget.ViewPager2
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.HOME_PLAYER
 import com.barryzeha.core.common.LIST_PLAYER
 import com.barryzeha.core.common.MAIN_FRAGMENT
-import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.PlaylistEntity
+import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
-import com.barryzeha.ktmusicplayer.view.ui.fragments.ListPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
@@ -46,22 +47,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import com.barryzeha.core.R as coreRes
 const val PLAYLIST_SUBMENU_ID = 25
 const val PLAYLIST_DEFAULT_ID = 0
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.OnFragmentReadyListener{
+class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFragment.OnFragmentReadyListener{
     internal lateinit var bind:ActivityMainBinding
     private var menu:Menu?=null
     private val mainViewModel: MainViewModel by viewModels()
     private var musicService: MusicPlayerService?=null
     private val launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var playlists:List<PlaylistEntity> = arrayListOf()
-    @Inject
-    lateinit var mPrefs:MyPreferences
+
     private var serviceSongListener:ServiceSongListener?=null
     private var loadedFinish = true
+    private var mOnBackPressedCallback:OnBackPressedCallback?=null
+    private var navController:NavController?=null
+    private var currentTrackAvailable:Boolean = false
+
     private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
@@ -112,8 +115,28 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     }
     private fun setUpObservers(){
         mainViewModel.fetchSongState()
+        mainViewModel.currentTrack.observe(this){
+            currentTrackAvailable =true
+        }
+        mainViewModel.serviceInstance.observe(this){(serviceConn, serviceInst)->
+            if(!currentTrackAvailable)serviceInst.getStateSaved()
+        }
         mainViewModel.playLists.observe(this){lists->
             this.playlists = lists
+            addItemOnMenuDrawer(playlists)
+        }
+        mainViewModel.createdPlayList.observe(this) { insertedRow ->
+            if (insertedRow > 0) {
+                Toast.makeText(
+                    this,
+                    com.barryzeha.core.R.string.playlistCreatedMsg,
+                    Toast.LENGTH_SHORT
+                ).show()
+                mainViewModel.fetchPlaylists()
+            }
+        }
+        mainViewModel.navControllerInstance.observe(this){instance->
+            navController=instance
         }
     }
     private fun setUpViewPager(){
@@ -123,7 +146,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
         // Para precargar el segundo fragmento mientras se muestra el primero
         //bind.mViewPager.offscreenPageLimit=2
         bind.mViewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback(){
-            override fun onPageSelected(position: Int) {
+              override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 when(position){
                     0->mPrefs.currentView= MAIN_FRAGMENT
@@ -141,9 +164,19 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             if(subMenu==null) {
                 subMenu = menu.addSubMenu(Menu.NONE, PLAYLIST_SUBMENU_ID, Menu.NONE, "Playlists")
                 subMenu.setHeaderIcon(coreRes.drawable.ic_playlist_select)
-
             }
             subMenu?.clear()
+            // Item para agregar nueva playlist
+            val menuItemAdd = subMenu?.add(Menu.NONE,-1,Menu.NONE,"")
+            val itemViewAdd = MenuItemViewBinding.inflate(layoutInflater)
+            itemViewAdd.menuItemIcon.setImageResource(coreRes.drawable.ic_add)
+            menuItemAdd?.setActionView(itemViewAdd.root)
+            itemViewAdd.menuItemIcon.setOnClickListener {
+                createNewPlayListDialog(this) { playlistName ->
+                    mainViewModel.createPlayList(PlaylistEntity(playListName = playlistName))
+                }
+                bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
+            }
             val m = subMenu?.add(Menu.NONE, PLAYLIST_DEFAULT_ID,Menu.NONE,"default")
             m?.setOnMenuItemClickListener {
                 mainViewModel.fetchPlaylistWithSongsBy(m.itemId,mPrefs.playListSortOption)
@@ -180,7 +213,6 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
                     }
                     itemView.menuItemIcon.setOnClickListener {
                         mainViewModel.deletePlayList(m?.itemId!!.toLong())
-                        //TODO remover el item
                         subMenu?.removeItem(m.itemId)
                     }
                     bind.navView.invalidate()
@@ -235,10 +267,11 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         val binder = service as MusicPlayerService.MusicPlayerServiceBinder
         musicService = binder.getService()
+        musicPlayerService = musicService
         musicService?.setActivity(this)
         mainViewModel.setServiceInstance(this,musicService!!)
         serviceSongListener?.onServiceConnected(this,service)
-        serviceSongListener?.let{serviceListener->registerSongListener(serviceListener)}
+        musicService?.setSongController(this)
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
              musicService?.setupPhoneCallStateReceiver()
         }
@@ -247,14 +280,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
          musicService = null
         serviceSongListener?.onServiceDisconnected()
     }
-    fun registerSongListener(songListener: ServiceSongListener){
-        this.serviceSongListener=songListener
-        musicService?.setSongController(serviceSongListener!!)
 
-    }
-    fun unregisterSongListener(){
-        musicService?.unregisterController()
-    }
     private fun checkedSelectedMenuDrawerItems(){
         when(mPrefs.currentView){
             MAIN_FRAGMENT->{
@@ -268,17 +294,33 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
 
             }
         }
-    }
-    /*private fun mOnBackPressedDispatcher(){
-        onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true){
+    }/*
+    private fun mOnBackPressedDispatcher(){
+        mOnBackPressedCallback = object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
-                if(bind.mainDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                if(bind.mainDrawerLayout.isOpen){
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
-                }else{
-                    onBackPressedDispatcher.onBackPressed()
+                }
+                else if(ListFragment.isFiltering){
+                    ListFragment.instance?.hideSearchBar()
+                }
+                else{
+                    checkedSelectedMenuDrawerItems()
+                    if(mPrefs.currentView == SONG_LIST_FRAGMENT){
+                        if (ListFragment.btmSheetIsExpanded)ListFragment.bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
+                        else {
+                            bind.mViewPager.setCurrentItem(MAIN_FRAGMENT, true)
+                            bind.navView.menu[MAIN_FRAGMENT].setChecked(true)
+                            mPrefs.currentView = MAIN_FRAGMENT
+                        }
+
+                    }else {
+                        finish()
+                    }
                 }
             }
-        })
+        }
+        onBackPressedDispatcher.addCallback(this,mOnBackPressedCallback!!)
     }*/
     // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
     override fun onFragmentReady() {
@@ -298,22 +340,22 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
     }
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
+
         if(bind.mainDrawerLayout.isOpen){
             bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
         }
         else if(ListFragment.isFiltering){
             ListFragment.instance?.hideSearchBar()
         }
+        else if(mPrefs.saveFragmentOfNav > 0){
+            navController?.navigate(R.id.playlistFragment)
+        }
         else{
             checkedSelectedMenuDrawerItems()
             if(mPrefs.currentView == SONG_LIST_FRAGMENT){
-                if (ListFragment.btmSheetIsExpanded)ListFragment.bottomSheetBehavior.state=BottomSheetBehavior.STATE_COLLAPSED
-                else {
                     bind.mViewPager.setCurrentItem(MAIN_FRAGMENT, true)
                     bind.navView.menu[MAIN_FRAGMENT].setChecked(true)
                     mPrefs.currentView = MAIN_FRAGMENT
-                }
-
             }else {
                 super.onBackPressed()
             }
@@ -326,6 +368,7 @@ class MainActivity : AppCompatActivity(), ServiceConnection, MainPlayerFragment.
             recreate()
         }
         checkedSelectedMenuDrawerItems()
+
     }
 
 

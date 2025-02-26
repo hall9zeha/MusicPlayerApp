@@ -23,6 +23,13 @@
         android:ellipsize="end"
         style="@style/Widget.Material3.Button.TextButton"/>
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoToAlbum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ir al álbum"
+        android:ellipsize="end"
+        style="@style/Widget.Material3.Button.TextButton"/>
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddToFavorite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

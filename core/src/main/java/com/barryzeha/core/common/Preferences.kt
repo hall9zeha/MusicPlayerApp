@@ -29,6 +29,8 @@ private const val STORAGE_DIR_SAF_URI = "storageDirSAFUri"
 private const val GLOBAL_THEME = "globalTheme"
 private const val THEME_CHANGED = "themeChanged"
 private const val SCROLL_TO_POSITION = "scrollToPosition"
+private const val SAVE_CURRENT_FRAGMENT_OF_NAV = "SaveFragmentOfNav"
+private const val IS_OPEN_QUEUE = "isOpenQueue"
 
 
 class  MyPreferences @Inject constructor(private val context: Context){
@@ -88,6 +90,12 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var scrollToPosition:Boolean
         get()= myPreferences.getBoolean(SCROLL_TO_POSITION,false)
         set(value)=myPreferences.edit().putBoolean(SCROLL_TO_POSITION,value).apply()
+    var saveFragmentOfNav:Int
+        get()= myPreferences.getInt(SAVE_CURRENT_FRAGMENT_OF_NAV,-1)
+        set(value)= myPreferences.edit().putInt(SAVE_CURRENT_FRAGMENT_OF_NAV,value).apply()
+    var isOpenQueue:Boolean
+        get() = myPreferences.getBoolean(IS_OPEN_QUEUE,false)
+        set(value) = myPreferences.edit().putBoolean(IS_OPEN_QUEUE,value).apply()
 
     fun clearIdSongInPrefs(){
         myPreferences.edit().remove(ID_SONG).apply()
