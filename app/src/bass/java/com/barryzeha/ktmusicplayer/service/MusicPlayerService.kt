@@ -749,7 +749,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                         songEntity = it
                         currentSongPosition = 0
                         bassManager?.streamCreateFile(song)
-                        //findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
+                        if(!mPrefs.isOpenQueue)findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
                         executeOnceTime = true
                     } ?: run {
                         bassManager?.streamCreateFile(songEntity)
