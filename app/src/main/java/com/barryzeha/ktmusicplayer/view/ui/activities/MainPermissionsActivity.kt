@@ -6,6 +6,7 @@ import android.os.Build.*
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
@@ -34,17 +35,17 @@ class MainPermissionsActivity : AppCompatActivity() {
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_PHONE_STATE,
             // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
             // cuando el servicio bluetooth del móvil esté activo.
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.BLUETOOTH_CONNECT
         )
     }else{
         mutableListOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_STATE)
+        )
     }
     private val permissionStatusMap = mutableMapOf<String, Boolean>()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -135,10 +136,9 @@ class MainPermissionsActivity : AppCompatActivity() {
                 bind.btnReadStoragePermission.setIconResource(coreRes.drawable.ic_check_rounded)
                 bind.btnReadStoragePermission.iconGravity= MaterialButton.ICON_GRAVITY_END
 
-                bind.btnPhonePermission.text=getString(coreRes.string.granted);bind.btnReadStoragePermission.isClickable=false
+                bind.btnPhonePermission.text=getString(coreRes.string.granted);bind.btnPhonePermission.isClickable=false
                 bind.btnPhonePermission.setIconResource(coreRes.drawable.ic_check_rounded)
                 bind.btnPhonePermission.iconGravity= MaterialButton.ICON_GRAVITY_END
-
                 bind.btnFinish.visibility = View.VISIBLE
 
             }else{
@@ -146,6 +146,7 @@ class MainPermissionsActivity : AppCompatActivity() {
                     val button:MaterialButton=bind.root.findViewWithTag<Button>(permission) as MaterialButton
                     if(!granted){
                         button.text=getString(coreRes.string.grant)
+                        button.isEnabled=true
                         button.setOnClickListener {
                             permissionStatusMap[permission]=false
                             launcherPermission.launch(permission)

@@ -154,8 +154,8 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        musicPlayerService?.reloadIndexOfSong()
         mPrefs.isOpenQueue=false
+        musicPlayerService?.reloadIndexOfSong()
     }
     companion object {
 
