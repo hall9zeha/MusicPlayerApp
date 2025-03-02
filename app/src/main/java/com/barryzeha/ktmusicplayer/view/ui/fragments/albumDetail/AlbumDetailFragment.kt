@@ -1,40 +1,35 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments.albumDetail
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.ActionBar.LayoutParams
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.fetchFileMetadata
-import com.barryzeha.core.common.fetchShortFileMetadata
-import com.barryzeha.core.common.fetchTimeOfSong
 import com.barryzeha.core.common.getBitmap
-import com.barryzeha.core.common.getTimeOfSong
 import com.barryzeha.core.common.loadImage
-import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.ALBUM_DETAIL_FRAGMENT
+import com.barryzeha.ktmusicplayer.common.ON_ALBUM_DETAIL_ITEM_MENU
+import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
 import com.barryzeha.ktmusicplayer.databinding.FragmentAlbumDetailBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
+import com.barryzeha.ktmusicplayer.view.ui.dialog.PlaylistDialogFragment
+import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.BaseFragment
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import kotlin.random.Random
 
 private const val ARG_PARAM1 = "param1"
@@ -51,9 +46,8 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     private var navController: NavController?= null
     private var albumSongs:List<SongEntity> = listOf()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        activity?.setTheme(com.barryzeha.core.R.style.Theme_With_Toolbar)
+        activity?.setTheme(com.barryzeha.core.R.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
         arguments?.let {
             albumName = it.getString("extra_album")
@@ -111,14 +105,14 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         val stringBuilder = StringBuilder()
         stringBuilder.appendLine(if(songMeta?.albumArtist?.isNotEmpty()!!)songMeta.albumArtist else songMeta.artist)
         stringBuilder.appendLine(songMeta?.year.toString())
-        stringBuilder.appendLine("${songs.size} Canciones")
+        stringBuilder.appendLine("${songs.size} ${getString(coreRes.string.songs)}")
         tvDetailAlbum.text=stringBuilder
         lifecycleScope.launch(Dispatchers.IO) {
             songs.forEach { track->
                 totalSongTime += track.duration
             }
             withContext(Dispatchers.Main){
-                stringBuilder.appendLine("Duración ${createTime(totalSongTime).third}")
+                stringBuilder.appendLine("${getString(coreRes.string.duration)} ${createTime(totalSongTime).third}")
                 tvDetailAlbum.text = stringBuilder
             }
         }
@@ -137,11 +131,36 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         btnShuffle.setOnClickListener {
             val randomPosition = Random.nextInt(0,albumSongs.size-1)
             musicPlayerService?.openQueue(albumSongs,randomPosition)
-            //TODO activar la preferencia shuffle
+            //TODO probar su funcionalidad
+            mPrefs.songMode = SHUFFLE
         }
     }
     private fun onMenuItemClick(view: View, position: Int, songEntity: SongEntity) {
-        musicPlayerService?.startPlayer(songEntity)
+        onMenuItemPopup(ON_ALBUM_DETAIL_ITEM_MENU,requireActivity(), view, {
+            // Delete item callback
+            mainViewModel.deleteSong(songEntity)
+            //this.song = selectedSong
+        }, { // Delete all items callback disable on this fragment
+
+        }, { // Send to playlist callback
+            if (albumAdapter?.itemCount!! > 0) {
+                PlaylistDialogFragment.newInstance(songEntity.id).show(parentFragmentManager,
+                    PlaylistDialogFragment::class.simpleName)
+            }
+        }, {
+            mainViewModel.updateSong(songEntity.copy(favorite = true))
+            Toast.makeText(context, com.barryzeha.core.R.string.addToFavorite, Toast.LENGTH_SHORT).show()
+        }, {
+            SongInfoDialogFragment.newInstance(
+                SongEntity(
+                    id = songEntity.id,
+                    pathLocation = songEntity.pathLocation
+                )
+            )
+                .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
+        },{//Go to album, disable on this fragment
+        })
+
     }
     private fun onItemClick(position: Int, songEntity: SongEntity) {
         musicPlayerService?.openQueue(albumSongs,position-1)
@@ -158,7 +177,6 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         musicPlayerService?.reloadIndexOfSong()
     }
     companion object {
-
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             AlbumDetailFragment().apply {

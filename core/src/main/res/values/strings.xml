@@ -53,4 +53,6 @@
     <string name="reverb">Reverb</string>
     <string name="enableEffects">Enable effects</string>
     <string name="reset">Reset</string>
+    <string name="songs">Songs</string>
+    <string name="duration">Duration</string>
 </resources>

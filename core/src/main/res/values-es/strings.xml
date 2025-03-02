@@ -54,4 +54,6 @@
     <string name="reverb">Reverberación</string>
     <string name="enableEffects">Activar efectos</string>
     <string name="reset">Reiniciar</string>
+    <string name="songs">Canciones</string>
+    <string name="duration">Duración</string>
 </resources>

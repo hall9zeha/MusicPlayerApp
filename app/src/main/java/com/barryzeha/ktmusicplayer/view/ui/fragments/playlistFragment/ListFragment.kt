@@ -29,6 +29,8 @@ import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.LIST_FRAGMENT
+import com.barryzeha.ktmusicplayer.common.ON_MENU_ITEM
+import com.barryzeha.ktmusicplayer.common.ON_MINI_PLAYER_MENU
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.common.getPlayListName
@@ -442,7 +444,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }
             btnMore.setOnClickListener { view ->
-                onMenuItemPopup(onItemClick = false, requireActivity(), view, {
+                onMenuItemPopup(ON_MINI_PLAYER_MENU, requireActivity(), view, {
                     // Delete item callback
                 }, {
                     // Delete all items callback
@@ -533,7 +535,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     }
 
     private fun onMenuItemClick(view: View, position: Int, selectedSong: SongEntity) {
-        onMenuItemPopup(true, requireActivity(), view, { // Delete item callback
+        onMenuItemPopup(ON_MENU_ITEM,requireActivity(), view, { // Delete item callback
             mainViewModel.deleteSong(selectedSong)
             this.song = selectedSong
         }, { // Delete all items callback

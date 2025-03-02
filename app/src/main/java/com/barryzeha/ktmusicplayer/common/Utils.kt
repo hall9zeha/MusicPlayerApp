@@ -69,6 +69,10 @@ const val NOTIFICATION_ID = 202405
 const val LIST_FRAGMENT = 0
 const val ALBUM_DETAIL_FRAGMENT = 1
 
+const val ON_MENU_ITEM = 0
+const val ON_MINI_PLAYER_MENU = 1
+const val ON_ALBUM_DETAIL_ITEM_MENU = 2
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -218,7 +222,7 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
         }
     }
 }
-fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
+fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, view:View,
                     deleteItemCallback:()->Unit,
                     deleteAllItemsCallback:()->Unit,
                     sendToPlaylistCallback:()->Unit,
@@ -229,9 +233,16 @@ fun onMenuItemPopup(onItemClick:Boolean=true, activity:Activity, view:View,
 
     val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
     createPopUpWindow(popupView,view,activity){popupWindow->
-        if (!onItemClick) {
-            popupView.btnDeleteItem.visibility = View.GONE
-            popupView.btnSendToList.visibility = View.GONE
+        when(onItemClick){
+            ON_MINI_PLAYER_MENU->{
+                popupView.btnDeleteItem.visibility = View.GONE
+                popupView.btnSendToList.visibility = View.GONE
+            }
+            ON_ALBUM_DETAIL_ITEM_MENU->{
+                popupView.btnDeleteAll.visibility = View.GONE
+                popupView.btnGoToAlbum.visibility = View.GONE
+            }
+            else->{}
         }
         popupView.btnDeleteItem.setOnClickListener {
             deleteItemCallback()
