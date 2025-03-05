@@ -117,9 +117,7 @@ class SongInfoDialogFragment : DialogFragment() {
             }
         }
         return super.onCreateView(inflater, container, savedInstanceState)
-
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupMenuProvider()
@@ -146,13 +144,16 @@ class SongInfoDialogFragment : DialogFragment() {
             edtAlbum.clearFocus()
             edtGenre.clearFocus()
             edtYear.clearFocus()
+            imgButtonPickImage.visibility = View.GONE
+            frmShadow.visibility = View.GONE
             lnMainInfo.visibility=View.VISIBLE
             lnMainInfoEdit.visibility=View.GONE
         }else{
+            imgButtonPickImage.visibility = View.VISIBLE
+            frmShadow.visibility = View.VISIBLE
             lnMainInfo.visibility=View.GONE
             lnMainInfoEdit.visibility=View.VISIBLE
         }
-
     }
     private fun enableViews(isEnable:Boolean)=with(bind){
         tilTitle.isEnabled=isEnable
@@ -177,8 +178,10 @@ class SongInfoDialogFragment : DialogFragment() {
         ivSongDetail.setOnClickListener {
             getImageLauncher.launch("image/*")
         }
+        imgButtonPickImage.setOnClickListener {
+            getImageLauncher.launch("image/*")
+        }
     }
-
     private fun setFileInfo(filePath:String?)=with(bind){
         showEditViews(false)
         filePath?.let {
@@ -235,9 +238,7 @@ class SongInfoDialogFragment : DialogFragment() {
             }
             true
         }
-
     }
-
     private fun handleUriSAFSelection(treeUri:Uri){
         // Guardamos la uri del directorio para uso posterior
         mPrefs.directorySAFUri = treeUri.toString()

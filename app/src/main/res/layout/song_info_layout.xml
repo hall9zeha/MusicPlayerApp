@@ -43,6 +43,29 @@
         app:layout_constraintTop_toBottomOf="@id/pbEdit"
         android:layout_marginTop="24dp"
         android:layout_marginStart="16dp"/>
+    <FrameLayout
+        android:id="@+id/frmShadow"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:background="#c333"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintStart_toStartOf="@id/ivSongDetail"
+        app:layout_constraintEnd_toEndOf="@id/ivSongDetail"
+        app:layout_constraintBottom_toBottomOf="@id/ivSongDetail"/>
+    <ImageButton
+        android:id="@+id/imgButtonPickImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_camera"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:background="@android:color/transparent"
+        app:layout_constraintStart_toStartOf="@id/ivSongDetail"
+        app:layout_constraintEnd_toEndOf="@id/ivSongDetail"
+        app:layout_constraintBottom_toBottomOf="@id/ivSongDetail"
+        android:layout_marginBottom="8dp"
+        />
     <LinearLayout
         android:id="@+id/lnInfo"
         android:layout_width="0dp"

@@ -37,8 +37,8 @@
         android:layout_marginStart="8dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnMainEq"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:insetTop="0dp"
         android:insetRight="0dp"
         android:insetLeft="0dp"

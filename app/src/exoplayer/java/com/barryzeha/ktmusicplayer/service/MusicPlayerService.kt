@@ -866,7 +866,6 @@ class MusicPlayerService : Service(){
     fun playingState():Boolean{
         return mPrefs.isPlaying
     }
-
     fun currentSongState():MusicState{
         return currentMusicState
     }
@@ -1004,7 +1003,6 @@ class MusicPlayerService : Service(){
                 songsList.add(s)
                 exoPlayer.addMediaItem(MediaItem.fromUri(s.pathLocation.toString()))
             }
-
         }
     }
     private fun setSongStateSaved(songState: SongStateWithDetail){
@@ -1017,7 +1015,6 @@ class MusicPlayerService : Service(){
                 latestPlayed = true
             )
         }
-
         // Al agregar todos los items de la lista al inicio, no necesitamos agregar uno nuevo,
         // lo necesitamos para la repetición de toda la lista
         //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
