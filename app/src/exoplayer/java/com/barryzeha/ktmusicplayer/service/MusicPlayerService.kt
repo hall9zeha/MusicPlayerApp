@@ -60,6 +60,8 @@ import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -99,7 +101,7 @@ class MusicPlayerService : Service(){
     private var isForegroundService = false
     private var currentMusicState = MusicState()
     val _currentMusicState:MusicState get() = currentMusicState
-
+    private val serviceScope = CoroutineScope(Job() + Main)
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
@@ -234,12 +236,10 @@ class MusicPlayerService : Service(){
         registerReceiver(headsetReceiver,filter)
 
         val bluetoothFilter = IntentFilter().apply {
-
             addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         }
-
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
 
@@ -453,7 +453,7 @@ class MusicPlayerService : Service(){
             .build()
         setUpEqualizer(exoPlayer.audioSessionId)
 
-        CoroutineScope(Dispatchers.Main).launch {
+        serviceScope.launch{
             // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
             // si no hay algo seleccionado previamente solo devolverá la lista por defecto
             //val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
@@ -466,7 +466,7 @@ class MusicPlayerService : Service(){
                     }
                    mediaItemList.add(convertToMediaItem(s))
                 }
-                withContext(Dispatchers.Main) {
+                withContext(Main) {
                     exoPlayer.addMediaItems(mediaItemList)
                 }
                 Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
@@ -623,7 +623,7 @@ class MusicPlayerService : Service(){
     }
     fun getStateSaved() {
         if(firstCallingToSongState) {
-            CoroutineScope(Dispatchers.Main).launch {
+            serviceScope.launch {
                 songState = repository.fetchSongState()
                 if (!songState.isNullOrEmpty()) setSongStateSaved(songState[0])
             }
@@ -720,17 +720,14 @@ class MusicPlayerService : Service(){
                          // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
                          if (!executeOnceTime) {
                              _songController?.currentTrack(currentMusicState)
-
                          }
                          executeOnceTime = true
                          setPlayingState(exoPlayer.isPlaying)
                      positionReset=-1
-
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
                      if(mPrefs.currentIndexSong < songsList.size -1 ){
                          nextOrPrevTRack((mPrefs.currentIndexSong + 1).toInt())
-
                      }
                  }
                  else if (playbackState == Player.STATE_ENDED) {
@@ -739,9 +736,7 @@ class MusicPlayerService : Service(){
                          latestPlayed = false
                      )
                      _songController?.currentTrack(currentMusicState)
-
                  }
-
              }
              override fun onPositionDiscontinuity(
                  oldPosition: Player.PositionInfo,
@@ -768,13 +763,9 @@ class MusicPlayerService : Service(){
                                     mPrefs.nextOrPrevFromNotify = true
                                     setPlayingState(exoPlayer.isPlaying)
                                     mPrefs.idSong = song.id
-
                                 }
-
                             }
-
                         }
-
                     }
              }
              override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -819,9 +810,7 @@ class MusicPlayerService : Service(){
         }
     }
     fun removeMediaItem(song: SongEntity){
-
         val mediaItemIndex = findMediaItemIndexById(mediaItemList,song.id.toString())
-
         mediaItemList.removeAt(mediaItemIndex)
         if(songsList.contains(song)) {
             val index = songsList.indexOf(song)
@@ -835,20 +824,17 @@ class MusicPlayerService : Service(){
         }
     }
     fun populatePlayList(songs:List<SongEntity>){
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch(Dispatchers.IO) {
             songs.forEach { s ->
                 if (!songsList.contains(s)) {
                     songsList.add(s)
-
                     val mediaItem = MediaItem.Builder()
                         .setMediaId(s.id.toString())
                         .setUri(s.pathLocation.toString())
                         .build()
                     mediaItemList.add(mediaItem)
-
-                    withContext(Dispatchers.Main) {
+                    withContext(Main) {
                         exoPlayer.addMediaItem(mediaItem)
-
                     }
                 }
             }
@@ -958,9 +944,6 @@ class MusicPlayerService : Service(){
         exoPlayer.clearMediaItems()
         mediaItemQueue.clear()
         exoPlayer.addMediaItems(mediaItemList)
-
-
-
     }
     fun fastForward(){
         val currentPosition = exoPlayer.currentPosition
@@ -995,7 +978,6 @@ class MusicPlayerService : Service(){
         // Inicia el ciclo que revisará cada segundo
         handler.postDelayed(runnable!!, 500)
     }
-
     fun clearABLoopOfPreferences(){
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
         runnable?.let{

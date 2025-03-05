@@ -62,6 +62,8 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -105,7 +107,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var executeOnceTime:Boolean=false
     private var musicState:MusicState?=null
     private var songEntity:SongEntity=SongEntity()
-
+    private val serviceScope = CoroutineScope(Job() + Main)
     private var songState:List<SongStateWithDetail> = arrayListOf()
     private var headsetReceiver:BroadcastReceiver?=null
     private var bluetoothReceiver:BroadcastReceiver?=null
@@ -121,6 +123,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     private var isPlayingBeforeCallPhone:Boolean = false
     // En esta lista cargamos momentaneamente las las canciones del fragmento AlbumDetail
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
+
 
     override fun onCreate() {
         super.onCreate()
@@ -291,7 +294,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
 
     @OptIn(UnstableApi::class)
     private fun setUpRepository(){
-        CoroutineScope(Dispatchers.Main).launch {
+        serviceScope.launch {
             // TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {
                 // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
@@ -312,7 +315,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
     fun getStateSaved() {
         if(firstCallingToSongState) {
-                CoroutineScope(Dispatchers.IO).launch {
+                serviceScope.launch(Dispatchers.IO) {
                     songState = repository.fetchSongState()
                     if(songState.isNotEmpty())setSongStateSaved(songState[0])
                 }
@@ -430,7 +433,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 if(ACTION_CLOSE == action){
                     setPlayingState(false)
                     pausePlayer()
-                    CoroutineScope(Dispatchers.IO).launch {
+                    serviceScope.launch(Dispatchers.IO) {
                         delay(1000)
                         bassManager?.releasePlayback()
                         songHandler.removeCallbacks(songRunnable)
@@ -670,7 +673,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
     }
     fun populatePlayList(songs:List<SongEntity>){
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch(Dispatchers.IO) {
             songs.forEach { s ->
                 if (!songsList.contains(s)) {
                     songsList.add(s)
@@ -682,7 +685,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                 indexOfSong = it
             }?:run{
                 indexOfSong = 0
-                withContext(Dispatchers.Main) {
+                withContext(Main) {
                     setMusicForPlay(songsList[0])
                 }
             }
@@ -881,7 +884,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     // Reordenamos la lista nuevamente a su forma original
     fun sortList(){
         if(listIsShuffled) {
-            CoroutineScope(Dispatchers.IO).launch {
+            serviceScope.launch(Dispatchers.IO) {
                 if(mPrefs.isOpenQueue){
                     playingQueue.clear()
                     playingQueue = repository.fetchSongsByAlbum(songEntity.album).toMutableList()

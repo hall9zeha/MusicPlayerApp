@@ -20,98 +20,102 @@ import javax.inject.Inject
  * Copyright (c)  All rights reserved.
  **/
 @AndroidEntryPoint
-open class AbsMusicServiceActivity:AppCompatActivity(), ServiceSongListener {
- private val mMusicPlayerServiceListeners = ArrayList<ServiceSongListener>()
- private var serviceConnection:ServiceConnection?=null
- open var musicPlayerService: MusicPlayerService?=null
+open class AbsMusicServiceActivity : AppCompatActivity(), ServiceSongListener {
+    private val mMusicPlayerServiceListeners = ArrayList<ServiceSongListener>()
+    private var serviceConnection: ServiceConnection? = null
+    open var musicPlayerService: MusicPlayerService? = null
 
- @Inject
- lateinit var defaultPrefs: SharedPreferences
+    @Inject
+    lateinit var defaultPrefs: SharedPreferences
 
- @Inject
- lateinit var mPrefs: MyPreferences
+    @Inject
+    lateinit var mPrefs: MyPreferences
 
- fun registerMusicServiceListener(listener: ServiceSongListener?){
-  if(listener !=null){
-   mMusicPlayerServiceListeners.add(listener)
-  }
- }
- fun unregisterMusicServiceListener(listener: ServiceSongListener?){
-  if(listener !=null){
-   mMusicPlayerServiceListeners.remove(listener)
-  }
- }
+    fun registerMusicServiceListener(listener: ServiceSongListener?) {
+        if (listener != null) {
+            mMusicPlayerServiceListeners.add(listener)
+        }
+    }
 
- @CallSuper
- override fun onResume() {
-  super.onResume()
-  musicPlayerService?.setSongController(this)
+    fun unregisterMusicServiceListener(listener: ServiceSongListener?) {
+        if (listener != null) {
+            mMusicPlayerServiceListeners.remove(listener)
+        }
+    }
 
- }
- @CallSuper
- override fun onPause() {
-  super.onPause()
-  musicPlayerService?.unregisterController()
- }
- @CallSuper
- override fun onDestroy() {
-  super.onDestroy()
-  musicPlayerService?.unregisterController()
- }
- override fun play() {
-  for(listener in mMusicPlayerServiceListeners){
-   listener.play()
-  }
- }
+    @CallSuper
+    override fun onResume() {
+        super.onResume()
+        musicPlayerService?.setSongController(this)
 
- override fun pause() {
-  for(listener in mMusicPlayerServiceListeners){
-   listener.pause()
-  }
- }
+    }
 
- override fun next() {
-  for(listener in mMusicPlayerServiceListeners){
-   listener.next()
-  }
- }
+    @CallSuper
+    override fun onPause() {
+        super.onPause()
+        musicPlayerService?.unregisterController()
+    }
 
- override fun previous() {
-  for(listener in mMusicPlayerServiceListeners){
-   listener.previous()
-  }
- }
+    @CallSuper
+    override fun onDestroy() {
+        super.onDestroy()
+        musicPlayerService?.unregisterController()
+    }
 
- override fun stop() {
-  for(listener in mMusicPlayerServiceListeners){
-   listener.stop()
-  }
- }
+    override fun play() {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.play()
+        }
+    }
 
- override fun musicState(musicState: MusicState?) {
-   for(listener in mMusicPlayerServiceListeners){
-    listener.musicState(musicState)
-   }
- }
+    override fun pause() {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.pause()
+        }
+    }
 
- override fun currentTrack(musicState: MusicState?) {
-   for(listener in mMusicPlayerServiceListeners){
-     listener.currentTrack(musicState)
-   }
- }
+    override fun next() {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.next()
+        }
+    }
 
- override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
-   val binder = service as MusicPlayerService.MusicPlayerServiceBinder
-  serviceConnection = conn
-  musicPlayerService = binder.getService()
-   for(listener in mMusicPlayerServiceListeners){
-    listener.onServiceConnected(conn,service)
-   }
- }
+    override fun previous() {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.previous()
+        }
+    }
 
- override fun onServiceDisconnected() {
-   for(listener in mMusicPlayerServiceListeners){
-    listener.onServiceDisconnected()
-   }
- }
+    override fun stop() {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.stop()
+        }
+    }
+
+    override fun musicState(musicState: MusicState?) {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.musicState(musicState)
+        }
+    }
+
+    override fun currentTrack(musicState: MusicState?) {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.currentTrack(musicState)
+        }
+    }
+
+    override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
+        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
+        serviceConnection = conn
+        musicPlayerService = binder.getService()
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.onServiceConnected(conn, service)
+        }
+    }
+
+    override fun onServiceDisconnected() {
+        for (listener in mMusicPlayerServiceListeners) {
+            listener.onServiceDisconnected()
+        }
+    }
 }

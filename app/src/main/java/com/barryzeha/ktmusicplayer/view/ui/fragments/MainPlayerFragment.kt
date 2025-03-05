@@ -400,9 +400,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     @SuppressLint("ResourceType", "ClickableViewAccessibility")
     private fun setUpListeners()=with(bind){
         this?.let {
-          /*  bind?.tvSongDescription?.setSelected(true)
-            bind?.tvSongArtist?.setSelected(true)
-            bind?.tvSongAlbum?.setSelected(true)*/
             checkCoverViewStyle()
             btnLyric?.setOnClickListener{
                 lrcView?.let {
