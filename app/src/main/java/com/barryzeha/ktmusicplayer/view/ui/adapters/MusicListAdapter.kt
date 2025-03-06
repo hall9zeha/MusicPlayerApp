@@ -57,9 +57,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     private var lastSelectedPos = -1
     private  var context:Context = MyApp.context
 
-    init{
-        //setHasStableIds(true)
-    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         context=parent.context
         return if(viewType == SONG_ITEM) {
@@ -160,7 +157,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                     )
                 )
             }
-
     }
     private fun setUpSongEntitiesIndices(){
         songEntityIndices.clear()
@@ -214,18 +210,12 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             val headerPos=shouldRemoveHeaderForSong(song)
             if(headerPos>-1){
                 currentList.removeAt(headerPos)
-                Log.e("HEADER-POS", "REMOVER POSITION" )
-            }else{
-                Log.e("HEADER-POS", "NO REMOVER" )
             }
-
             submitList(currentList)
             originalList = currentList
-
             setUpSongEntitiesIndices()
         }
     }
-
     fun removeItemsForMultipleSelectedAction() {
         CoroutineScope(Dispatchers.IO).launch {
             val currentList = currentList.toMutableList()
@@ -251,10 +241,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             sortedHeadersToRemove.forEach { headerPos ->
                 if (headerPos >= 0 && headerPos < currentList.size) {
                     currentList.removeAt(headerPos)
-                    Log.e("HEADER-POS", "REMOVER POSITION -> $headerPos")
                 }
             }
-
             submitList(currentList)
             originalList = currentList
         }
@@ -336,7 +324,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         }
         return Pair(positionNumbered,realPosition!!)
     }
-
     fun getSongById(idSong:Long):SongEntity?{
         return originalList.filterIsInstance<SongEntity>().find { idSong == it.id }
     }
@@ -437,14 +424,11 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
             @Suppress("UNCHECKED_CAST")
             submitList(results?.values as? List<Any> ?: emptyList())
-
         }
-
     }
     override fun getFilter(): Filter {
         return searchFilter
     }
-
     private class CombinedDiffCallback(
         private val songDiffCallback: SongDiffCallback,
         private val headerDiffCallback: HeaderDiffCallback
@@ -456,7 +440,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 else -> false
             }
         }
-
         override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
             return when {
                 oldItem is SongEntity && newItem is SongEntity -> songDiffCallback.areContentsTheSame(oldItem, newItem)

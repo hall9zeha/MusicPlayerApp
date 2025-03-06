@@ -7,6 +7,7 @@ import android.os.IBinder
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import com.barryzeha.core.common.MyPreferences
+import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -111,6 +112,7 @@ open class AbsMusicServiceActivity : AppCompatActivity(), ServiceSongListener {
         for (listener in mMusicPlayerServiceListeners) {
             listener.onServiceConnected(conn, service)
         }
+
     }
 
     override fun onServiceDisconnected() {

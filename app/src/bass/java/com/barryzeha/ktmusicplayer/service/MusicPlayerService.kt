@@ -137,7 +137,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
-        setUpRepository()
+        setUpPlaylist()
         setUpHeadsetAndBluetoothReceiver()
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
@@ -293,7 +293,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     }
 
     @OptIn(UnstableApi::class)
-    private fun setUpRepository(){
+    private fun setUpPlaylist(){
         serviceScope.launch {
             // TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {

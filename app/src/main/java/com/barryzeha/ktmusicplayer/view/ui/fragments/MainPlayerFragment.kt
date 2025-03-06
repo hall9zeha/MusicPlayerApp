@@ -264,7 +264,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
         val bind = service as MusicPlayerService.MusicPlayerServiceBinder
         musicPlayerService = bind.getService()
         this.serviceConnection=conn
-        startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
+        //startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
     }
     override fun onServiceDisconnected() {
         super.onServiceDisconnected()
@@ -648,7 +648,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlaye
     }
     private fun updateService(){
         serviceConnection?.let{
-        startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)}
+        startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)
+        }
     }
     override fun onResume() {
         super.onResume()

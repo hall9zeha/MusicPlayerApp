@@ -368,7 +368,6 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
             recreate()
         }
         checkedSelectedMenuDrawerItems()
-
     }
 
 

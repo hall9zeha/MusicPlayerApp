@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.GravityCompat
@@ -50,7 +49,6 @@ import com.barryzeha.ktmusicplayer.view.ui.fragments.BaseFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -86,8 +84,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
 
     private var idSongForSendToPlaylist: Long = 0
 
-    //private var musicListAdapter:MusicListAdapter?=null
-
     private var onFinisLoadSongsListener: OnFinishedLoadSongs? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +102,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         //onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
         navController=findNavController()
-        setupSubFragments()
         setUpAdapter()
         setUpPlayListAdapters()
         setUpObservers()
@@ -117,14 +112,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         setUpListeners()
         mainViewModel.sharedFragmentInstance(this)
     }
-    private fun setupSubFragments(){
 
-       /* playbackControlsFragment = parentFragmentManager.findFragmentById(R.id.miniPlayerControls) as PlaybackControlsFragment
-        playbackControlsFragment?.let{
-            it.setListMusicFragmentInstance(this)
-            playbackControlsCallback = it
-        }*/
-    }
     private fun handleArgumentsSending() {
         arguments?.let { arg ->
             val playlistId = arg.getInt(ARG_PARAM1)
@@ -136,7 +124,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         launcherAudioEffectActivity =
             registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()) { }
     }
-
     private fun filePickerActivityResult() {
         launcherFilePickerActivity =
             registerForActivityResult(FilePickerActivity.FilePickerContract()) { paths ->
@@ -177,7 +164,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             }
         }
     }
-
     private fun setUpPlayListAdapters() {
         playListAdapter = PlayListsAdapter({ playlistEntity ->
             // Guardamos los ids de playlist y de la canción al hacer click en un item de la lista
@@ -336,16 +322,13 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             if (musicPlayerService?.getCurrentSongPosition()!! >= musicPlayerService?.playListSize()!! - 1) rvSongs.scrollToPosition(
                 0
             )
-
         }
     }
-
     private fun updateUI(musicState: MusicState) {
         currentMusicState = musicState
         mPrefs.currentPosition = musicState.currentDuration
         updateService()
     }
-
     private fun setUpListeners() = with(bind) {
         var clicked = false
         val permissionList: List<String> =
@@ -595,19 +578,16 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         super.currentTrack(musicState)
         musicState?.let { mainViewModel.setCurrentTrack(musicState) }
     }
-
     // El método sobreescrito onConnectedService no se dispara aquí debido a que se ejecuta después del primer fragmento
     // La conexión al servicio la obtenemos a través del view model enviado desde main activity
     override fun onServiceDisconnected() {
         super.onServiceDisconnected()
         musicPlayerService = null
     }
-
     override fun onPause() {
         super.onPause()
         setNumberOfTrack()
     }
-
     override fun onResume() {
         super.onResume()
         setNumberOfTrack()
@@ -626,9 +606,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         var instance: ListFragment? = null
         @SuppressLint("StaticFieldLeak")
         var isFiltering: Boolean = false
-        var btmSheetIsExpanded: Boolean = false
         var navController:NavController?=null
-
         @JvmStatic
         fun newInstance(param1: Int, param2: String) =
             ListFragment().apply {

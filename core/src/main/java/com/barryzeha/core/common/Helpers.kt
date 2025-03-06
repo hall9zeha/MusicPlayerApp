@@ -92,9 +92,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
         } else context.startService(serviceIntent)
     }
     context.bindService(serviceIntent, serviceConn, Context.BIND_AUTO_CREATE)
-
 }
-
  fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata?{
      var metadata: AudioFile? = null
      try {
@@ -206,8 +204,6 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
         val title = getTagField(FieldKey.TITLE, nameFile)
         val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
         val album = getTagField(FieldKey.ALBUM, "Album Unknown")
-
-
         // Extract audio header data with default values
         val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
         val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong()} catch (ex: Exception) { 0L }
@@ -222,7 +218,6 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
             songLength = songLength,
             //coverArt = bitmapCoverArt
         )
-
     }
     return null
 }

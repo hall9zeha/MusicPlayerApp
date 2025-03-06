@@ -26,7 +26,6 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
@@ -146,7 +145,7 @@ class MusicPlayerService : Service(){
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
-        setUpRepository()
+        setUpPlaylist()
         initMusicStateLooper()
         setUpHeadsetAndBluetoothReceiver()
 
@@ -448,7 +447,7 @@ class MusicPlayerService : Service(){
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private fun setUpRepository(){
+    private fun setUpPlaylist(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
             .build()
         setUpEqualizer(exoPlayer.audioSessionId)
@@ -471,7 +470,6 @@ class MusicPlayerService : Service(){
                 }
                 Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
             }
-
             setUpExoplayerListener()
             playerListener?.let{listener->exoPlayer.addListener(listener)}
         }

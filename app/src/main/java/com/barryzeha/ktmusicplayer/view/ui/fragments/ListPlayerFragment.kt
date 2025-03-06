@@ -22,10 +22,8 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var navHostFragment:NavHostFragment?=null
 
     private var _playbackControlsFragmentInstance:PlaybackControlsFragment?=null
-    private val playbackControlsFragmentInstance:PlaybackControlsFragment get() = _playbackControlsFragmentInstance!!
     private var param1: String? = null
     private var param2: String? = null
-    private var playbackControlsFragment:PlaybackControlsFragment?=null
 
     private var onFinisLoadSongsListener:OnFinishedLoadSongs?=null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +63,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     }
     companion object {
          var instance: ListPlayerFragment? = null
-         var navController:NavController?=null
          @JvmStatic
          fun newInstance(param1: Int, param2: String) =
              ListPlayerFragment().apply {
