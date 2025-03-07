@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/sendToList"
+        android:title="@string/sendToList"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/songInfo"
+        android:title="@string/songInfo"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/addToFavorite"
+        android:title="@string/addToFavorite"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/goToAlbum"
+        android:title="@string/goToAlbum"
+        app:showAsAction="ifRoom"/>
     <item android:id="@+id/deleteItem"
         android:title="@string/delete_title"
         app:showAsAction="ifRoom"
@@ -8,5 +20,4 @@
     <item android:id="@+id/deleteAllItem"
         android:title="@string/delete_all"
         app:showAsAction="ifRoom"/>
-
 </menu>

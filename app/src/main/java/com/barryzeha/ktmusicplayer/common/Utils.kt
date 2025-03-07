@@ -1,7 +1,6 @@
 package com.barryzeha.ktmusicplayer.common
 
 import android.app.Activity
-import com.barryzeha.ktmusicplayer.br.MusicPlayerBroadcast
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -11,19 +10,14 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
-import android.media.session.MediaSession
 import android.os.Build
-import android.util.Log
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
-import android.widget.LinearLayout
-import android.widget.PopupWindow
 import androidx.annotation.RequiresApi
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.viewbinding.ViewBinding
 import com.barryzeha.core.R
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
@@ -32,10 +26,8 @@ import com.barryzeha.core.common.BY_GENRE
 import com.barryzeha.core.common.COLOR_ACCENT
 import com.barryzeha.core.common.COLOR_BACKGROUND
 import com.barryzeha.core.common.COLOR_TRANSPARENT
-import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SettingsKeys
-import com.barryzeha.core.common.getBiteArrayOfImageEmbedded
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.showDialog
@@ -44,17 +36,14 @@ import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.MyApp.Companion.mPrefs
-import com.barryzeha.ktmusicplayer.databinding.ActionAddMenuPopupBinding
+import com.barryzeha.ktmusicplayer.br.MusicPlayerBroadcast
 import com.barryzeha.ktmusicplayer.databinding.CreatePlaylistLayoutBinding
-import com.barryzeha.ktmusicplayer.databinding.WindowPopupMenuBinding
-
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.log
 
 
 /**
@@ -230,75 +219,76 @@ fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, view:View,
                     songInfoCallback:()->Unit,
                     goToAlbum:()->Unit
                     ){
-
-    val popupView = WindowPopupMenuBinding.inflate(activity.layoutInflater)
-    createPopUpWindow(popupView,view,activity){popupWindow->
-        when(onItemClick){
-            ON_MINI_PLAYER_MENU->{
-                popupView.btnDeleteItem.visibility = View.GONE
-                popupView.btnSendToList.visibility = View.GONE
-            }
-            ON_ALBUM_DETAIL_ITEM_MENU->{
-                popupView.btnDeleteAll.visibility = View.GONE
-                popupView.btnGoToAlbum.visibility = View.GONE
-            }
-            else->{}
+    val popupMenu = PopupMenu(activity, view)
+    popupMenu.inflate(R.menu.item_menu)
+    when(onItemClick){
+        ON_MINI_PLAYER_MENU->{
+            popupMenu.menu.getItem(0).setVisible(false)
+            popupMenu.menu.getItem(4).setVisible(false)
         }
-        popupView.btnDeleteItem.setOnClickListener {
-            deleteItemCallback()
-            popupWindow.dismiss()
+        ON_ALBUM_DETAIL_ITEM_MENU->{
+            popupMenu.menu.getItem(0).setVisible(false)
+            popupMenu.menu.getItem(5).setVisible(false)
         }
-        popupView.btnDeleteAll.setOnClickListener {
-            showDialog(activity, R.string.delete_all,
-                R.string.delete_all_msg) {
-                deleteAllItemsCallback()
-            }
-            popupWindow.dismiss()
-        }
-        popupView.btnSendToList.setOnClickListener {
-            sendToPlaylistCallback()
-            popupWindow.dismiss()
-        }
-        popupView.btnAddToFavorite.setOnClickListener {
-            addToFavoriteCallback()
-            popupWindow.dismiss()
-        }
-        popupView.btnInfo.setOnClickListener {
-            songInfoCallback()
-            popupWindow.dismiss()
-        }
-        popupView.btnGoToAlbum.setOnClickListener {
-            goToAlbum()
-            popupWindow.dismiss()
-        }
+        else->{}
     }
+    popupMenu.setOnMenuItemClickListener { item ->
+        when (item?.itemId) {
+            R.id.sendToList->{
+                sendToPlaylistCallback()
+                popupMenu.dismiss()
+            }
+            R.id.addToFavorite->{
+                addToFavoriteCallback()
+                popupMenu.dismiss()
+            }
+            R.id.songInfo->{
+                songInfoCallback()
+                popupMenu.dismiss()
+            }
+            R.id.goToAlbum->{
+                goToAlbum()
+                popupMenu.dismiss()
+            }
+            R.id.deleteItem->{
+                deleteItemCallback()
+                popupMenu.dismiss()
+            }
+            R.id.deleteAllItem->{
+                showDialog(activity, R.string.delete_all,
+                    R.string.delete_all_msg) {
+                    deleteAllItemsCallback()
+                }
+                popupMenu.dismiss()
+            }
+        }
+        true
+    }
+    popupMenu.show()
 
 }
 fun onMenuActionAddPopup(activity: Activity,view: View,
                          addFileCallback:()->Unit,
                          addPlaylistCallback:()->Unit,){
-    val popupView = ActionAddMenuPopupBinding.inflate(activity.layoutInflater)
-    createPopUpWindow(popupView,view,activity){popupWindow->
-        popupView.btnAddFile.setOnClickListener { addFileCallback(); popupWindow.dismiss() }
-        popupView.btnAddPlayList.setOnClickListener { addPlaylistCallback(); popupWindow.dismiss() }
+    val popupMenu = PopupMenu(activity, view,Gravity.TOP)
+    popupMenu.inflate(R.menu.add_actions_menu)
+    popupMenu.setOnMenuItemClickListener { item ->
+        when (item?.itemId) {
+            R.id.createPlaylistItem -> {
+                addPlaylistCallback()
+                popupMenu.dismiss()
+            }
+            R.id.addFileItem -> {
+                addFileCallback()
+                popupMenu.dismiss()
+            }
+        }
+        true
     }
+   popupMenu.show()
+
 }
 
-private fun createPopUpWindow(dialogView:ViewBinding,parentView:View, activity: Activity, listeners:(popup:PopupWindow)->Unit):PopupWindow{
-
-    val popupWindow = PopupWindow(dialogView.root, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-    listeners(popupWindow)
-    popupWindow.isFocusable = true
-    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(activity,com.barryzeha.ktmusicplayer.R.drawable.popup_window_background))
-    val location = IntArray(2)
-    parentView.getLocationOnScreen(location)
-
-    dialogView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-    popupWindow.width = LinearLayout.LayoutParams.WRAP_CONTENT
-    popupWindow.height = View.MeasureSpec.makeMeasureSpec(dialogView.root.measuredHeight, View.MeasureSpec.UNSPECIFIED)
-    popupWindow.showAtLocation(dialogView.root, Gravity.NO_GRAVITY, location[0], location[1] - popupWindow.height - 16)
-    return popupWindow
-}
  fun createNewPlayListDialog(context:Activity, onAccept:(value:String)->Unit){
      val dialogView = CreatePlaylistLayoutBinding.inflate(context.layoutInflater)
      val dialog = MaterialAlertDialogBuilder(context)

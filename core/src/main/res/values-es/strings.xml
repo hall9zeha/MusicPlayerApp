@@ -56,4 +56,5 @@
     <string name="reset">Reiniciar</string>
     <string name="songs">Canciones</string>
     <string name="duration">Duración</string>
+    <string name="goToAlbum">Ir al álbum</string>
 </resources>

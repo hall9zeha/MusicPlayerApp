@@ -55,4 +55,5 @@
     <string name="reset">Reset</string>
     <string name="songs">Songs</string>
     <string name="duration">Duration</string>
+    <string name="goToAlbum">Go to album</string>
 </resources>
