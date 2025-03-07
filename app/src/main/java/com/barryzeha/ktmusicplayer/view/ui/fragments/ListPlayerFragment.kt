@@ -25,7 +25,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     private var param1: String? = null
     private var param2: String? = null
 
-    private var onFinisLoadSongsListener:OnFinishedLoadSongs?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -36,7 +35,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bind = FragmentListPlayerBinding.bind(view)
-        onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
         setupNavigation()
         setupSubFragments()
@@ -57,9 +55,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
         mainViewModel.navControllerInstance.observe(viewLifecycleOwner){instance->
             navController = instance
         }
-        mainViewModel.currentTrack.observe(viewLifecycleOwner){
-
-        }
     }
     companion object {
          var instance: ListPlayerFragment? = null
@@ -71,19 +66,6 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
                      putString(ARG_PARAM2, param2)
                  }
              }
-    }
-    override fun currentTrack(musicState: MusicState?) {
-        super.currentTrack(musicState)
-        mainViewModel.setCurrentTrack(musicState!!)
-    }
-
-    override fun musicState(musicState: MusicState?) {
-        super.musicState(musicState)
-        mainViewModel.setMusicState(musicState!!)
-    }
-
-    interface OnFinishedLoadSongs{
-        fun onFinishLoad()
     }
 
 }

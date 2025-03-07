@@ -54,7 +54,7 @@ private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 @AndroidEntryPoint
-class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListPlayerFragment.OnFinishedLoadSongs {
+class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragment.OnFinishedLoadSongs {
 
     private var param1: String? = null
     private var param2: String? = null

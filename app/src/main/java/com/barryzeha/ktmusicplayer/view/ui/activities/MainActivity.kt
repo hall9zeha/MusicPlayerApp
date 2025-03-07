@@ -41,7 +41,6 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -177,9 +176,9 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
                 }
                 bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
             }
-            val m = subMenu?.add(Menu.NONE, PLAYLIST_DEFAULT_ID,Menu.NONE,"default")
-            m?.setOnMenuItemClickListener {
-                mainViewModel.fetchPlaylistWithSongsBy(m.itemId,mPrefs.playListSortOption)
+            val subMenuPlaylist = subMenu?.add(Menu.NONE, PLAYLIST_DEFAULT_ID,Menu.NONE,"default")
+            subMenuPlaylist?.setOnMenuItemClickListener {
+                mainViewModel.fetchPlaylistWithSongsBy(subMenuPlaylist.itemId,mPrefs.playListSortOption)
                 bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
                 mPrefs.currentView = SONG_LIST_FRAGMENT
                 bind.navView.menu[MAIN_FRAGMENT].setChecked(false)
@@ -188,23 +187,23 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
             }
             val existId = mutableSetOf<Int>()
 
-            m?.setIcon(coreRes.drawable.ic_playlist_select)
+            subMenuPlaylist?.setIcon(coreRes.drawable.ic_playlist_select)
             playlists.forEachIndexed { index, playlist ->
                 // Comprobamos si el item ya existe a través de su id
                 if (!existId.contains(playlist.idPlaylist.toInt())) {
                     val itemView = MenuItemViewBinding.inflate(layoutInflater)
-                    val m = subMenu?.add(
+                    val menuItemPlaylist = subMenu?.add(
                         Menu.NONE,
                         playlist.idPlaylist.toInt(),
                         Menu.NONE,
                         playlist.playListName
                     )
-                    m?.setActionView(itemView.root)
-                    m?.setIcon(coreRes.drawable.ic_playlist_select)
+                    menuItemPlaylist?.setActionView(itemView.root)
+                    menuItemPlaylist?.setIcon(coreRes.drawable.ic_playlist_select)
                     existId.add(playlist.idPlaylist.toInt())
 
-                    m?.setOnMenuItemClickListener {
-                        mainViewModel.fetchPlaylistWithSongsBy(m.itemId, mPrefs.playListSortOption)
+                    menuItemPlaylist?.setOnMenuItemClickListener {
+                        mainViewModel.fetchPlaylistWithSongsBy(menuItemPlaylist.itemId, mPrefs.playListSortOption)
                         bind.mViewPager.setCurrentItem(SONG_LIST_FRAGMENT, true)
                         mPrefs.currentView = SONG_LIST_FRAGMENT
                         bind.navView.menu[MAIN_FRAGMENT].setChecked(false)
@@ -212,8 +211,8 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
                         true
                     }
                     itemView.menuItemIcon.setOnClickListener {
-                        mainViewModel.deletePlayList(m?.itemId!!.toLong())
-                        subMenu?.removeItem(m.itemId)
+                        mainViewModel.deletePlayList(menuItemPlaylist?.itemId!!.toLong())
+                        subMenu?.removeItem(menuItemPlaylist.itemId)
                     }
                     bind.navView.invalidate()
                 }

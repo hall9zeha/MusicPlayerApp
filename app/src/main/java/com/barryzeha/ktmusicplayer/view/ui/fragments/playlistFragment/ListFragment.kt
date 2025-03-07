@@ -99,7 +99,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         super.onViewCreated(view, savedInstanceState)
         bind = FragmentPlaylistBinding.bind(view)
         //TODO implementar luego o en un viewModel la finalización de carga de la lista si es necesario
-        //onFinisLoadSongsListener = MainPlayerFragment.instance
+        onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
         navController=findNavController()
         setUpAdapter()
