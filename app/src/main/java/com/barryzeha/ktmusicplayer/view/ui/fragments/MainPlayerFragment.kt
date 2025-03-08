@@ -454,7 +454,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             btnMainPlay.setOnClickListener {
                 if (musicPlayerService?.getSongsList()?.size!! > 0) {
                     if (!currentMusicState.isPlaying && currentMusicState.duration <= 0) {
-                        getSongOfList(musicPlayerService?.getCurrentSongPosition()!!)?.let{song->
+                        musicPlayerService?.getSongsList()?.get(0)?.let{song->
                             musicPlayerService?.startPlayer(song)
                             btnMainPlay.setIconResource(coreRes.drawable.ic_circle_pause)
                         }

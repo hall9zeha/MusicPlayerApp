@@ -45,7 +45,6 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     protected var isUserSeeking=false
     protected var userSelectPosition=0
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {

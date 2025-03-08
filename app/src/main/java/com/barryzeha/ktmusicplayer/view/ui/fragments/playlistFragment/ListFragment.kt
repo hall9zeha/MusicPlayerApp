@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -288,6 +289,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 mPrefs.clearIdSongInPrefs()
                 mPrefs.clearCurrentPosition()
                 musicPlayerService?.clearPlayList(isSort = false)
+                currentMusicState = MusicState()
                 setNumberOfTrack()
             }
         }
@@ -555,10 +557,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             if (scrollToPosition) bind?.rvSongs?.scrollToPosition(realPos)
         }
-       /* playbackControlsFragment?.setNumberOfTracks(
-            (if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),
-            (musicListAdapter?.getSongItemCount()!! + itemCount)
-        )*/
         val numbersOfTrack=Pair((if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),(musicListAdapter?.getSongItemCount()!! + itemCount))
         return numbersOfTrack
     }
@@ -599,6 +597,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     override fun onStop() {
         mPrefs.currentView = MAIN_FRAGMENT
         mainViewModel.saveCurrentStateSong(currentMusicState)
+
         super.onStop()
     }
 

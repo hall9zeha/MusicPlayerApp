@@ -700,6 +700,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(!isSort){
             setPlayingState(false)
             _songController?.currentTrack(MusicState())
+            currentMusicState = MusicState()
             bassManager?.setSongStateSaved(0,0)
             bassManager?.clearBassChannel()
         }else{
@@ -707,6 +708,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }
         executeOnceTime=false
     }
+
     fun unregisterController(){
         _songController=null
     }

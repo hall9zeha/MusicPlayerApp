@@ -21,6 +21,7 @@ import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.SmallPlayerControlsBinding
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
+import javax.annotation.Nullable
 
 /**
  * Project KTMusicPlayer
@@ -47,17 +48,10 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         setupObservers()
 
     }
-    fun setNumberOfTracks(){
+    fun setNumberOfTracks(@Nullable itemCount: Int?=null){
         listFragmentInstance?.setNumberOfTrack()?.let{(currentTrack, totalTracks)->
-            bind.tvNumberSong.text=String.format("#%s/%s", currentTrack, totalTracks)
+            bind.tvNumberSong.text=String.format("#%s/%s", currentTrack, itemCount?:totalTracks)
         }
-    }
-    fun setAdapterInstance(musicAdapter:MusicListAdapter){
-        musicListAdapter=musicAdapter
-    }
-    fun setListMusicFragmentInstance(instance:Any){
-        listFragmentInstance = if(instance is ListFragment) instance else null
-        listFragmentInstance?.setNumberOfTrack()
     }
     private fun setupObservers(){
         mainViewModel.fragmentInstance.observe(viewLifecycleOwner){instance->
@@ -70,6 +64,9 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
             updateUIOnceTime(it)
             setNumberOfTracks()
         }
+        mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner) { (totalRegisters, count) ->
+            setNumberOfTracks(count)
+        }
         mainViewModel.musicState.observe(viewLifecycleOwner){
             updateUI(it)
         }
@@ -81,9 +78,9 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     private fun setupListeners()=with(bind){
          btnPlay.setOnClickListener {
              if (musicPlayerService?.playListSize()!! > 0) {
-                 if (!musicPlayerService!!.playingState() && musicPlayerService?.currentSongState()!!.duration <= 0) getSongOfAdapter(
-                     mPrefs.idSong
-                 )?.let { song ->
+                 if (!musicPlayerService!!.playingState() && musicPlayerService?.currentSongState()!!.duration <= 0) musicPlayerService?.getSongsList()
+                     ?.get(0)
+                 ?.let { song ->
                      musicPlayerService?.startPlayer(song)
                  }
                  else {
@@ -111,11 +108,12 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
                  setNumberOfTracks()
                  }
              else {
-                 getSongOfAdapter(0)?.let { song ->
+                 getSongOfAdapter(-1)?.let { song ->
                      musicPlayerService?.startPlayer(song)
                      setNumberOfTracks()
                  }
              }
+
          }
          btnNext.setOnLongClickListener {
              fastForwardOrRewind(true)
@@ -204,10 +202,10 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     private fun getSongOfAdapter(idSong: Long): SongEntity?{
         val song = if(idSong>-1){ musicListAdapter?.getSongById(idSong)}else{
             // Buscamos en la posición 1 porque primero tendremos un item header en la posición 0
-            musicListAdapter?.getSongByPosition(1)
+            listFragmentInstance?.musicListAdapter?.getSongByPosition(1)
         }
         song?.let{
-            val (numberedPosition, realPosition) =  musicListAdapter?.getPositionByItem(it)!!
+            val (numberedPosition, realPosition) =  listFragmentInstance?.musicListAdapter?.getPositionByItem(it)!!
             mainViewModel.setCurrentPosition(realPosition)
             mPrefs.currentIndexSong = numberedPosition.toLong()
             listFragmentInstance?.setNumberOfTrack(true)
@@ -230,7 +228,6 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         loadSeekBar.max = musicState.duration.toInt()
         tvInitTime.text = createTime(musicState.currentDuration).third
         loadSeekBar.progress = musicState.currentDuration.toInt()
-
     }
     @SuppressLint("ResourceType")
     private fun checkPlayerSongModePreferences()=with(bind){
