@@ -7,6 +7,7 @@
     <string name="album_placeholder">Album</string>
     <string name="aboutThisDescription">Offline multi-format music player supporting a wide variety of audio file formats, including MP3, WAV, MIDI, APE, ALAC, AAC, FLAC, OGG, and more. Enjoy a personalized experience with a 10-band equalizer in the BASS version and a 5-band equalizer in the ExoPlayer version. Additionally, the app features a tool to edit ID3 tag metadata, allowing you to easily manage your song information in a convenient and efficient way.</string>
     <string name="delete_title">Delete</string>
+    <string name="delete_track">Delete track</string>
     <string name="design">Design</string>
     <string name="develop">Develop</string>
     <string name="empty">No lyric</string>
@@ -29,7 +30,7 @@
     <string name="favorite">Favorite</string>
     <string name="file_meta_info">%s Kbps</string>
     <string name="soundEffects">Sound effects</string>
-    <string name="delete_all">Delete list</string>
+    <string name="delete_all">Delete playlist</string>
     <string name="delete_song">Remove from list</string>
     <string name="sendToList">Send to playlist</string>
     <string name="songInfo">File info</string>

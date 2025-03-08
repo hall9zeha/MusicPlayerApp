@@ -14,7 +14,7 @@
         android:title="@string/goToAlbum"
         app:showAsAction="ifRoom"/>
     <item android:id="@+id/deleteItem"
-        android:title="@string/delete_title"
+        android:title="@string/delete_track"
         app:showAsAction="ifRoom"
         />
     <item android:id="@+id/deleteAllItem"

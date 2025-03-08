@@ -286,9 +286,7 @@ fun onMenuActionAddPopup(activity: Activity,view: View,
         true
     }
    popupMenu.show()
-
 }
-
  fun createNewPlayListDialog(context:Activity, onAccept:(value:String)->Unit){
      val dialogView = CreatePlaylistLayoutBinding.inflate(context.layoutInflater)
      val dialog = MaterialAlertDialogBuilder(context)
@@ -311,7 +309,6 @@ fun getPlayListName(mPrefs:MyPreferences, headerTextRes:(Int)->Unit){
             else->headerTextRes(R.string.default_title)
 
         }
-
 }
 fun changeBackgroundColor(context:Context,colored:Boolean):ColorStateList{
     return if(colored) {
