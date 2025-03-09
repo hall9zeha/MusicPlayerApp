@@ -7,6 +7,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.barryzeha.core.common.getFragment
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.getPlayListName
 import com.barryzeha.ktmusicplayer.databinding.FragmentListPlayerBinding
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,6 +57,7 @@ class ListPlayerFragment : BaseFragment(R.layout.fragment_list_player){
             navController = instance
         }
     }
+
     companion object {
          var instance: ListPlayerFragment? = null
          @JvmStatic

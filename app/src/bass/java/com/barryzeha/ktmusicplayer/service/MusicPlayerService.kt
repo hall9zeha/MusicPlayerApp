@@ -683,6 +683,7 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
             // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
             findItemSongIndexById(mPrefs.idSong)?.let {
                 indexOfSong = it
+
             }?:run{
                 indexOfSong = 0
                 withContext(Main) {
@@ -700,7 +701,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(!isSort){
             setPlayingState(false)
             _songController?.currentTrack(MusicState())
-            currentMusicState = MusicState()
             bassManager?.setSongStateSaved(0,0)
             bassManager?.clearBassChannel()
         }else{

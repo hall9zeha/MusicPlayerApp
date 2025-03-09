@@ -300,7 +300,6 @@ fun onMenuActionAddPopup(activity: Activity,view: View,
      dialog.show()
  }
 fun getPlayListName(mPrefs:MyPreferences, headerTextRes:(Int)->Unit){
-
         when(mPrefs.playListSortOption){
             BY_ALBUM ->headerTextRes(R.string.album)
             BY_ARTIST ->headerTextRes(R.string.artist)

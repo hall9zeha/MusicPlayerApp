@@ -99,7 +99,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         activity?.setTheme(requireContext().getThemeResValue())
         super.onViewCreated(view, savedInstanceState)
         bind = FragmentPlaylistBinding.bind(view)
-        //TODO implementar luego o en un viewModel la finalización de carga de la lista si es necesario
+
         onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
         navController=findNavController()
@@ -302,10 +302,14 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 musicListAdapter?.update(song)
             }
         }
+        mainViewModel.playlistName.observe(viewLifecycleOwner){name->
+            bind?.tvPlayListName?.text = name
+        }
     }
     private fun setUpPlayListName() = with(bind) {
         this?.let {
             getPlayListName(mPrefs) { headerTextRes ->
+                mainViewModel.setPlaylistName(getString(headerTextRes))
                 tvPlayListName.text = getString(headerTextRes)
             }
         }
@@ -596,8 +600,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
 
     override fun onStop() {
         mPrefs.currentView = MAIN_FRAGMENT
-        mainViewModel.saveCurrentStateSong(currentMusicState)
-
+        if(mPrefs.idSong>-1) mainViewModel.saveCurrentStateSong(currentMusicState)
         super.onStop()
     }
 

@@ -106,6 +106,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var _playlistWithSongRefInserted:SingleMutableLiveData<Long> = SingleMutableLiveData()
     val playlistWithSongRefInserted:LiveData<Long> = _playlistWithSongRefInserted
 
+    private var _playlistName:MutableLiveData<String> = MutableLiveData()
+    val playlistName:LiveData<String> = _playlistName
+
     // Song tag edited
     private var _isSongTagEdited:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val isSongTagEdited:LiveData<SongEntity> = _isSongTagEdited
@@ -266,9 +269,15 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
            _playLists.value= repository.fetchPlaylists()
         }
     }
+    fun setPlaylistName(name:String){
+        launch{
+            _playlistName.value= name
+        }
+    }
     private suspend fun getPlayLists(){
         _playLists.postValue(repository.fetchPlaylists())
     }
+
     // For playlist with songs cross ref
     fun savePlaylistWithSongRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef){
         launch{

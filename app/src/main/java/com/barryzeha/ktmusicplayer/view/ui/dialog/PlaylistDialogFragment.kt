@@ -139,6 +139,7 @@ class PlaylistDialogFragment : DialogFragment() {
             } else {
                 // Cargamos la lista de reproducción seleccionada
                 getPlaylist(playlistEntity.idPlaylist.toInt())
+                mainViewModel.setPlaylistName(playlistEntity.playListName)
             }
         }, { playlist ->
             // Al eliminar un item
@@ -160,7 +161,7 @@ class PlaylistDialogFragment : DialogFragment() {
 
     private fun getPlaylist(playlistId: Int) {
         mPrefs.playlistId = playlistId
-        musicPlayerService?.clearPlayList(false)
+        musicPlayerService?.clearPlayList(true)
         mainViewModel.fetchPlaylistWithSongsBy(playlistId, mPrefs.playListSortOption)
         dismiss()
     }
