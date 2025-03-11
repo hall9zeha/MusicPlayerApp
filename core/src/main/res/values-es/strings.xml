@@ -30,7 +30,7 @@
     <string name="favorite">Fovoritos</string>
     <string name="file_meta_info">%s Kbps</string>
     <string name="soundEffects">Efectos de sonido</string>
-    <string name="delete_all">Eliminar lista de reproducción</string>
+    <string name="delete_all">Eliminar todas las pistas</string>
     <string name="delete_song">Quitar de la lista</string>
     <string name="empty">Sin letra</string>
     <string name="addToFavorite">Agregar a favoritos</string>

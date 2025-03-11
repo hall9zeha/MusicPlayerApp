@@ -30,7 +30,7 @@
     <string name="favorite">Favorite</string>
     <string name="file_meta_info">%s Kbps</string>
     <string name="soundEffects">Sound effects</string>
-    <string name="delete_all">Delete playlist</string>
+    <string name="delete_all">Delete all tracks</string>
     <string name="delete_song">Remove from list</string>
     <string name="sendToList">Send to playlist</string>
     <string name="songInfo">File info</string>

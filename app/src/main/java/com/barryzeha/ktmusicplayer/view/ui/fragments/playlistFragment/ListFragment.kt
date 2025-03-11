@@ -144,7 +144,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 }
             }
     }
-
     private fun activityResultForPermission() {
         launcherPermission =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -373,7 +372,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     })
                 }
             }
-
             btnFavorite.setOnClickListener {
                 if (!isFavorite) {
                     mainViewModel.updateFavoriteSong(true, mPrefs.idSong)
@@ -433,7 +431,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }
             btnMore.setOnClickListener { view ->
-                onMenuItemPopup(ON_MINI_PLAYER_MENU, requireActivity(), view, {
+                onMenuItemPopup(ON_MINI_PLAYER_MENU, requireActivity(), mPrefs,view, {
                     // Delete item callback
                 }, {
                     // Delete all items callback
@@ -524,7 +522,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     }
 
     private fun onMenuItemClick(view: View, position: Int, selectedSong: SongEntity) {
-        onMenuItemPopup(ON_MENU_ITEM,requireActivity(), view, { // Delete item callback
+        onMenuItemPopup(ON_MENU_ITEM,requireActivity(), mPrefs,view, { // Delete item callback
             mainViewModel.deleteSong(selectedSong)
             this.song = selectedSong
         }, { // Delete all items callback

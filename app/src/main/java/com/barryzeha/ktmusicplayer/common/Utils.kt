@@ -39,6 +39,7 @@ import com.barryzeha.ktmusicplayer.MyApp.Companion.mPrefs
 import com.barryzeha.ktmusicplayer.br.MusicPlayerBroadcast
 import com.barryzeha.ktmusicplayer.databinding.CreatePlaylistLayoutBinding
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
+import com.barryzeha.ktmusicplayer.view.ui.activities.PLAYLIST_DEFAULT_ID
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -211,7 +212,7 @@ fun sortPlayList(sortedOption:Int, songList:List<SongEntity>, result:(songListSo
         }
     }
 }
-fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, view:View,
+fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, mPrefs: MyPreferences, view:View,
                     deleteItemCallback:()->Unit,
                     deleteAllItemsCallback:()->Unit,
                     sendToPlaylistCallback:()->Unit,
@@ -221,6 +222,11 @@ fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, view:View,
                     ){
     val popupMenu = PopupMenu(activity, view)
     popupMenu.inflate(R.menu.item_menu)
+    if(mPrefs.playlistId == PLAYLIST_DEFAULT_ID){
+        popupMenu.menu.getItem(5).setVisible(true)
+    }else{
+        popupMenu.menu.getItem(5).setVisible(false)
+    }
     when(onItemClick){
         ON_MINI_PLAYER_MENU->{
             popupMenu.menu.getItem(0).setVisible(false)

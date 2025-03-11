@@ -527,8 +527,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
 
                             mPrefs.songMode = CLEAR_MODE
                             checkPlayerSongPreferences()
-                            // For bass flavor
-                            musicPlayerService?.sortList()
                         }
                         SongMode.RepeatAll.ordinal -> {
                             // Second: repeat one
@@ -536,8 +534,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                             btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode = REPEAT_ONE
                             checkPlayerSongPreferences()
-                            // For bass flavor
-                            musicPlayerService?.sortList()
                         }
                         else -> {
                             // First: active repeat All
@@ -545,8 +541,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                             btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode= REPEAT_ALL
                             checkPlayerSongPreferences()
-                            // For bass flavor
-                            musicPlayerService?.sortList()
                         }
                     }
             }
@@ -556,8 +550,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                         SongMode.Shuffle.ordinal->{
                             btnShuffle.backgroundTintList =changeBackgroundColor(requireContext(), false)
                             mPrefs.songMode = CLEAR_MODE
-                            // For bass flavor
-                            musicPlayerService?.sortList()
                             checkPlayerSongPreferences()
                     }
                     else->{
@@ -565,8 +557,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                         btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                         btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode= SHUFFLE
-                        // For bass flavor
-                        musicPlayerService?.shuffleList()
                         checkPlayerSongPreferences()
                     }
                 }

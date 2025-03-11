@@ -981,12 +981,6 @@ class MusicPlayerService : Service(){
             handler.removeCallbacks(it)
         }
     }
-
-    // Solo en bass flavour
-    fun shuffleList(songList: MutableList<SongEntity> = arrayListOf()){}
-    // Solo en bass flavour Reordenamos la lista nuevamente a su forma original
-    fun sortList(){}
-
     fun getSongsList():List<SongEntity>{
         return songsList
     }

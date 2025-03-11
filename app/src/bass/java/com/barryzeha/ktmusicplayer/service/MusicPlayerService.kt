@@ -68,6 +68,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.random.Random
 import kotlin.system.exitProcess
 
 
@@ -304,10 +305,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     //if (!songsList.contains(s)) {
                         songsList.add(s)
                     //}
-                }
-                // Comprobamos si la opción shuffle está activada al iniciar el servicio
-                if(mPrefs.songMode == SHUFFLE){
-                    shuffleList()
                 }
             }
             initMusicStateLooper()
@@ -690,7 +687,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     setMusicForPlay(songsList[0])
                 }
             }
-            if(mPrefs.songMode == SHUFFLE)shuffleList()
             mPrefs.currentIndexSong = indexOfSong.toLong()
 
         }
@@ -812,7 +808,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         if(mPrefs.isOpenQueue){
             if(playingQueue.isNotEmpty()){
                 if(indexOfSong < playingQueue.size -1){
-                    indexOfSong +=1
+                    if(mPrefs.songMode == SHUFFLE) indexOfSong = Random.nextInt(0,playingQueue.size-1)
+                    else indexOfSong +=1
                 }else{
                     indexOfSong = 0
                 }
@@ -820,7 +817,8 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
         }else {
             if (songsList.isNotEmpty()) {
                 if (indexOfSong < songsList.size - 1) {
-                    indexOfSong += 1
+                    if(mPrefs.songMode == SHUFFLE) indexOfSong = Random.nextInt(0,songsList.size-1)
+                    else indexOfSong += 1
                 } else {
                     indexOfSong = 0
                 }
@@ -837,7 +835,13 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun prevSong(){
         if(songsList.isNotEmpty()){
             if(indexOfSong > 0) {
-                indexOfSong -=1
+                if(mPrefs.isOpenQueue){
+                    if(mPrefs.songMode == SHUFFLE) indexOfSong =Random.nextInt(0, playingQueue.size-1)
+                    else  indexOfSong -=1
+                }else{
+                    if(mPrefs.songMode == SHUFFLE) indexOfSong =Random.nextInt(0, songsList.size-1)
+                    else  indexOfSong -=1
+                }
                 nextOrPrevAnimValue = PREVIOUS
                 setOrPlaySong(indexOfSong, PREVIOUS)
                 checkIfPhoneIsLock()
@@ -865,43 +869,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
     fun clearABLoopOfPreferences(){
         bassManager?.stopAbLoop()
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
-    }
-    // Probamos nueva forma de implementar shuffle
-    fun shuffleList(){
-        //CoroutineScope(Dispatchers.IO).launch {
-            //if(!listIsShuffled) {
-        if(mPrefs.isOpenQueue){
-            playingQueue.shuffled()
-        }
-        else {
-            songsList.shuffle()
-        }
-        findItemSongIndexById(mPrefs.idSong)?.let {
-            indexOfSong = it
-        } ?: run {
-            indexOfSong = 0
-        }
-        listIsShuffled = true
-    }
-    // Reordenamos la lista nuevamente a su forma original
-    fun sortList(){
-        if(listIsShuffled) {
-            serviceScope.launch(Dispatchers.IO) {
-                if(mPrefs.isOpenQueue){
-                    playingQueue.clear()
-                    playingQueue = repository.fetchSongsByAlbum(songEntity.album).toMutableList()
-                }else {
-                    songsList.clear()
-                    songsList = repository.fetchAllSongsBy(mPrefs.playListSortOption).toMutableList()
-                }
-                findItemSongIndexById(mPrefs.idSong)?.let {
-                    indexOfSong = it
-                } ?: run {
-                    indexOfSong = 0
-                }
-            }
-        }
-        listIsShuffled = false
     }
     fun getSongsList():List<SongEntity>{
         return songsList

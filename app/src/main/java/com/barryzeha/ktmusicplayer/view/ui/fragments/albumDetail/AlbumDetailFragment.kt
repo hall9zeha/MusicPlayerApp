@@ -131,12 +131,11 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         btnShuffle.setOnClickListener {
             val randomPosition = Random.nextInt(0,albumSongs.size-1)
             musicPlayerService?.openQueue(albumSongs,randomPosition)
-            //TODO probar su funcionalidad
             mPrefs.songMode = SHUFFLE
         }
     }
     private fun onMenuItemClick(view: View, position: Int, songEntity: SongEntity) {
-        onMenuItemPopup(ON_ALBUM_DETAIL_ITEM_MENU,requireActivity(), view, {
+        onMenuItemPopup(ON_ALBUM_DETAIL_ITEM_MENU,requireActivity(), mPrefs, view, {
             // Delete item callback
             mainViewModel.deleteSong(songEntity)
             //this.song = selectedSong
