@@ -79,7 +79,7 @@ import kotlin.system.exitProcess
  **/
 
 @AndroidEntryPoint
-class MusicPlayerService : Service(),BassManager.PlaybackManager{
+class MusicPlayerService : Service(), BassManager.PlaybackManager{
     @Inject
     lateinit var repository: MainRepository
     @Inject
@@ -317,7 +317,6 @@ class MusicPlayerService : Service(),BassManager.PlaybackManager{
                     if(songState.isNotEmpty())setSongStateSaved(songState[0])
                 }
         }
-        //firstCallingToSongState=false
     }
     private fun initMusicStateLooper(){
         initNotify()

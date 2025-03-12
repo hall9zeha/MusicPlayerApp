@@ -258,8 +258,8 @@
             />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLyric"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:icon="@drawable/ic_lyric"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
@@ -271,11 +271,12 @@
             style="@style/Widget.Material3.Button.IconButton"
             app:layout_constraintEnd_toStartOf="@id/btnInfo"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="8dp"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="4dp"/>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:icon="@drawable/ic_info"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
@@ -286,11 +287,12 @@
             style="@style/Widget.Material3.Button.IconButton"
             app:layout_constraintEnd_toStartOf="@id/btnFavorite"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="8dp"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="4dp"/>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnFavorite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             app:icon="@drawable/ic_favorite"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
@@ -301,6 +303,7 @@
             style="@style/Widget.Material3.Button.IconButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
          />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

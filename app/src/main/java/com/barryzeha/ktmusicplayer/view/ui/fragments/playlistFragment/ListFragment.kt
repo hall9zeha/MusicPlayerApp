@@ -478,7 +478,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             }
         }
     }
-
     private fun visibleOrGoneViews(isVisible: Boolean) = with(bind) {
         this?.let {
             tilSearch?.visibility = if (isVisible) View.GONE else View.VISIBLE
@@ -489,7 +488,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             tvPlayListName?.visibility = if (isVisible) View.VISIBLE else View.GONE
         }
     }
-
     private fun visibleOrGoneBottomActions(isVisible: Boolean) = with(bind) {
         this?.let {
             btnAdd.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
