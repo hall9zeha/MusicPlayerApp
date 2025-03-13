@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,8 +70,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
 
     private var param1: String? = null
     private var param2: String? = null
-
-    private var playListAdapter: PlayListsAdapter? = null
     private var playbackControlsFragment: PlaybackControlsFragment? = null
 
     private lateinit var launcherFilePickerActivity: ActivityResultLauncher<Unit>
@@ -103,8 +100,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         onFinisLoadSongsListener = MainPlayerFragment.instance
         instance = this
         navController=findNavController()
-        setUpAdapter()
-        setUpPlayListAdapters()
+        setupSongsAdapter()
         setUpObservers()
         setUpPlayListName()
         filePickerActivityResult()
@@ -152,7 +148,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 }
             }
     }
-    private fun setUpAdapter() {
+    private fun setupSongsAdapter() {
         musicListAdapter = MusicListAdapter(::onItemClick, ::onMenuItemClick)
         bind?.rvSongs?.apply {
             setHasFixedSize(true)
@@ -164,37 +160,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             }
         }
     }
-    private fun setUpPlayListAdapters() {
-        playListAdapter = PlayListsAdapter({ playlistEntity ->
-            // Guardamos los ids de playlist y de la canción al hacer click en un item de la lista
-            // que representa nuestras listas creadas
-            if (idSongForSendToPlaylist > 0) {
-                mainViewModel.savePlaylistWithSongRef(
-                    PlaylistWithSongsCrossRef(playlistEntity.idPlaylist, idSongForSendToPlaylist)
-                )
-            } else {
-                // Cargamos la lista de reproducción seleccionada
-                getPlaylist(playlistEntity.idPlaylist.toInt())
-            }
-        }, { playlist ->
-            // Al eliminar un item
-            mainViewModel.deletePlayList(playlist.idPlaylist)
-            playListAdapter?.remove(playlist)
-            (activity as? MainActivity)?.removeMenuItemDrawer(playlist.idPlaylist.toInt())
-
-        }, { playlist ->
-            // Cambiar nombre de una playlist
-            mainViewModel.updatePlaylist(playlist)
-        })
-        bind?.bottomSheetView?.rvPlaylists?.apply {
-            setHasFixedSize(true)
-            setItemViewCacheSize(10)
-            layoutManager = LinearLayoutManager(context)
-            adapter = playListAdapter
-        }
-        playListAdapter!!.add(PlaylistEntity(0, "Default"))
-    }
-
     private fun getPlaylist(playlistId: Int) {
         mPrefs.playlistId = playlistId
         musicPlayerService?.clearPlayList(false)
@@ -527,12 +492,11 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             musicListAdapter?.removeAll()
             mainViewModel.deleteAllSongs()
         }, { // Send to playlist callback
-            if (playListAdapter?.itemCount!! > 0) {
-                PlaylistDialogFragment.newInstance(selectedSong.id).show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
-            }
-        }, {
+             PlaylistDialogFragment.newInstance(selectedSong.id).show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
+
+        }, {//
             mainViewModel.updateSong(selectedSong.copy(favorite = true))
-        }, {
+        }, {// Go to song info
             SongInfoDialogFragment.newInstance(
                 SongEntity(
                     id = selectedSong.id,
@@ -540,7 +504,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 )
             )
                 .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
-        },{
+        },{// Go to album detail
 
             val bundle = Bundle().apply {
                 putString("extra_album", selectedSong.album)
@@ -548,7 +512,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             navController?.navigate(R.id.albumDetailFragment,bundle)
         })
     }
-
     fun setNumberOfTrack(scrollToPosition: Boolean = true, itemCount: Int = 0):Pair<Int,Int> {
         val itemSong = musicListAdapter?.getSongById(mPrefs.idSong)
         itemSong?.let {

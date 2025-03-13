@@ -78,8 +78,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
             setItemViewCacheSize(10)
             layoutManager = LinearLayoutManager(context)
             adapter = albumAdapter
-            /*post {
-            }*/
+
         }
     }
     private fun setupObservers(view:View){
@@ -116,12 +115,12 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
                 tvDetailAlbum.text = stringBuilder
             }
         }
-        val layoutParams0 = ConstraintLayout.LayoutParams(
+        val newLayoutParams = ConstraintLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             0
         )
-        layoutParams0.topToBottom=bind.btnPlaying.id
-        bind.rvAlbumDetail.layoutParams = layoutParams0
+        newLayoutParams.topToBottom=bind.btnPlaying.id
+        bind.rvAlbumDetail.layoutParams = newLayoutParams
     }
     private fun setupListeners()=with(bind){
         btnPlaying.setOnClickListener{
