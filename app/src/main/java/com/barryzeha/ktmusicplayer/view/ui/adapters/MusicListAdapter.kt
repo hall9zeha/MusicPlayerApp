@@ -471,9 +471,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         data class BackgroundColor(val color:Int):ItemSongChangePayload
         data class CheckBoxVisible(val isVisible:Boolean):ItemSongChangePayload
     }
-    private sealed interface ItemHeaderChangePayload{
-        data class TextHeader(val text:String):ItemHeaderChangePayload
-    }
 
 
 }

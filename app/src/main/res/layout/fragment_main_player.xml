@@ -208,8 +208,8 @@
         >
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAbLoop"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             app:icon="@drawable/ic_ab_looper"
             app:iconGravity="textStart"
             app:iconTint="@null"

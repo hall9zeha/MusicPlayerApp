@@ -12,7 +12,6 @@ import android.os.Looper
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -59,7 +58,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     private var param1: String? = null
     private var param2: String? = null
     private var bind:FragmentMainPlayerBinding ? = null
-    private var isPlaying:Boolean = false
     private var currentMusicState = MusicState()
     private val launcherAudioEffectActivity: ActivityResultLauncher<Int> = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var isFavorite:Boolean = false
@@ -116,37 +114,25 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         return defaultPrefs.getBoolean("coverStyle",false)
     }
     @SuppressLint("ResourceType")
-    private fun checkPlayerSongPreferences()=with(bind){
+    private fun checkPlayerSongModePreferences()=with(bind){
         this?.let {
-            when (mPrefs.songMode) {
+            val mode = mPrefs.songMode
+            val colorOn = changeBackgroundColor(requireContext(), true)
+            val colorOff = changeBackgroundColor(requireContext(), false)
+
+            btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+            btnRepeat.backgroundTintList = colorOff
+            btnShuffle.backgroundTintList = colorOff
+            btnAbLoop.backgroundTintList = colorOff
+            when (mode) {
                 SongMode.RepeatOne.ordinal -> {
-
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
-
+                    btnRepeat.backgroundTintList = colorOn
                 }
-                SongMode.RepeatAll.ordinal -> {
-                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
-
-                }
-                SongMode.Shuffle.ordinal ->{
-                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
-
-                }
-                SongMode.AbLoop.ordinal ->{
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                }
+                SongMode.RepeatAll.ordinal ->  btnRepeat.backgroundTintList = colorOn
+                SongMode.Shuffle.ordinal ->  btnShuffle.backgroundTintList = colorOn
+                SongMode.AbLoop.ordinal ->   btnAbLoop.backgroundTintList = colorOn
                 else -> {
-                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnAbLoop.backgroundTintList = changeBackgroundColor(requireContext(),false)
 
                 }
             }
@@ -178,9 +164,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner){statePlay->
             checkIfDiscCoverViewIsRotating(statePlay)
-            isPlaying=statePlay
             if (statePlay) {
-                bind?.btnMainPlay?.setIconResource(com.barryzeha.core.R.drawable.ic_circle_pause)
+                bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
             }else{
                 bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
             }
@@ -303,12 +288,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 bind?.btnAbLoop?.backgroundTintList=changeBackgroundColor(requireContext(),false)}
         }
     }
-    private fun checkIfDiscCoverViewIsRotating(isPlaying:Boolean){
-        if(discCoverViewIsEnable()) {
-                    if (isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).resume()
-                    else (bind?.ivDiscMusicCover as DiscCoverView).pause()
-                }
-    }
     private fun updateUI(musicState: MusicState)=with(bind){
         this?.let {
             currentMusicState = musicState
@@ -321,6 +300,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             lrcView?.updateTime(musicState.currentDuration)
         }
+    }
+    private fun checkIfDiscCoverViewIsRotating(isPlaying:Boolean){
+        if(discCoverViewIsEnable()) {
+                    if (isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).resume()
+                    else (bind?.ivDiscMusicCover as DiscCoverView).pause()
+                }
     }
     fun setNumberOfTrack(songId:Long? = null){
         CoroutineScope(Dispatchers.IO).launch {
@@ -460,13 +445,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                         }
 
                     } else {
-                        if (isPlaying) {
-                            musicPlayerService?.pausePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_play)
+                        if (musicPlayerService?.playingState()!!) {
+                            musicPlayerService?.pausePlayer()
                             mainViewModel.saveStatePlaying(false)
                             if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).pause()
 
                         } else {
-                            musicPlayerService?.resumePlayer(); btnMainPlay.setIconResource(coreRes.drawable.ic_circle_pause)
+                            musicPlayerService?.resumePlayer()
                             mainViewModel.saveStatePlaying(true)
                             if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).resume()
                         }
@@ -526,21 +511,21 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                             btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
 
                             mPrefs.songMode = CLEAR_MODE
-                            checkPlayerSongPreferences()
+                            checkPlayerSongModePreferences()
                         }
                         SongMode.RepeatAll.ordinal -> {
                             // Second: repeat one
                             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
                             btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode = REPEAT_ONE
-                            checkPlayerSongPreferences()
+                            checkPlayerSongModePreferences()
                         }
                         else -> {
                             // First: active repeat All
                             btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),true)
                             btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode= REPEAT_ALL
-                            checkPlayerSongPreferences()
+                            checkPlayerSongModePreferences()
                         }
                     }
             }
@@ -550,14 +535,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                         SongMode.Shuffle.ordinal->{
                             btnShuffle.backgroundTintList =changeBackgroundColor(requireContext(), false)
                             mPrefs.songMode = CLEAR_MODE
-                            checkPlayerSongPreferences()
+                            checkPlayerSongModePreferences()
                     }
                     else->{
                         btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),true)
                         btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
                         btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode= SHUFFLE
-                        checkPlayerSongPreferences()
+                        checkPlayerSongModePreferences()
                     }
                 }
             }
@@ -576,7 +561,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 if(mPrefs.songMode == AB_LOOP){
                     musicPlayerService?.stopAbLoop()
                     mPrefs.songMode = CLEAR_MODE
-                    checkPlayerSongPreferences()
+                    checkPlayerSongModePreferences()
                 }else {
                     btnAbLoop.visibility = View.GONE
                     btnALoop.visibility = View.VISIBLE
@@ -596,7 +581,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 btnAbLoop.visibility = View.VISIBLE
                 musicPlayerService?.setEndPositionAbLoop()
                 mPrefs.songMode = AB_LOOP
-                checkPlayerSongPreferences()
+                checkPlayerSongModePreferences()
             }
             btnMainEq?.setOnClickListener{
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
@@ -645,7 +630,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
         if(!coverViewClicked)checkCoverViewStyle()
-        checkPlayerSongPreferences()
+        checkPlayerSongModePreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         mainViewModel.reloadSongInfo()
         bind?.mainSeekBar?.max = currentMusicState.duration.toInt()

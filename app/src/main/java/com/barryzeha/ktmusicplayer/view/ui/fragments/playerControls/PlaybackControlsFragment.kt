@@ -69,22 +69,20 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     @SuppressLint("ResourceType")
     private fun checkPlayerSongModePreferences()=with(bind){
         this?.let {
-            when (mPrefs.songMode) {
+            val mode = mPrefs.songMode
+            val colorOn = changeBackgroundColor(requireContext(),true)
+            val colorOff = changeBackgroundColor(requireContext(),false)
+            btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
+            btnRepeat.backgroundTintList = colorOff
+            btnShuffle.backgroundTintList = colorOff
+            when (mode) {
                 SongMode.RepeatOne.ordinal -> {
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
+                    btnRepeat.backgroundTintList = colorOn
                 }
-                SongMode.RepeatAll.ordinal -> {
-                   btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                }
-                SongMode.Shuffle.ordinal ->{
-                   btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),true)
-                }
-                else -> {
-                    btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                    btnRepeat.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                    btnShuffle.backgroundTintList = changeBackgroundColor(requireContext(),false)
-                }
+                SongMode.RepeatAll.ordinal -> btnRepeat.backgroundTintList = colorOn
+                SongMode.Shuffle.ordinal ->btnShuffle.backgroundTintList = colorOn
+                else -> {}
             }
         }
     }
