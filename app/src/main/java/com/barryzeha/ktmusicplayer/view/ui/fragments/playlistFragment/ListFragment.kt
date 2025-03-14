@@ -116,7 +116,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             getPlaylist(playlistId)
         }
     }
-
     private fun audioEffectActivityResult() {
         launcherAudioEffectActivity =
             registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()) { }
@@ -462,7 +461,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             btnDelete?.visibility = if (isVisible) View.GONE else View.VISIBLE
         }
     }
-
     private fun showKeyboard(show: Boolean, view: View) {
         activity?.showOrHideKeyboard(show, view, { _ ->// isShown
             view.requestFocus()
@@ -473,7 +471,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             }
         })
     }
-
     private fun onItemClick(position: Int, song: SongEntity) {
         musicListAdapter?.getPositionByItem(song)?.let { pos ->
             musicPlayerService?.startPlayer(song)
@@ -483,7 +480,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
 
         }
     }
-
     private fun onMenuItemClick(view: View, position: Int, selectedSong: SongEntity) {
         onMenuItemPopup(ON_MENU_ITEM,requireActivity(), mPrefs,view, { // Delete item callback
             mainViewModel.deleteSong(selectedSong)
@@ -556,7 +552,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         mainViewModel.reloadSongInfo()
         mPrefs.saveFragmentOfNav = LIST_FRAGMENT
     }
-
     override fun onStop() {
         mPrefs.currentView = MAIN_FRAGMENT
         if(mPrefs.idSong>-1) mainViewModel.saveCurrentStateSong(currentMusicState)

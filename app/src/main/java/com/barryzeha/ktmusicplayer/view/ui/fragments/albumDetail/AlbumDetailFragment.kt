@@ -137,7 +137,6 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         onMenuItemPopup(ON_ALBUM_DETAIL_ITEM_MENU,requireActivity(), mPrefs, view, {
             // Delete item callback
             mainViewModel.deleteSong(songEntity)
-            //this.song = selectedSong
         }, { // Delete all items callback disable on this fragment
 
         }, { // Send to playlist callback
@@ -145,10 +144,10 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
                 PlaylistDialogFragment.newInstance(songEntity.id).show(parentFragmentManager,
                     PlaylistDialogFragment::class.simpleName)
             }
-        }, {
+        }, {//
             mainViewModel.updateSong(songEntity.copy(favorite = true))
             Toast.makeText(context, com.barryzeha.core.R.string.addToFavorite, Toast.LENGTH_SHORT).show()
-        }, {
+        }, {// Go to song info
             SongInfoDialogFragment.newInstance(
                 SongEntity(
                     id = songEntity.id,
