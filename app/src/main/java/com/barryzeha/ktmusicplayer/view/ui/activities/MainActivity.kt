@@ -1,19 +1,12 @@
 package com.barryzeha.ktmusicplayer.view.ui.activities
 
 import android.Manifest
-import android.content.ComponentName
 import android.content.Intent
-import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.os.IBinder
 import android.view.Menu
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.viewModels
-import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -29,38 +22,30 @@ import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getThemeResValue
-import com.barryzeha.core.common.startOrUpdateService
-import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
-import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
-import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.barryzeha.core.R as coreRes
+
 const val PLAYLIST_SUBMENU_ID = 25
 const val PLAYLIST_DEFAULT_ID = 0
 @AndroidEntryPoint
-class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFragment.OnFragmentReadyListener{
+class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentReadyListener{
     internal lateinit var bind:ActivityMainBinding
     private var menu:Menu?=null
-    private val mainViewModel: MainViewModel by viewModels()
-    private var musicService: MusicPlayerService?=null
     private val launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var playlists:List<PlaylistEntity> = arrayListOf()
 
-    private var serviceSongListener:ServiceSongListener?=null
-    private var loadedFinish = true
-    private var mOnBackPressedCallback:OnBackPressedCallback?=null
     private var navController:NavController?=null
     private var currentTrackAvailable:Boolean = false
 
@@ -245,7 +230,7 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
                     bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                 }
                 coreRes.id.equalizer->{
-                    musicService?.let{service->
+                    musicPlayerService?.let{service->
                         bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
                         launcherAudioEffectActivity.launch(service.getSessionOrChannelId())
                    }
@@ -263,23 +248,6 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
             true
         }
     }
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        val binder = service as MusicPlayerService.MusicPlayerServiceBinder
-        musicService = binder.getService()
-        musicPlayerService = musicService
-        musicService?.setActivity(this)
-        mainViewModel.setServiceInstance(this,musicService!!)
-        serviceSongListener?.onServiceConnected(this,service)
-        musicService?.setSongController(this)
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED){
-             musicService?.setupPhoneCallStateReceiver()
-        }
-    }
-    override fun onServiceDisconnected(name: ComponentName?) {
-         musicService = null
-        serviceSongListener?.onServiceDisconnected()
-    }
-
     private fun checkedSelectedMenuDrawerItems(){
         when(mPrefs.currentView){
             MAIN_FRAGMENT->{
@@ -293,7 +261,8 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
 
             }
         }
-    }/*
+    }
+    /*
     private fun mOnBackPressedDispatcher(){
         mOnBackPressedCallback = object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
@@ -321,6 +290,7 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
         }
         onBackPressedDispatcher.addCallback(this,mOnBackPressedCallback!!)
     }*/
+
     // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
     override fun onFragmentReady() {
         CoroutineScope(Dispatchers.Main).launch {
@@ -328,14 +298,6 @@ class MainActivity : AbsMusicServiceActivity(), ServiceConnection, MainPlayerFra
             delay(1500)
             bind.mViewPager.offscreenPageLimit = 2
         }
-    }
-    override fun onStart() {
-        super.onStart()
-        startOrUpdateService(this,MusicPlayerService::class.java,this)
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        musicService?.let{unbindService(this)}
     }
     @Suppress("DEPRECATION")
     override fun onBackPressed() {

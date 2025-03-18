@@ -7,9 +7,11 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -200,7 +202,10 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro
                 if (!mPrefs.firstExecution) musicPlayerService?.populatePlayList(songList)
                 // ************
-                musicListAdapter?.addAll(result)
+                //TODO PROBANDO, POR AHORA NO DA PROBLEMAS CARGAR EL ADAPTADOR EN OTRO HILO
+                lifecycleScope.launch(Dispatchers.IO) {
+                    musicListAdapter?.addAll(result)
+                }
                 bind?.rvSongs?.post {
                     setNumberOfTrack()
                     //TODO mejorar la obtención del número de pista/total pistas en el fragmento principal
@@ -430,7 +435,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             }
         }
     }
-
     fun hideSearchBar() = with(bind) {
         this?.let {
             if (isFiltering) {

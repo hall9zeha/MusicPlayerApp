@@ -12,6 +12,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -84,11 +85,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             instance=this
             bind=FragmentMainPlayerBinding.bind(view)
             // Important is necessary setSelected to textview for able marquee autoscroll when text is long than textView size
+            //setUpScrollOnTextViews()
             setUpObservers()
             setUpListeners()
-            //setUpScrollOnTextViews()
             setupAnimator()
             listener?.onFragmentReady()
+            bind?.tvNumberSong?.text = String.format("#%s/%s",if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0,mPrefs.totalItemSongs)
     }
     /*private fun tryBlurBackground(){
         bind?.colorBackground?.let {
@@ -139,8 +141,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         }
     }
     private fun setUpObservers(){
-        (bind?.ivDiscMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
-        (bind?.ivMusicCover as ImageView)?.loadImage(coreRes.mipmap.ic_launcher)
+        (bind?.ivDiscMusicCover as ImageView).loadImage(coreRes.mipmap.ic_launcher)
+        (bind?.ivMusicCover as ImageView).loadImage(coreRes.mipmap.ic_launcher)
         mainViewModel.fragmentInstance.observe(viewLifecycleOwner){instance->
             if(instance is ListFragment) listFragmentInstance = instance as ListFragment
         }
@@ -208,53 +210,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             }
         }
     }
-    override fun play() {
-        super.play()
-        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
-        musicPlayerService?.resumePlayer()
-        mainViewModel.saveStatePlaying(true)
-    }
-    override fun pause() {
-        super.pause()
-        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
-        musicPlayerService?.pausePlayer()
-        mainViewModel.saveStatePlaying(false)
-    }
-    override fun next() {
-        super.next()
-        bind?.btnMainNext?.performClick()
-    }
-    override fun previous() {
-        super.previous()
-        bind?.btnMainPrevious?.performClick()
-    }
-    override fun stop() {
-        super.stop()
-        activity?.finish()
-    }
-    override fun musicState(musicState: MusicState?) {
-        super.musicState(musicState)
-        musicState?.let{
-            mainViewModel.setMusicState(musicState)
-          }
-    }
-    override fun currentTrack(musicState: MusicState?) {
-        super.currentTrack(musicState)
-        musicState?.let{
-            mainViewModel.setCurrentTrack(musicState)
-        }
-    }
-    override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
-        super.onServiceConnected(conn, service)
-        val bind = service as MusicPlayerService.MusicPlayerServiceBinder
-        musicPlayerService = bind.getService()
-        this.serviceConnection=conn
-        //startOrUpdateService(requireContext(),MusicPlayerService::class.java,conn,currentMusicState)
-    }
-    override fun onServiceDisconnected() {
-        super.onServiceDisconnected()
-        musicPlayerService=null
-    }
     private fun updateUIOnceTime(musicState: MusicState)=with(bind){
         this?.let {
             val albumArt = getBitmap(requireContext(),musicState.songPath)
@@ -292,10 +247,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         this?.let {
             currentMusicState = musicState
             mPrefs.currentPosition = musicState.currentDuration
-            // Quitamos esta propiedad de mainSeekBar.max en actualización constante
-            // porque genera un mal efecto en la vista al cargar la pista guardada
-            // entre otros pequeños inconvenientes, ahora está en onResumen para actualizarse cuando cambiemos de lista
-            // a main
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             lrcView?.updateTime(musicState.currentDuration)
@@ -626,6 +577,53 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         startOrUpdateService(requireContext(),MusicPlayerService::class.java,it,currentMusicState)
         }
     }
+
+    override fun play() {
+        super.play()
+        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_circle_pause)
+        musicPlayerService?.resumePlayer()
+        mainViewModel.saveStatePlaying(true)
+    }
+    override fun pause() {
+        super.pause()
+        bind?.btnMainPlay?.setIconResource(coreRes.drawable.ic_play)
+        musicPlayerService?.pausePlayer()
+        mainViewModel.saveStatePlaying(false)
+    }
+    override fun next() {
+        super.next()
+        bind?.btnMainNext?.performClick()
+    }
+    override fun previous() {
+        super.previous()
+        bind?.btnMainPrevious?.performClick()
+    }
+    override fun stop() {
+        super.stop()
+        activity?.finish()
+    }
+    override fun musicState(musicState: MusicState?) {
+        super.musicState(musicState)
+        musicState?.let{
+            mainViewModel.setMusicState(musicState)
+        }
+    }
+    override fun currentTrack(musicState: MusicState?) {
+        super.currentTrack(musicState)
+        musicState?.let{
+            mainViewModel.setCurrentTrack(musicState)
+        }
+    }
+    override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
+        super.onServiceConnected(conn, service)
+        val bind = service as MusicPlayerService.MusicPlayerServiceBinder
+        musicPlayerService = bind.getService()
+        this.serviceConnection=conn
+    }
+    override fun onServiceDisconnected() {
+        super.onServiceDisconnected()
+        musicPlayerService=null
+    }
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
@@ -633,7 +631,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         checkPlayerSongModePreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         mainViewModel.reloadSongInfo()
-        bind?.mainSeekBar?.max = currentMusicState.duration.toInt()
     }
     override fun onStop() {
         super.onStop()

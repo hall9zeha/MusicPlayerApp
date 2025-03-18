@@ -772,7 +772,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             bassManager?.getActiveChannel()!!,
                             effectsPrefs
                         )
-                        //TODO trial
                         mPrefs.currentIndexSong = indexOfSong.toLong()
                     } else {
                         _activity?.showSnackBar(
@@ -948,11 +947,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             if (indexOfSong < playingQueue.size - 1 && playingQueue.isNotEmpty()) {
                 when (mPrefs.songMode) {
                     REPEAT_ONE -> {if (playingState()) {bassManager?.repeatSong()}}
-                    //TODO probamos nueva forma de barajar la lista comentamos por ahora
-                    /* SHUFFLE->{
-                    indexOfSong = (songsList.indices).random()
-                    play(songsList[indexOfSong])
-                }*/
+                    SHUFFLE->{
+                    indexOfSong = (playingQueue.indices).random()
+                    play(playingQueue[indexOfSong])
+                }
                    else -> {if (playingState()) nextSong()}
                 }
             } else {
@@ -969,11 +967,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             if (indexOfSong < songsList.size - 1 && songsList.isNotEmpty()) {
                 when (mPrefs.songMode) {
                     REPEAT_ONE -> {if (playingState()) {bassManager?.repeatSong()}}
-                    //TODO probamos nueva forma de barajar la lista comentamos por ahora
-                    /* SHUFFLE->{
+                    SHUFFLE->{
                     indexOfSong = (songsList.indices).random()
                     play(songsList[indexOfSong])
-                }*/
+                }
                     else -> {if (playingState()) nextSong() }
                 }
             } else {

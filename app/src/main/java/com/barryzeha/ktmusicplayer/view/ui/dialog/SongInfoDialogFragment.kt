@@ -382,8 +382,7 @@ class SongInfoDialogFragment : DialogFragment() {
         return outputFile
     }
     private fun saveFileEdited(originalPathFile: String, onSuccess:()->Unit, onError:()->Unit){
-        //TODO refactorizar
-        CoroutineScope(Dispatchers.IO).launch {
+         CoroutineScope(Dispatchers.IO).launch {
             try {
 
                 val fileName = originalPathFile.substringAfterLast("/")
@@ -405,7 +404,6 @@ class SongInfoDialogFragment : DialogFragment() {
                         // Solicitar el permiso persistente nuevamente
                         openDocumentTreeLauncher.launch(null)
                     } else {
-                        //TODO REFACTORIZAR
                         val uriPath = Uri.parse(mPrefs.directorySAFUri).path
                         val rootUriDir = uriPath?.substringAfterLast(":")
                         val parentFileDir = getParentDirectories(originalPathFile)

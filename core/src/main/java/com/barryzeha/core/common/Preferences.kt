@@ -32,6 +32,8 @@ private const val SCROLL_TO_POSITION = "scrollToPosition"
 private const val SAVE_CURRENT_FRAGMENT_OF_NAV = "SaveFragmentOfNav"
 private const val IS_OPEN_QUEUE = "isOpenQueue"
 
+private const val TOTAL_ITEM_SONGS = "totalItemSongs"
+
 
 class  MyPreferences @Inject constructor(private val context: Context){
     val gson = Gson()
@@ -62,6 +64,10 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var currentIndexSong:Long
         get()=myPreferences.getLong(CURRENT_POSITION,-1)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()
+    var totalItemSongs:Int
+        get()=myPreferences.getInt(TOTAL_ITEM_SONGS,0)
+        set(value)=myPreferences.edit().putInt(TOTAL_ITEM_SONGS,value).apply()
+
     var idSong:Long
         get()=myPreferences.getLong(ID_SONG,-1)
         set(value)=myPreferences.edit().putLong(ID_SONG,value).apply()
