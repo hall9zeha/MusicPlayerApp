@@ -57,7 +57,7 @@ class MainPermissionsActivity : AppCompatActivity() {
         bind = ActivityMainPermissionsBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(bind.root)
-        ViewCompat.setOnApplyWindowInsetsListener(bind.main) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(bind.scrollViewContent) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -106,6 +106,9 @@ class MainPermissionsActivity : AppCompatActivity() {
         checkPermissions(this,permissionList){isGranted,permission->
             if(isGranted){
                 bind.btnFinish.visibility = View.VISIBLE
+                bind.btnFinish.post {
+                    bind.scrollViewContent.scrollTo(0,bind.btnFinish.bottom)
+                }
             }else{
                 bind.btnFinish.visibility = View.GONE
             }
@@ -140,6 +143,9 @@ class MainPermissionsActivity : AppCompatActivity() {
                 bind.btnPhonePermission.setIconResource(coreRes.drawable.ic_check_rounded)
                 bind.btnPhonePermission.iconGravity= MaterialButton.ICON_GRAVITY_END
                 bind.btnFinish.visibility = View.VISIBLE
+                bind.btnFinish.post {
+                    bind.scrollViewContent.scrollTo(0,bind.btnFinish.bottom)
+                }
 
             }else{
                 permissions.forEach {(permission, granted)->
