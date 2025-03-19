@@ -34,13 +34,13 @@ android {
         create("exoplayer"){
             dimension="version"
             applicationId="com.barryzeha.ktmusicplayer.exoplayer"
-            manifestPlaceholders["appLabel"]="KTMusic Exo"
+            manifestPlaceholders["appLabel"]="KMusic Exo"
         }
         create("bass"){
             dimension="version"
 
             applicationId="com.barryzeha.ktmusicplayer.bass"
-            manifestPlaceholders["appLabel"]="KTMusic Bass"
+            manifestPlaceholders["appLabel"]="KMusic Bass"
         }
 
     }
