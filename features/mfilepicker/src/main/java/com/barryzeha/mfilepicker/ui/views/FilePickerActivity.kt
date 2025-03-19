@@ -52,6 +52,7 @@ class FilePickerActivity : AppCompatActivity() {
         bind = ActivityFilePickerBinding.inflate(layoutInflater)
 
         //Para mostrar correctamente el toolbar debemos de comentar la configuración de ViewCompat
+
         //enableEdgeToEdge()
         setContentView(bind.root)
         /*ViewCompat.setOnApplyWindowInsetsListener(bind.main) { v, insets ->
@@ -72,7 +73,7 @@ class FilePickerActivity : AppCompatActivity() {
         storagePaths.add(rootDirectory)
 
         // Listar todos los volúmenes de almacenamiento, esto nos listará los directorios correspondientes a nuestra app
-        // filesDir tanto externos como internos, pero solo queremos el path de la tarjeta DS si esta existe.
+        // filesDir tanto externos como internos, pero solo queremos el path de la tarjeta SD si esta existe.
         // por eso cortaremos el path manteniendo la dirección a la memoria SD ejm: /storage/4566-4556/
         val externalStorageVolumes = getExternalFilesDirs(null)
         if(externalStorageVolumes.size>1) {
@@ -110,7 +111,7 @@ class FilePickerActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadFiles(position:Int =0 ,/*directory:File*/ dirs:List<File?>){
+    private fun loadFiles(position:Int =0 ,dirs:List<File?>){
         fileList.clear()
         if(dirs.size>1){
             setTitle(applicationInfo.nonLocalizedLabel.toString())
@@ -191,7 +192,6 @@ class FilePickerActivity : AppCompatActivity() {
         if(item.isDir) {
             pickerAdapter.clear()
             val paths = listOf(file)
-            //loadFiles(position,file)
             loadFiles(position,paths)
             toolbarMenu?.getItem(0)?.setVisible(false)
             selectedItemsList.clear()
@@ -300,8 +300,6 @@ class FilePickerActivity : AppCompatActivity() {
         }else{
             loadFiles(dirs=navPaths)
         }
-        //loadFiles(directory = dirList[(dirList.size-1)-1].second)
-
         // Para volver a mostrar la posición del directorio padre cuando naveguemos hacia atrás
         bind.rvFilePicker.scrollToPosition(dirList[(dirList.size - 1) - 1].first)
 

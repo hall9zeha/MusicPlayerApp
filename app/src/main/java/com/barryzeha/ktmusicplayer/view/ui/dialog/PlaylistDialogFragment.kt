@@ -132,6 +132,7 @@ class PlaylistDialogFragment : DialogFragment() {
         playListAdapter = PlayListsAdapter({ playlistEntity ->
             // Guardamos los ids de playlist y de la canción al hacer click en un item de la lista
             // que representa nuestras listas creadas
+            mPrefs.playlistId = playlistEntity.idPlaylist.toInt()
             if (idSongForSendToPlaylist > 0) {
                 mainViewModel.savePlaylistWithSongRef(
                     PlaylistWithSongsCrossRef(playlistEntity.idPlaylist, idSongForSendToPlaylist)

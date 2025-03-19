@@ -95,7 +95,6 @@ object EqualizerManager {
         val ch = if (fxChan != 0) fxChan else chan
         for (i in fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
-            //TODO ya es funcional correctamente, hacer más pruebas
         }
 
         if (isEnable) {
