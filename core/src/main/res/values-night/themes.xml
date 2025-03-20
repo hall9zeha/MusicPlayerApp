@@ -116,7 +116,7 @@
         <item name="windowSplashScreenBackground">?attr/colorPrimary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ktmusic_icon</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>
-        <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/brand_text</item>
+        <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/ktmusic_brand_text</item>
 
     </style>
 </resources>
