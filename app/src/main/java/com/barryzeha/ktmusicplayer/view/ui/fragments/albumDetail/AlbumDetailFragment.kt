@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments.albumDetail
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -16,6 +17,7 @@ import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.core.R as coreRes
@@ -115,13 +117,19 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
                 tvDetailAlbum.text = stringBuilder
             }
         }
-        val newLayoutParams = ConstraintLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            0
-        )
-        newLayoutParams.topToBottom=bind.btnPlaying.id
-        bind.rvAlbumDetail.layoutParams = newLayoutParams
+        // Ya que guideLine solo está disponible en el diseño Landscape de nuestra vista
+        // no necesitamos aplicar un nuevo LayoutParam a nuestro recyclerview, solo en el diseño Portrait de nuestra vista
+        guideLine?.let{
+            // No need apply new Layout params
+        }?:run{
+            val newLayoutParams = ConstraintLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0)
+            newLayoutParams.topToBottom=bind.btnPlaying.id
+            bind.rvAlbumDetail.layoutParams = newLayoutParams
+        }
     }
+
     private fun setupListeners()=with(bind){
         btnPlaying.setOnClickListener{
             musicPlayerService?.openQueue(albumSongs,0)
@@ -162,6 +170,20 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     private fun onItemClick(position: Int, songEntity: SongEntity) {
         musicPlayerService?.openQueue(albumSongs,position-1)
         mPrefs.isOpenQueue = true
+    }
+
+    override fun currentTrack(musicState: MusicState?) {
+        super.currentTrack(musicState)
+        musicState?.let {
+            mainViewModel.setCurrentTrack(musicState)
+        }
+    }
+
+    override fun musicState(musicState: MusicState?) {
+        super.musicState(musicState)
+        musicState?.let{
+            mainViewModel.setMusicState(musicState)
+        }
     }
     override fun onResume() {
         super.onResume()

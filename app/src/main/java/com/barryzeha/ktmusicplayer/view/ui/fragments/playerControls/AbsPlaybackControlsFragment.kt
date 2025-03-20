@@ -16,6 +16,7 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.SmallPlayerControlsBinding
 import com.barryzeha.ktmusicplayer.view.ui.fragments.AbsBaseFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.BaseFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import javax.annotation.Nullable
 
@@ -25,7 +26,7 @@ import javax.annotation.Nullable
  * Copyright (c)  All rights reserved.
  **/
 
-abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): AbsBaseFragment(layout) {
+abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(layout) {
     open val binding:SmallPlayerControlsBinding?=null
     protected  var listFragmentInstance:ListFragment?=null
 
