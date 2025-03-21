@@ -1,8 +1,7 @@
 package com.barryzeha.ktmusicplayer.di
 
-import android.graphics.pdf.PdfDocument.Page
 import androidx.fragment.app.FragmentActivity
-import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
+import com.barryzeha.ktmusicplayer.view.ui.adapters.ViewPagerAdapter
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import dagger.Module
 import dagger.Provides
@@ -22,6 +21,6 @@ import javax.inject.Singleton
 class AppModule {
     @Provides
     @Singleton
-    fun pageAdapterProvides(mainViewModel: MainViewModel, fragment:FragmentActivity,titleList:List<String>):PageCollectionAdapter =
-        PageCollectionAdapter(mainViewModel,fragment,titleList)
+    fun pageAdapterProvides(mainViewModel: MainViewModel, fragment:FragmentActivity,titleList:List<String>):ViewPagerAdapter =
+        ViewPagerAdapter(mainViewModel,fragment,titleList)
 }

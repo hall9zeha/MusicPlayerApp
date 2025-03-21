@@ -1,6 +1,5 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments.albumDetail
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
@@ -20,7 +19,6 @@ import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
-import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.ALBUM_DETAIL_FRAGMENT
 import com.barryzeha.ktmusicplayer.common.ON_ALBUM_DETAIL_ITEM_MENU
 import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
@@ -33,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
+import com.barryzeha.core.R as coreRes
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"

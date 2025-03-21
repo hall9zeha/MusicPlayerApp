@@ -27,7 +27,7 @@ import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
-import com.barryzeha.ktmusicplayer.view.ui.adapters.PageCollectionAdapter
+import com.barryzeha.ktmusicplayer.view.ui.adapters.ViewPagerAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -124,7 +124,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         }
     }
     private fun setUpViewPager(){
-        val viewPagerAdapter= PageCollectionAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
+        val viewPagerAdapter= ViewPagerAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
         bind.mViewPager.adapter=viewPagerAdapter
 
         // Para precargar el segundo fragmento mientras se muestra el primero

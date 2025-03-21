@@ -3,9 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +15,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.common.COLOR_ACCENT
-import com.barryzeha.core.common.COLOR_ON_PRIMARY
 import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.SettingsKeys
-import com.barryzeha.core.common.TEXT_COLOR_PRIMARY_INVERSE_NO_DISABLE
 import com.barryzeha.core.common.adjustAlpha
 import com.barryzeha.core.common.fetchFileMetadata
 import com.barryzeha.core.common.fetchShortFileMetadata
@@ -29,7 +25,6 @@ import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
-import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
 import com.barryzeha.ktmusicplayer.databinding.ListItemHeaderBinding
 import com.l4digital.fastscroll.FastScroller
@@ -388,7 +383,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             bind.chkItemSong.visibility=if(isVisible)View.VISIBLE else View.GONE
         }
     }
-    inner class HeaderViewHolder(v:View):StickyViewHolder(v){
+    inner class HeaderViewHolder(v:View):RecyclerView.ViewHolder(v){
         val bind = ListItemHeaderBinding.bind(v)
         fun onBind(value:String)=with(bind){
             tvHeaderDescription.text=value
