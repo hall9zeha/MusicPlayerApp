@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -29,6 +30,7 @@ import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.FLAT_PRESET
 import com.barryzeha.audioeffects.common.FULL_BASS_AND_TREBLE_PRESET
 import com.barryzeha.audioeffects.common.FULL_SOUND_PRESET
+import com.barryzeha.audioeffects.common.HEAD_PHONE
 import com.barryzeha.audioeffects.common.HIP_HOP_PRESET
 import com.barryzeha.audioeffects.common.JAZZ_PRESET
 import com.barryzeha.audioeffects.common.POP_PRESET
@@ -94,6 +96,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                 ELECTRONIC_PRESET->{chipGroupFocused(ELECTRONIC_PRESET)}
                 FULL_SOUND_PRESET->{chipGroupFocused(FULL_SOUND_PRESET)}
                 FULL_BASS_AND_TREBLE_PRESET->{chipGroupFocused(FULL_BASS_AND_TREBLE_PRESET)}
+                HEAD_PHONE->{chipGroupFocused(HEAD_PHONE)}
             }
         }
         output.setOnClickListener {
@@ -117,8 +120,8 @@ class MainEqualizerActivity : AppCompatActivity() {
             HIP_HOP_PRESET->{lnContentBands.removeAllViews(); createView(HIP_HOP_PRESET);setEffect()}
             ELECTRONIC_PRESET->{lnContentBands.removeAllViews(); createView(ELECTRONIC_PRESET);setEffect()}
             FULL_SOUND_PRESET->{lnContentBands.removeAllViews(); createView(FULL_SOUND_PRESET);setEffect()}
-            FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews();createView(FULL_BASS_AND_TREBLE_PRESET);setEffect()
-            }
+            FULL_BASS_AND_TREBLE_PRESET->{lnContentBands.removeAllViews();createView(FULL_BASS_AND_TREBLE_PRESET);setEffect()}
+            HEAD_PHONE->{lnContentBands.removeAllViews();createView(HEAD_PHONE);setEffect()}
         }
         }
 
@@ -165,7 +168,6 @@ class MainEqualizerActivity : AppCompatActivity() {
         EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
     }
     private fun setEffect(){
-
         EqualizerManager.setEffect(bind.output.isChecked)
         EqualizerManager.setupFX { fxIndex->
             val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
@@ -224,7 +226,6 @@ class MainEqualizerActivity : AppCompatActivity() {
         for(i in 0 until fxArray.size-1){
             val seekId=i
             val seekProgress= mPrefs.getSeekBandValue(effectType,seekId)
-
             val linearLayoutSeekbar = LinearLayout(this).apply{
                 orientation = LinearLayout.HORIZONTAL
             }

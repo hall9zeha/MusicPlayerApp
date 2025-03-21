@@ -127,6 +127,19 @@ fun getEqualizerBandPreConfig(effectType:Int,bandLevel:Int):Int{
    9 -> 18  // +3 dB (Subgraves - asegurarse de que el bajo no pierda fuerza)
    else -> 15
   }
+  HEAD_PHONE-> when (bandLevel){
+   0 -> 18
+   1 -> 17
+   2 -> 18
+   3 -> 13
+   4 -> 12
+   5 -> 13
+   6 -> 18
+   7 -> 19
+   8 -> 18
+   9 -> 17
+   else ->15
+  }
   else -> 15
  }
 }

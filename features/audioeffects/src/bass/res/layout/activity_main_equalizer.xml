@@ -63,67 +63,73 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/chipCustomEffect"
                     android:checkable="true"
-                    android:text="Custom"/>
+                    android:text="@string/custom"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipRockEffect"
                     android:checkable="true"
-                    android:text="Rock"/>
+                    android:text="@string/rock"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipPopEffect"
                     android:checkable="true"
-                    android:text="Pop"/>
+                    android:text="@string/pop"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipBassEffect"
                     android:checkable="true"
-                    android:text="Bass"/>
+                    android:text="@string/bass"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipFlatEffect"
                     android:checkable="true"
-                    android:text="Flat"/>
+                    android:text="@string/flat"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipJazzEffect"
                     android:checkable="true"
-                    android:text="Jazz"/>
+                    android:text="@string/jazz"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipClassicalEffect"
                     android:checkable="true"
-                    android:text="Classical"/>
+                    android:text="@string/classical"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipHipHopEffect"
                     android:checkable="true"
-                    android:text="Hip Hop"/>
+                    android:text="@string/hip_hop"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipElectronicEffect"
                     android:checkable="true"
-                    android:text="Electronic"/>
+                    android:text="@string/electronic"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipFullSoundEffect"
                     android:checkable="true"
-                    android:text="Full Sound"/>
+                    android:text="@string/full_sound"/>
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/chipFullBassAndTrebleEffect"
                     android:checkable="true"
-                    android:text="Full bass &amp; Treble"/>
+                    android:text="@string/full_bass_amp_treble"/>
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/chipHeadPhoneEffect"
+                    android:checkable="true"
+                    android:text="@string/headphone"/>
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>

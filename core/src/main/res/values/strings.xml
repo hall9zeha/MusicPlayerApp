@@ -57,4 +57,16 @@
     <string name="songs">Songs</string>
     <string name="duration">Duration</string>
     <string name="goToAlbum">Go to album</string>
+    <string name="headphone">Headphone</string>
+    <string name="full_bass_amp_treble"><![CDATA[Full bass & Treble]]></string>
+    <string name="full_sound">Full Sound</string>
+    <string name="electronic">Electronic</string>
+    <string name="hip_hop">Hip Hop</string>
+    <string name="classical">Classical</string>
+    <string name="jazz">Jazz</string>
+    <string name="flat">Flat</string>
+    <string name="bass">Bass</string>
+    <string name="pop">Pop</string>
+    <string name="rock">Rock</string>
+    <string name="custom">Custom</string>
 </resources>

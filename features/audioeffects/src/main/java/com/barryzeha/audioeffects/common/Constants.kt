@@ -18,3 +18,4 @@ const val HIP_HOP_PRESET = 7
 const val ELECTRONIC_PRESET = 8
 const val FULL_SOUND_PRESET = 9
 const val FULL_BASS_AND_TREBLE_PRESET=10
+const val HEAD_PHONE=11
