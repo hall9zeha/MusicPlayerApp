@@ -3,8 +3,6 @@ package com.barryzeha.core.common
 
 
 import android.app.Activity
-import android.content.ContentResolver
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
@@ -13,40 +11,21 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.os.Build
-import android.provider.DocumentsContract
-import android.provider.MediaStore
 import android.util.Log
 import android.view.WindowManager
-import android.widget.ImageView
 import androidx.core.content.ContextCompat
-import androidx.documentfile.provider.DocumentFile
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
 import com.barryzeha.core.model.entities.MusicState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
-import org.jaudiotagger.audio.exceptions.CannotReadException
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException
-import org.jaudiotagger.audio.mp3.MP3File
 import org.jaudiotagger.tag.FieldKey
-import org.jaudiotagger.tag.TagException
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import java.util.prefs.Preferences
 import kotlin.math.min
 
 /**
@@ -93,7 +72,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
     }
     context.bindService(serviceIntent, serviceConn, Context.BIND_AUTO_CREATE)
 }
- fun fetchFileMetadata(context: Context, pathFile:String):AudioMetadata?{
+ fun fetchCompleteFileMetadata(context: Context, pathFile:String):AudioMetadata?{
      var metadata: AudioFile? = null
      try {
          metadata = AudioFileIO.read(File(pathFile))
@@ -183,6 +162,35 @@ fun fetchTimeOfSong(pathFile: String?):AudioMetadata?{
     }
     return null
 }
+fun fetchShortMetadataAlbumInfo(context: Context,pathFile:String):AudioMetadata?{
+    val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
+    metadata?.let {
+        val tag = metadata.tag
+        val nameFile = metadata.file.name.substringBeforeLast(".")
+             fun getTagField(fieldKey: FieldKey, defaultValue: String) =
+            try {
+                tag?.getFirst(fieldKey)?.takeIf { it.isNotEmpty() } ?: defaultValue
+            } catch (ex: Exception) {
+                defaultValue
+            }
+        // Extract metadata with default values
+        val title = getTagField(FieldKey.TITLE, nameFile)
+        val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
+        val album = getTagField(FieldKey.ALBUM, "Album Unknown")
+        val albumArtist = getTagField(FieldKey.ALBUM_ARTIST, "")
+        val year = getTagField(FieldKey.YEAR, "Unknown Year")
+        val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong()} catch (ex: Exception) { 0L }
+        return AudioMetadata(
+            title = title,
+            artist = artist,
+            album = album,
+            songLength = songLength,
+            albumArtist = albumArtist,
+            year = year
+        )
+    }
+    return null
+}
 fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
     val metadata = try{AudioFileIO.read(File(pathFile))}catch(e:Exception){null}
     metadata?.let {
@@ -260,7 +268,7 @@ fun getBiteArrayOfImageEmbedded(pathFile: String?):ByteArrayInputStream?{
 }
 fun getSongMetadata(context: Context, path: String?,withBitmap:Boolean=false, isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
-        val metadata=fetchFileMetadata(context,path)
+        val metadata= fetchShortFileMetadata(context,path)
         val bitmap = if(withBitmap)getBitmap(context,path,isForNotify)!!else null
         metadata?.let {
             return if(bitmap !=null) MusicState(

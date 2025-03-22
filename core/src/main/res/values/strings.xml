@@ -69,4 +69,6 @@
     <string name="pop">Pop</string>
     <string name="rock">Rock</string>
     <string name="custom">Custom</string>
+    <string name="play">Play</string>
+    <string name="shuffle">Shuffle</string>
 </resources>

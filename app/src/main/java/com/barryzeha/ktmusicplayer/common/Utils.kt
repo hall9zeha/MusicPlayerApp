@@ -249,12 +249,12 @@ fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, mPrefs: MyPreferences,
                 popupMenu.dismiss()
             }
             R.id.songInfo->{
-                songInfoCallback()
                 popupMenu.dismiss()
+                songInfoCallback()
             }
             R.id.goToAlbum->{
-                goToAlbum()
                 popupMenu.dismiss()
+                goToAlbum()
             }
             R.id.deleteItem->{
                 deleteItemCallback()

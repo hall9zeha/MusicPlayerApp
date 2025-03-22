@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +19,7 @@ import androidx.fragment.app.activityViewModels
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
 import com.barryzeha.core.common.createTime
-import com.barryzeha.core.common.fetchFileMetadata
+import com.barryzeha.core.common.fetchCompleteFileMetadata
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
@@ -186,7 +185,7 @@ class SongInfoDialogFragment : DialogFragment() {
         showEditViews(false)
         filePath?.let {
             val inputFile = File(filePath)
-            val metadata = fetchFileMetadata(requireContext(),filePath)
+            val metadata = fetchCompleteFileMetadata(requireContext(),filePath)
             val songInfo = getSongMetadata(requireContext(),filePath, withBitmap = true)
             metadata?.let{meta->
                 toolbarInfo.subtitle=meta.title

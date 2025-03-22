@@ -70,4 +70,6 @@
     <string name="pop">Pop</string>
     <string name="rock">Rock</string>
     <string name="custom">Personalizado</string>
+    <string name="play">Reproducir</string>
+    <string name="shuffle">Aleatorio</string>
 </resources>

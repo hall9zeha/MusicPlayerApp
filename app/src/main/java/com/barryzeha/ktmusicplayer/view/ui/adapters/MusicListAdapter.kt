@@ -19,7 +19,7 @@ import com.barryzeha.core.common.COLOR_PRIMARY
 import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.SettingsKeys
 import com.barryzeha.core.common.adjustAlpha
-import com.barryzeha.core.common.fetchFileMetadata
+import com.barryzeha.core.common.fetchCompleteFileMetadata
 import com.barryzeha.core.common.fetchShortFileMetadata
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.model.entities.SongEntity
@@ -178,7 +178,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         val positionOnAdapter = currentList.indexOf(item as SongEntity)
         val positionOnOriginalList = originalList.indexOf(item)
 
-        val meta = fetchFileMetadata(context, song.pathLocation!!)
+        val meta = fetchCompleteFileMetadata(context, song.pathLocation!!)
         meta?.let {
             val itemUpdated = item?.copy(
                 description = meta.title.toString(),

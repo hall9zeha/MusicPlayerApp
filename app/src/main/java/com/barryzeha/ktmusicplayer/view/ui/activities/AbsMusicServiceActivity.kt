@@ -63,7 +63,9 @@ open class AbsMusicServiceActivity : AppCompatActivity(),ServiceConnection, Serv
     override fun onStop() {
         super.onStop()
         //Guardamos el número total de pistas en preferencias para mostrala luego en nuestras vistas ex: #4/500
-        mPrefs.totalItemSongs=musicPlayerService?.getSongsList()?.count()!!
+        musicPlayerService?.let {
+            mPrefs.totalItemSongs = it.getSongsList().count()
+        }
     }
     @CallSuper
     override fun onDestroy() {

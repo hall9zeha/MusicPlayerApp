@@ -1,8 +1,7 @@
 package com.barryzeha.ktmusicplayer.common
 
 import android.content.Context
-import android.util.Log
-import com.barryzeha.core.common.fetchFileMetadata
+import com.barryzeha.core.common.fetchCompleteFileMetadata
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.mfilepicker.common.util.getParentDirectories
@@ -92,7 +91,7 @@ private suspend fun processFile(
         operationsMutex.withLock {
             val realPathFromFile = file.absolutePath
             val parentDir = getParentDirectories(file.path.toString())
-            val metadata = fetchFileMetadata(context, realPathFromFile)
+            val metadata = fetchCompleteFileMetadata(context, realPathFromFile)
             metadata?.let {
                 val song = SongEntity(
                     idPlaylistCreator = MyApp.mPrefs.playlistId.toLong(),

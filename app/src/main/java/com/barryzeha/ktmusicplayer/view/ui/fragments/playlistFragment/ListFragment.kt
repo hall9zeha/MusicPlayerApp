@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.GravityCompat
+import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -55,6 +56,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -506,10 +508,16 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
         },{// Go to album detail
 
-            val bundle = Bundle().apply {
-                putString("extra_album", selectedSong.album)
+            lifecycleScope.launch {
+                mainViewModel.fetchSongsByAlbum(selectedSong.album)
+                withContext(Dispatchers.Main) {
+                    delay(250)
+                    val bundle = Bundle().apply {
+                        putString("extra_album", selectedSong.album)
+                    }
+                    navController?.navigate(R.id.albumDetailFragment, bundle)
+                }
             }
-            navController?.navigate(R.id.albumDetailFragment,bundle)
         })
     }
     fun setNumberOfTrack(scrollToPosition: Boolean = true, itemCount: Int = 0):Pair<Int,Int> {

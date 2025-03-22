@@ -13,7 +13,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
-import com.barryzeha.core.common.fetchFileMetadata
+import com.barryzeha.core.common.fetchCompleteFileMetadata
+import com.barryzeha.core.common.fetchShortMetadataAlbumInfo
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.model.entities.MusicState
@@ -53,23 +54,22 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         arguments?.let {
             albumName = it.getString("extra_album")
        }
-        activity?.onBackPressedDispatcher?.addCallback(this,object: OnBackPressedCallback(true){
+       /*activity?.onBackPressedDispatcher?.addCallback(this,object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
                //navController?.navigate(R.id.playlistFragment)
                 navController?.navigateUp()
             }
-        })
+        })*/
 
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _bind = FragmentAlbumDetailBinding.bind(view)
+        //postponeEnterTransition()
         navController = findNavController()
-        postponeEnterTransition()
         setupAdapter()
-        setupObservers(view)
         setupListeners()
+        setupObservers(view)
     }
 
     private fun setupAdapter()=with(bind){
@@ -83,14 +83,13 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         }
     }
     private fun setupObservers(view:View){
-        albumName?.let{mainViewModel.fetchSongsByAlbum(it)}
         mainViewModel.songsByAlbum.observe(viewLifecycleOwner){songs->
-            view.doOnPreDraw {
-                startPostponedEnterTransition()
-            }
+            /* view.doOnPreDraw {
+                 startPostponedEnterTransition()
+             }*/
+            if(songs.isNotEmpty()) setAlbumInfo(songs)
             albumSongs = songs
             albumAdapter?.addAll(songs)
-            if(songs.isNotEmpty()) setAlbumInfo(songs)
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTrack->
             albumAdapter?.changeBackgroundColorSelectedItem(currentTrack.idSong)
@@ -99,21 +98,21 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     private fun setAlbumInfo(songs:List<SongEntity>)=with(bind){
         val song = songs[0]
         var totalSongTime = 0L
-        val songMeta= fetchFileMetadata(requireContext(),song.pathLocation!!)
         ivMusicCover.loadImage(getBitmap(requireContext(),song.pathLocation)!!)
-        tvAlbumName.text=song.album
-        val stringBuilder = StringBuilder()
-        stringBuilder.appendLine(if(songMeta?.albumArtist?.isNotEmpty()!!)songMeta.albumArtist else songMeta.artist)
-        stringBuilder.appendLine(songMeta?.year.toString())
-        stringBuilder.appendLine("${songs.size} ${getString(coreRes.string.songs)}")
-        tvDetailAlbum.text=stringBuilder
+
         lifecycleScope.launch(Dispatchers.IO) {
+            val songMeta= fetchShortMetadataAlbumInfo(requireContext(),song.pathLocation!!)
             songs.forEach { track->
                 totalSongTime += track.duration
             }
             withContext(Dispatchers.Main){
+                tvAlbumName.text=song.album
+                val stringBuilder = StringBuilder()
+                stringBuilder.appendLine(if(songMeta?.albumArtist?.isNotEmpty()!!)songMeta.albumArtist else songMeta.artist)
+                stringBuilder.appendLine(songMeta?.year.toString())
+                stringBuilder.appendLine("${songs.size} ${getString(coreRes.string.songs)}")
                 stringBuilder.appendLine("${getString(coreRes.string.duration)} ${createTime(totalSongTime).third}")
-                tvDetailAlbum.text = stringBuilder
+                tvDetailAlbum.text=stringBuilder
             }
         }
         // Ya que guideLine solo está disponible en el diseño Landscape de nuestra vista

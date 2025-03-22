@@ -236,12 +236,10 @@ class FilePickerActivity : AppCompatActivity() {
                 when(menuItem.itemId){
                     android.R.id.home->{
                         if( listTreeOfNav.size>1){
-                            navigationDirList(listTreeOfNav)
-
-                        }else{
-                            mPrefs.clearLastDirs()
-                            finish()
+                            saveNavigationTree(listTreeOfNav)
                         }
+                        finish()
+                       
                     }
                     R.id.itemConfirm->{
                         val fileList:MutableList<String> = arrayListOf()
