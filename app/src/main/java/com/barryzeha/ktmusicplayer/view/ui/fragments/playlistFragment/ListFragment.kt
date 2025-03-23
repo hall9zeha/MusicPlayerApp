@@ -511,7 +511,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             lifecycleScope.launch {
                 mainViewModel.fetchSongsByAlbum(selectedSong.album)
                 withContext(Dispatchers.Main) {
-                    delay(250)
+                    delay(300)
                     val bundle = Bundle().apply {
                         putString("extra_album", selectedSong.album)
                     }
