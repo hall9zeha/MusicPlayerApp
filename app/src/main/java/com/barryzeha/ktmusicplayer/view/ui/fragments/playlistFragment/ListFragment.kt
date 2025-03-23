@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +51,7 @@ import com.barryzeha.ktmusicplayer.view.ui.dialog.PlaylistDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.BaseFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
+import com.barryzeha.ktmusicplayer.view.ui.fragments.albumDetail.AlbumDetailFragmentArgs
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import kotlinx.coroutines.CoroutineScope
@@ -204,10 +206,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro
                 if (!mPrefs.firstExecution) musicPlayerService?.populatePlayList(songList)
                 // ************
-                //TODO PROBANDO, POR AHORA NO DA PROBLEMAS CARGAR EL ADAPTADOR EN OTRO HILO
-                lifecycleScope.launch(Dispatchers.IO) {
-                    musicListAdapter?.addAll(result)
-                }
+                musicListAdapter?.addAll(result)
                 bind?.rvSongs?.post {
                     setNumberOfTrack()
                     //TODO mejorar la obtención del número de pista/total pistas en el fragmento principal
@@ -507,15 +506,10 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             )
                 .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
         },{// Go to album detail
-
             lifecycleScope.launch {
-                mainViewModel.fetchSongsByAlbum(selectedSong.album)
-                withContext(Dispatchers.Main) {
+               withContext(Dispatchers.Main) {
                     delay(300)
-                    val bundle = Bundle().apply {
-                        putString("extra_album", selectedSong.album)
-                    }
-                    navController?.navigate(R.id.albumDetailFragment, bundle)
+                    navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to selectedSong.album))
                 }
             }
         })

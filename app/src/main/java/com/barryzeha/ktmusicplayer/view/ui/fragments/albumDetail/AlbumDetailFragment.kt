@@ -4,16 +4,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.doOnPreDraw
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
-import com.barryzeha.core.common.fetchCompleteFileMetadata
 import com.barryzeha.core.common.fetchShortMetadataAlbumInfo
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.loadImage
@@ -28,6 +27,7 @@ import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.PlaylistDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.BaseFragment
+import com.barryzeha.ktmusicplayer.view.viewmodel.AlbumDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,6 +41,8 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
 
     private var param1: String? = null
     private var param2: String? = null
+    private val arguments by navArgs<AlbumDetailFragmentArgs>()
+    private val albumDetailViewModel: AlbumDetailViewModel by viewModels()
     private var _bind: FragmentAlbumDetailBinding?=null
     private val bind: FragmentAlbumDetailBinding get() = _bind!!
     private var albumAdapter:MusicListAdapter?=null
@@ -51,9 +53,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     override fun onCreate(savedInstanceState: Bundle?) {
         activity?.setTheme(com.barryzeha.core.R.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            albumName = it.getString("extra_album")
-       }
+        albumDetailViewModel.fetchSongsByAlbum(arguments.extraAlbum)
        /*activity?.onBackPressedDispatcher?.addCallback(this,object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
                //navController?.navigate(R.id.playlistFragment)
@@ -83,8 +83,8 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         }
     }
     private fun setupObservers(view:View){
-        mainViewModel.songsByAlbum.observe(viewLifecycleOwner){songs->
-            /* view.doOnPreDraw {
+        albumDetailViewModel.songsByAlbum.observe(viewLifecycleOwner){songs->
+          /*   view.doOnPreDraw {
                  startPostponedEnterTransition()
              }*/
             if(songs.isNotEmpty()) setAlbumInfo(songs)
@@ -99,13 +99,13 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         val song = songs[0]
         var totalSongTime = 0L
         ivMusicCover.loadImage(getBitmap(requireContext(),song.pathLocation)!!)
-
         lifecycleScope.launch(Dispatchers.IO) {
             val songMeta= fetchShortMetadataAlbumInfo(requireContext(),song.pathLocation!!)
             songs.forEach { track->
                 totalSongTime += track.duration
             }
             withContext(Dispatchers.Main){
+
                 tvAlbumName.text=song.album
                 val stringBuilder = StringBuilder()
                 stringBuilder.appendLine(if(songMeta?.albumArtist?.isNotEmpty()!!)songMeta.albumArtist else songMeta.artist)
@@ -197,10 +197,10 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             AlbumDetailFragment().apply {
-                arguments = Bundle().apply {
+               /* arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
-                }
+                }*/
             }
     }
 

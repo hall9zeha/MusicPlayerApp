@@ -47,7 +47,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
 
-    private var _songsByAlbum:MutableLiveData<List<SongEntity>> = MutableLiveData()
+    private var _songsByAlbum:SingleMutableLiveData<List<SongEntity>> = SingleMutableLiveData()
     val songsByAlbum:LiveData<List<SongEntity>> = _songsByAlbum
 
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()

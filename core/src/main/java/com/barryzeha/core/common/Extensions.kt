@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import android.view.GestureDetector
@@ -15,9 +16,11 @@ import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.use
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.barryzeha.core.R
@@ -32,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 import kotlin.math.roundToInt
 
 
@@ -166,4 +170,3 @@ fun <T> AppCompatActivity.getFragment(@IdRes id: Int): T {
 fun <T> Fragment.getFragment(@IdRes id: Int): T {
     return childFragmentManager.findFragmentById(id) as T
 }
-

@@ -65,7 +65,7 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room_ver
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room_version" }
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 androidx-transition = { group = "androidx.transition", name = "transition", version.ref = "transition" }
-
+androidx-navigation-safeargs-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigation_version" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 dagger-hilt-plugin = {id= "com.google.dagger.hilt.android", version.ref = "dagger-hilt-version"}
@@ -75,5 +75,7 @@ kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 parcelize = {id="org.jetbrains.kotlin.plugin.parcelize", version.ref="kotlin"}
+safeargs-plugin = {id="androidx.navigation.safeargs.kotlin", version.ref="navigation_version"}
+
 
 
