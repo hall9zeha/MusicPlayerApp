@@ -279,12 +279,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     private fun checkCoverViewStyle()=with(bind){
         this?.let {
             if (discCoverViewIsEnable()) {
-                ivMusicCover.visibility = View.GONE
+                cardCoverView.visibility = View.GONE
                 ivDiscMusicCover.visibility = View.VISIBLE
                 checkIfDiscCoverViewIsRotating(mPrefs.isPlaying)
             } else {
                 ivDiscMusicCover.visibility = View.GONE
-                ivMusicCover.visibility = View.VISIBLE
+                cardCoverView.visibility = View.VISIBLE
             }
         }
     }

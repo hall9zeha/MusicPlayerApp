@@ -7,19 +7,27 @@
     android:layout_height="match_parent"
     tools:context=".view.ui.activities.MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/contentCover"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:elevation="4dp"
         android:orientation="vertical"
+        android:background="@android:color/transparent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="24dp"
         android:layout_marginStart="48dp"
         app:layout_constraintWidth_percent="0.30"
         app:layout_constraintDimensionRatio="H,1:1">
-
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardCoverView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp"
+            app:cardElevation="1dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="0dp">
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivMusicCover"
             android:layout_width="match_parent"
@@ -29,6 +37,7 @@
             android:scaleType="fitXY"
             app:shapeAppearanceOverlay="@style/imageViewCornerStyle"
             />
+        </com.google.android.material.card.MaterialCardView>
         <com.barryzeha.library.components.DiscCoverView
             android:id="@+id/ivDiscMusicCover"
             android:layout_width="match_parent"
@@ -38,7 +47,7 @@
             android:visibility="gone"
             android:elevation="4dp"
             android:scaleType="fitXY"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/lnDesc"
         android:layout_width="0dp"
