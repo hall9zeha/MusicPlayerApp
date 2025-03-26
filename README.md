@@ -1,14 +1,17 @@
 # MusicPlayerApp
 
-Una aplicación sencilla para reproducción de música offline escrita en Kotlin para Android. La aplicación tien dos versiones: KTMusic Bass que usa librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) y KTMusic Exo que usa La API [MediaPlayer](https://developer.android.com/media/media3/exoplayer) de Android.
+Una aplicación sencilla para reproducción de música offline escrita en Kotlin para Android. La aplicación tien dos versiones: KMusic Bass que usa librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) y KMusic Exo que usa La API [MediaPlayer](https://developer.android.com/media/media3/exoplayer) de Android.
+
+# Motivación
+Quería una aplicación de música con la cual reproducir en bucle solo una parte de las canciones que me gustan con (A-B loop) y de paso usar la librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) porque reproduce las pistas con muy buena calidad y me gustan todos los efectos de ecualizador que se pueden implementar. Pero ninguna de las apps que me gustaban tenían la función de repetición en bucle A-B, así que terminé haciendo más de lo que necesitaba ya que no soy un sibarita de las funciones en un reproductor de audio. Aún así estoy contento con lo que ha resultado y lo que he aprendido, aunque no es perfecta, la iré mejorando con el tiempo y  espero que le pueda servir a cualquiera que necesite un ejemplo de reproductor de audio en Android. Siéntase libre de usar el código aquí publicado como más le convenga. 
 
 # Demo
 
 # Características
 
 - Selector de archivos
-- Equalizador de 10 bandas y control de volúmen (en la versión con BASS)
-- Equalizador de 5 bandas (en la versión con MediaPlayer)
+- Ecualizador de 10 bandas y control de volúmen (en la versión con BASS)
+- Ecualizador de 5 bandas (en la versión con MediaPlayer)
 - Modo: repetir uno, repetir todo y aleatorio.
 - Modo repetición de sección A-B
 - Muestra la letra de la canción(si está disponible en los metadatos ID3)
@@ -31,7 +34,7 @@ Una aplicación sencilla para reproducción de música offline escrita en Kotlin
 - data
 - di
 - features
-  - audioeffects (equalizadores)
+  - audioeffects (ecualizadores para bass y exoplayer)
   - mfilepicker (selector de archivos)
     
 # Versiones (Sabores)
