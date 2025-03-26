@@ -51,8 +51,6 @@ class MainPermissionsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
-        // Para evitar que se vuelva a la actividad principal
-        //onBackPressedDispatcher.addCallback(this){}
 
         bind = ActivityMainPermissionsBinding.inflate(layoutInflater)
         enableEdgeToEdge()

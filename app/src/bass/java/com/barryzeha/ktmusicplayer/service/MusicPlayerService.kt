@@ -122,7 +122,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private var phoneCallStateReceiver:BroadcastReceiver?=null
     private var telephonyManager: TelephonyManager?=null
     private var isPlayingBeforeCallPhone:Boolean = false
-    // En esta lista cargamos momentaneamente las las canciones del fragmento AlbumDetail
+    // En esta lista cargamos momentaneamente las canciones del fragmento AlbumDetail
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
 
 
@@ -467,7 +467,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
 
             }
             SongAction.Next -> {
-                //TODO trying probar en android 8
+                //TODO probar en android 8
                 nextOrPrevTrack(NEXT)
             }
             SongAction.Previous -> {

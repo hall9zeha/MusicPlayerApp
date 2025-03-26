@@ -62,7 +62,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     private var currentMusicState = MusicState()
     private val launcherAudioEffectActivity: ActivityResultLauncher<Int> = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var isFavorite:Boolean = false
-    //private val mainViewModel:MainViewModel by activityViewModels()
     private var listener: OnFragmentReadyListener? = null
     // Forward and rewind
     private var fastForwardingOrRewind = false

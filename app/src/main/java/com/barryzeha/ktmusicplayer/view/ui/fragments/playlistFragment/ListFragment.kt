@@ -86,8 +86,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     private var song: SongEntity? = null
     private var isFavorite: Boolean = false
 
-    private var idSongForSendToPlaylist: Long = 0
-
     private var onFinisLoadSongsListener: OnFinishedLoadSongs? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

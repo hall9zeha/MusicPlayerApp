@@ -47,9 +47,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
 
-    private var _songsByAlbum:SingleMutableLiveData<List<SongEntity>> = SingleMutableLiveData()
-    val songsByAlbum:LiveData<List<SongEntity>> = _songsByAlbum
-
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
     val songState:LiveData<List<SongStateWithDetail>> = _songState
 
@@ -149,12 +146,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     fun fetchAllSongFromMain(){
         launch {
             _allSongFromMain.value=repository.fetchAllSongs()
-        }
-    }
-    fun fetchSongsByAlbum(album:String){
-        launch(Dispatchers.IO){
-            val songs = repository.fetchSongsByAlbum(album)
-            withContext(Dispatchers.Main){_songsByAlbum.value = songs}
         }
     }
 

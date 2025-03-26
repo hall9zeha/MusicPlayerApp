@@ -85,13 +85,15 @@ open class AbsMusicServiceActivity : AppCompatActivity(),ServiceConnection, Serv
             listener.pause()
         }
     }
-
+    //Implementar solo en el fragmento que lo requiera, ya que si tenemos dos fragmentos activos al mismo tiempo
+    //en la misma vista, se ejecutará dos veces
     override fun next() {
         for (listener in mMusicPlayerServiceListeners) {
             listener.next()
         }
     }
-
+    //Implementar solo en el fragmento que lo requiera, ya que si tenemos dos fragmentos activos al mismo tiempo
+    //en la misma vista, se ejecutará dos veces
     override fun previous() {
         for (listener in mMusicPlayerServiceListeners) {
             listener.previous()
