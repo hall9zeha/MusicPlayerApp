@@ -86,14 +86,14 @@ class MainEqualizerActivity : AppCompatActivity() {
         // setup FX
 
         bind.main.setPadding(0, 0, 0, 20)
-        //        get number frequency bands supported by the equalizer engine
-        //        numberFrequencyBands = mEq!!.getNumberOfBands()
+        // get number frequency bands supported by the equalizer engine
+        // numberFrequencyBands = mEq!!.getNumberOfBands()
         numberFrequencyBands = EqualizerManager.mEq?.getNumberOfBands()
-        //        get the level ranges to be used in setting the band level
-        //        get lower limit of the range in milliBels
+        // get the level ranges to be used in setting the band level
+        // get lower limit of the range in milliBels
         lowerEqualizerBandLevel = EqualizerManager.mEq!!.getBandLevelRange()[0]
 
-        //        get the upper limit of the range in millibels
+        // get the upper limit of the range in millibels
         upperEqualizerBandLevel = EqualizerManager.mEq!!.getBandLevelRange()[1]
 
     }
@@ -165,7 +165,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         for (i in 0 until numberFrequencyBands!!) {
             val equalizerBandIndex = i.toShort()
 
-            //            frequency header for each seekBar
+            // frequency header for each seekBar
             val frequencyHeaderTextview = TextView(this)
             frequencyHeaderTextview.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -176,11 +176,11 @@ class MainEqualizerActivity : AppCompatActivity() {
                 .setText((EqualizerManager.mEq!!.getCenterFreq(equalizerBandIndex) / 1000).toString() + " Hz")
             bind.contentBands.addView(frequencyHeaderTextview)
 
-            //            set up linear layout to contain each seekBar
+            // set up linear layout to contain each seekBar
             val seekBarRowLayout = LinearLayout(this)
             seekBarRowLayout.orientation = LinearLayout.HORIZONTAL
 
-            //            set up lower level textview for this seekBar
+            // set up lower level textview for this seekBar
             val lowerEqualizerBandLevelTextview = TextView(this)
             lowerEqualizerBandLevelTextview.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -189,7 +189,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             lowerEqualizerBandLevelTextview.text =
                 (lowerEqualizerBandLevel!! / 100).toString() + " dB"
             lowerEqualizerBandLevelTextview.rotation = 90f
-            //            set up upper level textview for this seekBar
+            // set up upper level textview for this seekBar
             val upperEqualizerBandLevelTextview = TextView(this)
             upperEqualizerBandLevelTextview.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -200,28 +200,28 @@ class MainEqualizerActivity : AppCompatActivity() {
             upperEqualizerBandLevelTextview.rotation = 90f
 
 
-            //            **********  the seekBar  **************
-            //            set the layout parameters for the seekbar
+            // **********  the seekBar  **************
+            // set the layout parameters for the seekbar
             val layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT - 60,
                 120
             )
             layoutParams.weight = 1f
 
-            //            create a new seekBar
+            // create a new seekBar
             val seekBar = SeekBar(this)
-            //            give the seekBar an ID
+            // give the seekBar an ID
             seekBar.id = i.toInt()
 
             var seekbg = ColorDrawable(mColorList(this).getColor(COLOR_PRIMARY, COLOR_PRIMARY))
             seekbg.alpha = 90
-            //            seekBar.setBackground(new ColorDrawable(Color.rgb(201, 224, 203)));
+            // seekBar.setBackground(new ColorDrawable(Color.rgb(201, 224, 203)));
             seekBar.background = seekbg
             seekBar.setPadding(35, 15, 35, 15)
 
             seekBar.layoutParams = layoutParams
             seekBar.max = (upperEqualizerBandLevel!!) - (lowerEqualizerBandLevel!!)
-            //            set the progress for this seekBar
+            // set the progress for this seekBar
             val seek_id = i.toInt()
             val progressBar: Int = mPrefs.getSeekBandValue(effectType,seek_id)
 
@@ -229,13 +229,11 @@ class MainEqualizerActivity : AppCompatActivity() {
                 seekBar.progress = progressBar
                 EqualizerManager.setBand(equalizerBandIndex,(progressBar + lowerEqualizerBandLevel!!).toShort())
             } else {
-
-                    val bandValue = getEqualizerBandPreConfig(effectType, seek_id)
-
-                    seekBar.progress = bandValue
-                    EqualizerManager.setBand(equalizerBandIndex,(bandValue + lowerEqualizerBandLevel!!).toShort())
+                val bandValue = getEqualizerBandPreConfig(effectType, seek_id)
+                seekBar.progress = bandValue
+                EqualizerManager.setBand(equalizerBandIndex,(bandValue + lowerEqualizerBandLevel!!).toShort())
             }
-            //            change progress as its changed by moving the sliders
+            // change progress as its changed by moving the sliders
             seekBar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
                 override fun onProgressChanged(
                     seekBar: SeekBar, progress: Int,
@@ -267,7 +265,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             seekBarLayout.setMargins(5, 0, 5, 0)
             seekBarRowLayout.layoutParams = seekBarLayout
 
-            //            add the lower and upper band level textviews and the seekBar to the row layout
+            // add the lower and upper band level textviews and the seekBar to the row layout
             seekBarRowLayout.addView(lowerEqualizerBandLevelTextview)
             seekBarRowLayout.addView(seekBar)
             seekBarRowLayout.addView(upperEqualizerBandLevelTextview)

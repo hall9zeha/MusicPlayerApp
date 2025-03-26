@@ -37,7 +37,7 @@ object EqualizerManager {
             setupFX() { seekId ->
                 val eqValue = prefs.getSeekBandValue(prefs.effectType, seekId)
 
-                // Si no hay cambios en los valores de una banda de equalizador en preferencias cargar los valores predefinidos
+                // Si no hay cambios en los valores de una banda de ecualizador en preferencias cargar los valores predefinidos
                 val bandValue = if (eqValue != 30) eqValue else getEqualizerBandPreConfig(
                     prefs.effectType,
                     seekId
