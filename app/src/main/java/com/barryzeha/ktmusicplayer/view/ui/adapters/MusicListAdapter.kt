@@ -93,17 +93,16 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         }
 
     }
-    // Esta función también nos mostrará la numeración original incluso mientras filtramos
-    // la lista al buscar una canción
+    // This feature will also show us the original numbering even while filtering the list when searching for a song.
     private fun getOriginalPosition(item: Any): Int {
-        // Encuentra la posición del ítem en la lista original
+        // Find the position of the item in the original list
         val itemPos = originalList.indexOf(item)
-        // Si el ítem está en la lista original y es un SongEntity
+        // If the item is in the original list and is a SongEntity
         if (itemPos != -1 && originalList[itemPos] is SongEntity) {
-            // Busca la posición en la lista de índices
+            // Find the position in the index list
             return songEntityIndices.indexOf(itemPos) + 1
         }
-        return 0 // Retorna 0 si no se encuentra o no es SongEntity
+        return 0 // Returns 0 if not found or is not a SongEntity
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -126,8 +125,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     }
     @SuppressLint("ResourceType")
     fun changeBackgroundColorSelectedItem(songId:Long){
-        // obtenemos la posición del item por su id, ya que tenemos dos tipos de vistas en el recyclerview
-        // solo debemos cambiar de color a items SongEntity
+        // We get the position of the item by its ID, since we have two types of views in the recyclerview we just have to change the color to SongEntity items
         val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
         songItem?.let {
                 val position = originalList.indexOf(songItem)
@@ -161,11 +159,11 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             }
         }
     }
-    // Al usar DiffUtils o asyncListDiffer para agregar más de un item a la vez a veces solo ingresa el último
-    // otras si muestra lo item completos, al parecer la actualización asíncrona en segundo plano es un problema
-    // SE SOLUCIONÓ llamando a la lista completa de registros cada vez que se insertaba uno nuevo, parece poco eficiente,
-    // pero diff util está diseñado para manejarlo, aún así seguiremos averiguando más.
 
+    // When using DiffUtils or asyncListDiffer to add more than one item at a time, sometimes only the last one is entered,
+    // and other times it shows the entire items. Apparently,  the asynchronous background update is an issue.
+    // It was fixed by calling the full list of records each time a new one was inserted.
+    // It seems inefficient, but diff util is designed to handle it. We'll continue to investigate further.
     fun addAll(songs:List<Any>){
         this.originalList=songs.toMutableList()
         setUpSongEntitiesIndices()
@@ -193,8 +191,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         }
 
     }
-    //TODO crear otro método para manejar la eliminación de una lista de elementos seleccionados
-    // y llamar al método setUpSongEntitiesIndices() al final
+    //TODO create another method to handle removing a list of selected items and call the setUpSongEntitiesIndices() method at the end
     fun remove(song:SongEntity){
 
         val currentList=currentList.toMutableList()
@@ -214,24 +211,24 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     fun removeItemsForMultipleSelectedAction() {
         CoroutineScope(Dispatchers.IO).launch {
             val currentList = currentList.toMutableList()
-            val headersToRemove = mutableSetOf<Int>()  // Para almacenar posiciones de encabezados a eliminar
+            val headersToRemove = mutableSetOf<Int>()  // To store header positions to be deleted
 
             itemListForDelete.forEach { song ->
                 val position = currentList.indexOf(song)
                 if (position != -1) {
-                    // Primero, elimina la canción
+                    // First, delete the song
                     currentList.removeAt(position)
 
-                    // Luego, revisa si hay un encabezado asociado
+                    // Then check if there is an associated header
 
                     val headerPos = shouldRemoveHeaderForSong(position, currentList)
                     if (headerPos != -1) {
-                        headersToRemove.add(headerPos)  // Marca el encabezado para eliminación
+                        headersToRemove.add(headerPos)  // Mark the header for deletion
                     }
                 }
             }
 
-            // Ahora elimina los encabezados marcados, de arriba hacia abajo
+            // Now delete the marked headers, from top to bottom
             val sortedHeadersToRemove = headersToRemove.sortedDescending()
             sortedHeadersToRemove.forEach { headerPos ->
                 if (headerPos >= 0 && headerPos < currentList.size) {
@@ -305,7 +302,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             null
         }
     }
-    // Obtener la posición numerada solo de items SongEntity sin contar itemHeaders
+    // Get the numbered position of only SongEntity items without counting itemHeaders
     fun getPositionByItem(item: Any): Pair<Int,Int> {
         val positionNumbered = originalList.indexOf(item) // Index in filteredList
             .let { index -> originalList
@@ -363,7 +360,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                         }
                     }
                     root.setOnClickListener {
-                        // La marcación del item se hará cuando se lance current track en nuestra interface
                         onItemClick(position, song)
                     }
                     chkItemSong.setOnClickListener {view->

@@ -52,21 +52,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginEnd="8dp"/>
-   <!-- <com.barryzeha.core.components.DiscCoverView
-        android:id="@+id/ivMusicCover"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:src="@mipmap/ic_launcher"
-        app:shape="circle"
-        android:scaleType="centerCrop"
-        android:elevation="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="96dp"
-        app:layout_constraintWidth_percent="0.72"
-        app:layout_constraintDimensionRatio="H,1:1"
-        />-->
+
     <LinearLayout
         android:id="@+id/contentCover"
         android:layout_width="0dp"

@@ -115,8 +115,9 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
                 tvDetailAlbum.text=stringBuilder
             }
         }
-        // Ya que guideLine solo está disponible en el diseño Landscape de nuestra vista
-        // no necesitamos aplicar un nuevo LayoutParam a nuestro recyclerview, solo en el diseño Portrait de nuestra vista
+        // Since guideLine is only available in the Landscape layout of our view
+        // we do not need to apply a new LayoutParam to our recyclerview,
+        // only in the Portrait layout of our view
         guideLine?.let{
             // No need apply new Layout params
         }?:run{

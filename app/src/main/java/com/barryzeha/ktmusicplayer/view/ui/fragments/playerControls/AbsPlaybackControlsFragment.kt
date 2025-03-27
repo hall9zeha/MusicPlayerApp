@@ -189,7 +189,7 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
     }
     private fun getSongOfAdapter(idSong: Long): SongEntity?{
         val song = if(idSong>-1){ listFragmentInstance?.musicListAdapter?.getSongById(idSong)}else{
-            // Buscamos en la posición 1 porque primero tendremos un item header en la posición 0
+            //We search in position 1 because we will first have an item header in position 0
             listFragmentInstance?.musicListAdapter?.getSongByPosition(1)
         }
         song?.let{

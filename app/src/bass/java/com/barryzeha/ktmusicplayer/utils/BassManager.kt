@@ -131,7 +131,7 @@ open class BassManager {
 
     fun channelPlay(currentSongPosition:Long){
         BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)
-        // Convertir la posición actual (en milisegundos) a bytes con bassManager?.getCurrentPositionToBytes
+        // Convert the current position (in milliseconds) to bytes with  bassManager?.getCurrentPositionToBytes
         BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(currentSongPosition),BASS.BASS_POS_BYTE)
         BASS.BASS_ChannelPlay(getActiveChannel()!!, false)
     }

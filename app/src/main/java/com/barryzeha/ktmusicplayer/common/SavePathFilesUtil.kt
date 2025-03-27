@@ -26,34 +26,34 @@ import java.util.Date
 private  const  val CONSUMER_COUNT = 4
 private val operationsMutex = Mutex()
 private var audioFileCount:Int=0
-// Función para procesar múltiples rutas de directorios de forma secuencial
+// Function to process multiple directory paths sequentially
 fun processSongPaths(
-    paths: List<String>,  // Lista de directorios a procesar
+    paths: List<String>,  // List of directories to process
     itemsCount:(itemsNum:Int)->Unit,
     fileProcessed: (song:SongEntity) -> Unit
 ) {
-    val channel = Channel<File>(Channel.UNLIMITED)  // Canal sin límite de buffer
+    val channel = Channel<File>(Channel.UNLIMITED)  // Channel without buffer limit
     audioFileCount=0
     var listFilesProcessed:MutableList<SongEntity> = arrayListOf()
 
-    // Corutina para encolar archivos en el canal
+    // Coroutine to queue files in the channel
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            // Contamos cuantos archivos de audio hay
+            // We count how many audio files there are
             paths.forEach { path ->
                 countAudioFile(File(path))
             }
             itemsCount(audioFileCount)
 
-            // Encolar archivos de todos los directorios
+            // Enqueue files from all directories
             paths.forEach { path ->
                 enqueueFiles(File(path), channel)
             }
         } finally {
-            channel.close()  // Cerrar el canal cuando haya terminado de enviar datos
+            channel.close()  // Close the channel when you have finished sending data
         }
     }
-    // Corutina única para procesar archivos secuencialmente
+    // Single coroutine to process files sequentially
      CoroutineScope(Dispatchers.IO).launch {
             for (file in channel) {
                 processFile(file, MyApp.context,fileProcessed)
@@ -63,12 +63,12 @@ fun processSongPaths(
 
 private fun enqueueFiles(file: File, channel: Channel<File>) {
     if (file.isDirectory) {
-        // Encolar archivos en el directorio recursivamente
+        // Queue files in the directory recursively
         file.listFiles()?.forEach { subFile ->
             enqueueFiles(subFile, channel)
         }
     } else {
-            // Enviar archivo al canal
+            // Send file to channel
             channel.trySend(file).isSuccess
     }
 }
@@ -78,7 +78,7 @@ private fun countAudioFile(file: File) {
             countAudioFile(subFile)
         }
     } else {
-        //Comprobamos que sea un archivo de audio
+        // We check that it is an audio file
         if(AudioFileType().verify(file.name))audioFileCount++
     }
 }
@@ -105,7 +105,7 @@ private suspend fun processFile(
                     genre = metadata.genre,
                     timestamp = Date().time
                 )
-                // Guardar en el ViewModel si es necesario
+                // Output metadata of the processed file
                 withContext(Dispatchers.Main) {
                     metadata?.let {
                         fileProcessed(song)

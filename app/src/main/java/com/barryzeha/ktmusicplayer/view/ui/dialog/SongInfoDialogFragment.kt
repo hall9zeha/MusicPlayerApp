@@ -97,7 +97,7 @@ class SongInfoDialogFragment : DialogFragment() {
             _bind = SongInfoLayoutBinding.inflate(inflater, container, false)
             _bind?.let { b ->
                 if(mPrefs.directorySAFUri!!.isNotEmpty()){
-                    // Después de un nuevo reinicio de nuestro dispositivo para conservar los persmisos sobre el directorio que hayamos seleccionado a través de SAF
+                    // After a new reboot of our device to preserve the permissions on the directory we have selected through SAF
                     val safUri = mPrefs.directorySAFUri
                     requireContext().contentResolver.takePersistableUriPermission(Uri.parse(safUri), Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
@@ -111,7 +111,6 @@ class SongInfoDialogFragment : DialogFragment() {
                 dialog?.window?.apply {
                     statusBarColor = mColorList(context).getColor(4, 1)
                 }
-                // Listeners of header icons
                 return b.root
             }
         }
@@ -215,9 +214,8 @@ class SongInfoDialogFragment : DialogFragment() {
         }
     }
     private fun setupMenuProvider() {
-        //TODO Al usar android.widget.Toolbar infla el menú pero sin íconos
-        // Por el momento androidx.appcompat.widget.Toolbar nos permite usar este tipo de configuración
-        // averiguar más sobre el asunto
+        //TODO When using android.widget.Toolbar it inflates the menu but without icons.At the moment androidx.appcompat.widget.Toolbar
+        // allows us to use this type of configuration. Find out more about the issue.
         bind.toolbarInfo.inflateMenu(coreRes.menu.song_info_menu)
         val menu=bind.toolbarInfo.menu
         menu[1].setVisible(false)
@@ -239,9 +237,9 @@ class SongInfoDialogFragment : DialogFragment() {
         }
     }
     private fun handleUriSAFSelection(treeUri:Uri){
-        // Guardamos la uri del directorio para uso posterior
+        // We save the directory uri for later use
         mPrefs.directorySAFUri = treeUri.toString()
-        // Conceder permisos persistentes para que no sea necesario pedir acceso nuevamente.
+        // Grant persistent permissions so you don't need to request access again.
         requireContext().contentResolver.takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
         saveFileEdited(pathFile!!,{
             isEditing = false
@@ -264,7 +262,7 @@ class SongInfoDialogFragment : DialogFragment() {
                 }
                 var tag =audioFile.tag
                 if(tag==null){
-                    // Si el archivo no tiene etiquetas de metadatos las creamos vacías
+                    // If the file has no metadata tags, we create them empty.
                     tag = ID3v24Tag()
                 }
 
@@ -347,17 +345,16 @@ class SongInfoDialogFragment : DialogFragment() {
             val oldFile = File(requireContext().filesDir, "cover.jpg")
             if(oldFile.exists())oldFile.delete()
             val inputStream = requireContext().contentResolver?.openInputStream(uri)
-            val file = File(requireContext().filesDir, "cover.jpg") // Usamos un archivo temporal en la caché
+            val file = File(requireContext().filesDir, "cover.jpg") // We use a temporary file in the cache
             val outputStream = FileOutputStream(file)
 
-            // Copiar los datos de InputStream a OutputStream
-
+            //Copy data from InputStream to OutputStream
             inputStream?.copyTo(outputStream)
             inputStream?.close()
             outputStream.close()
 
             withContext(Dispatchers.Main) {
-                pathFile(file.absolutePath) // Devolvemos la ruta del archivo temporal
+                pathFile(file.absolutePath) // We return the path of the temporary file
                 }
             }
 
@@ -390,17 +387,17 @@ class SongInfoDialogFragment : DialogFragment() {
 
                 val contentResolver: ContentResolver = requireContext().contentResolver
 
-                // Crear un archivo de entrada a partir del archivo editado (directorio interno)
+                // Create an input file from the edited file (internal directory)
                 val inputFile = songFileInternalPath
                 if (!inputFile.exists()) {
-                    throw IOException("El archivo original no existe")
+                    throw IOException("The original file does not exist")
                 }
-                // Acceder al directorio seleccionado con SAF
+                // Access the selected directory with SAF
                 val documentFile =DocumentFile.fromTreeUri(requireContext(), Uri.parse(mPrefs.directorySAFUri))
-                // Verificar si el directorio es válido
+                // Check if the directory is valid
                 if (documentFile != null) {
                     if (!documentFile.canWrite()) {
-                        // Solicitar el permiso persistente nuevamente
+                        // Request persistent permission again
                         openDocumentTreeLauncher.launch(null)
                     } else {
                         val uriPath = Uri.parse(mPrefs.directorySAFUri).path
@@ -410,12 +407,12 @@ class SongInfoDialogFragment : DialogFragment() {
                         val directory = if(rootUriDir == parentFileDir) documentFile
                         else getSubdirectory(documentFile,parentFileDir.split("/"))
 
-                        // Buscamos el archivo existente para eliminarlo y luego copiar el que tenemos editado
+                        // We look for the existing file to delete and then copy the one we have edited.
 
                         if (directory != null && directory.isDirectory) {
-                            // Buscar el archivo existente con el mismo nombre
+                            // Find the existing file with the same name
                             val existingFile = directory.findFile(fileName)
-                            // Si el archivo existe, eliminarlo
+                            // If the file exists, delete it
                             existingFile?.delete()
 
                         }
@@ -425,15 +422,15 @@ class SongInfoDialogFragment : DialogFragment() {
                             mimeType.toString().lowercase(),
                             fileName
                         )
-                        // Comprobar si el archivo fue creado correctamente
+                        // Check if the file was created correctly
                         if (newFile != null) {
-                            // Abrir un OutputStream para el nuevo archivo
+                            // Open an OutputStream for the new file
                             val outputStream = contentResolver.openOutputStream(newFile.uri)
 
-                            // Abrir un InputStream para el archivo original (editado)
+                            // Open an InputStream for the original file (which has already been edited)
                             val inputStream = FileInputStream(inputFile)
 
-                            // Copiar el contenido del archivo original al nuevo archivo
+                            // Copy the contents of the original file to the new file
                             inputStream.use { input ->
                                 outputStream?.use { output ->
                                     input.copyTo(output)
@@ -449,7 +446,7 @@ class SongInfoDialogFragment : DialogFragment() {
                                 clearInternalAppFilesDir()
                                 onError()
                             }
-                            throw IOException("No se pudo crear el archivo en el directorio seleccionado")
+                            throw IOException("The file could not be created in the selected directory")
                         }
                     }
                 } else {
@@ -457,7 +454,7 @@ class SongInfoDialogFragment : DialogFragment() {
                         clearInternalAppFilesDir()
                         onError()
                     }
-                    throw IOException("No se tiene permiso para escribir en el directorio seleccionado")
+                    throw IOException("You don't have permission to write to the selected directory")
 
                 }
 

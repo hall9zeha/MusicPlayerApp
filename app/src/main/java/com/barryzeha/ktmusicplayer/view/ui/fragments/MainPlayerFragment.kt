@@ -174,13 +174,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner){currentPosition->
             musicPlayerService?.setCurrentSongPosition(currentPosition)
         }
-        mainViewModel.songById.observe(viewLifecycleOwner){song->
-            // Si se agregó una pista nueva desde la lista del segundo fragmento
-            // el observador lo agregará a la lista de este fragmento principal
-            song?.let{
-                //if(!songLists.contains(song)) songLists.add(song)
-            }
-        }
+
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
@@ -227,13 +221,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             updateService()
             if(discCoverViewIsEnable()) {
-                // Detenemos la animación para cada cambio de canción para que la imágen
-                // aparezca correctamente y no rotada
+                // We stop the animation for each song change so that the image appears correctly and not rotated.
                 (bind?.ivDiscMusicCover as DiscCoverView).end()
                 CoroutineScope(Dispatchers.IO).launch{
                     delay(500)
                     withContext(Dispatchers.Main) {
-                        // Si se estaba reproduciendo iniciamos animacion nuevamente al cambiar de canción
+                        // If it was playing, we start the animation again when changing the song.
                         if (mPrefs.isPlaying) (bind?.ivDiscMusicCover as DiscCoverView).start()
                     }
                 }
@@ -370,13 +363,13 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                     }
                 }
             }
-            //Cuando lrcView esté lleno podrá usarse el evento click de la vista
+            // When lrcView is full, the view's click event can be used.
             lrcView?.setOnClickListener{
                 showLyricView(false)
                 setAlbumCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
                 coverViewClicked=false
             }
-            //Cuando lrcView  esté vacío solo el evento click en rootView funcionará
+            // When lrcView is empty only the click event on rootView will work
             contentCover.setOnClickListener{
                 showLyricView(false)
                 setAlbumCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)

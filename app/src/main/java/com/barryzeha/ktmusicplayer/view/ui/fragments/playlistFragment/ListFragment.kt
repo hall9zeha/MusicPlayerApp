@@ -147,7 +147,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         launcherPermission =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {
                 if (it) {
-                    //Todo lanzar file picker activity si se dieron los permisos de lectura
+                    //TODO launch file picker activity if read permissions were given
                 }
             }
     }
@@ -193,21 +193,20 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             playbackControlsFragment?.updatePlayerStateUI(statePlay)
         }
         mainViewModel.allSongs.observe(viewLifecycleOwner) { songList ->
-            //Removemos el estado de pantalla encendida permanentemente
+            // We remove the permanently on screen state
             keepScreenOn(requireActivity(), false)
 
-            // La actualización del adaptador debe ocurrir en el hilo principal.
-            // Caso contrario dará problemas al recrearse la vista cuando rotemos la pantalla
+            // The adapter update must occur on the main thread. Otherwise, it will cause problems recreating the view when we rotate the screen.
             sortPlayList(
                 mPrefs.playListSortOption, songList
             ) { result ->
-                // Probando nuevamente llenar la lista de mediaitems cuando seleccionamos un filtro
+                // We fill the list of mediaitems when we select a filter
                 if (!mPrefs.firstExecution) musicPlayerService?.populatePlayList(songList)
                 // ************
                 musicListAdapter?.addAll(result)
                 bind?.rvSongs?.post {
                     setNumberOfTrack()
-                    //TODO mejorar la obtención del número de pista/total pistas en el fragmento principal
+                    //TODO improve getting track number/total tracks in main fragment
                     MainPlayerFragment.instance?.setNumberOfTrack(mPrefs.idSong)
                     onFinisLoadSongsListener?.onFinishLoad()
                     mainViewModel.sharedFragmentInstance(this@ListFragment)
@@ -219,7 +218,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         }
         mainViewModel.orderBySelection.observe(viewLifecycleOwner) { selectedSort ->
             musicListAdapter?.removeAll()
-            // probando eliminar la lista de media items para cargar la lista nueva, ya que tendrá un orden distinto
+            // Delete the media items list to load the new list, as it will have a different order.
             musicPlayerService?.clearPlayList(isSort = true)
             // ********
             mPrefs.playListSortOption = selectedSort
@@ -243,7 +242,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 if (song.id == mPrefs.idSong) {
                     mainViewModel.removeSongState(song.id)
                     mPrefs.clearIdSongInPrefs()
-                    //Si eliminamos la pista que está en reproducción, pasamos a la siguiente
+                    //If we delete the track that is playing, we move on to the next one
                     musicPlayerService?.nextSong()
                 }
                 musicPlayerService?.removeMediaItem(song)
@@ -291,7 +290,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
-            //Mover al principio de la lista cuando acabe la reproducción
+            //Move to the beginning of the list when all tracks have finished playing
             if (musicPlayerService?.getCurrentSongPosition()!! >= musicPlayerService?.playListSize()!! - 1) rvSongs.scrollToPosition(
                 0
             )
@@ -539,8 +538,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         super.currentTrack(musicState)
         musicState?.let { mainViewModel.setCurrentTrack(musicState) }
     }
-    // El método sobreescrito onConnectedService no se dispara aquí debido a que se ejecuta después del primer fragmento
-    // La conexión al servicio la obtenemos a través del view model enviado desde main activity
+    // The overridden method onConnectedService is not fired here because it is executed after the first fragment.
+    // We obtain the connection to the service through the view model sent from the main activity.
     override fun onServiceDisconnected() {
         super.onServiceDisconnected()
         musicPlayerService = null

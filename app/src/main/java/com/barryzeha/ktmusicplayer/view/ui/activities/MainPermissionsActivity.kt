@@ -36,8 +36,7 @@ class MainPermissionsActivity : AppCompatActivity() {
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.READ_PHONE_STATE,
-            // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
-            // cuando el servicio bluetooth del móvil esté activo.
+            // It is required to detect connection and disconnection events of Bluetooth devices when the mobile Bluetooth service is active.
             Manifest.permission.BLUETOOTH_CONNECT
         )
     }else{
@@ -161,8 +160,7 @@ class MainPermissionsActivity : AppCompatActivity() {
                         button.iconGravity= MaterialButton.ICON_GRAVITY_END
                     }
                     if(permission==Manifest.permission.READ_PHONE_STATE && granted){
-                        // Inicializamos el receiver para detectar cuando se recibe una llamada telefónica
-                        // y pausar o continuar la reproducción
+                        // We initialize the call state listener to detect when a phone call is received and pause or continue playback.
                         musicPlayerService?.setupPhoneCallStateReceiver()
                     }
                 }

@@ -114,10 +114,9 @@ class PlaylistDialogFragment : DialogFragment() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                // Reiniciamos el valor para evitar inconvenientes, lo usaremos para nuestra lógica
-                // cuando es mayor que cero agregar a lista y si es cero, cambiar entre listas
+                // We reset the value to avoid inconveniences, we will use it for our logic
+                // when it is greater than zero add to list and if it is zero, switch between lists
                 idSongForSendToPlaylist = 0
-                // TODO cambiar a la nueva lista u otros, agregar lógica correspondiente
                 dismiss()
             }
         }
@@ -130,25 +129,24 @@ class PlaylistDialogFragment : DialogFragment() {
     private fun setupAdapter() {
 
         playListAdapter = PlayListsAdapter({ playlistEntity ->
-            // Guardamos los ids de playlist y de la canción al hacer click en un item de la lista
-            // que representa nuestras listas creadas
+            // We save playlist ids by clicking on an item in the list that represents our created lists.
             mPrefs.playlistId = playlistEntity.idPlaylist.toInt()
             if (idSongForSendToPlaylist > 0) {
                 mainViewModel.savePlaylistWithSongRef(
                     PlaylistWithSongsCrossRef(playlistEntity.idPlaylist, idSongForSendToPlaylist)
                 )
             } else {
-                // Cargamos la lista de reproducción seleccionada
+                // We load the selected playlist
                 getPlaylist(playlistEntity.idPlaylist.toInt())
                 mainViewModel.setPlaylistName(playlistEntity.playListName)
             }
         }, { playlist ->
-            // Al eliminar un item
+            // When deleting an item
             mainViewModel.deletePlayList(playlist.idPlaylist)
             playListAdapter?.remove(playlist)
             (activity as? MainActivity)?.removeMenuItemDrawer(playlist.idPlaylist.toInt())
         }, { playlist ->
-            // Cambiar nombre de una playlist
+            //Rename a playlist
             mainViewModel.updatePlaylist(playlist)
         })
         _bind?.rvPlaylists?.apply {

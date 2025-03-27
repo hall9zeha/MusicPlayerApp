@@ -54,8 +54,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.READ_PHONE_STATE,
-            // Se requiere para detectar los eventos de conexión y desconexión de dispositivos bluetooth
-            // cuando el servicio bluetooth del móvil esté activo.
+            // It is required to detect connection and disconnection events of Bluetooth devices when the mobile Bluetooth service is active.
             Manifest.permission.BLUETOOTH_CONNECT)
     }else{
         mutableListOf(
@@ -127,8 +126,8 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         val viewPagerAdapter= ViewPagerAdapter(mainViewModel,this, listOf(HOME_PLAYER, LIST_PLAYER))
         bind.mViewPager.adapter=viewPagerAdapter
 
-        // Para precargar el segundo fragmento mientras se muestra el primero
-        //bind.mViewPager.offscreenPageLimit=2
+        // To preload the second fragment while displaying the first one
+        // bind.mViewPager.offscreenPageLimit=2
         bind.mViewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback(){
               override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
@@ -150,7 +149,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
                 subMenu.setHeaderIcon(coreRes.drawable.ic_playlist_select)
             }
             subMenu?.clear()
-            // Item para agregar nueva playlist
+            // Item to add new playlist
             val menuItemAdd = subMenu?.add(Menu.NONE,-1,Menu.NONE,"")
             val itemViewAdd = MenuItemViewBinding.inflate(layoutInflater)
             itemViewAdd.menuItemIcon.setImageResource(coreRes.drawable.ic_add)
@@ -174,7 +173,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
 
             subMenuPlaylist?.setIcon(coreRes.drawable.ic_playlist_select)
             playlists.forEachIndexed { index, playlist ->
-                // Comprobamos si el item ya existe a través de su id
+                // We check if the item already exists through its id
                 if (!existId.contains(playlist.idPlaylist.toInt())) {
                     val itemView = MenuItemViewBinding.inflate(layoutInflater)
                     val menuItemPlaylist = subMenu?.add(
@@ -211,8 +210,8 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         }
     }
 
-    // Usamos  la navegación sin el componente de navegación ya que necesitamos el viewPager para deslizarnos
-    // y solo el menú para poder mostrar los índices del viewPager programaticamente
+    // We use navigation without the navigation component since we need the viewPager to scroll and
+    // only the menu to be able to show the viewPager indexes programmatically
     private fun setUpListeners(){
         bind.navView.setNavigationItemSelectedListener {menuItem->
             when(menuItem.itemId){
@@ -291,10 +290,10 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         onBackPressedDispatcher.addCallback(this,mOnBackPressedCallback!!)
     }*/
 
-    // Esperamos a que el primer fragmento cargue completamente para cargar el segundo
+    // We wait for the first fragment to load completely before loading the second one.
     override fun onFragmentReady() {
         CoroutineScope(Dispatchers.Main).launch {
-            // Retrasamos 1.5 segundos la carga del segundo fragmento
+            // We delayed the loading of the second fragment by 1.5 seconds
             delay(1500)
             bind.mViewPager.offscreenPageLimit = 2
         }

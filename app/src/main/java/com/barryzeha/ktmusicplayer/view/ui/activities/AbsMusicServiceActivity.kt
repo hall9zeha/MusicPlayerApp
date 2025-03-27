@@ -62,7 +62,7 @@ open class AbsMusicServiceActivity : AppCompatActivity(),ServiceConnection, Serv
     @CallSuper
     override fun onStop() {
         super.onStop()
-        //Guardamos el número total de pistas en preferencias para mostrala luego en nuestras vistas ex: #4/500
+        // We save the total number of tracks in preferences to show it later in our views ex: #4/500
         musicPlayerService?.let {
             mPrefs.totalItemSongs = it.getSongsList().count()
         }
@@ -85,15 +85,13 @@ open class AbsMusicServiceActivity : AppCompatActivity(),ServiceConnection, Serv
             listener.pause()
         }
     }
-    //Implementar solo en el fragmento que lo requiera, ya que si tenemos dos fragmentos activos al mismo tiempo
-    //en la misma vista, se ejecutará dos veces
+    // Implement only in the fragment that requires it, since if we have two fragments active at the same time in the same view, it will be executed twice
     override fun next() {
         for (listener in mMusicPlayerServiceListeners) {
             listener.next()
         }
     }
-    //Implementar solo en el fragmento que lo requiera, ya que si tenemos dos fragmentos activos al mismo tiempo
-    //en la misma vista, se ejecutará dos veces
+    // Implement only in the fragment that requires it, since if we have two fragments active at the same time in the same view, it will be executed twice
     override fun previous() {
         for (listener in mMusicPlayerServiceListeners) {
             listener.previous()
