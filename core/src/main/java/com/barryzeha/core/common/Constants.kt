@@ -35,6 +35,7 @@ const val CLEAR_MODE = -1
 // Actions custom for media player notify
 
 const val ACTION_CLOSE = "Action close"
+const val ACTION_FAVORITE = "Action favorite"
 const val CHANNEL_OR_SESSION_ID_EXTRA="channelOrSessionId"
 
 
@@ -42,3 +43,7 @@ const val CHANNEL_OR_SESSION_ID_EXTRA="channelOrSessionId"
 const val NEXT =0
 const val PREVIOUS =1
 const val DEFAULT_DIRECTION = 2
+
+// Extra intent
+const val MUSIC_STATE_EXTRA = "musicState"
+const val FAVORITE_STATE_EXTRA = "favoriteState"

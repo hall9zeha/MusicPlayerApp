@@ -37,8 +37,10 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.audioeffects.common.getEqualizerConfig
+import com.barryzeha.core.R
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.ACTION_CLOSE
+import com.barryzeha.core.common.ACTION_FAVORITE
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
 import com.barryzeha.core.common.MyPreferences
@@ -371,6 +373,14 @@ class MusicPlayerService : Service(){
                     _activity?.finish()
                     exitProcess(0)
                 }
+                if(ACTION_FAVORITE == action){
+                    serviceScope.launch(Dispatchers.IO) {
+                        repository.updateFavoriteSong(!currentMusicState.isFavorite,currentMusicState.idSong)
+                        currentMusicState = currentMusicState.copy(isFavorite = !currentMusicState.isFavorite)
+                        // Recreamos la notificación para que el ícono de nuestro estado de favoritos cambie
+                        initNotify()
+                    }
+                }
             }
         }
     }
@@ -511,6 +521,13 @@ class MusicPlayerService : Service(){
                 )
                 .addCustomAction(
                     PlaybackState.CustomAction.Builder(
+                        ACTION_FAVORITE,
+                        ACTION_FAVORITE,
+                        if(newState.isFavorite) R.drawable.ic_favorite_fill else R.drawable.ic_favorite
+                    ).build()
+                )
+                .addCustomAction(
+                    PlaybackState.CustomAction.Builder(
                         ACTION_CLOSE,
                         ACTION_CLOSE,
                         com.barryzeha.core.R.drawable.ic_close
@@ -621,7 +638,7 @@ class MusicPlayerService : Service(){
     }
     fun getStateSaved() {
         if(firstCallingToSongState) {
-            serviceScope.launch {
+            serviceScope.launch{
                 songState = repository.fetchSongState()
                 if (!songState.isNullOrEmpty()) setSongStateSaved(songState[0])
             }
@@ -687,6 +704,10 @@ class MusicPlayerService : Service(){
     @Synchronized
     private fun findMediaItemIndexById(mediaItems:List<MediaItem>, mediaItemId:String):Int{
         return mediaItems.indexOfFirst { it.mediaId == mediaItemId }
+    }
+    @Synchronized
+    private fun findMediaItemIndexById(songList:List<SongEntity>, mediaItemId:Long):Int{
+        return songList.indexOfFirst { it.id == mediaItemId }
     }
 
     private fun initExoPlayer(song:SongEntity){
@@ -873,6 +894,14 @@ class MusicPlayerService : Service(){
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
+    fun checkIfSongIsFavorite(id:Long){
+        serviceScope.launch(Dispatchers.IO) {
+            fetchSongMetadata(repository.fetchSongById(id))?.let{data->
+              currentMusicState = data
+              initNotify()
+          }
+        }
+    }
     fun openQueue(songs:List<SongEntity>, startPosition:Int){
         mPrefs.currentIndexSong = startPosition.toLong()
         playingQueue = songs.toMutableList()
@@ -997,28 +1026,21 @@ class MusicPlayerService : Service(){
             }
         }
     }
+
     private fun setSongStateSaved(songState: SongStateWithDetail){
         songEntity=songState.songEntity
-        songEntity
         // Set info currentSongEntity
         fetchSongMetadata(songEntity)?.let{ musicState->
             currentMusicState = musicState.copy(
                 currentDuration = songState.songState.currentPosition,
+                isFavorite = songEntity.favorite,
                 latestPlayed = true
             )
         }
-        // Al agregar todos los items de la lista al inicio, no necesitamos agregar uno nuevo,
-        // lo necesitamos para la repetición de toda la lista
-        //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
+        //FIXME arreglar la forma de obtener la posición del mediaitem
+        //exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,songEntity.id.toString()),songState.songState.currentPosition)
+        exoPlayer.seekTo(findMediaItemIndexById(songsList,songEntity.id),songState.songState.currentPosition)
 
-        // Cuando tenemos toda la lista de items desde el inicio, siempre comienza por el primer archivo de la lista
-        // entonces para iniciar por el item de una posición específica usamos lo siguiente:
-        //exoPlayer.seekToDefaultPosition(mPrefs.currentPosition.toInt())
-        //exoPlayer.addMediaItem(MediaItem.fromUri(songPath))
-
-        //exoPlayer.seekTo(mPrefs.currentPosition.toInt(),songState.songState.currentPosition)
-        //TODO arreglar la forma de obtener la posición del mediaitem
-        exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,songEntity.id.toString()),songState.songState.currentPosition)
 
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false
@@ -1030,22 +1052,27 @@ class MusicPlayerService : Service(){
         executeOnceTime = true
         setPlayingState(false)
     }
+
     private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {
-            val songPath = song.pathLocation.toString()
-            val songMetadata = fetchShortFileMetadata(applicationContext!!, songPath)!!
-        return MusicState(
-            idSong = song.id,
-            isPlaying = exoPlayer.isPlaying,
-            title = songMetadata.title,
-            artist = songMetadata.artist,
-            album = songMetadata.album,
-            //albumArt = songMetadata.albumArt,
-            duration = songMetadata.songLength,
-            songPath = songPath,
-            latestPlayed = false
-        )
+                val songPath = song.pathLocation.toString()
+                val songMetadata = fetchShortFileMetadata(applicationContext!!, songPath)!!
+
+                return MusicState(
+                    idSong = song.id,
+                    isPlaying = playingState(),
+                    title = songMetadata.title,
+                    artist = songMetadata.artist,
+                    album = songMetadata.album,
+                    isFavorite = song.favorite,
+                    duration = songMetadata.songLength,
+                    songPath = songPath,
+                    latestPlayed = false
+
+                )
+
         }catch(ex:Exception) {
+            ex.printStackTrace()
             return null
         }
     }

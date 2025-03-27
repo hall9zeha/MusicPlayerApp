@@ -19,7 +19,9 @@ import androidx.core.view.GravityCompat
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
+import com.barryzeha.core.common.FAVORITE_STATE_EXTRA
 import com.barryzeha.core.common.MAIN_FRAGMENT
+import com.barryzeha.core.common.MUSIC_STATE_EXTRA
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
@@ -178,6 +180,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         mainViewModel.isFavorite.observe(viewLifecycleOwner){isFavorite->
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if(isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite)
+            //For change state of the favorite action in media notify
+            musicPlayerService?.checkIfSongIsFavorite(mPrefs.idSong)
+
         }
         mainViewModel.deletedRow.observe(viewLifecycleOwner){deleteRow->
             if(deleteRow>0){

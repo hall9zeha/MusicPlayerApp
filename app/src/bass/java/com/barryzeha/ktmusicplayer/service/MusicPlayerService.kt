@@ -33,9 +33,11 @@ import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.audioeffects.common.EqualizerManager
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.ACTION_CLOSE
+import com.barryzeha.core.common.ACTION_FAVORITE
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.DEFAULT_DIRECTION
 import com.barryzeha.core.common.MUSIC_PLAYER_SESSION
+import com.barryzeha.core.common.MUSIC_STATE_EXTRA
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.NEXT
 import com.barryzeha.core.common.PREVIOUS
@@ -307,7 +309,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     //}
                 }
             }
-            initMusicStateLooper()
+            initMusicStateLoop()
         }
     }
     fun getStateSaved() {
@@ -318,7 +320,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }
         }
     }
-    private fun initMusicStateLooper(){
+    private fun initMusicStateLoop(){
         initNotify()
         songRunnable = Runnable {
             if(bassManager?.getActiveChannel() != 0) {
@@ -336,19 +338,20 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         songHandler.post(songRunnable)
 
     }
-    private fun stopLooper(){
+    private fun stopLoop(){
         songHandler.removeCallbacks(songRunnable)
         initNotify()
     }
-    private fun startLooper(){
+    private fun startLoop(){
         songHandler.post(songRunnable)
     }
     fun updateNotify(musicState:MusicState){
-        stopLooper()
+        stopLoop()
         currentMusicState = musicState
         initNotify()
-        startLooper()
+        startLoop()
     }
+    // Funciona con las últimas versiones de Android a partir de Android 10
     private fun mediaSessionCallback():MediaSession.Callback{
         return object:MediaSession.Callback(){
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -442,13 +445,22 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         // exitProcess elimina completamente la notificación y el servicio
                         exitProcess(0)
                     }
-
+                }
+                if(ACTION_FAVORITE == action){
+                    serviceScope.launch(Dispatchers.IO) {
+                        repository.updateFavoriteSong(!currentMusicState.isFavorite,currentMusicState.idSong)
+                        currentMusicState = currentMusicState.copy(isFavorite = !currentMusicState.isFavorite)
+                        // Recreamos la notificación para que el ícono de nuestro estado de favoritos cambie
+                        initNotify()
+                    }
                 }
             }
         }
     }
+    // Funciona con versiones legadas de Android
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        musicState = intent?.getParcelableExtra<MusicState>("musicState")
+        musicState = intent?.getParcelableExtra<MusicState>(MUSIC_STATE_EXTRA)
+        if(songEntity.favorite !=musicState?.isFavorite ) initNotify()
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
                 setPlayingState(false)
@@ -516,6 +528,13 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         or PlaybackState.ACTION_SKIP_TO_NEXT
                         or PlaybackState.ACTION_SKIP_TO_PREVIOUS
                         or PlaybackState.ACTION_STOP
+            )
+            .addCustomAction(
+                PlaybackState.CustomAction.Builder(
+                    ACTION_FAVORITE,
+                    ACTION_FAVORITE,
+                    if(newState.isFavorite)coreRes.drawable.ic_favorite_fill else coreRes.drawable.ic_favorite
+                ).build()
             )
             .addCustomAction(
                 PlaybackState.CustomAction.Builder(
@@ -704,6 +723,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         executeOnceTime=false
     }
 
+
     fun unregisterController(){
         _songController=null
     }
@@ -725,6 +745,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
+    }
+    fun checkIfSongIsFavorite(id:Long){
+        serviceScope.launch(Dispatchers.IO) {
+            currentMusicState = fetchSongMetadata(repository.fetchSongById(id))!!
+            initNotify()
+        }
     }
     fun openQueue(songs:List<SongEntity>, startPosition:Int){
         mPrefs.currentIndexSong = startPosition.toLong()
@@ -764,6 +790,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         currentMusicState = fetchSongMetadata(songEntity)?.copy(
                             isPlaying = playingState(),
                             idSong = songEntity.id,
+                            isFavorite = songEntity.favorite,
                             latestPlayed = false,
                             nextOrPrev = nextOrPrevAnimValue
                         )!!
@@ -899,7 +926,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 currentMusicState = musicState.copy(
                     currentDuration = songState.songState.currentPosition,
                     latestPlayed = true,
-                    nextOrPrev = animDirection
+                    nextOrPrev = animDirection,
+                    isFavorite = song.favorite
                 )
             }
             setPlayingState(false)
@@ -935,6 +963,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             artist = songMetadata.artist,
             album = songMetadata.album,
             duration = songMetadata.songLength,
+            isFavorite = song.favorite,
             songPath = songPath,
             latestPlayed = false
         )

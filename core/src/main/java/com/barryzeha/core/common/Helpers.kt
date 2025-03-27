@@ -63,7 +63,7 @@ fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Bool
 
 fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:ServiceConnection,musicState: MusicState=MusicState()){
     val serviceIntent = Intent (context, service).apply {
-        putExtra("musicState", musicState)
+        putExtra(MUSIC_STATE_EXTRA, musicState)
     }
     if (!context.isServiceRunning(service) ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -262,6 +262,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         mainViewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
             this.isFavorite = isFavorite
             bind?.btnFavorite?.setIconResource(if (isFavorite) com.barryzeha.core.R.drawable.ic_favorite_fill else com.barryzeha.core.R.drawable.ic_favorite)
+            //For change state of the favorite action in media notify
+            musicPlayerService?.checkIfSongIsFavorite(mPrefs.idSong)
         }
         mainViewModel.isSongTagEdited.observe(viewLifecycleOwner) { song ->
             song?.let {
