@@ -153,8 +153,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     }
     private fun setUpSongEntitiesIndices(){
         songEntityIndices.clear()
-        for(i in originalList.indices){
-            if(originalList[i] is SongEntity){
+        for (i in originalList.indices) {
+            if (originalList[i] is SongEntity) {
                 songEntityIndices.add(i)
             }
         }

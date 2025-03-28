@@ -67,7 +67,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         super.onCreate(savedInstanceState)
         installSplashScreen().apply{
             lifecycleScope.launch {
-                setKeepOnScreenCondition{true}
+                //setKeepOnScreenCondition{true}
                 delay(1500)
                 setKeepOnScreenCondition{false}
             }
