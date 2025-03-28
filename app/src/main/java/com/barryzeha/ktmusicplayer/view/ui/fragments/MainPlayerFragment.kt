@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -610,6 +611,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         musicState?.let{
             mainViewModel.setCurrentTrack(musicState)
         }
+
     }
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
         super.onServiceConnected(conn, service)

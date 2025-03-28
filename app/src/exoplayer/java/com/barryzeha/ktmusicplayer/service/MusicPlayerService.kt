@@ -105,7 +105,6 @@ class MusicPlayerService : Service(){
     private val serviceScope = CoroutineScope(Job() + Main)
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
-    private var executeOnceTime:Boolean=false
     private var musicState:MusicState?=null
     private lateinit var mPrefs:MyPreferences
     private var songEntity:SongEntity=SongEntity()
@@ -478,7 +477,7 @@ class MusicPlayerService : Service(){
                 withContext(Main) {
                     exoPlayer.addMediaItems(mediaItemList)
                 }
-                Log.e("ITEMS-MEDIA-S-POPULATE", mediaItemList.size.toString())
+
             }
             setUpExoplayerListener()
             playerListener?.let{listener->exoPlayer.addListener(listener)}
@@ -713,13 +712,11 @@ class MusicPlayerService : Service(){
     private fun initExoPlayer(song:SongEntity){
         songEntity=song
         exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,song.id.toString()),0)
-
         exoPlayer.prepare()
         exoPlayer.play()
-        setPlayingState(exoPlayer.isPlaying)
+        setPlayingState(true)
 
     }
-
     @OptIn(UnstableApi::class)
     private fun setUpExoplayerListener():Player.Listener?{
          playerListener = object : Player.Listener {
@@ -728,20 +725,13 @@ class MusicPlayerService : Service(){
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
                         val song=if(positionReset>-1) (if(mPrefs.isOpenQueue) playingQueue[positionReset]else songsList[positionReset]) else songEntity
                          // Set info currentSongEntity
-                         fetchSongMetadata(song)?.let{
+                     setPlayingState(exoPlayer.isPlaying)
+                     fetchSongMetadata(song)?.let{
                              currentMusicState=it
                              // Para encontrar la posición del item en la lista de nuestra vista
                              // por su id
                              mPrefs.idSong=it.idSong
                          }
-                         // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-                         // información que de la pista en reproducción que no requiere cambios constantes
-                         // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
-                         if (!executeOnceTime) {
-                             _songController?.currentTrack(currentMusicState)
-                         }
-                         executeOnceTime = true
-                         setPlayingState(exoPlayer.isPlaying)
                      positionReset=-1
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
@@ -870,7 +860,6 @@ class MusicPlayerService : Service(){
         currentMusicState=MusicState()
         _songController?.currentTrack(currentMusicState)
         positionReset=0
-        executeOnceTime=false
     }
     fun unregisterController(){
         _songController=null
@@ -914,10 +903,6 @@ class MusicPlayerService : Service(){
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
             if(playingState()){songHandler.post(songRunnable)}
-            // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-            // información  de la pista en reproducción que no requiere cambios constantes
-            // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
-            executeOnceTime=false
             initExoPlayer(song)
         }
 
@@ -952,16 +937,16 @@ class MusicPlayerService : Service(){
     }
     fun nextSong(){
         setPlayingState(exoPlayer.isPlaying)
-        exoPlayer.seekToNext()
+        exoPlayer.seekToNextMediaItem()
         clearABLoopOfPreferences()
     }
     fun prevSong(){
         setPlayingState(exoPlayer.isPlaying)
-        exoPlayer.seekToPrevious()
+        exoPlayer.seekToPreviousMediaItem()
         clearABLoopOfPreferences()
-            //exoPlayer.seekToPrevious()
-            // retrocede al principio de la pista hay que hacer click dos veces
-            // para que retroceda a la pista anterior
+        //exoPlayer.seekToPrevious()
+        // retrocede al principio de la pista hay que hacer click dos veces
+        // para que retroceda a la pista anterior
 
     }
     fun reloadIndexOfSong(){
@@ -1039,17 +1024,11 @@ class MusicPlayerService : Service(){
         }
         //FIXME arreglar la forma de obtener la posición del mediaitem
         //exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,songEntity.id.toString()),songState.songState.currentPosition)
-        exoPlayer.seekTo(findMediaItemIndexById(songsList,songEntity.id),songState.songState.currentPosition)
 
-
+        exoPlayer.seekTo(mPrefs.currentIndexSong.toInt() - 1 ,songState.songState.currentPosition)
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false
         _songController?.currentTrack(currentMusicState)
-        // Al cargar la información de una pista guardada
-        // se ejecutaba una primera vez el evento currentTRack de la interface
-        // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
-        // para evitarlo
-        executeOnceTime = true
         setPlayingState(false)
     }
 

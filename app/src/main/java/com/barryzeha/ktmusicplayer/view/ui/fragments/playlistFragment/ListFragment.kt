@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -539,6 +540,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
         musicState?.let { mainViewModel.setCurrentTrack(musicState) }
+
     }
     // The overridden method onConnectedService is not fired here because it is executed after the first fragment.
     // We obtain the connection to the service through the view model sent from the main activity.
