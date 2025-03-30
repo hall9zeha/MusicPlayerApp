@@ -26,6 +26,7 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -135,7 +136,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         bassManager?.getInstance(this)
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
-        mPrefs.firstExecution=true
+        mPrefs.isPopulateServicePlaylist=false
 
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
@@ -304,9 +305,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 // si no hay algo seleccionado previamente solo devolverá la lista por defecto
                 val songs=repository.fetchPlaylistOrderBy(mPrefs.playlistId.toLong(), mPrefs.playListSortOption)
                 songs.forEach { s ->
-                    //if (!songsList.contains(s)) {
-                        songsList.add(s)
-                    //}
+                      songsList.add(s)
                 }
             }
             initMusicStateLoop()
@@ -689,25 +688,23 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     fun populatePlayList(songs:List<SongEntity>){
         serviceScope.launch(Dispatchers.IO) {
-            songs.forEach { s ->
-                if (!songsList.contains(s)) {
-                    songsList.add(s)
-                }
-            }
-            // Volvemos a obtener la posición de la pista en
-            // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
-            findItemSongIndexById(mPrefs.idSong)?.let {
-                indexOfSong = it
+            if(songs.size != songsList.size) {
+                songs.forEach { s -> songsList.add(s)}
+                // Volvemos a obtener la posición de la pista en
+                // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
+                findItemSongIndexById(mPrefs.idSong)?.let {
+                    indexOfSong = it
 
-            }?:run{
-                indexOfSong = 0
-                withContext(Main) {
-                    setMusicForPlay(songsList[0])
+                } ?: run {
+                    indexOfSong = 0
+                    withContext(Main) {
+                        setMusicForPlay(songsList[0])
+                    }
                 }
+                mPrefs.currentIndexSong = indexOfSong.toLong()
             }
-            mPrefs.currentIndexSong = indexOfSong.toLong()
-
         }
+        mPrefs.isPopulateServicePlaylist = false
     }
     fun clearPlayList(isSort:Boolean){
         songsList.clear()

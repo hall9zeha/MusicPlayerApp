@@ -26,6 +26,7 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
@@ -52,6 +53,7 @@ import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
+import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
 import com.barryzeha.ktmusicplayer.MyApp
@@ -110,7 +112,6 @@ class MusicPlayerService : Service(){
     private var songEntity:SongEntity=SongEntity()
     private lateinit var songMetaData:MusicState
     private var playerListener:Player.Listener?=null
-    private var isFirstTime=true
     private var songs:MutableList<SongEntity> = arrayListOf()
     private var mediaItemList:MutableList<MediaItem> = arrayListOf()
     private var songState:List<SongStateWithDetail> = arrayListOf()
@@ -134,6 +135,7 @@ class MusicPlayerService : Service(){
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
     private var mediaItemQueue:MutableList<MediaItem> = arrayListOf()
     private var playingQueueList:Boolean = false
+    private var finalizedPopulatePlaylist=false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -141,7 +143,7 @@ class MusicPlayerService : Service(){
         mPrefs = MyApp.mPrefs
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
-        mPrefs.firstExecution=true
+        mPrefs.isPopulateServicePlaylist=false
 
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
@@ -149,8 +151,6 @@ class MusicPlayerService : Service(){
         setUpPlaylist()
         initMusicStateLooper()
         setUpHeadsetAndBluetoothReceiver()
-
-
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
         headsetReceiver = object:BroadcastReceiver(){
@@ -460,7 +460,6 @@ class MusicPlayerService : Service(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
             .build()
         setUpEqualizer(exoPlayer.audioSessionId)
-
         serviceScope.launch{
             // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
             // si no hay algo seleccionado previamente solo devolverá la lista por defecto
@@ -469,10 +468,8 @@ class MusicPlayerService : Service(){
             // TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {
                 songs.forEach { s ->
-                    if (!songsList.contains(s)) {
-                        songsList.add(s)
-                    }
-                   mediaItemList.add(convertToMediaItem(s))
+                    songsList.add(s)
+                    mediaItemList.add(convertToMediaItem(s))
                 }
                 withContext(Main) {
                     exoPlayer.addMediaItems(mediaItemList)
@@ -661,7 +658,6 @@ class MusicPlayerService : Service(){
                 updateNotify()
             //}
             setUpExoPlayerRepeatMode()
-
            songHandler.postDelayed(songRunnable, 500)
         }
         songHandler.post(songRunnable)
@@ -705,8 +701,8 @@ class MusicPlayerService : Service(){
         return mediaItems.indexOfFirst { it.mediaId == mediaItemId }
     }
     @Synchronized
-    private fun findMediaItemIndexById(songList:List<SongEntity>, mediaItemId:Long):Int{
-        return songList.indexOfFirst { it.id == mediaItemId }
+    private fun findSongInSongList(songList:List<SongEntity>, idSong:Long):Int{
+        return try{songList.indexOfFirst { it.id == idSong }}catch(e:Exception){0}
     }
 
     private fun initExoPlayer(song:SongEntity){
@@ -730,9 +726,11 @@ class MusicPlayerService : Service(){
                              currentMusicState=it
                              // Para encontrar la posición del item en la lista de nuestra vista
                              // por su id
-                             mPrefs.idSong=it.idSong
+                             // por ahora lo guardamos en onPositionDiscontinuity
+                             //mPrefs.idSong=it.idSong
                          }
                      positionReset=-1
+
                  }
                  if(playbackState == Player.STATE_ENDED  && _songController==null){
                      if(mPrefs.currentIndexSong < songsList.size -1 ){
@@ -794,6 +792,7 @@ class MusicPlayerService : Service(){
                          playingQueueList=false
                      }
                  }
+
              }
 
          }
@@ -834,20 +833,31 @@ class MusicPlayerService : Service(){
     }
     fun populatePlayList(songs:List<SongEntity>){
         serviceScope.launch(Dispatchers.IO) {
-            songs.forEach { s ->
-                if (!songsList.contains(s)) {
+           if (songs.size != mediaItemList.count()) {
+                songs.forEach { s ->
                     songsList.add(s)
                     val mediaItem = MediaItem.Builder()
                         .setMediaId(s.id.toString())
                         .setUri(s.pathLocation.toString())
                         .build()
                     mediaItemList.add(mediaItem)
-                    withContext(Main) {
-                        exoPlayer.addMediaItem(mediaItem)
-                    }
+                }
+                withContext(Main) {
+                    exoPlayer.setMediaItems(mediaItemList)
+                   findSongInSongList(songsList,mPrefs.idSong).let {index->
+                       val song=songsList[index]
+                       mPrefs.idSong = song.id
+                       setSongStateSaved(
+                           SongStateWithDetail(
+                               songState = SongState(),
+                               songEntity = song
+                           )
+                       )
+                   }
                 }
             }
         }
+        mPrefs.isPopulateServicePlaylist=false
     }
     // Ya que el fragmento de lista no es diferente para cada versión, en bass flavor se implemnta clearPlayList
     // con el parámetro (isSort), pero en exoplayer flavor no, aún así debemos ponerlo porque el fragmento de lista
@@ -927,13 +937,17 @@ class MusicPlayerService : Service(){
         return Pair(0,0)
     }
     fun resumePlayer(){
-        if(!exoPlayer.isPlaying){
-            exoPlayer.prepare()
-            exoPlayer.play()
-            isFirstTime=false
-            setPlayingState(exoPlayer.isPlaying)
+        if(exoPlayer.mediaItemCount == mediaItemList.size) {
+            if (!exoPlayer.isPlaying) {
+                exoPlayer.prepare()
+                exoPlayer.play()
+                setPlayingState(true)
+            }
+            updateNotifyForLegacySdkVersions()
+        }else{
+            Toast.makeText(this, "cargando medios...", Toast.LENGTH_SHORT).show()
+            setPlayingState(false)
         }
-        updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
         setPlayingState(exoPlayer.isPlaying)
@@ -1024,7 +1038,6 @@ class MusicPlayerService : Service(){
         }
         //FIXME arreglar la forma de obtener la posición del mediaitem
         //exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,songEntity.id.toString()),songState.songState.currentPosition)
-
         exoPlayer.seekTo(mPrefs.currentIndexSong.toInt() - 1 ,songState.songState.currentPosition)
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false

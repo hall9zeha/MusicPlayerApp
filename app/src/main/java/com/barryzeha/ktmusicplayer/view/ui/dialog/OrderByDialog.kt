@@ -95,6 +95,6 @@ class OrderByDialog:DialogFragment() {
     }
     private fun saveOrderOption(){
         mainViewModel.setOrderListBy(rbSelectedPosition)
-
+        mPrefs.isPopulateServicePlaylist=true
     }
 }

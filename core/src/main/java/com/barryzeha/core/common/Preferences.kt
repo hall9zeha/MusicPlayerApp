@@ -57,7 +57,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var isPlaying:Boolean
         get()= myPreferences.getBoolean(PLAYER_IS_STOP,false)
         set(value)=myPreferences.edit().putBoolean(PLAYER_IS_STOP,value).apply()
-    var firstExecution:Boolean
+    var isPopulateServicePlaylist:Boolean
         get()= myPreferences.getBoolean(FIRST_EXECUTION,false)
         set(value)=myPreferences.edit().putBoolean(FIRST_EXECUTION,value).apply()
 

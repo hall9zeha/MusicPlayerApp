@@ -391,17 +391,18 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                         musicPlayerService?.getSongsList()?.get(0)?.let{song->
                             musicPlayerService?.startPlayer(song)
                             btnMainPlay.setIconResource(coreRes.drawable.ic_circle_pause)
+                            mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
                         }
 
                     } else {
                         if (musicPlayerService?.playingState()!!) {
                             musicPlayerService?.pausePlayer()
-                            mainViewModel.saveStatePlaying(false)
+                            mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
                             if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).pause()
 
                         } else {
                             musicPlayerService?.resumePlayer()
-                            mainViewModel.saveStatePlaying(true)
+                            mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
                             if(discCoverViewIsEnable()) (bind?.ivDiscMusicCover as DiscCoverView).resume()
                         }
                     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -103,7 +104,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
             currentTrackAvailable =true
         }
         mainViewModel.serviceInstance.observe(this){(serviceConn, serviceInst)->
-            if(!currentTrackAvailable)serviceInst.getStateSaved()
+           if(!currentTrackAvailable)serviceInst.getStateSaved()
         }
         mainViewModel.playLists.observe(this){lists->
             this.playlists = lists

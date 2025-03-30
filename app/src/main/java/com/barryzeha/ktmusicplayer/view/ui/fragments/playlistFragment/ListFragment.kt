@@ -6,14 +6,11 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
-import androidx.core.view.doOnPreDraw
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -29,7 +26,6 @@ import com.barryzeha.core.common.showOrHideKeyboard
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
-import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.LIST_FRAGMENT
@@ -46,13 +42,11 @@ import com.barryzeha.ktmusicplayer.databinding.FragmentPlaylistBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.MusicListAdapter
-import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
 import com.barryzeha.ktmusicplayer.view.ui.dialog.OrderByDialog
 import com.barryzeha.ktmusicplayer.view.ui.dialog.PlaylistDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.dialog.SongInfoDialogFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.BaseFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
-import com.barryzeha.ktmusicplayer.view.ui.fragments.albumDetail.AlbumDetailFragmentArgs
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import com.barryzeha.mfilepicker.ui.views.FilePickerActivity
 import kotlinx.coroutines.CoroutineScope
@@ -202,7 +196,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 mPrefs.playListSortOption, songList
             ) { result ->
                 // We fill the list of mediaitems when we select a filter
-                if (!mPrefs.firstExecution) musicPlayerService?.populatePlayList(songList)
+                if (mPrefs.isPopulateServicePlaylist) musicPlayerService?.populatePlayList(songList)
                 // ************
                 musicListAdapter?.addAll(result)
                 bind?.rvSongs?.post {
@@ -214,7 +208,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 }
                 bind?.pbLoad?.visibility = View.GONE
                 bind?.pbLoad?.isIndeterminate = true
-                mPrefs.firstExecution = false
             }
         }
         mainViewModel.orderBySelection.observe(viewLifecycleOwner) { selectedSort ->

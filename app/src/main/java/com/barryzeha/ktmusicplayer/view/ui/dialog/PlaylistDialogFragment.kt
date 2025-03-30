@@ -139,6 +139,7 @@ class PlaylistDialogFragment : DialogFragment() {
                 // We load the selected playlist
                 getPlaylist(playlistEntity.idPlaylist.toInt())
                 mainViewModel.setPlaylistName(playlistEntity.playListName)
+                mPrefs.isPopulateServicePlaylist = true
             }
         }, { playlist ->
             // When deleting an item
