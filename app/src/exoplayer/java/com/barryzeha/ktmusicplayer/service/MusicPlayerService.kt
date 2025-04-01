@@ -436,6 +436,14 @@ class MusicPlayerService : Service(){
                 _songController?.previous()
                nextOrPrevTRack(mPrefs.currentIndexSong.toInt() -1)
             }
+            SongAction.Favorite->{
+                serviceScope.launch(Dispatchers.IO) {
+                repository.updateFavoriteSong(!currentMusicState.isFavorite,currentMusicState.idSong)
+                currentMusicState = currentMusicState.copy(isFavorite = !currentMusicState.isFavorite)
+                // Recreamos la notificación para que el ícono de nuestro estado de favoritos cambie
+                initNotify()
+                }
+            }
             SongAction.Close -> {
                 exoPlayer.stop()
                 exoPlayer.release()

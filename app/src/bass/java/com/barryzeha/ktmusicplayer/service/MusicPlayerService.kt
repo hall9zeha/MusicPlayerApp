@@ -478,7 +478,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
 
             }
             SongAction.Next -> {
-                //TODO probar en android 8
                 nextOrPrevTrack(NEXT)
             }
             SongAction.Previous -> {
