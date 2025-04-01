@@ -18,6 +18,7 @@ import android.view.animation.Animation
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.core.content.contentValuesOf
 import com.barryzeha.core.R
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
@@ -88,78 +89,42 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     val builder = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
         Notification.Builder(context, CHANNEL_ID)
     }else Notification.Builder(context)
-    val playPauseIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(
-            if (state.isPlaying) SongAction.Pause.ordinal.toString() else SongAction.Resume.ordinal.toString()
-        )
-    val playPausePI = PendingIntent.getBroadcast(
-        context,
-        1,
-        playPauseIntent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
+
+    // Action PlayPause
     val playPauseAction = Notification.Action.Builder(
         Icon.createWithResource(
             context,
             if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow
         ),
         "PlayPause",
-        playPausePI
+        createActionPendingIntent(context,if (state.isPlaying) SongAction.Pause.ordinal.toString() else SongAction.Resume.ordinal.toString(),1 )
     ).build()
 
-    val previousIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(SongAction.Previous.ordinal.toString())
-    val previousPI = PendingIntent.getBroadcast(
-        context,
-        2,
-        previousIntent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
+    // Action previous
     val previousAction = Notification.Action.Builder(
         Icon.createWithResource(context, R.drawable.ic_back),
         "Previous",
-        previousPI
+        createActionPendingIntent(context,SongAction.Previous.ordinal.toString(),2)
     ).build()
 
-    val nextIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(SongAction.Next.ordinal.toString())
-    val nextPI = PendingIntent.getBroadcast(
-        context,
-        3,
-        nextIntent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
+    // Action Next
     val nextAction = Notification.Action.Builder(
         Icon.createWithResource(context, R.drawable.ic_next),
         "Previous",
-        nextPI
+        createActionPendingIntent(context,SongAction.Next.ordinal.toString(),3)
     ).build()
 
     // Action favorite
-    val favoriteIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(SongAction.Favorite.ordinal.toString())
-    val favoritePI = PendingIntent.getBroadcast(
-        context, 4,favoriteIntent,PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
     val favoriteAction = Notification.Action.Builder(
         Icon.createWithResource(context,if(state.isFavorite)R.drawable.ic_favorite_fill else R.drawable.ic_favorite),
         "Favorite",
-        favoritePI
+        createActionPendingIntent(context,SongAction.Favorite.ordinal.toString(),4)
     ).build()
     // Action close notify
-    val closeIntent = Intent(context, MusicPlayerBroadcast::class.java)
-        .setAction(SongAction.Close.ordinal.toString())
-
-    val closePI = PendingIntent.getBroadcast(
-        context,
-        5,
-        closeIntent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
     val closeAction = Notification.Action.Builder(
         Icon.createWithResource(context,R.drawable.ic_close),
         "Close",
-        closePI
+        createActionPendingIntent(context,SongAction.Close.ordinal.toString(),5)
     ).build()
 
     return builder
@@ -178,6 +143,17 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         .addAction(closeAction)
         .build()
 
+}
+fun createActionPendingIntent(context: Context, action:String, requestCode:Int ):PendingIntent{
+    val intent = Intent(context, MusicPlayerBroadcast::class.java)
+        .setAction(action)
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        requestCode,
+        intent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    return pendingIntent
 }
 fun cancelPersistentNotify(context:Context) {
     val notificationManager =
