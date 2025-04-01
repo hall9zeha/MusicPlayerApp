@@ -299,7 +299,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     @OptIn(UnstableApi::class)
     private fun setUpPlaylist(){
         serviceScope.launch {
-            //TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {
                 // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
                 // si no hay algo seleccionado previamente solo devolverá la lista por defecto

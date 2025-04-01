@@ -188,8 +188,6 @@ class MusicPlayerService : Service(){
                         BluetoothDevice.ACTION_ACL_CONNECTED -> {
                             bluetoothIsConnect = true
                             Log.d("BLUETOOTH_STATE", "Bluetooth connected")
-
-                            // Aquí puedes agregar la lógica cuando se conecta el Bluetooth
                         }
                         BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                             if (exoPlayer.isPlaying) {
@@ -209,7 +207,6 @@ class MusicPlayerService : Service(){
                             when (state) {
                                 BluetoothAdapter.STATE_OFF -> {
                                     Log.d("BLUETOOTH_STATE", "Bluetooth disconnected")
-                                    // Aquí puedes agregar la lógica cuando se desconecta el Bluetooth
                                     if (exoPlayer.isPlaying) {
                                         exoPlayer.pause()
                                         _songController?.let{
@@ -224,7 +221,6 @@ class MusicPlayerService : Service(){
                                 }
                                 BluetoothAdapter.STATE_ON -> {
                                     Log.d("BluetoothReceiver", "Bluetooth adapter turned on")
-                                    // Aquí puedes agregar lógica adicional cuando el adaptador Bluetooth se enciende
                                 }
                             }
                         }
@@ -473,7 +469,6 @@ class MusicPlayerService : Service(){
             // si no hay algo seleccionado previamente solo devolverá la lista por defecto
             //val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
             val songs=repository.fetchPlaylistOrderBy(mPrefs.playlistId.toLong(), mPrefs.playListSortOption)
-            // TODO Revisar, no cargar toda la lista antes del estado de la canción
             withContext(Dispatchers.IO) {
                 songs.forEach { s ->
                     songsList.add(s)

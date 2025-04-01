@@ -117,7 +117,7 @@ open class BassManager {
     fun repeatSong(){
         BASS.BASS_ChannelPlay(getActiveChannel(), true);
     }
-    fun startAbLoop(){
+    private fun startAbLoop(){
         val currentPosition = getCurrentPositionInSeconds(getActiveChannel())
         if(currentPosition >= endAbLopPosition){
             BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
@@ -159,7 +159,7 @@ open class BassManager {
         }, 100) */// Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
 
     }
-    fun getCurrentPositionToBytes(position: Long):Long{
+    private fun getCurrentPositionToBytes(position: Long):Long{
         return if(mainChannel!=null)BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, position / 1000.0)else 0L
     }
     fun setActiveChannel(channel:Int){
