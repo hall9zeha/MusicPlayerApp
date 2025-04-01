@@ -135,13 +135,24 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         nextPI
     ).build()
 
+    // Action favorite
+    val favoriteIntent = Intent(context, MusicPlayerBroadcast::class.java)
+        .setAction(SongAction.Favorite.ordinal.toString())
+    val favoritePI = PendingIntent.getBroadcast(
+        context, 4,favoriteIntent,PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    val favoriteAction = Notification.Action.Builder(
+        Icon.createWithResource(context,if(state.isFavorite)R.drawable.ic_favorite_fill else R.drawable.ic_favorite),
+        "Favorite",
+        favoritePI
+    ).build()
     // Action close notify
     val closeIntent = Intent(context, MusicPlayerBroadcast::class.java)
         .setAction(SongAction.Close.ordinal.toString())
 
     val closePI = PendingIntent.getBroadcast(
         context,
-        4,
+        5,
         closeIntent,
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
@@ -163,9 +174,8 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
         .addAction(previousAction)
         .addAction(playPauseAction)
         .addAction(nextAction)
-        .addAction(null)
+        .addAction(favoriteAction)
         .addAction(closeAction)
-
         .build()
 
 }

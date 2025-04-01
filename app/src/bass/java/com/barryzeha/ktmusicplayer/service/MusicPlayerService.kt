@@ -484,6 +484,14 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             SongAction.Previous -> {
                nextOrPrevTrack(PREVIOUS)
             }
+            SongAction.Favorite -> {
+                serviceScope.launch(Dispatchers.IO) {
+                    repository.updateFavoriteSong(!currentMusicState.isFavorite,currentMusicState.idSong)
+                    currentMusicState = currentMusicState.copy(isFavorite = !currentMusicState.isFavorite)
+                    // Recreamos la notificación para que el ícono de nuestro estado de favoritos cambie
+                    initNotify()
+                }
+            }
             SongAction.Close -> {
                 bassManager?.releasePlayback()
                 songHandler.removeCallbacks(songRunnable)

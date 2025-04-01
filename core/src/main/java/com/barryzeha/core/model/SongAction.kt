@@ -14,5 +14,6 @@ enum class SongAction{
  Next,
  Previous,
  Nothing,
+ Favorite,
  Close
 }
