@@ -5,6 +5,27 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+    <ProgressBar
+        android:id="@+id/pbLoadAlbumDetail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/switchTrackTint"
+        android:indeterminateTintMode="src_in"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ctlContentDetail"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideLine"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardCoverView"
         android:layout_width="0dp"
@@ -13,7 +34,7 @@
         app:cardCornerRadius="16dp"
         app:strokeWidth="0dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintWidth_percent="0.20"
+        app:layout_constraintWidth_percent="0.45"
         app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -46,7 +67,7 @@
         android:layout_marginEnd="4dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/guideLine"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardCoverView"/>
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvDetailAlbum"
@@ -57,7 +78,7 @@
         android:textSize="10sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/cardCoverView"
-        app:layout_constraintEnd_toStartOf="@id/guideLine"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/cardCoverView"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
@@ -85,10 +106,11 @@
         android:textSize="12sp"
         android:textColor="@color/primaryColor"
         style="@style/Widget.Material3.Button.OutlinedButton"
-        app:layout_constraintEnd_toStartOf="@id/guideLine"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btnPlaying"
         app:layout_constraintTop_toBottomOf="@id/tvAlbumName"
         android:layout_marginTop="8dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideLine"
         android:layout_width="wrap_content"
