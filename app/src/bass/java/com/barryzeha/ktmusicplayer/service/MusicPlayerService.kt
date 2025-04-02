@@ -26,7 +26,6 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
@@ -56,7 +55,6 @@ import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
 import com.barryzeha.data.repository.MainRepository
-import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
@@ -73,6 +71,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.random.Random
 import kotlin.system.exitProcess
+import com.barryzeha.core.R as coreRes
 
 
 /**
@@ -334,7 +333,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             songHandler.postDelayed(songRunnable, 500)
         }
         songHandler.post(songRunnable)
-
     }
     private fun stopLoop(){
         songHandler.removeCallbacks(songRunnable)
@@ -369,7 +367,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                         _songController?.play()
                                     }
                                 }
-
                                 KeyEvent.KEYCODE_MEDIA_PAUSE -> {
                                     if (_songController == null) {
                                         pausePlayer()
@@ -379,11 +376,9 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                         _songController?.pause()
                                     }
                                 }
-
                                 KeyEvent.KEYCODE_MEDIA_NEXT -> {
                                     nextOrPrevTrack(NEXT)
                                 }
-
                                 KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                                     nextOrPrevTrack(PREVIOUS)
                                 }
@@ -398,7 +393,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 super.onSeekTo(pos)
                 setPlayerProgress(pos)
             }
-
             override fun onPause() {
                 super.onPause()
                 setPlayingState(false)
@@ -406,7 +400,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 else pausePlayer()
                 checkIfPhoneIsLock()
             }
-
             override fun onPlay() {
                 super.onPlay()
                 setPlayingState(true)
@@ -474,7 +467,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             }
             SongAction.Stop -> {
                 _songController?.stop()
-
             }
             SongAction.Next -> {
                 nextOrPrevTrack(NEXT)
@@ -619,7 +611,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             currentMusicState
                         )
                     }
-
                 notificationManager.notify(
                     NOTIFICATION_ID,
                     mediaPlayerNotify
@@ -1028,7 +1019,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         stopSelf()
         super.onDestroy()
     }
-    // TODO
+    //TODO
     // Si queremos mantener las notificaciones una vez cerrada la aplicación
     // no debemos sobreescribir onTaskRemoved - volveremos más tarde para implementar algo con eso
     override fun onTaskRemoved(rootIntent: Intent?) {

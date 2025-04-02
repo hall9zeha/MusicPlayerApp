@@ -9,20 +9,16 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
-import com.barryzeha.core.common.FAVORITE_STATE_EXTRA
 import com.barryzeha.core.common.MAIN_FRAGMENT
-import com.barryzeha.core.common.MUSIC_STATE_EXTRA
 import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
@@ -38,6 +34,7 @@ import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.animateButtonsAbLoop
 import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
+import com.barryzeha.ktmusicplayer.common.changeColorOfIcon
 import com.barryzeha.ktmusicplayer.databinding.FragmentMainPlayerBinding
 import com.barryzeha.ktmusicplayer.lyrics.CoverLrcView
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -121,21 +118,21 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     private fun checkPlayerSongModePreferences()=with(bind){
         this?.let {
             val mode = mPrefs.songMode
-            val colorOn = changeBackgroundColor(requireContext(), true)
-            val colorOff = changeBackgroundColor(requireContext(), false)
+            val colorOn = changeColorOfIcon(requireContext(), true)
+            val colorOff = changeColorOfIcon(requireContext(), false)
 
             btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-            btnRepeat.backgroundTintList = colorOff
-            btnShuffle.backgroundTintList = colorOff
-            btnAbLoop.backgroundTintList = colorOff
+            btnRepeat.iconTint = colorOff
+            btnShuffle.iconTint = colorOff
+            btnAbLoop.iconTint = colorOff
             when (mode) {
                 SongMode.RepeatOne.ordinal -> {
                     btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                    btnRepeat.backgroundTintList = colorOn
+                    btnRepeat.iconTint = colorOn
                 }
-                SongMode.RepeatAll.ordinal ->  btnRepeat.backgroundTintList = colorOn
-                SongMode.Shuffle.ordinal ->  btnShuffle.backgroundTintList = colorOn
-                SongMode.AbLoop.ordinal ->   btnAbLoop.backgroundTintList = colorOn
+                SongMode.RepeatAll.ordinal ->  btnRepeat.iconTint = colorOn
+                SongMode.Shuffle.ordinal ->  btnShuffle.iconTint = colorOn
+                SongMode.AbLoop.ordinal ->   btnAbLoop.iconTint = colorOn
                 else -> {
 
                 }
@@ -456,24 +453,16 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                     when (mPrefs.songMode) {
                         SongMode.RepeatOne.ordinal -> {
                             //  Third: deactivate modes
-                            btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                            btnRepeat.backgroundTintList= changeBackgroundColor(requireContext(),false)
-                            btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
-
                             mPrefs.songMode = CLEAR_MODE
                             checkPlayerSongModePreferences()
                         }
                         SongMode.RepeatAll.ordinal -> {
                             // Second: repeat one
-                            btnRepeat.setIconResource(coreRes.drawable.ic_repeat_one)
-                            btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode = REPEAT_ONE
                             checkPlayerSongModePreferences()
                         }
                         else -> {
                             // First: active repeat All
-                            btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),true)
-                            btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),false)
                             mPrefs.songMode= REPEAT_ALL
                             checkPlayerSongModePreferences()
                         }
@@ -483,21 +472,16 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 musicPlayerService?.stopAbLoop()
                 when(mPrefs.songMode){
                         SongMode.Shuffle.ordinal->{
-                            btnShuffle.backgroundTintList =changeBackgroundColor(requireContext(), false)
                             mPrefs.songMode = CLEAR_MODE
                             checkPlayerSongModePreferences()
                     }
                     else->{
-                        btnShuffle.backgroundTintList=changeBackgroundColor(requireContext(),true)
-                        btnRepeat.setIconResource(coreRes.drawable.ic_repeat_all)
-                        btnRepeat.backgroundTintList=changeBackgroundColor(requireContext(),false)
                         mPrefs.songMode= SHUFFLE
                         checkPlayerSongModePreferences()
                     }
                 }
             }
             btnFavorite.setOnClickListener {
-
                 if(!isFavorite){
                     mainViewModel.updateFavoriteSong(true,mPrefs.idSong)
                     //isFavorite=true
@@ -612,7 +596,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         musicState?.let{
             mainViewModel.setCurrentTrack(musicState)
         }
-
     }
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) {
         super.onServiceConnected(conn, service)

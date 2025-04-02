@@ -109,7 +109,6 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
                     isUserSeeking = true
                 }
-
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     isUserSeeking = false
                     musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)

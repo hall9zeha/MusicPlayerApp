@@ -54,19 +54,20 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         activity?.setTheme(com.barryzeha.core.R.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
         albumDetailViewModel.fetchSongsByAlbum(arguments.extraAlbum)
+
        /*activity?.onBackPressedDispatcher?.addCallback(this,object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
                //navController?.navigate(R.id.playlistFragment)
                 navController?.navigateUp()
             }
         })*/
-
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _bind = FragmentAlbumDetailBinding.bind(view)
         //postponeEnterTransition()
         navController = findNavController()
+        bind.pbLoadAlbumDetail?.isIndeterminate = true
         setupAdapter()
         setupListeners()
         setupObservers(view)
@@ -79,7 +80,6 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
             setItemViewCacheSize(10)
             layoutManager = LinearLayoutManager(context)
             adapter = albumAdapter
-
         }
     }
     private fun setupObservers(view:View){
@@ -90,6 +90,8 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
             if(songs.isNotEmpty()) setAlbumInfo(songs)
             albumSongs = songs
             albumAdapter?.addAll(songs)
+            bind.pbLoadAlbumDetail?.visibility = View.GONE
+            bind.ctlContentDetail?.visibility = View.VISIBLE
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTrack->
             albumAdapter?.changeBackgroundColorSelectedItem(currentTrack.idSong)
