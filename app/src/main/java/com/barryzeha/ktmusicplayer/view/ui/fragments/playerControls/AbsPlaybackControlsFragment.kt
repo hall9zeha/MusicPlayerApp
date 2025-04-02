@@ -75,7 +75,7 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
                 }
             }
             btnNext.setOnClickListener {
-                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!! - 1) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!!) {
                     musicPlayerService?.nextSong()
                     listFragmentInstance?.setNumberOfTrack(true)
                     setNumberOfTracks()
