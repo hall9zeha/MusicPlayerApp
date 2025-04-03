@@ -194,13 +194,13 @@
         >
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAbLoop"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            app:icon="@drawable/ic_ab_loop"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:icon="@drawable/ic_ab_loop_variant"
             app:iconGravity="textStart"
             app:iconTint="@null"
             app:iconPadding="0dp"
-            app:iconSize="16dp"
+            app:iconSize="20dp"
             android:clickable="true"
             android:focusable="true"
             style="@style/Widget.Material3.Button.IconButton"
