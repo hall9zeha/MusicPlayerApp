@@ -90,7 +90,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     lateinit var effectsPrefs:EffectsPreferences
     private var songsList: MutableList<SongEntity> = mutableListOf()
     private  var bassManager:BassManager?=null
-    private var currentSongPosition:Long=0
+    private var currentSongProgress:Long=0
     private var indexOfSong:Int=0
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
@@ -767,16 +767,16 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 //try {
                     song?.let {
                         songEntity = it
-                        currentSongPosition = 0
+                        currentSongProgress = 0
                         bassManager?.streamCreateFile(song)
-                        if(!mPrefs.isOpenQueue)findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
+                        findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
                         executeOnceTime = true
                     } ?: run {
                         bassManager?.streamCreateFile(songEntity)
                         executeOnceTime = false
                     }
                     if (bassManager?.getActiveChannel() != 0) {
-                        bassManager?.channelPlay(currentSongPosition)
+                        bassManager?.channelPlay(currentSongProgress)
                         bassManager?.startCheckingPlayback()
 
                         setPlayingState(true)
@@ -811,7 +811,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     fun pausePlayer(){
         setPlayingState(false)
-        currentSongPosition=bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0
+        currentSongProgress=bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0
         bassManager?.channelPause()
         bassManager?.stopCheckingPlayback()
         updateNotifyForLegacySdkVersions()
@@ -876,10 +876,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         indexOfSong = findItemSongIndexById(songEntity.id)!!
     }
     fun fastForward(){
-        bassManager?.fastForwardOrRewind(isForward=true){currentSongPosition=it}
+        bassManager?.fastForwardOrRewind(isForward=true){currentSongProgress=it}
     }
     fun fastRewind(){
-        bassManager?.fastForwardOrRewind(isForward=false){currentSongPosition=it}
+        bassManager?.fastForwardOrRewind(isForward=false){currentSongProgress=it}
     }
     // A-B looper
     fun setStartPositionForAbLoop() = bassManager?.setAbLoopStar()
@@ -890,7 +890,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
     }
     fun getSongsList():List<SongEntity>{
-        return songsList
+        return if(mPrefs.isOpenQueue) playingQueue else songsList
     }
     fun getCurrentSongPosition():Int = mPrefs.currentIndexSong.toInt()?:0
     fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
@@ -909,7 +909,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
 
     }
     fun setPlayerProgress(progress:Long){
-       bassManager?.setChannelProgress(progress){currentSongPosition=it}
+       bassManager?.setChannelProgress(progress){currentSongProgress=it}
     }
 
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
@@ -925,7 +925,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 )
             }
             setPlayingState(false)
-            currentSongPosition = songState.songState.currentPosition
+            currentSongProgress = songState.songState.currentPosition
             bassManager?.streamCreateFile(songState.songEntity)
             bassManager?.setSongStateSaved(
                 bassManager?.getActiveChannel()!!,

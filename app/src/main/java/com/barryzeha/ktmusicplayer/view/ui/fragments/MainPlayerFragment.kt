@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -414,7 +415,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             btnMainNext.setOnClickListener {
                 checkCoverViewStyle()
                 if (musicPlayerService?.getCurrentSongPosition()!! < listFragmentInstance?.musicListAdapter?.itemCount!! - 1) {
-                      musicPlayerService?.nextSong()
+                    musicPlayerService?.nextSong()
                 } else {
                     getSongOfList(0)?.let{song->
                         musicPlayerService?.startPlayer(song)

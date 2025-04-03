@@ -133,8 +133,8 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
 
     private fun setupListeners()=with(bind){
         btnPlaying.setOnClickListener{
-            musicPlayerService?.openQueue(albumSongs,0)
             mPrefs.isOpenQueue = true
+            musicPlayerService?.openQueue(albumSongs,0)
         }
         btnShuffle.setOnClickListener {
             val randomPosition = Random.nextInt(0,albumSongs.size-1)
