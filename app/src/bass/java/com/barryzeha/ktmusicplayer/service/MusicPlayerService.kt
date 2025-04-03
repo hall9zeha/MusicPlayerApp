@@ -88,7 +88,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     lateinit var mPrefs:MyPreferences
     @Inject
     lateinit var effectsPrefs:EffectsPreferences
-    private var songsList: MutableList<SongEntity> = mutableListOf()
+    private var mainSongsList: MutableList<SongEntity> = mutableListOf()
     private  var bassManager:BassManager?=null
     private var currentSongProgress:Long=0
     private var indexOfSong:Int=0
@@ -303,7 +303,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 // si no hay algo seleccionado previamente solo devolverá la lista por defecto
                 val songs=repository.fetchPlaylistOrderBy(mPrefs.playlistId.toLong(), mPrefs.playListSortOption)
                 songs.forEach { s ->
-                      songsList.add(s)
+                      mainSongsList.add(s)
                 }
             }
             initMusicStateLoop()
@@ -497,7 +497,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
       return START_NOT_STICKY
     }
     private fun nextOrPrevTrack(action:Int){
-            if(songsList.isNotEmpty()) {
+            if(mainSongsList.isNotEmpty()) {
                 when(action){
                     NEXT->nextSong()
                     PREVIOUS->prevSong()
@@ -654,8 +654,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                return if (index > -1) index else 0
            }
        }else {
-           if (songsList.isNotEmpty()) {
-               val index = songsList.indexOfFirst { it.id == idSong }
+           if (mainSongsList.isNotEmpty()) {
+               val index = mainSongsList.indexOfFirst { it.id == idSong }
                return if (index > -1) index else 0
            }
        }
@@ -671,11 +671,11 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         _songController=controller
     }
     fun setNewMediaItem(song:SongEntity){
-       if(!songsList.contains(song)){ songsList.add(song)}
+       if(!mainSongsList.contains(song)){ mainSongsList.add(song)}
     }
     fun removeMediaItem(song: SongEntity){
-       if(songsList.contains(song)) {
-           songsList.remove(song)
+       if(mainSongsList.contains(song)) {
+           mainSongsList.remove(song)
         }
     }
     fun removeMediaItems(list: List<SongEntity>){
@@ -685,8 +685,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     fun populatePlayList(songs:List<SongEntity>){
         serviceScope.launch(Dispatchers.IO) {
-            if(songs.size != songsList.size) {
-                songs.forEach { s -> songsList.add(s)}
+            if(songs.size != mainSongsList.size) {
+                songs.forEach { s -> mainSongsList.add(s)}
                 // Volvemos a obtener la posición de la pista en
                 // la nueva lista (importante si se ha ordenado la lista por artista , album, favoritos, etc)
                 findItemSongIndexById(mPrefs.idSong)?.let {
@@ -695,7 +695,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 } ?: run {
                     indexOfSong = 0
                     withContext(Main) {
-                        setMusicForPlay(songsList[0])
+                        setMusicForPlay(mainSongsList[0])
                     }
                 }
                 mPrefs.currentIndexSong = indexOfSong.toLong()
@@ -704,7 +704,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         mPrefs.isPopulateServicePlaylist = false
     }
     fun clearPlayList(isSort:Boolean){
-        songsList.clear()
+        mainSongsList.clear()
         // Cuando no es para ordenar la lista por(artista, álbum, género) será para eliminar y cargar una nueva lista de reproducción
         if(!isSort){
             setPlayingState(false)
@@ -732,7 +732,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         return currentMusicState
     }
     fun playListSize():Int{
-        return if(songsList.isNotEmpty()) songsList.size else 0
+        return if(mainSongsList.isNotEmpty()) mainSongsList.size else 0
     }
     fun playingState():Boolean{
         return mPrefs.isPlaying
@@ -763,7 +763,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     private fun play(song:SongEntity?){
-            if (songsList.isNotEmpty()) {
+            if (mainSongsList.isNotEmpty()) {
                 //try {
                     song?.let {
                         songEntity = it
@@ -834,9 +834,9 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }
             }
         }else {
-            if (songsList.isNotEmpty()) {
-                if (indexOfSong < songsList.size - 1) {
-                    if(mPrefs.songMode == SHUFFLE) indexOfSong = Random.nextInt(0,songsList.size-1)
+            if (mainSongsList.isNotEmpty()) {
+                if (indexOfSong < mainSongsList.size - 1) {
+                    if(mPrefs.songMode == SHUFFLE) indexOfSong = Random.nextInt(0,mainSongsList.size-1)
                     else indexOfSong += 1
                 } else {
                     indexOfSong = 0
@@ -852,13 +852,13 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         clearABLoopOfPreferences()
     }
     fun prevSong(){
-        if(songsList.isNotEmpty()){
+        if(mainSongsList.isNotEmpty()){
             if(indexOfSong > 0) {
                 if(mPrefs.isOpenQueue){
                     if(mPrefs.songMode == SHUFFLE) indexOfSong =Random.nextInt(0, playingQueue.size-1)
                     else  indexOfSong -=1
                 }else{
-                    if(mPrefs.songMode == SHUFFLE) indexOfSong =Random.nextInt(0, songsList.size-1)
+                    if(mPrefs.songMode == SHUFFLE) indexOfSong =Random.nextInt(0, mainSongsList.size-1)
                     else  indexOfSong -=1
                 }
                 nextOrPrevAnimValue = PREVIOUS
@@ -890,16 +890,16 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
     }
     fun getSongsList():List<SongEntity>{
-        return if(mPrefs.isOpenQueue) playingQueue else songsList
+        return if(mPrefs.isOpenQueue) playingQueue else mainSongsList
     }
     fun getCurrentSongPosition():Int = mPrefs.currentIndexSong.toInt()?:0
     fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
         if (mPrefs.isPlaying){
-            play(if(mPrefs.isOpenQueue)playingQueue[indexOfSong] else songsList[indexOfSong])
+            play(if(mPrefs.isOpenQueue)playingQueue[indexOfSong] else mainSongsList[indexOfSong])
         }
         else{
-            setMusicForPlay(if(mPrefs.isOpenQueue)playingQueue[indexOfSong]else songsList[indexOfSong], animDirection)
+            setMusicForPlay(if(mPrefs.isOpenQueue)playingQueue[indexOfSong]else mainSongsList[indexOfSong], animDirection)
         }
     }
     private fun setMusicForPlay(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
@@ -987,21 +987,21 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }
             }
         }else {
-            if (indexOfSong < songsList.size - 1 && songsList.isNotEmpty()) {
+            if (indexOfSong < mainSongsList.size - 1 && mainSongsList.isNotEmpty()) {
                 when (mPrefs.songMode) {
                     REPEAT_ONE -> {if (playingState()) {bassManager?.repeatSong()}}
                     SHUFFLE->{
-                    indexOfSong = (songsList.indices).random()
-                    play(songsList[indexOfSong])
+                    indexOfSong = (mainSongsList.indices).random()
+                    play(mainSongsList[indexOfSong])
                 }
                     else -> {if (playingState()) nextSong() }
                 }
             } else {
                 when (mPrefs.songMode) {
-                    REPEAT_ALL -> {play(songsList[0])}
+                    REPEAT_ALL -> {play(mainSongsList[0])}
                     REPEAT_ONE -> {if (playingState()) {bassManager?.repeatSong()}}
                     else -> {
-                        if (songsList.isNotEmpty()) setMusicForPlay(songsList[0])
+                        if (mainSongsList.isNotEmpty()) setMusicForPlay(mainSongsList[0])
                         bassManager?.stopCheckingPlayback()
                     }
                 }

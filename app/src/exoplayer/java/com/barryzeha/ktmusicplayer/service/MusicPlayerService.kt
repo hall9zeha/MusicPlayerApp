@@ -113,7 +113,7 @@ class MusicPlayerService : Service(){
     private lateinit var songMetaData:MusicState
     private var playerListener:Player.Listener?=null
     private var songs:MutableList<SongEntity> = arrayListOf()
-    private var mediaItemList:MutableList<MediaItem> = arrayListOf()
+    private var mainMediaItemList:MutableList<MediaItem> = arrayListOf()
     private var songState:List<SongStateWithDetail> = arrayListOf()
     private var headsetReceiver:BroadcastReceiver?=null
     private var bluetoothReceiver:BroadcastReceiver?=null
@@ -133,9 +133,8 @@ class MusicPlayerService : Service(){
     private var isPlayingBeforeCallPhone:Boolean = false
     // En esta lista cargamos momentaneamente las las canciones del fragmento AlbumDetail
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
-    private var mediaItemQueue:MutableList<MediaItem> = arrayListOf()
+    private var mediaItemsQueue:MutableList<MediaItem> = arrayListOf()
     private var playingQueueList:Boolean = false
-    private var finalizedPopulatePlaylist=false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -472,10 +471,10 @@ class MusicPlayerService : Service(){
             withContext(Dispatchers.IO) {
                 songs.forEach { s ->
                     songsList.add(s)
-                    mediaItemList.add(convertToMediaItem(s))
+                    mainMediaItemList.add(convertToMediaItem(s))
                 }
                 withContext(Main) {
-                    exoPlayer.addMediaItems(mediaItemList)
+                    exoPlayer.addMediaItems(mainMediaItemList)
                 }
 
             }
@@ -710,7 +709,7 @@ class MusicPlayerService : Service(){
 
     private fun initExoPlayer(song:SongEntity){
         songEntity=song
-        exoPlayer.seekTo(findMediaItemIndexById(mediaItemList,song.id.toString()),0)
+        exoPlayer.seekTo(findMediaItemIndexById(mainMediaItemList,song.id.toString()),0)
         exoPlayer.prepare()
         exoPlayer.play()
         setPlayingState(true)
@@ -784,11 +783,11 @@ class MusicPlayerService : Service(){
                  // es porque volveremos a la lista principal y habremos limpiado playingQueue
                  // entonces que volveremos a reproducir la pista que estábamos reproduciendo en playingQueue
                  if(playingQueueList) {
-                     if (exoPlayer.mediaItemCount == mediaItemList.size) {
+                     if (exoPlayer.mediaItemCount == mainMediaItemList.size) {
                          //TODO reproducir la misma canción en la lista principal que se estaba reproduciendo en la lista de playingQueue
                          exoPlayer.seekTo(
                              findMediaItemIndexById(
-                                 mediaItemList,
+                                 mainMediaItemList,
                                  mPrefs.idSong.toString()
                              ), currentMusicState.currentPosition
                          )
@@ -816,13 +815,13 @@ class MusicPlayerService : Service(){
                 .setMediaId(song.id.toString())
                 .setUri(song.pathLocation.toString())
                 .build()
-            mediaItemList.add(newMediaItem)
+            mainMediaItemList.add(newMediaItem)
             exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation.toString()))
         }
     }
     fun removeMediaItem(song: SongEntity){
-        val mediaItemIndex = findMediaItemIndexById(mediaItemList,song.id.toString())
-        mediaItemList.removeAt(mediaItemIndex)
+        val mediaItemIndex = findMediaItemIndexById(mainMediaItemList,song.id.toString())
+        mainMediaItemList.removeAt(mediaItemIndex)
         if(songsList.contains(song)) {
             val index = songsList.indexOf(song)
             exoPlayer.removeMediaItem(index)
@@ -836,17 +835,17 @@ class MusicPlayerService : Service(){
     }
     fun populatePlayList(songs:List<SongEntity>){
         serviceScope.launch(Dispatchers.IO) {
-           if (songs.size != mediaItemList.count()) {
+           if (songs.size != mainMediaItemList.count()) {
                 songs.forEach { s ->
                     songsList.add(s)
                     val mediaItem = MediaItem.Builder()
                         .setMediaId(s.id.toString())
                         .setUri(s.pathLocation.toString())
                         .build()
-                    mediaItemList.add(mediaItem)
+                    mainMediaItemList.add(mediaItem)
                 }
                 withContext(Main) {
-                    exoPlayer.setMediaItems(mediaItemList)
+                    exoPlayer.setMediaItems(mainMediaItemList)
                    findSongInSongList(songsList,mPrefs.idSong).let {index->
                        val song=songsList[index]
                        mPrefs.idSong = song.id
@@ -866,7 +865,7 @@ class MusicPlayerService : Service(){
     // con el parámetro (isSort), pero en exoplayer flavor no, aún así debemos ponerlo porque el fragmento de lista
     // lo usa así tanto para bass como exoplayer.
     fun clearPlayList(isSort:Boolean=false){
-        mediaItemList.clear()
+        mainMediaItemList.clear()
         songsList.clear()
         exoPlayer.clearMediaItems()
         //exoPlayer.release()
@@ -907,9 +906,9 @@ class MusicPlayerService : Service(){
     fun openQueue(songs:List<SongEntity>, startPosition:Int){
         mPrefs.currentIndexSong = startPosition.toLong()
         playingQueue = songs.toMutableList()
-        songs.forEach { s->mediaItemQueue.add(convertToMediaItem(s)) }
+        songs.forEach { s->mediaItemsQueue.add(convertToMediaItem(s)) }
         exoPlayer.clearMediaItems()
-        exoPlayer.addMediaItems(mediaItemQueue)
+        exoPlayer.addMediaItems(mediaItemsQueue)
         startPlayer(songs[startPosition])
         playingQueueList = true
     }
@@ -940,7 +939,7 @@ class MusicPlayerService : Service(){
         return Pair(0,0)
     }
     fun resumePlayer(){
-        if(exoPlayer.mediaItemCount == mediaItemList.size) {
+        if(exoPlayer.mediaItemCount == mainMediaItemList.size) {
             if (!exoPlayer.isPlaying) {
                 exoPlayer.prepare()
                 exoPlayer.play()
@@ -970,8 +969,8 @@ class MusicPlayerService : Service(){
         // Obtenemos la posición en la lista principal de la pista que hayamos reproducido
         // de cualquier otra lista como AlbumDetail
         exoPlayer.clearMediaItems()
-        mediaItemQueue.clear()
-        exoPlayer.addMediaItems(mediaItemList)
+        mediaItemsQueue.clear()
+        exoPlayer.addMediaItems(mainMediaItemList)
     }
     fun fastForward(){
         val currentPosition = exoPlayer.currentPosition
