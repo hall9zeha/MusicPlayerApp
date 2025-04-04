@@ -4,7 +4,13 @@
     android:height="180.58dp"
     android:viewportWidth="240.58"
     android:viewportHeight="240.58">
-  <group android:pivotX="90" android:pivotY="90" android:scaleX="0.35" android:scaleY="0.35">
+  <group
+      android:name="splashIcon"
+      android:pivotX="90"
+      android:pivotY="90"
+      android:scaleX="0.35"
+      android:scaleY="0.35"
+      >
   <path
       android:strokeWidth="8"
       android:pathData="M177.29,177.29m-176.79,0a176.79,176.79 0,1 1,353.58 0a176.79,176.79 0,1 1,-353.58 0"
