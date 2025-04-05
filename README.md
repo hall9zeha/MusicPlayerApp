@@ -1,4 +1,4 @@
-# MusicPlayerApp
+# KMusic - Music player app
 
 Una aplicación sencilla para reproducción de música offline escrita en Kotlin para Android. La aplicación tien dos versiones: KMusic Bass que usa librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) y KMusic Exo que usa La API [MediaPlayer](https://developer.android.com/media/media3/exoplayer) de Android.
 
@@ -61,4 +61,9 @@ Quería una aplicación de música con la cual reproducir en bucle solo una part
 - [Fast scroll](https://github.com/L4Digital/FastScroll/tree/main)
 
 ## Capturas
+
+## Licencia y uso de la librería Bass
+KMusic es de uso gratuito. En su variante KMusic Bass, utiliza la librería Bass de [un4seen](https://www.un4seen.com/), la cual está disponible de forma gratuita para aplicaciones de uso libre. Si tu aplicación también es gratuita, puedes usarla sin ningún costo. Sin embargo, Bass ofrece también varios niveles de licencias de pago para aplicaciones comerciales.
+
+Para más detalles sobre la licencia de la librería Bass, puedes consultar el sitio oficial de [un4seen](https://www.un4seen.com/).
 
