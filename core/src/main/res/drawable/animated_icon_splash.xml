@@ -10,8 +10,8 @@
             android:viewportHeight="360">
             <group
                 android:name="splashIcon"
-                android:pivotX="177.2"
-                android:pivotY="177.6"
+                android:pivotX="179.2"
+                android:pivotY="177.2"
                 android:scaleX="0.50"
                 android:scaleY="0.50"
                 >
@@ -1876,7 +1876,7 @@
                 android:duration="1500"
                 android:propertyName="rotation"
                 android:valueFrom="0"
-                android:valueTo="360" />
+                android:valueTo="180" />
         </aapt:attr>
     </target>
 
