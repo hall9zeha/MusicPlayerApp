@@ -62,6 +62,11 @@ Quería una aplicación de música con la cual reproducir en bucle solo una part
 
 ## Capturas
 
+## Agradecimientos
+Un agradecimiento especial a [MarthaB94](https://github.com/MarthaB94) por diseñar el ícono y el texto de marca para el splash screen. Su contribución ha sido invaluable para darle vida a la identidad visual de la aplicación.
+|||
+|--|--|
+|[MarthaB94](https://github.com/MarthaB94)| ![](https://avatars.githubusercontent.com/u/128934015?s=48)|
 ## Licencia y uso de la librería Bass
 KMusic es de uso gratuito. En su variante KMusic Bass, utiliza la librería Bass de [un4seen](https://www.un4seen.com/), la cual está disponible de forma gratuita para aplicaciones de uso libre. Si tu aplicación también es gratuita, puedes usarla sin ningún costo. Sin embargo, Bass ofrece también varios niveles de licencias de pago para aplicaciones comerciales.
 
