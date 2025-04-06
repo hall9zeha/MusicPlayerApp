@@ -4,12 +4,12 @@
 </div>
 A simple offline music player app written in Kotlin for Android. The app has two versions: KTMusic Bass, which uses the [BASS](https://www.un4seen.com/) library from [un4seen](https://www.un4seen.com/), and KTMusic Exo, which uses the Android [MediaPlayer](https://developer.android.com/media/media3/exoplayer) API.
 
-## Motivation
+## 🚀 Motivation
 I wanted a music app that would allow me to loop only a part of the songs I like (A-B loop), and at the same time, use the [BASS](https://www.un4seen.com/) library from [un4seen](https://www.un4seen.com/) because it plays tracks with great quality, and I like all the equalizer effects that can be implemented. But none of the apps I liked had the A-B loop repeat function, so I ended up doing more than I needed since I'm not a purist when it comes to audio player features. Still, I'm happy with what I’ve achieved and what I’ve learned, although it’s not perfect, I’ll keep improving it over time, and I hope it can be helpful to anyone who needs an example of an audio player for Android. Feel free to use the code published here as you see fit.
 
 ## Demo
 
-## Features
+## :memo: Features
 
 - File selector
 - 10-band equalizer and volume control (in the BASS version)
@@ -29,10 +29,10 @@ I wanted a music app that would allow me to loop only a part of the songs I like
 - Support for Bluetooth devices
 - Change album cover style to show in card or CD format.
   
-## Features that could be added
+## ✨ Features that could be added
 I think there are many, xD. One of the most interesting ones is using MediaStore to scan and list the music files. When I discovered I could use it, the project was already quite advanced, and I was a bit lazy to implement it at that point, xD. Also, I like being able to add and remove files however I want, in whatever order I choose. For now, the files or directories where the tracks are located are added manually in a very simple way, so it shouldn't be a challenge. That said, I'm considering adding a version that uses MediaStore.
 
-## Modules
+## :card_file_box: Modules
 - App
 - bass (contains BASS library files)
 - core
@@ -42,7 +42,7 @@ I think there are many, xD. One of the most interesting ones is using MediaStore
   - audioeffects (equalizers for bass and exoplayer)
   - mfilepicker (file selector)
     
-## Versions (Flavors)
+## 📦 Versions (Flavors)
 - KTMusic Bass, for the following files and modules:
   - MusicPlayerService class
   - audioeffects module
@@ -50,7 +50,7 @@ I think there are many, xD. One of the most interesting ones is using MediaStore
   - MusicPlayerService class
   - audioeffects module
     
-## Used in the project
+## :wrench: Used in the project
 - [MVVM Architecture](https://developer.android.com/jetpack/guide)
 - [ViewModel](https://developer.android.com/jetpack/androidx/releases/lifecycle)
 - [LiveData](https://developer.android.com/topic/libraries/architecture/livedata)
@@ -65,7 +65,7 @@ I think there are many, xD. One of the most interesting ones is using MediaStore
 - [Jaudiotagger](https://www.jthink.net/jaudiotagger/)
 - [Fast scroll](https://github.com/L4Digital/FastScroll/tree/main)
 
-## Screenshots
+## :framed_picture: Screenshots
 ||||
 |--|--|--|
 |<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen1.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen2.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4.jpg"  alt="drawing" width="70%" height="70%"/></p>
@@ -77,13 +77,13 @@ I think there are many, xD. One of the most interesting ones is using MediaStore
 |--|--|
 |Landscape|||
 |<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen8.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen9.jpg" alt="drawing" width="70%" height="70%"/></p>|
-## Acknowledgments
+## 🙏 Acknowledgments
 Special thanks to [MarthaB94](https://github.com/MarthaB94) for designing the icon and the brand text for the splash screen. Her contributions have been invaluable in bringing the visual identity of the application to life.
 |||
 |--|--|
 |[MarthaB94](https://github.com/MarthaB94)| ![](https://avatars.githubusercontent.com/u/128934015?s=48)|
 
-## Bass Library License and Use
+## 📜 Bass Library License and Use
 KMusic is free to use. In its KMusic Bass variant, it uses the Bass library from Un4seen, which is available for free for non-commercial applications. If your application is also free, you can use it at no cost. However, Bass also offers several paid license tiers for commercial applications.
 
 For more details on the Bass library's licensing, you can check the official site of Un4seen.
