@@ -4,12 +4,12 @@
 </div>
 Una aplicación sencilla para reproducción de música offline escrita en Kotlin para Android. La aplicación tiene dos versiones: KMusic Bass que usa la librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) y KMusic Exo que usa La API [MediaPlayer](https://developer.android.com/media/media3/exoplayer) de Android.
 
-## Motivación
+## 🚀 Motivación
 Quería una aplicación de música con la cual reproducir en bucle solo una parte de las canciones que me gustan con (A-B loop) y de paso usar la librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) porque reproduce las pistas con muy buena calidad y me gustan todos los efectos de ecualizador que se pueden implementar. Pero ninguna de las apps que me gustaban tenían la función de repetición en bucle A-B, así que terminé haciendo más de lo que necesitaba ya que no soy un sibarita de las funciones en un reproductor de audio. Aún así estoy contento con lo que ha resultado y lo que he aprendido, aunque no es perfecta, la iré mejorando con el tiempo y  espero que le pueda servir a cualquiera que necesite un ejemplo de reproductor de audio en Android. Siéntase libre de usar el código aquí publicado como más le convenga. 
 
 ## Demo
 
-## Características
+## :memo: Características
 
 - Selector de archivos
 - Ecualizador de 10 bandas y control de volúmen (en la versión con BASS)
@@ -29,10 +29,10 @@ Quería una aplicación de música con la cual reproducir en bucle solo una part
 - Soporte para dispoditivos bluetooth
 - Cambiar estilo de la cubierta del album mostrada en modo tarjeta o disco compacto.
 
-# Características que podrían ser agregadas
+## ✨ Características que podrían ser agregadas
 Creo que hay muchas xD. Una de las más interesantes es el uso de MediaStore para escanear y listar los archivos de música. Cuando descubrí que podía usarla, ya tenía el proyecto bastante avanzado y me dio un poco de pereza implementarlo en ese momento xD. Además, me gusta poder agregar y quitar archivos como quiera, en el orden que desee. Por ahora, los archivos o directorios donde están las pistas se agregan manualmente de manera muy sencilla, por lo que no debería ser un desafío. De todas formas, tengo en cuenta la posibilidad de agregar una versión que use MediaStore.
 
-## Módulos
+## :card_file_box: Módulos
 - App
 - bass (contiene los archivos de la librería BASS)
 - core
@@ -42,7 +42,7 @@ Creo que hay muchas xD. Una de las más interesantes es el uso de MediaStore par
   - audioeffects (ecualizadores para bass y exoplayer)
   - mfilepicker (selector de archivos)
     
-## Versiones (Sabores)
+## 📦 Versiones (Sabores)
 - KTMusic Bass, para los siguientes archivos y módulos:
   - Clase MusicPlayerService
   - Módulo audioeffects
@@ -50,7 +50,7 @@ Creo que hay muchas xD. Una de las más interesantes es el uso de MediaStore par
   - Clase MusicPlayerService
   - Módulo audioeffects
     
-## Se utilizó en el proyecto
+## :wrench: Se utilizó en el proyecto
 - [Arquitectura MVVM](https://developer.android.com/jetpack/guide)
 - [ViewModel](https://developer.android.com/jetpack/androidx/releases/lifecycle)
 - [LiveData](https://developer.android.com/topic/libraries/architecture/livedata)
@@ -65,7 +65,7 @@ Creo que hay muchas xD. Una de las más interesantes es el uso de MediaStore par
 - [Jaudiotagger](https://www.jthink.net/jaudiotagger/)
 - [Fast scroll](https://github.com/L4Digital/FastScroll/tree/main)
 
-## Capturas
+## :framed_picture: Capturas
 ||||
 |--|--|--|
 |<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen1.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen2.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4.jpg"  alt="drawing" width="70%" height="70%"/></p>
@@ -78,12 +78,12 @@ Creo que hay muchas xD. Una de las más interesantes es el uso de MediaStore par
 |Landscape|||
 |<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen8.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen9.jpg" alt="drawing" width="70%" height="70%"/></p>|
 
-## Agradecimientos
+## 🙏 Agradecimientos
 Un agradecimiento especial a [MarthaB94](https://github.com/MarthaB94) por diseñar el ícono y el texto de marca para el splash screen. Su contribución ha sido invaluable para darle vida a la identidad visual de la aplicación.
 |||
 |--|--|
 |[MarthaB94](https://github.com/MarthaB94)| ![](https://avatars.githubusercontent.com/u/128934015?s=48)|
-## Licencia y uso de la librería Bass
+## 📜 Licencia y uso de la librería Bass
 KMusic es de uso gratuito. En su variante KMusic Bass, utiliza la librería Bass de [un4seen](https://www.un4seen.com/), la cual está disponible de forma gratuita para aplicaciones de uso libre. Si tu aplicación también es gratuita, puedes usarla sin ningún costo. Sin embargo, Bass ofrece también varios niveles de licencias de pago para aplicaciones comerciales.
 
 Para más detalles sobre la licencia de la librería Bass, puedes consultar el sitio oficial de [un4seen](https://www.un4seen.com/).
