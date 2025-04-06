@@ -26,6 +26,9 @@ I wanted a music app that would allow me to loop only a part of the songs I like
 - Media controls in lock screen mode.
 - Support for Bluetooth devices
 - Change album cover style to show in card or CD format.
+  
+## Features that could be added
+I think there are many, xD. One of the most interesting ones is using MediaStore to scan and list the music files. When I discovered I could use it, the project was already quite advanced, and I was a bit lazy to implement it at that point, xD. Also, I like being able to add and remove files however I want, in whatever order I choose. For now, the files or directories where the tracks are located are added manually in a very simple way, so it shouldn't be a challenge. That said, I'm considering adding a version that uses MediaStore.
 
 ## Modules
 - App
