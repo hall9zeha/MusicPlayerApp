@@ -64,7 +64,17 @@ I think there are many, xD. One of the most interesting ones is using MediaStore
 - [Fast scroll](https://github.com/L4Digital/FastScroll/tree/main)
 
 ## Screenshots
+||||
+|--|--|--|
+|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen1.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen2.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4.jpg"  alt="drawing" width="70%" height="70%"/></p>
+|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4_1.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen6.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen7.jpg"  alt="drawing" width="70%" height="70%"/></p>
+|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen11.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen11_1.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen13.jpg"  alt="drawing" width="70%" height="70%"/></p>
+|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen14.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen15.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen17.jpg"  alt="drawing" width="70%" height="70%"/></p>
 
+|||
+|--|--|
+|Landscape|||
+|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen8.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen9.jpg" alt="drawing" width="70%" height="70%"/></p>|
 ## Acknowledgments
 Special thanks to [MarthaB94](https://github.com/MarthaB94) for designing the icon and the brand text for the splash screen. Her contributions have been invaluable in bringing the visual identity of the application to life.
 |||
