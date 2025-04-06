@@ -70,6 +70,7 @@ class FilePickerAdapter(private val onItemClick:(position:Int,item:FileItem)->Un
         }
         holder.bind.chkSelected.setOnClickListener{view->
            onCheckboxClick(position,item.copy(isChecked = (view as CheckBox).isChecked))
+            listItems[position] = item.copy(isChecked = (view as CheckBox).isChecked)
         }
 
     }
