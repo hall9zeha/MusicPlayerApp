@@ -17,6 +17,7 @@
     <string name="cantPlayMsg">Can\'t player this file, will be deleted or error format </string>
     <string name="callStatePhonePermissionMsg">This permission needs to be enabled to pause or resume the player during a call</string>
     <string name="classical">Classical</string>
+    <string name="cover_view_style">Album cover art style</string>
     <string name="custom">Custom</string>
     <string name="default_title">Default</string>
     <string name="delete_all">Delete all tracks</string>
@@ -32,6 +33,7 @@
     <string name="editFileSuccess">Edited successful</string>
     <string name="electronic">Electronic</string>
     <string name="empty">No lyric</string>
+    <string name="enable_disc_style">Enable disc style</string>
     <string name="enableEffects">Enable effects</string>
     <string name="favorite">Favorite</string>
     <string name="file_meta_info">%s Kbps</string>

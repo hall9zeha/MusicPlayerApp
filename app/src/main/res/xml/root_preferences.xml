@@ -15,13 +15,13 @@
              app:title="@string/dynamicTheme" />
 
     </PreferenceCategory>
-    <PreferenceCategory app:title="Cover view style">
+    <PreferenceCategory app:title="@string/cover_view_style">
         <SwitchPreferenceCompat
             app:key="coverStyle"
             app:defaultValue="false"
             app:widgetLayout="@layout/material_switch_layout"
             app:singleLineTitle="false"
-            app:title="Enable album cover disc style"
+            app:title="@string/enable_disc_style"
             />
     </PreferenceCategory>
 </PreferenceScreen>

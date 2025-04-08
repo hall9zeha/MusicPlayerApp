@@ -102,7 +102,7 @@ class SongInfoDialogFragment : DialogFragment() {
                     requireContext().contentResolver.takePersistableUriPermission(Uri.parse(safUri), Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 b.toolbarInfo.setNavigationIcon(coreRes.drawable.ic_arrow_back)
-                b.toolbarInfo.title = "Song info"
+                b.toolbarInfo.title = getString(coreRes.string.songInfo)
                 b.toolbarInfo.subtitle = "Song name"
                 b.toolbarInfo.setNavigationOnClickListener {
                     dismiss()

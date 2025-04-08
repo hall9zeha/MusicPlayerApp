@@ -18,6 +18,7 @@
     <string name="cancel">Cancelar</string>
     <string name="callStatePhonePermissionMsg">Se necesita habilitar este permiso para pausar o reanudar el reproductor durante una llamada</string>
     <string name="classical">Clásica</string>
+    <string name="cover_view_style">Carátula de álbum</string>
     <string name="custom">Personalizado</string>
     <string name="delete_title">Eliminar</string>
     <string name="delete_track">Eliminar pista</string>
@@ -33,6 +34,7 @@
     <string name="editFileSuccess">Editado correctamente</string>
     <string name="electronic">Electrónica</string>
     <string name="empty">Sin letra</string>
+    <string name="enable_disc_style">Cambiar a estilo Cd</string>
     <string name="enableEffects">Activar efectos</string>
     <string name="favorite">Fovoritos</string>
     <string name="file_meta_info">%s Kbps</string>
