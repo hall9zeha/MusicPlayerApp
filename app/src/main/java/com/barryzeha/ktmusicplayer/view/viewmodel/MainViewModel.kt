@@ -71,8 +71,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
 
     private var _deleteAllRows:SingleMutableLiveData<Int> = SingleMutableLiveData()
     val deleteAllRows:LiveData<Int> = _deleteAllRows
-    private var _deletePlayList:SingleMutableLiveData<Int> = SingleMutableLiveData()
-    val deletePlayList:LiveData<Int> = _deletePlayList
+    private var _deletePlayList:SingleMutableLiveData<Int?> = SingleMutableLiveData()
+    val deletePlayList:LiveData<Int?> = _deletePlayList
     private var _songById:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val songById:LiveData<SongEntity> = _songById
 

@@ -121,9 +121,13 @@ class PlaylistDialogFragment : DialogFragment() {
             }
         }
         mainViewModel.deletePlayList.observe(viewLifecycleOwner){deleteRow->
-            if(deleteRow>0)mainViewModel.fetchPlaylists()
+            deleteRow?.let {
+                if (deleteRow > 0){
+                    playListAdapter?.remove(deleteRow)
+                    mainViewModel.fetchPlaylists()
+                }
+            }
         }
-
     }
 
     private fun setupAdapter() {

@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.ui.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -68,6 +69,16 @@ class PlayListsAdapter(private val onItemClick:(PlaylistEntity)->Unit,
             notifyItemRemoved(index)
         }
     }
+    fun remove(idPlaylist:Int){
+        try{
+        val playlistIndex = playLists.indexOfFirst { it.idPlaylist == idPlaylist.toLong() }
+        playLists.removeAt(playlistIndex)
+        notifyItemRemoved(playlistIndex)
+        }catch(e:Exception){
+            Log.e("REMOVE_PLAYLIST_BY_INDEX_ERR", e.message.toString())
+        }
+    }
+
     private fun updateNameOfPlaylist(oldEntity: PlaylistEntity, newEntity:PlaylistEntity){
         if(playLists.contains(oldEntity)){
             val index = playLists.indexOf(oldEntity)

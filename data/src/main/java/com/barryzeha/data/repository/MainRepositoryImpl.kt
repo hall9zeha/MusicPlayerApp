@@ -117,7 +117,8 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
     }
 
     override suspend fun deletePlaylist(id: Long): Int = withContext(Dispatchers.IO) {
-        playlistDao.deletePlaylist(id)
+        val affectedRow=playlistDao.deletePlaylist(id)
+        if(affectedRow>0) id.toInt() else 0
     }
 
     override suspend fun deleteAllPlaylist(playlistEntities: List<PlaylistEntity>) = withContext(Dispatchers.IO) {
