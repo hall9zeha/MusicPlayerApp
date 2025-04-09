@@ -45,16 +45,16 @@ open class BassManager {
             instance=BassManager()
             this.playbackManager = playbackManager
             if (!BASS.BASS_Init(-1, SAMPLE192, BASS.BASS_DEVICE_FREQ)) {
-                Log.i(TAG, "Can't initialize device");
-                Log.i(TAG, "init with sample " + SAMPLE96 + "Hz");
+                Log.i(TAG, "Can't initialize device")
+                Log.i(TAG, "init with sample " + SAMPLE96 + "Hz")
                 if (!BASS.BASS_Init(-1, SAMPLE96, BASS.BASS_DEVICE_FREQ)) {
-                    Log.i(TAG, "Can't initialize device");
-                    Log.i(TAG, "init with sample " + SAMPLE48 + "Hz");
+                    Log.i(TAG, "Can't initialize device")
+                    Log.i(TAG, "init with sample " + SAMPLE48 + "Hz")
                     if (!BASS.BASS_Init(-1, SAMPLE48, BASS.BASS_DEVICE_FREQ)) {
-                        Log.i(TAG, "Can't initialize device");
-                        Log.i(TAG, "init with sample " + SAMPLE44 + "Hz");
+                        Log.i(TAG, "Can't initialize device")
+                        Log.i(TAG, "init with sample " + SAMPLE44 + "Hz")
                         if (!BASS.BASS_Init(-1, SAMPLE44, BASS.BASS_DEVICE_FREQ)) {
-                            Log.i(TAG, "Can't initialize device");
+                            Log.i(TAG, "Can't initialize device")
                         }
                     }
                 }
@@ -77,10 +77,10 @@ open class BassManager {
         return instance
     }
     private fun configure(){
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_FLOATDSP, 1);
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10);
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC, 3);
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC_SAMPLE, 3);
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_FLOATDSP, 1)
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10)
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC, 3)
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC_SAMPLE, 3)
     }
     fun startCheckingPlayback(){
         stopRunnable()
@@ -106,7 +106,7 @@ open class BassManager {
     fun setSongStateSaved(channel:Int, position:Long){
         mainChannel = channel
         val positionBytes = getCurrentPositionToBytes(position)
-        BASS.BASS_ChannelSetPosition(channel, positionBytes, BASS.BASS_POS_BYTE);
+        BASS.BASS_ChannelSetPosition(channel, positionBytes, BASS.BASS_POS_BYTE)
     }
     fun streamCreateFile(song:SongEntity){
         // Cleaning a previous track if have anyone
@@ -114,20 +114,6 @@ open class BassManager {
         // Creating the new channel for playing
         mainChannel = BASS.BASS_StreamCreateFile(song.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
     }
-    fun repeatSong(){
-        BASS.BASS_ChannelPlay(getActiveChannel(), true);
-    }
-    private fun startAbLoop(){
-        val currentPosition = getCurrentPositionInSeconds(getActiveChannel())
-        if(currentPosition >= endAbLopPosition){
-            BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
-        }
-        aBLoopHandler.postDelayed({
-            startAbLoop()
-        },500)
-
-    }
-    fun stopAbLoop() = aBLoopHandler.removeCallbacksAndMessages(null)
 
     fun channelPlay(currentSongProgress:Long){
         BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)
@@ -159,6 +145,9 @@ open class BassManager {
         }, 100) */// Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
 
     }
+    fun repeatSong(){
+        BASS.BASS_ChannelPlay(getActiveChannel(), true)
+    }
     private fun getCurrentPositionToBytes(position: Long):Long{
         return if(mainChannel!=null)BASS.BASS_ChannelSeconds2Bytes(mainChannel!!, position / 1000.0)else 0L
     }
@@ -172,6 +161,18 @@ open class BassManager {
         endAbLopPosition = getCurrentPositionInSeconds(getActiveChannel())
         startAbLoop()
     }
+    private fun startAbLoop(){
+        val currentPosition = getCurrentPositionInSeconds(getActiveChannel())
+        if(currentPosition >= endAbLopPosition){
+            BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
+        }
+        aBLoopHandler.postDelayed({
+            startAbLoop()
+        },500)
+
+    }
+    fun stopAbLoop() = aBLoopHandler.removeCallbacksAndMessages(null)
+
     fun getActiveChannel():Int{
         return mainChannel?:0
     }

@@ -265,7 +265,6 @@ class SongInfoDialogFragment : DialogFragment() {
                     // If the file has no metadata tags, we create them empty.
                     tag = ID3v24Tag()
                 }
-
                 val title = bind.edtTitle.text.toString()
                 val artist =bind.edtArtist.text.toString()
                 val album = bind.edtAlbum.text.toString()
