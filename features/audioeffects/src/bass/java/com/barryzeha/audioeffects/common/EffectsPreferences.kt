@@ -21,11 +21,11 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
     fun clearPreference(){
         mPreferences.edit().clear().apply()
     }
-    fun setSeekBandValue(effectType:Int,seekId:Int,seekValue:Int){
-        mPreferences.edit().putInt("$effectType$SEEK_BAND$seekId",seekValue).apply()
+    fun setSeekBandValue(effectType:Int,seekId:Int,seekValue:Float){
+        mPreferences.edit().putFloat("$effectType$SEEK_BAND$seekId",seekValue).apply()
     }
-    fun getSeekBandValue(effectType: Int,seekId: Int):Int{
-        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",30)
+    fun getSeekBandValue(effectType: Int,seekId: Int):Float{
+        return mPreferences.getFloat("$effectType$SEEK_BAND$seekId",30f)
     }
     var effectsIsEnabled:Boolean
         get()=mPreferences.getBoolean(ENABLE_EFFECTS,false)
@@ -35,10 +35,10 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
         get() = mPreferences.getInt(EFFECT_TYPE,0)
         set(value)=mPreferences.edit().putInt(EFFECT_TYPE,value).apply()
 
-    fun getReverbSeekBandValue(effectType: Int,seekId: Int):Int{
-        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",0)
+    fun getReverbSeekBandValue(effectType: Int,seekId: Int):Float{
+        return mPreferences.getFloat("$effectType$SEEK_BAND$seekId",0f)
     }
-    fun getVolumeSeekBandValue(effectType: Int,seekId: Int):Int{
-        return mPreferences.getInt("$effectType$SEEK_BAND$seekId",15)
+    fun getVolumeSeekBandValue(effectType: Int,seekId: Int):Float{
+        return mPreferences.getFloat("$effectType$SEEK_BAND$seekId",30f)
     }
 }
