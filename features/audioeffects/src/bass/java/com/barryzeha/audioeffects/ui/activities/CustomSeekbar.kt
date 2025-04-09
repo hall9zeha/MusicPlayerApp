@@ -19,39 +19,42 @@ import com.barryzeha.core.R as coreRes
  * Copyright (c)  All rights reserved.
  **/
 
-class  CustomSeekBar @JvmOverloads constructor(
- context: Context,
- attrs: AttributeSet?=null
-) : AppCompatSeekBar(context, attrs) {
+ class  CustomSeekBar @JvmOverloads constructor(
+  context: Context,
+  attrs: AttributeSet?=null,
+  private val progressRange:Int = 30
+ ) : AppCompatSeekBar(context, attrs) {
 
- private var rect: Rect = Rect()
- private var paint: Paint = Paint()
- private var seekbarHeight: Int = 8
+  private var rect: Rect = Rect()
+  private var paint: Paint = Paint()
+  private var seekbarHeight: Int = 8
+  init{
 
- @Synchronized
- override fun onDraw(canvas: Canvas) {
-  // for seek bar line
-  rect[0 + 30, height / 2 - seekbarHeight / 2, width - 30] = height / 2 + seekbarHeight / 2
-  paint.color = Color.DKGRAY
-  canvas.drawRect(rect, paint)
-
-  //for right side
-  if (this.progress > 15) {
-   rect[(width / 2), height / 2 - seekbarHeight / 2, (width / 2 + width / 30 * (progress - 15))-30] =
-    height / 2 + seekbarHeight / 2
-
-   paint.color = Color.GREEN
-   canvas.drawRect(rect, paint)
   }
-
-  //for left side
-  if (this.progress < 15) {
-   rect[(width / 2)- ((width / 30 )* (15-progress)-40), height / 2 - seekbarHeight / 2, (width / 2)] =
-    height / 2 + seekbarHeight / 2
-
-   paint.color = Color.RED
+  @Synchronized
+  override fun onDraw(canvas: Canvas) {
+   // for seek bar line
+   rect[0 + progressRange, height / 2 - seekbarHeight / 2, width - progressRange] = height / 2 + seekbarHeight / 2
+   paint.color = Color.DKGRAY
    canvas.drawRect(rect, paint)
+
+   // for right side
+   if (this.progress > 15) {
+    rect[(width / 2), height / 2 - seekbarHeight / 2, (width / 2 + width / progressRange * (progress - (progressRange/2)))-progressRange] =
+     height / 2 + seekbarHeight / 2
+
+    paint.color = Color.GREEN
+    canvas.drawRect(rect, paint)
+   }
+
+   // for left side
+   if (this.progress < (progressRange/2)) {
+    rect[(width / 2)- ((width / progressRange )* ((progressRange/2)-progress)-40), height / 2 - seekbarHeight / 2, (width / 2)] =
+     height / 2 + seekbarHeight / 2
+
+    paint.color = Color.RED
+    canvas.drawRect(rect, paint)
+   }
+   super.onDraw(canvas)
   }
-  super.onDraw(canvas)
  }
-}

@@ -42,6 +42,7 @@ import com.barryzeha.core.common.getThemeResValue
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import androidx.core.graphics.drawable.toDrawable
 
 
 @AndroidEntryPoint
@@ -254,7 +255,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                 max=30
                 progress= if(seekProgress != 30) seekProgress else getEqualizerBandPreConfig(effectType,seekId)
                 thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
-                progressDrawable=ColorDrawable(Color.TRANSPARENT)
+                progressDrawable= Color.TRANSPARENT.toDrawable()
                 setOnSeekBarChangeListener(osbcl)
             }
             val textView = TextView(this@MainEqualizerActivity)
