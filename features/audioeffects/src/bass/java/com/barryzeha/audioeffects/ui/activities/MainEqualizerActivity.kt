@@ -182,6 +182,7 @@ class MainEqualizerActivity : AppCompatActivity() {
     }
     private fun enableAndDisableViews(isEnable:Boolean){
         bind.btnResetEffects.isEnabled=isEnable
+        mPrefs.effectsIsEnabled=isEnable
         for (i in 0 until bind.chipGroupEffects.childCount) {
             val chip = bind.chipGroupEffects.getChildAt(i) as Chip
             chip.isEnabled = isEnable
