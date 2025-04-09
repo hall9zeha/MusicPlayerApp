@@ -170,12 +170,11 @@ class MainEqualizerActivity : AppCompatActivity() {
             val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
             if(childView is SeekBar) {
                 when (childView.id) {
-
                     coreRes.id.volume -> {
-                        EqualizerManager.updateFX(childView.tag.toString().toInt(), childView.progress.toFloat())
+                        EqualizerManager.updateFX(childView.tag.toString().toInt(), childView.progress.toInt())
                     }
                     else -> {
-                        EqualizerManager.updateFX(childView.tag.toString().toInt(), convertBandValueToPreferences(childView.progress))
+                        EqualizerManager.updateFX(childView.tag.toString().toInt(), convertBandValueToPreferences(childView.progress).toInt())
                     }
                 }
 
@@ -183,7 +182,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             }
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
-        EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress.toFloat())
+        EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
     }
     private fun setEffect(){
         EqualizerManager.setEffect(bind.output.isChecked)
@@ -191,21 +190,21 @@ class MainEqualizerActivity : AppCompatActivity() {
             val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
             if(childView is SeekBar)
                 when (childView.id) {
-
                     coreRes.id.volume -> {
-                        EqualizerManager.updateFX(childView.tag.toString().toInt(), childView.progress.toFloat())
+                        EqualizerManager.updateFX(childView.tag.toString().toInt(), childView.progress.toInt())
                     }
                     else -> {
-                        EqualizerManager.updateFX(childView.tag.toString().toInt(), convertBandValueToPreferences(childView.progress))
+                        EqualizerManager.updateFX(childView.tag.toString().toInt(), convertBandValueToPreferences(childView.progress).toInt())
                     }
                 }
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
-        EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress.toFloat())
+        EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress)
 
     }
     private fun enableAndDisableViews(isEnable:Boolean){
         bind.btnResetEffects.isEnabled=isEnable
+        mPrefs.effectsIsEnabled = isEnable
         for (i in 0 until bind.chipGroupEffects.childCount) {
             val chip = bind.chipGroupEffects.getChildAt(i) as Chip
             chip.isEnabled = isEnable
@@ -249,25 +248,26 @@ class MainEqualizerActivity : AppCompatActivity() {
                         mPrefs.setSeekBandValue(effectType,seekBar.id,convertBandValueToPreferences(seekBar.progress))
                     }
                 }
-
+                Log.e("SEEKBAR-STOP", convertBandValueToPreferences(seekBar.progress).toString())
             }
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 when (seekBar.id) {
                     coreRes.id.reverb -> {
-                        EqualizerManager.updateFX(seekBar.tag.toString().toInt(),progress.toFloat())
+                        EqualizerManager.updateFX(seekBar.tag.toString().toInt(),progress)
                     }
                     coreRes.id.volume -> {
-                        EqualizerManager.updateFX(seekBar.tag.toString().toInt(),progress.toFloat())
+                        EqualizerManager.updateFX(seekBar.tag.toString().toInt(),progress)
                     }
                     else -> {
-                        EqualizerManager.updateFX(seekBar.tag.toString().toInt(),convertBandValueToPreferences(progress))
+                        EqualizerManager.updateFX(seekBar.tag.toString().toInt(),convertBandValueToPreferences(progress).toInt())
                         Log.e("EQUALIZER->", convertBandValueToPreferences(progress).toString() )
                     }
                 }
 
                val textViewDb =  bind.lnContentBands.findViewWithTag<TextView>("Dbs${seekBar.tag}")
                textViewDb?.text = getBandValue(seekBar.progress)
+                Log.e("SEEKBAR-CHANG", convertBandValueToPreferences(seekBar.progress).toString())
             }
         }
 
@@ -301,11 +301,12 @@ class MainEqualizerActivity : AppCompatActivity() {
                 id=seekId
                 tag=seekId
                 max=maxProgressRange
-                progress= if(seekProgress!= 30) seekProgress else convertBandValueToSeekbar(getEqualizerBandPreConfig(effectType,seekId).toFloat())
+                progress= if(seekProgress!= 30) seekProgress else convertBandValueToSeekbar(getEqualizerBandPreConfig(mPrefs.effectType,seekId).toFloat())
                 thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
                 progressDrawable= Color.TRANSPARENT.toDrawable()
                 setOnSeekBarChangeListener(osbcl)
             }
+
             val textView = TextView(this@MainEqualizerActivity)
             textView.gravity = Gravity.CENTER // Centrar el texto
             textView.layoutParams=layoutParams0
@@ -315,17 +316,16 @@ class MainEqualizerActivity : AppCompatActivity() {
             val textViewDb = TextView(this@MainEqualizerActivity)
             textViewDb.gravity = Gravity.CENTER // Centrar el texto
             textViewDb.layoutParams=layoutParamsForTvDbs
-            textViewDb.text=getBandValue(if(seekProgress != 30) seekProgress else getEqualizerBandPreConfig(effectType,seekId))
+            textViewDb.text=getBandValue(if(seekProgress != 30) seekProgress else convertBandValueToSeekbar(getEqualizerBandPreConfig(mPrefs.effectType,seekId).toFloat()))
             textViewDb.tag="Dbs$seekId"
             textViewDb.textSize = 10f
             seekBar.layoutParams=layoutParamsForSeekbar
             linearLayoutSeekbar.addView(seekBar)
             linearLayoutSeekbar.addView(textViewDb)
-
             bind.lnContentBands.addView(linearLayoutSeekbar)
             bind.lnContentBands.addView(textView)
         }
-        val reverbProgress = mPrefs.getReverbSeekBandValue(effectType, coreRes.id.reverb)
+        val reverbProgress = mPrefs.getReverbSeekBandValue(mPrefs.effectType, coreRes.id.reverb)
         val reverbSeekBar = SeekBar(this@MainEqualizerActivity).apply {
             id = coreRes.id.reverb
             tag = fxArray.size-1
@@ -378,6 +378,7 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
         bind.lnContentBands.addView(volumeSeekBar)
         bind.lnContentBands.addView(volumeTextView)
+
     }
     private fun convertBandValueToSeekbar(value:Float):Int{
         // Convertir el valor flotante (-15 a 15) a un valor del SeekBar (0 a 300)
