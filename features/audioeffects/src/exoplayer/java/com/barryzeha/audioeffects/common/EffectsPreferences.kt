@@ -2,6 +2,7 @@ package com.barryzeha.audioeffects.common
 
 import android.content.Context
 import javax.inject.Inject
+import androidx.core.content.edit
 
 
 /**
@@ -33,4 +34,16 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
     var effectType:Int
         get() = mPreferences.getInt(EFFECT_TYPE,0)
         set(value)=mPreferences.edit().putInt(EFFECT_TYPE,value).apply()
+
+    fun clearSeekBandPreferences(){
+        val allPrefs = mPreferences.all
+        val editor = mPreferences.edit()
+
+        for((key,_) in allPrefs){
+            if(key.contains(SEEK_BAND)) editor.remove(key)
+        }
+        mPreferences.edit() { remove(EFFECT_TYPE) }
+        editor.apply()
+    }
+
 }
