@@ -128,7 +128,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         }
         btnResetEffects.setOnClickListener{
-            mPrefs.clearPreference()
+            mPrefs.clearSeekBandPreferences()
             lnContentBands.removeAllViews()
             createView(CUSTOM_PRESET)
             setEffect()
