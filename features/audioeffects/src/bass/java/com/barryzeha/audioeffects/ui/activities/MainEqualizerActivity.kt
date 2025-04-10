@@ -283,7 +283,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             val layoutParamsForSeekbar = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                0.09f
+                0.12f
             ).apply {
                 topMargin = 2
                 bottomMargin = 2
@@ -291,7 +291,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             val layoutParamsForTvDbs = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                0.91f
+                0.88f
             ).apply {
                 topMargin = 2
                 bottomMargin = 2

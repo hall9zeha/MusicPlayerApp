@@ -65,6 +65,7 @@ object EqualizerManager {
             BASS.BASS_FXSetParameters(fxArray[i], p)
             // Enviamos el índice donde lo necesitemos
             fxIndex(i)
+            Log.d("FX-Handle", "FX[$i] = ${fxArray[i]}")
         }
         fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_REVERB, 0)
         updateFX(fxArray.size - 1, 0f)
@@ -72,6 +73,7 @@ object EqualizerManager {
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 15f)
         }
+
     }
 
     fun updateFX(index: Int, value: Float) {
@@ -80,16 +82,21 @@ object EqualizerManager {
         if (n < fxArray.size - 1) { // EQ
             val p: BASS.BASS_DX8_PARAMEQ = BASS.BASS_DX8_PARAMEQ()
             BASS.BASS_FXGetParameters(fxArray[n], p)
-            p.fGain = (v - 15f).toFloat()
+            p.fGain = v.coerceIn(-15f, 15f).takeIf { it.isFinite() } ?: 0f
             BASS.BASS_FXSetParameters(fxArray[n], p)
+            val check = BASS.BASS_FXSetParameters(fxArray[n], p)
+            if (!check) {
+                Log.e("BASS_ERROR", "SetParameters failed on FX[$n]: ${BASS.BASS_ErrorGetCode()}")
+            }
         } else if (n == fxArray.size - 1) { // reverb
             val p: BASS.BASS_DX8_REVERB = BASS.BASS_DX8_REVERB()
             BASS.BASS_FXGetParameters(fxArray[n], p)
-            p.fReverbMix = (if (v.toInt() != 0) (Math.log(v / 30.0) * 30).toFloat() else (-96).toFloat())
+            p.fReverbMix = (if (v.toInt() != 0) (Math.log(v.toInt() / 30.0) * 30).toFloat() else (-96).toFloat())
             BASS.BASS_FXSetParameters(fxArray[n], p)
         } else // volume
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 15f)
         Log.e("UPDATE-FX->upd","$n -> $v")
+
     }
     fun setEffect(isEnable: Boolean){
         val ch = if (fxChan != 0) fxChan else chan
