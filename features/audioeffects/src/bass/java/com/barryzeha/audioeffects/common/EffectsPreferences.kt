@@ -2,6 +2,7 @@ package com.barryzeha.audioeffects.common
 
 import android.content.Context
 import javax.inject.Inject
+import androidx.core.content.edit
 
 
 /**
@@ -19,7 +20,7 @@ private const val REVERB="REVERB"
 class EffectsPreferences @Inject constructor(private val ctx: Context) {
     private var mPreferences = ctx.getSharedPreferences(EFFECTS_PREFERENCES_FILE,Context.MODE_PRIVATE)
     fun clearPreference(){
-        mPreferences.edit().clear().apply()
+        mPreferences.edit { clear() }
     }
     fun setSeekBandValue(effectType:Int,seekId:Int,seekValue:Float){
         mPreferences.edit().putFloat("$effectType$SEEK_BAND$seekId",seekValue).apply()
@@ -40,5 +41,16 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
     }
     fun getVolumeSeekBandValue(effectType: Int,seekId: Int):Float{
         return mPreferences.getFloat("$effectType$SEEK_BAND$seekId",30f)
+    }
+    fun clearSeekBandPreferences(){
+        val allPrefs = mPreferences.all
+        val editor = mPreferences.edit()
+        for((key,_) in allPrefs){
+            if(key.contains(SEEK_BAND)){
+                editor.remove(key)
+            }
+        }
+        mPreferences.edit().remove(EFFECT_TYPE).apply()
+        editor.apply()
     }
 }

@@ -136,7 +136,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
         }
         btnResetEffects.setOnClickListener{
-            mPrefs.clearPreference()
+            mPrefs.clearSeekBandPreferences()
             lnContentBands.removeAllViews()
             createView(CUSTOM_PRESET)
             setEffect()
@@ -204,7 +204,8 @@ class MainEqualizerActivity : AppCompatActivity() {
     }
     private fun enableAndDisableViews(isEnable:Boolean){
         bind.btnResetEffects.isEnabled=isEnable
-        mPrefs.effectsIsEnabled = isEnable
+        mPrefs.effectsIsEnabled=isEnable
+
         for (i in 0 until bind.chipGroupEffects.childCount) {
             val chip = bind.chipGroupEffects.getChildAt(i) as Chip
             chip.isEnabled = isEnable
