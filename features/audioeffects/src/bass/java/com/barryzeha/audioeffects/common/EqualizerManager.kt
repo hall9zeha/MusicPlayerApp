@@ -67,7 +67,7 @@ object EqualizerManager {
             fxIndex(i)
         }
         fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_REVERB, 0)
-        updateFX(fxArray.size - 1, fxArray[fxArray.size - 1].toFloat())
+        updateFX(fxArray.size - 1, 0f)
         mPrefs?.let {prefs->
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 15f)
