@@ -27,11 +27,10 @@ import com.barryzeha.core.R as coreRes
 
   private var rect: Rect = Rect()
   private var paint: Paint = Paint()
-  private var seekbarHeight: Int = 8
- init {
-
-  this.max = progressRange
- }
+  private var seekbarHeight: Int = 4
+  init {
+   this.max = progressRange
+  }
   @Synchronized
   override fun onDraw(canvas: Canvas) {
 

@@ -42,7 +42,7 @@ object EqualizerManager {
             val bandValue = if (eqValue.toInt() != 30) eqValue else getEqualizerBandPreConfig(
                 prefs.effectType,
                 seekId
-            ).toFloat()
+            )
             updateFX(seekId, bandValue)
         }
         val reverbValue = prefs.getReverbSeekBandValue(prefs.effectType, coreRes.id.reverb)
@@ -59,13 +59,10 @@ object EqualizerManager {
             val p = BASS_DX8_PARAMEQ()
             p.fGain = 0f
             p.fBandwidth = 18f
-            p.fCenter =
-                (125f * Math.pow(2.0, (i - 1).toDouble())).toFloat() // Frecuencias centradas
-            Log.e("FX-CENTER", p.fCenter.toString() )
+            p.fCenter =(125f * Math.pow(2.0, (i - 1).toDouble())).toFloat() // Frecuencias centradas
             BASS.BASS_FXSetParameters(fxArray[i], p)
             // Enviamos el índice donde lo necesitemos
             fxIndex(i)
-            Log.d("FX-Handle", "FX[$i] = ${fxArray[i]}")
         }
         fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_REVERB, 0)
         updateFX(fxArray.size - 1, 0f)
@@ -82,7 +79,7 @@ object EqualizerManager {
         if (n < fxArray.size - 1) { // EQ
             val p: BASS.BASS_DX8_PARAMEQ = BASS.BASS_DX8_PARAMEQ()
             BASS.BASS_FXGetParameters(fxArray[n], p)
-            p.fGain = v.coerceIn(-15f, 15f).takeIf { it.isFinite() } ?: 0f
+            p.fGain = v.coerceIn(-15f, 15f).takeIf { it.isFinite() } ?: 0f // para evitar valores infinitos si usamos decimales
             BASS.BASS_FXSetParameters(fxArray[n], p)
             val check = BASS.BASS_FXSetParameters(fxArray[n], p)
             if (!check) {
@@ -95,7 +92,6 @@ object EqualizerManager {
             BASS.BASS_FXSetParameters(fxArray[n], p)
         } else // volume
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 15f)
-        Log.e("UPDATE-FX->upd","$n -> $v")
 
     }
     fun setEffect(isEnable: Boolean){
@@ -103,11 +99,8 @@ object EqualizerManager {
         for (i in fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
         }
-
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
-            Log.e("FX-CHAN", fxChan.toString() )
-            Log.e("FX-CHAN->", chan.toString() )
         } else {
             fxChan=0
         }
@@ -124,7 +117,6 @@ object EqualizerManager {
             setEnabled(true)
 
         } else {
-
             fxChan=0
             chan=0
             mPrefs?.effectsIsEnabled = false

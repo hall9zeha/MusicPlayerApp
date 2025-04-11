@@ -31,7 +31,7 @@
                android:layout_height="wrap_content"
                android:text="@string/reset"
                android:layout_gravity="end"
-               android:layout_margin="16dp"
+               android:layout_margin="8dp"
                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                app:layout_constraintEnd_toEndOf="parent"
                app:layout_constraintTop_toTopOf="parent"
