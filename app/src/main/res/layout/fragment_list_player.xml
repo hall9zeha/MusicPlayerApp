@@ -12,7 +12,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".view.ui.fragments.ListPlayerFragment"
-
    >
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
@@ -26,7 +25,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintTop_toBottomOf="@id/miniPlayerControls"
         />
-
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/miniPlayerControls"
         android:name="com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment"

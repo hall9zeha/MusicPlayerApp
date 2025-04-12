@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.util.EMPTY_STRING_ARRAY
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
@@ -283,6 +284,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             ivCover.loadImage(albumArt!!)
             playbackControlsFragment?.updateUIOnceTime(musicState)
             musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
+            
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())

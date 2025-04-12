@@ -13,14 +13,11 @@ import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
-import com.barryzeha.ktmusicplayer.databinding.BottomSheetPlaylistsLayoutBinding
-import com.barryzeha.ktmusicplayer.databinding.OrderByDialogLayoutBinding
+import com.barryzeha.ktmusicplayer.databinding.FragmentDialogPlaylistsLayoutBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.activities.MainActivity
 import com.barryzeha.ktmusicplayer.view.ui.adapters.PlayListsAdapter
-
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -38,7 +35,7 @@ class PlaylistDialogFragment : DialogFragment() {
     @Inject
     lateinit var mPrefs: MyPreferences
 
-    private var _bind: BottomSheetPlaylistsLayoutBinding? = null
+    private var _bind: FragmentDialogPlaylistsLayoutBinding? = null
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private var dialogView: View? = null
@@ -60,7 +57,7 @@ class PlaylistDialogFragment : DialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         activity?.let {
-            _bind = BottomSheetPlaylistsLayoutBinding.inflate(inflater, container, false)
+            _bind = FragmentDialogPlaylistsLayoutBinding.inflate(inflater, container, false)
             _bind?.let { bind ->
                 return bind.root
             }
@@ -74,7 +71,7 @@ class PlaylistDialogFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _bind = BottomSheetPlaylistsLayoutBinding.bind(dialogView!!)
+        _bind = FragmentDialogPlaylistsLayoutBinding.bind(dialogView!!)
         getBundle()
         setupAdapter()
         setupObservers()
