@@ -3,6 +3,13 @@
 <img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/core/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="drawing" width="24%" height="24%"/>
 </div>
 
+<p align="center">
+  
+<a>[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/hall9zeha/MusicPlayerApp/blob/main/README.md) </a>
+<a href="https://github.com/RetroMusicPlayer/RetroMusicPlayer" style="text-decoration:none" area-label="Min API: 21"> 
+ <img src="https://img.shields.io/badge/minSdkVersion-24-green.svg"></a>
+<a area_label="Work"> <img src="https://img.shields.io/badge/works_on-my_machine-yellow"></a>
+
 A simple offline music player app written in Kotlin for Android. The app has two versions: KTMusic Bass, which uses the [BASS](https://www.un4seen.com/) library from [un4seen](https://www.un4seen.com/), and KTMusic Exo, which uses the Android [MediaPlayer](https://developer.android.com/media/media3/exoplayer) API.
 
 ## 🚀 Motivation
