@@ -61,7 +61,7 @@
     <string name="reverb">Reverb</string>
     <string name="rock">Rock</string>
     <string name="settings">Settings</string>
-    <string name="sampleString">No tracks currently playing No tracks currently playing</string>
+    <string name="sampleString">There is no track playing right now</string>
     <string name="sendToList">Send to playlist</string>
     <string name="songs">Songs</string>
     <string name="songInfo">File info</string>

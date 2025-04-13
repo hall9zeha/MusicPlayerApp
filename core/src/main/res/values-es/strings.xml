@@ -61,7 +61,7 @@
     <string name="reset">Reiniciar</string>
     <string name="reverb">Reverberación</string>
     <string name="rock">Rock</string>
-    <string name="sampleString">No hay canción reproduciéndose ahora</string>
+    <string name="sampleString">No hay ninguna canción reproduciéndose ahora</string>
     <string name="sendToList">Enviar a lista de reproducción</string>
     <string name="settings">Configuración</string>
     <string name="soundEffects">Efectos de sonido</string>

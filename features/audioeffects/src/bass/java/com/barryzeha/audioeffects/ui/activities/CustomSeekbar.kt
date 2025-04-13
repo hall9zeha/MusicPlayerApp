@@ -27,7 +27,7 @@ import com.barryzeha.core.R as coreRes
 
   private var rect: Rect = Rect()
   private var paint: Paint = Paint()
-  private var seekbarHeight: Int = 4
+  private var seekbarHeight: Int = 6
   init {
    this.max = progressRange
   }
