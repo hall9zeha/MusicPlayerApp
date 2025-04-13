@@ -2,12 +2,22 @@
 <div align="left">
 <img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/core/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" alt="drawing" width="24%" height="24%"/>
 </div>
+
+<p align="center">
+  
+<a>[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/hall9zeha/MusicPlayerApp/blob/main/README.md) </a>
+<a>[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/hall9zeha/MusicPlayerApp/blob/main/README.en.md) </a>
+ <a href="https://github.com/RetroMusicPlayer/RetroMusicPlayer" style="text-decoration:none" area-label="Min API: 21"> 
+ <img src="https://img.shields.io/badge/minSdkVersion-24-green.svg"></a>
+<a area_label="Work"> <img src="https://img.shields.io/badge/works_on-my_machine-yellow"></a>
+
 Una aplicación sencilla para reproducción de música offline escrita en Kotlin para Android. La aplicación tiene dos versiones: KMusic Bass que usa la librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) y KMusic Exo que usa La API [MediaPlayer](https://developer.android.com/media/media3/exoplayer) de Android.
+</p>
 
 ## 🚀 Motivación
 Quería una aplicación de música con la cual reproducir en bucle solo una parte de las canciones que me gustan con (A-B loop) y de paso usar la librería [BASS](https://www.un4seen.com/) de [un4seen](https://www.un4seen.com/) porque reproduce las pistas con muy buena calidad y me gustan todos los efectos de ecualizador que se pueden implementar. Pero ninguna de las apps que me gustaban tenían la función de repetición en bucle A-B, así que terminé haciendo más de lo que necesitaba ya que no soy un sibarita de las funciones en un reproductor de audio. Aún así estoy contento con lo que ha resultado y lo que he aprendido, aunque no es perfecta, la iré mejorando con el tiempo y  espero que le pueda servir a cualquiera que necesite un ejemplo de reproductor de audio en Android. Siéntase libre de usar el código aquí publicado como más le convenga. 
 
-## Demo
+## 📥 Demo
 
 ## :memo: Características
 
@@ -68,15 +78,15 @@ Creo que hay muchas xD. Una de las más interesantes es el uso de MediaStore par
 ## :framed_picture: Capturas
 ||||
 |--|--|--|
-|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen1.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen2.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4.jpg"  alt="drawing" width="70%" height="70%"/></p>
-|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4_1.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen6.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen7.jpg"  alt="drawing" width="70%" height="70%"/></p>
-|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen11.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen11_1.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen13.jpg"  alt="drawing" width="70%" height="70%"/></p>
-|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen14.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen15.jpg" alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen17.jpg"  alt="drawing" width="70%" height="70%"/></p>
+|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen1.jpg"  alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen2.jpg" alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4.jpg"  alt="drawing" width="80%" height="80%"/></p>
+|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen4_1.jpg"  alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen6.jpg" alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen7.jpg"  alt="drawing" width="80%" height="80%"/></p>
+|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen11.jpg"  alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen11_1.jpg" alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen13.jpg"  alt="drawing" width="80%" height="80%"/></p>
+|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen14.jpg"  alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen15.jpg" alt="drawing" width="80%" height="80%"/></p>|<p align="center" width="80%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen17.jpg"  alt="drawing" width="80%" height="90%"/></p>
 
 |||
 |--|--|
-|Landscape|||
-|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen8.jpg"  alt="drawing" width="70%" height="70%"/></p>|<p align="center" width="70%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen9.jpg" alt="drawing" width="70%" height="70%"/></p>|
+||||
+|<p align="center" width="90%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen8.jpg"  alt="drawing" width="90%" height="90%"/></p>|<p align="center" width="90%"><img src="https://github.com/hall9zeha/MusicPlayerApp/blob/main/docs/screenshots/screen9.jpg" alt="drawing" width="90%" height="90%"/></p>|
 
 ## 🙏 Agradecimientos
 Un agradecimiento especial a [MarthaB94](https://github.com/MarthaB94) por diseñar el ícono y el texto de marca para el splash screen. Su contribución ha sido invaluable para darle vida a la identidad visual de la aplicación.
