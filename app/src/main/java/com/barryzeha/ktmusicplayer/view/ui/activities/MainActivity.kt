@@ -25,6 +25,7 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding

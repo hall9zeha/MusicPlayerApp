@@ -99,7 +99,8 @@
     <style name="splashScreenTheme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/surface</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/animated_icon_splash</item>
-        <item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>
+        <!--Si activamos postSplashScreenTheme siempre mantendrá el tema por defecto y no podremos forzar el cambio entre temas-->
+        <!--<item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>-->
         <item name="android:windowSplashScreenAnimationDuration" tools:ignore = "newApi">1500</item>
         <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/ktmusic_brand_text</item>
     </style>
