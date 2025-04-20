@@ -48,7 +48,7 @@ object EqualizerManager {
         val reverbValue = prefs.getReverbSeekBandValue(prefs.effectType, coreRes.id.reverb)
         updateFX(fxArray.size - 1, reverbValue)
         val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
-        updateFX(11, volumeValue)
+        updateFX(index=11, volumeValue)
     }
 
     fun setupFX(fxIndex:(index:Int)->Unit) {
@@ -68,7 +68,7 @@ object EqualizerManager {
         updateFX(fxArray.size - 1, 0f)
         mPrefs?.let {prefs->
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue / 15f)
+            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue)
         }
 
     }

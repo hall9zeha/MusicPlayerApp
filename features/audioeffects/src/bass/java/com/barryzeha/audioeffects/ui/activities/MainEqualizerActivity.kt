@@ -352,7 +352,7 @@ class MainEqualizerActivity : AppCompatActivity() {
             id = coreRes.id.volume
             tag = 11
             max = 30
-            progress = if(volumeProgress !=30f) volumeProgress.toInt() else 15
+            progress = if(volumeProgress !=15f) volumeProgress.toInt() else 15
             thumb= ContextCompat.getDrawable(this@MainEqualizerActivity,coreRes.drawable.seekbar_thumb)
             layoutParams = layoutParams1
             progressDrawable=ColorDrawable(Color.TRANSPARENT)

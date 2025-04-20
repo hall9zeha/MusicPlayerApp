@@ -40,7 +40,7 @@ class EffectsPreferences @Inject constructor(private val ctx: Context) {
         return mPreferences.getFloat("$effectType$SEEK_BAND$seekId",0f)
     }
     fun getVolumeSeekBandValue(effectType: Int,seekId: Int):Float{
-        return mPreferences.getFloat("$effectType$SEEK_BAND$seekId",30f)
+        return mPreferences.getFloat("$effectType$SEEK_BAND$seekId",15f)
     }
     fun clearSeekBandPreferences(){
         val allPrefs = mPreferences.all
