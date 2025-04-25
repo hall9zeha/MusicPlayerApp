@@ -76,7 +76,6 @@ class MainEqualizerActivity : AppCompatActivity() {
     private fun handleIntent(){
         intent?.let{
             sessionId=intent.getIntExtra(MUSIC_PLAYER_SESSION,-1)
-
         }
     }
     private fun setUpEqualizer(){
@@ -111,12 +110,10 @@ class MainEqualizerActivity : AppCompatActivity() {
                 swIsChecked= false
                enableAndDisableViews(false)
             }
-        }
-        bind.btnApplyEffects.setOnClickListener {
-            mPrefs.effectsIsEnabled = swIsChecked
+            mPrefs.effectsIsEnabled = isChecked
             mPrefs.effectType = effectTypeForSave
-            Snackbar.make(bind.root,"Applied success", Snackbar.LENGTH_SHORT).show()
         }
+
         bind.chipGroupEffects.isSingleSelection=true
         bind.chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
             if(checkedIds.isNotEmpty()){
@@ -239,7 +236,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                     seekBar: SeekBar, progress: Int,
                     fromUser: Boolean
                 ) {
-                    EqualizerManager.setBand(equalizerBandIndex,(equalizerBandIndex + lowerEqualizerBandLevel!!).toShort())
+                    EqualizerManager.setBand(equalizerBandIndex,(progress + lowerEqualizerBandLevel!!).toShort())
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {

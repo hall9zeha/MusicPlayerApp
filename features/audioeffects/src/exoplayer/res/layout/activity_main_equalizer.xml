@@ -15,15 +15,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_margin="16dp"/>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnApplyEffects"
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Apply"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_margin="16dp"/>
+        android:text="@string/enableEffects"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@id/swEnableEffects"
+        app:layout_constraintTop_toTopOf="@id/swEnableEffects"
+        app:layout_constraintBottom_toBottomOf="@id/swEnableEffects"/>
     <HorizontalScrollView
         android:id="@+id/horizontalScrollView"
         android:layout_width="match_parent"
