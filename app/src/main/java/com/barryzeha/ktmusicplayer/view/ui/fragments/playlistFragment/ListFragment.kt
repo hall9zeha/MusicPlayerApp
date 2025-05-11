@@ -411,7 +411,15 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                         )
                     )
                         .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
-                },{})
+                },{
+                    // Go to album
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.Main) {
+                            delay(300)
+                            navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to musicPlayerService?.currentSongState()?.album))
+                        }
+                    }
+                })
             }
         }
     }
