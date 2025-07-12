@@ -243,6 +243,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         this?.let {
             currentMusicState = musicState
             mPrefs.currentPosition = musicState.currentDuration
+
             mainSeekBar.progress = musicState.currentDuration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             lrcView?.updateTime(musicState.currentDuration)

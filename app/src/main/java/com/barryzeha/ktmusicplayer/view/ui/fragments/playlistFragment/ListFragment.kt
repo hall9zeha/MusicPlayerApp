@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.util.EMPTY_STRING_ARRAY
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
+import com.barryzeha.core.common.COLOR_TRANSPARENT
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getBitmap
@@ -228,7 +230,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner) { positionSelected ->
             musicPlayerService?.setCurrentSongPosition(positionSelected)
             positionSelected?.let {
-                musicListAdapter?.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
+                if(!isFiltering)musicListAdapter?.changeBackgroundColorSelectedItem(songId = mPrefs.idSong)
             }
         }
         mainViewModel.deletedRow.observe(viewLifecycleOwner) { deletedRow ->
@@ -283,8 +285,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             val albumArt = getBitmap(requireContext(), musicState.songPath)
             ivCover.loadImage(albumArt!!)
             playbackControlsFragment?.updateUIOnceTime(musicState)
-            musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
-            
+            if(!isFiltering)musicListAdapter?.changeBackgroundColorSelectedItem(musicState.idSong)
             mainViewModel.checkIfIsFavorite(musicState.idSong)
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
@@ -430,6 +431,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 btnSearch.backgroundTintList = changeBackgroundColor(requireContext(), true)
                 isFiltering = true
                 showKeyboard(true, edtSearch)
+                musicListAdapter?.removeBackgroundColorOnItem(mPrefs.idSong)
             } else {
                 visibleOrGoneViews(true)
                 edtSearch.setText("")
@@ -475,7 +477,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         }, { // isHide
             CoroutineScope(Dispatchers.Main).launch {
                 delay(1000)
-                musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
+                if(!isFiltering)musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
             }
         })
     }
@@ -485,7 +487,9 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             musicPlayerService?.clearABLoopOfPreferences()
             mPrefs.idSong = song.id
             mainViewModel.setCurrentPosition(pos.first)
-
+            if(isFiltering){
+                musicListAdapter?.changeBackgroundColorSelectedItem(song.id,true)
+            }
         }
     }
     private fun onMenuItemClick(view: View, position: Int, selectedSong: SongEntity) {
@@ -522,8 +526,10 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         itemSong?.let {
             val (numberedPos, realPos) = musicListAdapter?.getPositionByItem(itemSong)!!
             mPrefs.currentIndexSong = numberedPos.toLong()
-            musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
-            if (scrollToPosition) bind?.rvSongs?.scrollToPosition(realPos)
+            if(!isFiltering) {
+                musicListAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
+                if (scrollToPosition) bind?.rvSongs?.scrollToPosition(realPos)
+            }
         }
         val numbersOfTrack=Pair((if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),(musicListAdapter?.getSongItemCount()!! + itemCount))
         return numbersOfTrack

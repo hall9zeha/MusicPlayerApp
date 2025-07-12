@@ -7,6 +7,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.util.Log
 import android.util.TypedValue
 import android.view.GestureDetector
@@ -17,8 +18,10 @@ import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import android.widget.SeekBar
 import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
+import androidx.annotation.RequiresApi
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.use
@@ -38,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.Exception
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 
 /**
@@ -170,4 +174,12 @@ fun <T> AppCompatActivity.getFragment(@IdRes id: Int): T {
 @Suppress("UNCHECKED_CAST")
 fun <T> Fragment.getFragment(@IdRes id: Int): T {
     return childFragmentManager.findFragmentById(id) as T
+}
+
+fun SeekBar.setProgressSynchronized(context:Context, currentPosition:Long){
+    val frameTime = (1/ (context.display?.refreshRate!! )).toDouble().milliseconds
+    CoroutineScope(Dispatchers.Main).launch {
+        delay(frameTime)
+        this@setProgressSynchronized.progress= currentPosition.toInt()
+    }
 }

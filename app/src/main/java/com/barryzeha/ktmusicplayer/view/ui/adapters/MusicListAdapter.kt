@@ -4,6 +4,7 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.graphics.ColorFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +47,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     private val SONG_ITEM=0
     private val HEADER_ITEM=1
     private var originalList:MutableList<Any> = arrayListOf()
+    private var filteredList:MutableList<Any> = arrayListOf()
     private var songEntityIndices = mutableListOf<Int>()
     private var itemListForDelete:MutableList<SongEntity> = arrayListOf()
     private var selectedPos = -1
@@ -123,13 +125,23 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
            originalList=currentList
         }
     }
+    fun removeBackgroundColorOnItem(idSong: Long){
+        val songItem = originalList.filterIsInstance<SongEntity>().find { idSong == it.id }
+        songItem?.let {
+            val position = originalList.indexOf(songItem)
+            notifyItemChanged(
+                position,
+                ItemSongChangePayload.BackgroundColor(Color.TRANSPARENT)
+            )
+        }
+    }
     @SuppressLint("ResourceType")
-    fun changeBackgroundColorSelectedItem(songId:Long){
+    fun changeBackgroundColorSelectedItem(songId:Long,isFiltering:Boolean=false){
         // We get the position of the item by its ID, since we have two types of views in the recyclerview we just have to change the color to SongEntity items
         val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
         songItem?.let {
                 val position = originalList.indexOf(songItem)
-                selectedPos = originalList.indexOf(songItem)
+                selectedPos = if(!isFiltering)originalList.indexOf(songItem)else filteredList.indexOf(songItem)
                 if (lastSelectedPos == -1) {
                     lastSelectedPos = selectedPos
                 } else {
@@ -249,7 +261,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     }
     fun getListItemsForDelete():List<SongEntity> = itemListForDelete
     fun clearListItemsForDelete(){itemListForDelete.clear()}
-
     private fun shouldRemoveHeaderForSong(song:SongEntity):Int{
         val position = currentList.indexOf(song)
         val aboveItem = currentList[position - 1]
@@ -396,7 +407,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     // Filter
     private val searchFilter:Filter = object:Filter(){
         override fun performFiltering(input: CharSequence?): FilterResults {
-            val filteredList = if (input.toString().isEmpty()) {
+            filteredList = if (input.toString().isEmpty()) {
                 originalList
             } else {
                 originalList.filter { item ->
@@ -407,7 +418,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                     } else {
                         false
                     }
-                }
+                }.toMutableList()
             }
             return FilterResults().apply { values = filteredList }
         }
