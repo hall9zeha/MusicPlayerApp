@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <SeekBar
-        android:id="@+id/loadSeekBar"
+        android:id="@+id/miniPlaybackSeekBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:progress="50"
@@ -23,8 +23,8 @@
         android:layout_height="wrap_content"
         tools:text="0:20"
         android:textSize="11sp"
-        app:layout_constraintStart_toStartOf="@id/loadSeekBar"
-        app:layout_constraintTop_toBottomOf="@id/loadSeekBar"
+        app:layout_constraintStart_toStartOf="@id/miniPlaybackSeekBar"
+        app:layout_constraintTop_toBottomOf="@id/miniPlaybackSeekBar"
         android:layout_marginTop="4dp"
         android:layout_marginStart="16dp"/>
     <com.google.android.material.textview.MaterialTextView
@@ -36,7 +36,7 @@
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toEndOf="@id/tvInitTime"
         app:layout_constraintEnd_toStartOf="@id/tvEndTime"
-        app:layout_constraintTop_toBottomOf="@id/loadSeekBar"/>
+        app:layout_constraintTop_toBottomOf="@id/miniPlaybackSeekBar"/>
     <TextView
         android:id="@+id/tvEndTime"
         android:layout_width="wrap_content"
@@ -44,8 +44,8 @@
         tools:text="3:20"
         android:text="00:00"
         android:textSize="11sp"
-        app:layout_constraintEnd_toEndOf="@id/loadSeekBar"
-        app:layout_constraintTop_toBottomOf="@id/loadSeekBar"
+        app:layout_constraintEnd_toEndOf="@id/miniPlaybackSeekBar"
+        app:layout_constraintTop_toBottomOf="@id/miniPlaybackSeekBar"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"/>
 

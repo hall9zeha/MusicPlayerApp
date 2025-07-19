@@ -28,6 +28,7 @@ import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getEmbeddedSyncedLyrics
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.setProgressSynchronized
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongEntity
@@ -72,6 +73,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     private var frontAnimator:AnimatorSet?=null
     private var backAnimator:AnimatorSet?=null
     private var listFragmentInstance:ListFragment?=null
+    override var isUserSeeking:Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -243,8 +245,11 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         this?.let {
             currentMusicState = musicState
             mPrefs.currentPosition = musicState.currentDuration
+            //mainSeekBar.progress = musicState.currentDuration.toInt()
 
-            mainSeekBar.progress = musicState.currentDuration.toInt()
+            // Updates the SeekBar progress with a slight delay synced to the screen refresh rate
+            // to reduce visual stuttering. Only applies when the user is not interacting with the SeekBar.
+            mainSeekBar.setProgressSynchronized(requireContext(),isUserSeeking,musicState.currentDuration)
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             lrcView?.updateTime(musicState.currentDuration)
         }
@@ -439,12 +444,14 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                     fromUser: Boolean
                 ) {
                     if (fromUser) {
+                        isUserSeeking=true
                         tvSongTimeRest.text = createTime(progress.toLong()).third
                         userSelectPosition = progress
                     }
                 }
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    isUserSeeking=false
                     musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
                     mainSeekBar.progress = userSelectPosition
 

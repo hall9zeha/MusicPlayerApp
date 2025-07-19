@@ -2,8 +2,10 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.setProgressSynchronized
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.ktmusicplayer.R
@@ -58,13 +60,17 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     }
     fun updateUIOnceTime(musicState: MusicState)=with(bind){
         tvEndTime.text = createTime(musicState.duration).third
-        loadSeekBar.max = musicState.duration.toInt()
+        miniPlaybackSeekBar.max = musicState.duration.toInt()
         tvInitTime.text = createTime(musicState.currentDuration).third
     }
     private fun updateUI(musicState: MusicState)=with(bind){
-        loadSeekBar.max = musicState.duration.toInt()
+        miniPlaybackSeekBar.max = musicState.duration.toInt()
         tvInitTime.text = createTime(musicState.currentDuration).third
-        loadSeekBar.progress = musicState.currentDuration.toInt()
+        //loadSeekBar.progress = musicState.currentDuration.toInt()
+
+        // Updates the SeekBar progress with a slight delay synced to the screen refresh rate
+        // to reduce visual stuttering. Only applies when the user is not interacting with the SeekBar.
+        miniPlaybackSeekBar.setProgressSynchronized(requireContext(),isUserSeeking,musicState.currentDuration)
     }
     @SuppressLint("ResourceType")
     private fun checkPlayerSongModePreferences()=with(bind){

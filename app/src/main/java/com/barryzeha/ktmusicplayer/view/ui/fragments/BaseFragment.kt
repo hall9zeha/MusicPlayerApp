@@ -43,7 +43,7 @@ open class BaseFragment(@LayoutRes layout: Int) : Fragment(layout), ServiceSongL
     private val mMusicPlayerServiceListeners = ArrayList<ServiceSongListener>()
     protected var serviceConnection:ServiceConnection?=null
     protected var musicPlayerService: MusicPlayerService?=null
-    protected var isUserSeeking=false
+    protected open var isUserSeeking=false
     protected var userSelectPosition=0
 
     override fun onAttach(context: Context) {

@@ -94,7 +94,7 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
                 fastForwardOrRewind(false)
                 true
             }
-            loadSeekBar.setOnSeekBarChangeListener(object :
+            miniPlaybackSeekBar.setOnSeekBarChangeListener(object :
                 SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(
                     seekBar: SeekBar?,
@@ -112,7 +112,7 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                     isUserSeeking = false
                     musicPlayerService?.setPlayerProgress(seekBar?.progress?.toLong()!!)
-                    loadSeekBar.progress = userSelectPosition
+                    miniPlaybackSeekBar.progress = userSelectPosition
                 }
             })
             btnRepeat.setOnClickListener {

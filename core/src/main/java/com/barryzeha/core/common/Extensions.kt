@@ -176,10 +176,12 @@ fun <T> Fragment.getFragment(@IdRes id: Int): T {
     return childFragmentManager.findFragmentById(id) as T
 }
 
-fun SeekBar.setProgressSynchronized(context:Context, currentPosition:Long){
+fun SeekBar.setProgressSynchronized(context:Context, isUserSeeking:Boolean, currentPosition:Long){
     val frameTime = (1/ (context.display?.refreshRate!! )).toDouble().milliseconds
     CoroutineScope(Dispatchers.Main).launch {
         delay(frameTime)
-        this@setProgressSynchronized.progress= currentPosition.toInt()
+        if(!isUserSeeking) {
+            this@setProgressSynchronized.progress = currentPosition.toInt()
+        }
     }
 }
