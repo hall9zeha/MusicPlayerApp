@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.barryzeha.core"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 24
 
