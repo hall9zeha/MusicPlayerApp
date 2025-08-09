@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -15,8 +15,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.barryzeha.core.common.getThemeResValue
+import com.barryzeha.core.common.ALPHABETICAL
+import com.barryzeha.core.common.LAST_CREATED
 import com.barryzeha.core.common.getThemeWithActionBarResValue
+import com.barryzeha.core.common.lastCreated
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.common.Preferences
 import com.barryzeha.mfilepicker.common.util.COMMON_DIR
@@ -30,7 +32,6 @@ import com.barryzeha.mfilepicker.ui.adapters.FilePickerAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
-import com.barryzeha.core.R as coreRes
 
 @AndroidEntryPoint
 class FilePickerActivity : AppCompatActivity() {
@@ -45,6 +46,8 @@ class FilePickerActivity : AppCompatActivity() {
     private var selectedItemsList:MutableList<FileItem> = arrayListOf()
     private var toolbarMenu:Menu?=null
     private var isSelectedAll:Boolean=false
+    private var listOfPaths:List<File?> = listOf()
+    private var position =0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(getThemeWithActionBarResValue())
@@ -68,6 +71,7 @@ class FilePickerActivity : AppCompatActivity() {
 
     }
     private fun setUpLoadFiles(){
+        pickerAdapter.clear()
         rootDirectory = Environment.getExternalStorageDirectory()
 
         storagePaths.add(rootDirectory)
@@ -111,11 +115,14 @@ class FilePickerActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadFiles(position:Int =0 ,dirs:List<File?>){
+    private fun loadFiles(position:Int =0 ,dirs:List<File?>, sortAction:Boolean=false){
+        pickerAdapter.clear()
         fileList.clear()
         if(dirs.size>1){
             setTitle(applicationInfo.nonLocalizedLabel.toString())
-            listTreeOfNav.add(Pair(position, null))
+            //Para que no agrege una la misma posición repetida al ordenar nuestra lista por fecha o alfabeticamente
+            //si es verdadero no agregará otra posición porque no navegaremos a un nuevo directorio
+            if(!sortAction)listTreeOfNav.add(Pair(position, null))
             dirs.forEach { file ->
                 val storageType=if(file?.name== ROOT_STORAGE.toString()) ROOT_STORAGE else SD_STORAGE
                 file?.let {
@@ -136,20 +143,20 @@ class FilePickerActivity : AppCompatActivity() {
         }else {
             val directory = dirs[0]
 
-            listTreeOfNav.add(Pair(position, directory))
+            if(!sortAction)listTreeOfNav.add(Pair(position, directory))
             // Para mostrar la nueva lista desde el inicio cuando navegamos en los directorios
             // internos
             if (listTreeOfNav[listTreeOfNav.size - 1].first > listTreeOfNav.size - 1) {
                 bind.rvFilePicker.scrollToPosition(0)
             }
             val files = directory?.listFiles()
-
             if (files != null) {
                 //
                 if (checkIfRootDir(directory)) setTitle(directory.parent)
                 else setTitle(directory.name)
 
-                val filesList = files.sortedBy { it.name.lowercase() }
+                //val filesList = files.sortedByDescending { it.lastCreated()}
+                val filesList = filteredListBySortOption(files)
                 filesList.forEach { file ->
 
                     if (file.isDirectory) {
@@ -184,7 +191,9 @@ class FilePickerActivity : AppCompatActivity() {
             }
             pickerAdapter.addAll(fileList)
         }
-
+        //
+          listOfPaths = dirs
+          this@FilePickerActivity.position=position
     }
     private fun onItemClick(position:Int,item:FileItem){
         val file = File(item.filePath.toString())
@@ -195,6 +204,9 @@ class FilePickerActivity : AppCompatActivity() {
             loadFiles(position,paths)
             toolbarMenu?.getItem(0)?.setVisible(false)
             selectedItemsList.clear()
+            //
+            listOfPaths = paths
+            this@FilePickerActivity.position = position
         }
 
     }
@@ -255,6 +267,12 @@ class FilePickerActivity : AppCompatActivity() {
                         finish()
 
                     }
+                    R.id.itemAlphabetical->{
+                        setSortFilesOption(ALPHABETICAL)
+                    }
+                    R.id.itemLastCreated->{
+                        setSortFilesOption(LAST_CREATED)
+                    }
                     R.id.itemSelectAll->{
                         if(!isSelectedAll) {
                             isSelectedAll=true
@@ -305,6 +323,31 @@ class FilePickerActivity : AppCompatActivity() {
         dirList.removeAt(dirList.size - 1)
         toolbarMenu?.getItem(0)?.setVisible(false)
         selectedItemsList.clear()
+    }
+    private fun setSortFilesOption(optionSort:Int){
+        mPrefs.sortedFilesOption = optionSort
+        loadFiles(position,listOfPaths, sortAction = true)
+    }
+    private fun filteredListBySortOption(files: Array<File>?):List<File> {
+        var filesSorted:List<File> = listOf()
+        files?.let{
+           when(mPrefs.sortedFilesOption){
+                ALPHABETICAL->{
+                    filesSorted = files.sortedBy{ it.name.toString()}
+                }
+                LAST_CREATED->{
+                    if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
+                       filesSorted= files.sortedByDescending { it.lastCreated()}
+                    }else{
+                        files.sortedBy { it.name.toString()}
+                    }
+                }
+                else->{
+                    filesSorted = files.sortedBy { it.name.toString()}
+                }
+            }
+        }
+        return filesSorted
     }
 
     @Suppress("DEPRECATION")

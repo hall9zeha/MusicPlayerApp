@@ -31,7 +31,6 @@ private const val THEME_CHANGED = "themeChanged"
 private const val SCROLL_TO_POSITION = "scrollToPosition"
 private const val SAVE_CURRENT_FRAGMENT_OF_NAV = "SaveFragmentOfNav"
 private const val IS_OPEN_QUEUE = "isOpenQueue"
-
 private const val TOTAL_ITEM_SONGS = "totalItemSongs"
 
 
@@ -102,6 +101,7 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var isOpenQueue:Boolean
         get() = myPreferences.getBoolean(IS_OPEN_QUEUE,false)
         set(value) = myPreferences.edit().putBoolean(IS_OPEN_QUEUE,value).apply()
+
 
     fun clearIdSongInPrefs(){
         myPreferences.edit().remove(ID_SONG).apply()

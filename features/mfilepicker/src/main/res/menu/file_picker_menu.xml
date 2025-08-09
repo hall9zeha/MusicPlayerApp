@@ -4,9 +4,24 @@
     <item android:id="@+id/itemConfirm"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_check"
-        android:title="Confirm"/>
+        android:title="@string/confirm"/>
+    <item android:id="@+id/itemSort"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_sort"
+        android:title="@string/sort">
+        <menu>
+        <item android:id="@+id/itemAlphabetical"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_sort_alphabetical"
+            android:title="@string/sort_alphabetically"/>
+        <item android:id="@+id/itemLastCreated"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_sort_last"
+            android:title="@string/sort_last_added"/>
+        </menu>
+    </item>
     <item android:id="@+id/itemSelectAll"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_select_all"
-        android:title="Select all"/>
+        android:title="@string/select_all"/>
 </menu>

@@ -1,1 +1,7 @@
-<resources></resources>
+<resources>
+    <string name="sort_alphabetically">Sort alphabetically</string>
+    <string name="sort_last_added">Sort last added</string>
+    <string name="sort">sort</string>
+    <string name="confirm">Confirm</string>
+    <string name="select_all">Select all</string>
+</resources>

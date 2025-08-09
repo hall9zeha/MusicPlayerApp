@@ -13,6 +13,7 @@ import javax.inject.Inject
  **/
 private const val PREFERENCES_FILE="filePickerPreferences"
 private const val LAST_DIRS_SELECTED="lastDirsSelected"
+private const val SORTED_FILES_BY = "sortedFilesBy"
 class Preferences @Inject constructor(private val context:Context){
     private var myPreferences = context.getSharedPreferences(PREFERENCES_FILE,Context.MODE_PRIVATE)
     private val gson = Gson()
@@ -30,6 +31,10 @@ class Preferences @Inject constructor(private val context:Context){
             val json = gson.toJson(value)
             myPreferences.edit().putString(LAST_DIRS_SELECTED, json).apply()
         }
+    var sortedFilesOption:Int
+        get() = myPreferences.getInt(SORTED_FILES_BY,-1)
+        set(value) = myPreferences.edit().putInt(SORTED_FILES_BY,value).apply()
+
     fun clearLastDirs(){
         myPreferences.edit().remove(LAST_DIRS_SELECTED).apply()
     }

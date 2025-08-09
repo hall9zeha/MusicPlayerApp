@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sort_alphabetically">Ordenar alfabeticamente</string>
+    <string name="sort_last_added">Agregado recientemente</string>
+    <string name="sort">Ordenar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="select_all">Seleccionar todo</string>
+</resources>

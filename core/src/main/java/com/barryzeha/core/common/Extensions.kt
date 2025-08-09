@@ -39,7 +39,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.lang.Exception
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -183,5 +186,15 @@ fun SeekBar.setProgressSynchronized(context:Context, isUserSeeking:Boolean, curr
         if(!isUserSeeking) {
             this@setProgressSynchronized.progress = currentPosition.toInt()
         }
+    }
+}
+@RequiresApi(Build.VERSION_CODES.O)
+fun File.lastCreated():Long{
+    return try{
+        val path = this.toPath()
+        val attrs = Files.readAttributes(path,BasicFileAttributes::class.java)
+        attrs.creationTime().toMillis()
+    }catch (e:Exception){
+        this.lastModified()
     }
 }

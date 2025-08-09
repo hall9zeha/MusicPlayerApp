@@ -47,3 +47,7 @@ const val DEFAULT_DIRECTION = 2
 // Extra intent
 const val MUSIC_STATE_EXTRA = "musicState"
 const val FAVORITE_STATE_EXTRA = "favoriteState"
+
+// Sort files option from file picker
+const val ALPHABETICAL = 0
+const val LAST_CREATED = 1
