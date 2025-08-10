@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/itemAlphabetical"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_sort_alphabetical"
+        android:title="@string/sort_alphabetically"/>
+    <item android:id="@+id/itemLastCreated"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_sort_last"
+        android:title="@string/sort_last_added"/>
+</menu>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget.MyApp.PopupMenu" parent="Widget.Material3.PopupMenu">
+        <!-- Puedes personalizar colores, bordes, radios, etc -->
+    </style>
+
+</resources>

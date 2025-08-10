@@ -7,11 +7,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -142,7 +145,8 @@ class FilePickerActivity : AppCompatActivity() {
             }
         }else {
             val directory = dirs[0]
-
+            //Para que no agrege una la misma posición repetida al ordenar nuestra lista por fecha o alfabeticamente
+            //si es verdadero no agregará otra posición porque no navegaremos a un nuevo directorio
             if(!sortAction)listTreeOfNav.add(Pair(position, directory))
             // Para mostrar la nueva lista desde el inicio cuando navegamos en los directorios
             // internos
@@ -267,11 +271,30 @@ class FilePickerActivity : AppCompatActivity() {
                         finish()
 
                     }
-                    R.id.itemAlphabetical->{
-                        setSortFilesOption(ALPHABETICAL)
-                    }
-                    R.id.itemLastCreated->{
-                        setSortFilesOption(LAST_CREATED)
+                    R.id.itemSort->{
+                        val anchorView = findViewById<View>(R.id.itemSort)
+                        val popup = PopupMenu(ContextThemeWrapper(this@FilePickerActivity,R.style.Widget_MyApp_PopupMenu), anchorView)
+                        popup.menuInflater.inflate(R.menu.sort_menu, popup.menu)
+                        // Para forzar los íconos en el popup menu
+                        try {
+                            val fields = popup.javaClass.getDeclaredField("mPopup")
+                            fields.isAccessible = true
+                            val menuPopupHelper = fields.get(popup)
+                            val classPopupHelper = Class.forName(menuPopupHelper.javaClass.name)
+                            val setForceIcons = classPopupHelper.getMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                            setForceIcons.invoke(menuPopupHelper, true)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        popup.setOnMenuItemClickListener { item ->
+                            when(item.itemId) {
+                                R.id.itemAlphabetical -> setSortFilesOption(ALPHABETICAL)
+                                R.id.itemLastCreated -> setSortFilesOption(LAST_CREATED)
+                            }
+                            true
+                        }
+
+                        popup.show()
                     }
                     R.id.itemSelectAll->{
                         if(!isSelectedAll) {
