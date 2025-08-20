@@ -11,6 +11,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.barryzeha.core.common.ALBUM_UNKNOWN
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
 import com.barryzeha.core.common.fetchShortMetadataAlbumInfo
@@ -103,7 +104,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     private fun getAlbumInfo(song:SongEntity){
         when(song.album.lowercase()){
             //If the song doesn't have album info or is a single (or "unknown" album)
-            "single","unknown","album unknown"->{
+            "single","unknown", ALBUM_UNKNOWN->{
                 albumDetailViewModel.fetchSongById(song.id)
             }
             else->{

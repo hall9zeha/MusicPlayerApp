@@ -99,7 +99,7 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
             }
         // Extract metadata with default values
         val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
-        val album = getTagField(FieldKey.ALBUM, "Album Unknown")
+        val album = getTagField(FieldKey.ALBUM, ALBUM_UNKNOWN)
         val albumArtist = getTagField(FieldKey.ALBUM_ARTIST, "")
         val genre = getTagField(FieldKey.GENRE, "Unknown Genre")
         val title = getTagField(FieldKey.TITLE, nameFile)
