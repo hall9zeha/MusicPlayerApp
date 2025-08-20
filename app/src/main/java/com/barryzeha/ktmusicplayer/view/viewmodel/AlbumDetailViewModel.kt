@@ -31,6 +31,14 @@ import javax.inject.Inject
     withContext(Dispatchers.Main){_songsByAlbum.value = songs}
    }
  }
+ fun fetchSongById(id:Long){
+  launch{
+    val song = repository.fetchSongById(id)
+    val listOfSong = mutableListOf<SongEntity>()
+    listOfSong.add(song)
+    _songsByAlbum.value = listOfSong
+  }
+ }
  override fun onCleared() {
   destroyScope()
   super.onCleared()

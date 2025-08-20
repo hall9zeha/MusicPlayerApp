@@ -18,7 +18,9 @@
         tools:layout="@layout/fragment_album_detail">
         <argument
             android:name="extra_album"
-            app:argType="string"/>
+            app:argType="com.barryzeha.core.model.entities.SongEntity"
+            app:nullable="true"
+            />
     </fragment>
 
     <fragment

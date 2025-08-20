@@ -31,6 +31,7 @@ import com.barryzeha.ktmusicplayer.view.viewmodel.AlbumDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import kotlin.random.Random
 import com.barryzeha.core.R as coreRes
 
@@ -53,8 +54,10 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     override fun onCreate(savedInstanceState: Bundle?) {
         activity?.setTheme(com.barryzeha.core.R.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
-        albumDetailViewModel.fetchSongsByAlbum(arguments.extraAlbum)
-
+        val songEntity = arguments.extraAlbum
+        songEntity?.let { song->
+            getAlbumInfo(song)
+        }
        /*activity?.onBackPressedDispatcher?.addCallback(this,object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
                //navController?.navigate(R.id.playlistFragment)
@@ -95,6 +98,17 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTrack->
             albumAdapter?.changeBackgroundColorSelectedItem(currentTrack.idSong)
+        }
+    }
+    private fun getAlbumInfo(song:SongEntity){
+        when(song.album.lowercase()){
+            //If the song doesn't have album info or is a single (or "unknown" album)
+            "single","unknown","album unknown"->{
+                albumDetailViewModel.fetchSongById(song.id)
+            }
+            else->{
+                albumDetailViewModel.fetchSongsByAlbum(song.album)
+            }
         }
     }
     private fun setAlbumInfo(songs:List<SongEntity>)=with(bind){

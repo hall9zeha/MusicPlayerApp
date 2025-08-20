@@ -516,7 +516,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             lifecycleScope.launch {
                withContext(Dispatchers.Main) {
                     delay(300)
-                    navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to selectedSong.album))
+                    //navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to selectedSong.album))
+                    navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to selectedSong))
                 }
             }
         })
