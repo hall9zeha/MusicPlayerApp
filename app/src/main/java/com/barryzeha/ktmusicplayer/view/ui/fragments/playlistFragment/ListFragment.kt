@@ -416,8 +416,11 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     // Go to album
                     lifecycleScope.launch {
                         withContext(Dispatchers.Main) {
-                            delay(300)
-                            navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to musicPlayerService?.currentSongState()?.album))
+                             musicPlayerService?.currentSongState()?.let {song->
+                                 val songEntity = SongEntity(id = song.idSong,album = song.album)
+                                 delay(300)
+                                 navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to songEntity))
+                             }
                         }
                     }
                 })
@@ -516,7 +519,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             lifecycleScope.launch {
                withContext(Dispatchers.Main) {
                     delay(300)
-                    //navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to selectedSong.album))
                     navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to selectedSong))
                 }
             }
