@@ -13,6 +13,9 @@
     <item android:id="@+id/goToAlbum"
         android:title="@string/goToAlbum"
         app:showAsAction="ifRoom"/>
+    <item android:id="@+id/shareSong"
+        android:title="@string/share_song"
+        app:showAsAction="ifRoom"/>
     <item android:id="@+id/deleteItem"
         android:title="@string/delete_track"
         app:showAsAction="ifRoom"

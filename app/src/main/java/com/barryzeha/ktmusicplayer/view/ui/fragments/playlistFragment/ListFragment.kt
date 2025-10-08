@@ -25,6 +25,7 @@ import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.shareSong
 import com.barryzeha.core.common.showOrHideKeyboard
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
@@ -423,6 +424,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                              }
                         }
                     }
+                },{// Share song
+                    shareSong(requireContext(),musicPlayerService?.currentSongState()?.songPath.toString())
                 })
             }
         }
@@ -505,7 +508,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         }, { // Send to playlist callback
              PlaylistDialogFragment.newInstance(selectedSong.id).show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
 
-        }, {//
+        }, {// Add to favorite
             mainViewModel.updateSong(selectedSong.copy(favorite = true))
         }, {// Go to song info
             SongInfoDialogFragment.newInstance(
@@ -522,6 +525,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to selectedSong))
                 }
             }
+        },{// Share song
+            shareSong(requireContext(),selectedSong.pathLocation.toString())
         })
     }
     fun setNumberOfTrack(scrollToPosition: Boolean = true, itemCount: Int = 0):Pair<Int,Int> {

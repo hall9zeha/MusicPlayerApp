@@ -195,7 +195,8 @@ fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, mPrefs: MyPreferences,
                     sendToPlaylistCallback:()->Unit,
                     addToFavoriteCallback:()->Unit,
                     songInfoCallback:()->Unit,
-                    goToAlbum:()->Unit
+                    goToAlbum:()->Unit,
+                    shareSong:()->Unit
                     ){
     val popupMenu = PopupMenu(activity, view)
     popupMenu.inflate(R.menu.item_menu)
@@ -232,6 +233,10 @@ fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, mPrefs: MyPreferences,
             R.id.goToAlbum->{
                 popupMenu.dismiss()
                 goToAlbum()
+            }
+            R.id.shareSong->{
+                popupMenu.dismiss()
+                shareSong()
             }
             R.id.deleteItem->{
                 deleteItemCallback()

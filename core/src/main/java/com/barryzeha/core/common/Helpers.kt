@@ -14,7 +14,9 @@ import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
 import com.barryzeha.core.model.entities.MusicState
@@ -363,3 +365,24 @@ fun keepScreenOn(activity:Activity, screenOn:Boolean){
     else activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 }
 
+fun shareSong(context:Context, filePath:String){
+    try {
+        val file = File(filePath)
+        if(!file.exists()){
+            Toast.makeText(context, "File not exist", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = FileProvider.getUriForFile(context,"${context.packageName}.fileprovider",file)
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type="*/*"
+            putExtra(Intent.EXTRA_STREAM,uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(shareIntent,"Compartir archivo con..."))
+
+    }catch(e:Exception){
+        e.printStackTrace()
+        Log.e("SHARE_SONG_ERROR", e.message.toString() )
+    }
+}

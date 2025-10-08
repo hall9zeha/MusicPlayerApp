@@ -180,7 +180,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
             )
                 .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)
         },{//Go to album, disable on this fragment
-        })
+        },{})
 
     }
     private fun onItemClick(position: Int, songEntity: SongEntity) {

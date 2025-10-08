@@ -74,4 +74,5 @@
     <string name="welcomeToApp">Bienvenido a </string>
     <string name="volume">Volumen</string>
     <string name="writeExternalStorageMsg">Se necesita habilitar el permiso de Write External storage para realizar la escritura de metadatos y etiquetas de audio cuando use el editor de etiquetas en sus canciones</string>
+    <string name="share_song">Compartir canción</string>
 </resources>
