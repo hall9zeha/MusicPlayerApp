@@ -18,7 +18,6 @@ import android.view.animation.Animation
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.core.content.contentValuesOf
 import com.barryzeha.core.R
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
@@ -46,6 +45,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.core.view.get
 
 
 /**
@@ -63,6 +63,14 @@ const val ALBUM_DETAIL_FRAGMENT = 1
 const val ON_MENU_ITEM = 0
 const val ON_MINI_PLAYER_MENU = 1
 const val ON_ALBUM_DETAIL_ITEM_MENU = 2
+
+private const val SEND_TO_LIST_ITEM =0
+private const val ADD_TO_FAVORITE_ITEM =1
+private const val SONG_INFO_ITEM =2
+private const val GO_TO_ALBUM_ITEM =3
+private const val SHARE_SONG_ITEM =4
+private const val DELETE_SONG_ITEM =5
+private const val DELETE_ALL_ITEM =6
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun createNotificationChannel(context: Context){
@@ -201,18 +209,18 @@ fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, mPrefs: MyPreferences,
     val popupMenu = PopupMenu(activity, view)
     popupMenu.inflate(R.menu.item_menu)
     if(mPrefs.playlistId == PLAYLIST_DEFAULT_ID){
-        popupMenu.menu.getItem(5).setVisible(true)
+        popupMenu.menu[DELETE_ALL_ITEM].isVisible = true
     }else{
-        popupMenu.menu.getItem(5).setVisible(false)
+        popupMenu.menu[DELETE_ALL_ITEM].isVisible = false
     }
     when(onItemClick){
         ON_MINI_PLAYER_MENU->{
-            popupMenu.menu.getItem(0).setVisible(false)
-            popupMenu.menu.getItem(4).setVisible(false)
+            popupMenu.menu[SEND_TO_LIST_ITEM].isVisible = false
+            popupMenu.menu[DELETE_SONG_ITEM].isVisible = false
         }
         ON_ALBUM_DETAIL_ITEM_MENU->{
-            popupMenu.menu.getItem(0).setVisible(false)
-            popupMenu.menu.getItem(5).setVisible(false)
+            popupMenu.menu[SEND_TO_LIST_ITEM].isVisible = false
+            popupMenu.menu[DELETE_SONG_ITEM].isVisible = false
         }
         else->{}
     }
@@ -255,9 +263,11 @@ fun onMenuItemPopup(onItemClick:Int=0, activity:Activity, mPrefs: MyPreferences,
     popupMenu.show()
 
 }
-fun onMenuActionAddPopup(activity: Activity,view: View,
-                         addFileCallback:()->Unit,
-                         addPlaylistCallback:()->Unit,){
+fun onMenuActionAddPopup(
+    activity: Activity, view: View,
+    addFileCallback: () -> Unit,
+    addPlaylistCallback: () -> Unit,
+){
     val popupMenu = PopupMenu(activity, view,Gravity.TOP)
     popupMenu.inflate(R.menu.add_actions_menu)
     popupMenu.setOnMenuItemClickListener { item ->
