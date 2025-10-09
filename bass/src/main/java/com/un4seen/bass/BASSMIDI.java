@@ -1,6 +1,6 @@
 /*
 	BASSMIDI 2.4 Java class
-	Copyright (c) 2006-2023 Un4seen Developments Ltd.
+	Copyright (c) 2006-2024 Un4seen Developments Ltd.
 
 	See the BASSMIDI.CHM file for more detailed documentation
 */
@@ -35,6 +35,7 @@ public class BASSMIDI
 	public static final int BASS_SYNC_MIDI_TICK = 0x10005;
 
 	// Additional BASS_MIDI_StreamCreateFile/etc flags
+	public static final int BASS_MIDI_NODRUMPARAMUSER = 0x200;
 	public static final int BASS_MIDI_NODRUMPARAM = 0x400;
 	public static final int BASS_MIDI_NOSYSRESET = 0x800;
 	public static final int BASS_MIDI_DECAYEND = 0x1000;
@@ -52,31 +53,27 @@ public class BASSMIDI
 	public static final int BASS_MIDI_FONT_LINATTMOD = 0x100000;
 	public static final int BASS_MIDI_FONT_LINDECVOL = 0x200000;
 	public static final int BASS_MIDI_FONT_NORAMPIN = 0x400000;
-	public static final int BASS_MIDI_FONT_NOLIMITS = 0x800000;
+	public static final int BASS_MIDI_FONT_NOSBLIMITS = 0x800000;
+	public static final int BASS_MIDI_FONT_NOLIMITS = BASS_MIDI_FONT_NOSBLIMITS;
 	public static final int BASS_MIDI_FONT_MINFX = 0x1000000;
+	public static final int BASS_MIDI_FONT_SBLIMITS = 0x2000000;
 
 	public static class BASS_MIDI_FONT {
-		public int font;        // soundfont
-		public int preset;        // preset number (-1=all)
+		public int font;		// soundfont
+		public int preset;		// preset number (-1=all)
 		public int bank;
 	}
 
 	public static class BASS_MIDI_FONTEX {
-		public int font;        // soundfont
-		public int spreset;        // source preset number
-		public int sbank;        // source bank number
-		public int dpreset;        // destination preset/program number
-		public int dbank;        // destination bank number
-		public int dbanklsb;    // destination bank number LSB
+		public int font;		// soundfont
+		public int spreset;		// source preset number
+		public int sbank;		// source bank number
+		public int dpreset;		// destination preset/program number
+		public int dbank;		// destination bank number
+		public int dbanklsb;	// destination bank number LSB
 	}
 
-	public static class BASS_MIDI_FONTEX2 {
-		public int font;        // soundfont
-		public int spreset;        // source preset number
-		public int sbank;        // source bank number
-		public int dpreset;        // destination preset/program number
-		public int dbank;        // destination bank number
-		public int dbanklsb;    // destination bank number LSB
+	public static class BASS_MIDI_FONTEX2 extends BASS_MIDI_FONTEX {
 		public int minchan;		// minimum channel number
 		public int numchan;		// number of channels from minchan
 	}
@@ -89,35 +86,36 @@ public class BASSMIDI
 		public String name;
 		public String copyright;
 		public String comment;
-		public int presets;        // number of presets/instruments
-		public int samsize;        // total size (in bytes) of the sample data
-		public int samload;        // amount of sample data currently loaded
-		public int samtype;        // sample format (CTYPE) if packed
+		public int presets;		// number of presets/instruments
+		public int samsize;		// total size (in bytes) of the sample data
+		public int samload;		// amount of sample data currently loaded
+		public int samtype;		// sample format (CTYPE) if packed
 	}
 
 	public static class BASS_MIDI_MARK {
-		public int track;        // track containing marker
-		public int pos;            // marker position
-		public String text;        // marker text
+		public int track;		// track containing marker
+		public int pos;			// marker position
+		public String text;		// marker text
 	}
 
 	public static class BASS_MIDI_MARKB {
-		public int track;        // track containing marker
-		public int pos;            // marker position
-		public byte[] text;        // marker text
+		public int track;		// track containing marker
+		public int pos;			// marker position
+		public byte[] text;		// marker text
 	}
 
 	// Marker types
-	public static final int BASS_MIDI_MARK_MARKER = 0;    // marker
-	public static final int BASS_MIDI_MARK_CUE = 1;        // cue point
-	public static final int BASS_MIDI_MARK_LYRIC = 2;        // lyric
-	public static final int BASS_MIDI_MARK_TEXT = 3;        // text
-	public static final int BASS_MIDI_MARK_TIMESIG = 4;    // time signature
-	public static final int BASS_MIDI_MARK_KEYSIG = 5;    // key signature
-	public static final int BASS_MIDI_MARK_COPY = 6;        // copyright notice
-	public static final int BASS_MIDI_MARK_TRACK = 7;        // track name
-	public static final int BASS_MIDI_MARK_INST = 8;        // instrument name
+	public static final int BASS_MIDI_MARK_MARKER = 0; // marker
+	public static final int BASS_MIDI_MARK_CUE = 1; // cue point
+	public static final int BASS_MIDI_MARK_LYRIC = 2; // lyric
+	public static final int BASS_MIDI_MARK_TEXT = 3; // text
+	public static final int BASS_MIDI_MARK_TIMESIG = 4; // time signature
+	public static final int BASS_MIDI_MARK_KEYSIG = 5; // key signature
+	public static final int BASS_MIDI_MARK_COPY = 6; // copyright notice
+	public static final int BASS_MIDI_MARK_TRACK = 7; // track name
+	public static final int BASS_MIDI_MARK_INST = 8; // instrument name
 	public static final int BASS_MIDI_MARK_TRACKSTART = 9; // track start (SMF2)
+	public static final int BASS_MIDI_MARK_SEQSPEC = 10; // sequencer-specific
 	public static final int BASS_MIDI_MARK_TICK = 0x10000; // flag: get position in ticks (otherwise bytes)
 
 	// MIDI events
@@ -221,11 +219,11 @@ public class BASSMIDI
 	public static final int MIDI_SYSTEM_GS = 4;
 
 	public static class BASS_MIDI_EVENT {
-		public int event;        // MIDI_EVENT_xxx
+		public int event;		// MIDI_EVENT_xxx
 		public int param;
 		public int chan;
-		public int tick;        // event position (ticks)
-		public int pos;            // event position (bytes)
+		public int tick;		// event position (ticks)
+		public int pos;			// event position (bytes)
 	}
 
 	// BASS_MIDI_StreamEvents modes
@@ -260,6 +258,9 @@ public class BASSMIDI
 	public static final int BASS_ATTRIB_MIDI_SPEED = 0x12008;
 	public static final int BASS_ATTRIB_MIDI_REVERB = 0x12009;
 	public static final int BASS_ATTRIB_MIDI_VOL = 0x1200a;
+	public static final int BASS_ATTRIB_MIDI_QUEUE_TICK = 0x1200b;
+	public static final int BASS_ATTRIB_MIDI_QUEUE_BYTE = 0x1200c;
+	public static final int BASS_ATTRIB_MIDI_QUEUE_ASYNC = 0x1200d;
 	public static final int BASS_ATTRIB_MIDI_TRACK_VOL = 0x12100; // + track #
 
 	// Additional tag type
@@ -287,7 +288,7 @@ public class BASSMIDI
 	public static final int BASS_MIDI_FONTLOAD_KEEPDEC = 16; // keep decoders
 
 	public static class BASS_MIDI_DEVICEINFO {
-		public String name;    // description
+		public String name;		// description
 		public int id;
 		public int flags;
 	}
