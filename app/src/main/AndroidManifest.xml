@@ -81,12 +81,6 @@
         <receiver
             android:name=".br.MusicPlayerBroadcast"
             android:exported="false">
-
-            <!--
-            <intent-filter>
-                <action android:name="com.barryzeha.ktmusicplayer.ACTION_TOAST"/>
-            </intent-filter>
-            -->
         </receiver>
 
         <provider
