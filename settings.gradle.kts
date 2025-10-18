@@ -23,6 +23,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "KTMusicPlayer"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":app")
 include(":core")
 include(":data")

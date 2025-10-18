@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    // En gradle kts no requiere  agregar apply false a los plugins
     alias(libs.plugins.ksp)
     alias(libs.plugins.dagger.hilt.plugin)
     alias(libs.plugins.parcelize)
@@ -56,11 +55,11 @@ android {
         }
     }*/
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
    buildFeatures{
         viewBinding= true
@@ -108,13 +107,12 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.runtime.ktx)
     // Modules
-    implementation(project(":core"))
-    implementation(project(":data"))
-    implementation(project(":di"))
-    implementation(project(":features:mfilepicker"))
-    implementation(project(":features:audioeffects"))
+    implementation(projects.core)
+    implementation(projects.data)
+    implementation(projects.di)
+    implementation(projects.features.mfilepicker)
+    implementation(projects.features.audioeffects)
     // Only will charge this module when using bass flavor implementation
-    bassImplementation(project(":bass"))
-
+    bassImplementation(projects.bass)
 
 }
