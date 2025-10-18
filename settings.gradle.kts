@@ -33,3 +33,5 @@ include(":features")
 include(":features:mfilepicker")
 include(":features:audioeffects")
 include(":bass")
+
+include(":core:testing")

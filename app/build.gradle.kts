@@ -115,4 +115,10 @@ dependencies {
     // Only will charge this module when using bass flavor implementation
     bassImplementation(projects.bass)
 
+    // Tests third party libraries
+   /* testImplementation("io.mockk:mockk:1.13.12")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")*/
+    //testImplementation("junit:junit:4.13.2")
+
+
 }
