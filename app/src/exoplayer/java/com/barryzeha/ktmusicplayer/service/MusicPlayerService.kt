@@ -462,7 +462,7 @@ class MusicPlayerService : Service(){
     private fun setUpPlaylist(){
         exoPlayer = ExoPlayer.Builder(applicationContext)
             .build()
-        setUpEqualizer(exoPlayer.audioSessionId)
+
         serviceScope.launch{
             // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
             // si no hay algo seleccionado previamente solo devolverá la lista por defecto
@@ -795,6 +795,13 @@ class MusicPlayerService : Service(){
                      }
                  }
 
+             }
+
+             override fun onAudioSessionIdChanged(audioSessionId: Int) {
+                 super.onAudioSessionIdChanged(audioSessionId)
+                 if (audioSessionId != C.AUDIO_SESSION_ID_UNSET) {
+                     setUpEqualizer(audioSessionId)
+                 }
              }
 
          }

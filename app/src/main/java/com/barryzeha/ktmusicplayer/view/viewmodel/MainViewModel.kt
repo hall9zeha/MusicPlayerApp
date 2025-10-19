@@ -166,8 +166,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
            _processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
-           Log.e("SAVE-NEW-SONG", "$itemsCount --: $countItemsInserted" )
-
         }
     }
 

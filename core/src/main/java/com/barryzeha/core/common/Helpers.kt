@@ -329,7 +329,9 @@ fun mColorList(context:Context)=
     context.obtainStyledAttributes(intArrayOf(
         android.R.attr.textColorPrimaryInverseNoDisable,
         android.R.attr.colorPrimary,
+        //TODO upgrade to material you with material 1.13.0
         com.google.android.material.R.attr.colorAccent,
+        // *********************************************
         com.google.android.material.R.attr.colorOnPrimary,
         com.google.android.material.R.attr.colorSurface,
         android.R.attr.colorBackground,

@@ -1,5 +1,6 @@
 package com.barryzeha.data.repository
 
+import android.util.Log
 import com.barryzeha.core.common.BY_ALBUM
 import com.barryzeha.core.common.BY_ARTIST
 import com.barryzeha.core.common.BY_FAVORITE
@@ -46,7 +47,8 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
     }
 
     override suspend fun fetchSongById(idSong: Long): SongEntity = withContext(Dispatchers.IO){
-        songDao.fetchSongById(idSong)
+       if(idSong>0)songDao.fetchSongById(idSong)
+       else SongEntity()
     }
 
     override suspend fun fetchSongsByAlbum(album: String): List<SongEntity> = withContext(Dispatchers.IO){
