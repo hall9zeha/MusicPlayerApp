@@ -239,7 +239,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 itemsCount=0
                 countItemsInserted =0
             }
-            Log.e("SAVE-NEW-SONG", "$itemsCount --: $countItemsInserted" )
         }
     }
     // for SongState

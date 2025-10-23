@@ -27,6 +27,7 @@ glide-compiler-version = "5.0.5"
 room_version = "2.8.2"
 jetbrainsKotlinJvm = "2.2.20"
 lifecycle-version = "2.9.4"
+lifecycleLivedataCoreKtx = "2.8.6"
 media-version="1.7.1"
 navigation_version = "2.9.5"
 core-version="1.17.0"
@@ -34,6 +35,7 @@ media3-version = "1.8.0"
 preference = "1.2.1"
 splashscreen-version = "1.0.1"
 transition = "1.6.0"
+
 
 
 [libraries]
@@ -72,6 +74,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 androidx-transition = { group = "androidx.transition", name = "transition", version.ref = "transition" }
 androidx-navigation-safeargs-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigation_version" }
+androidx-lifecycle-livedata-core-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-core-ktx", version.ref = "lifecycleLivedataCoreKtx" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 dagger-hilt-plugin = {id= "com.google.dagger.hilt.android", version.ref = "dagger-hilt-version"}
