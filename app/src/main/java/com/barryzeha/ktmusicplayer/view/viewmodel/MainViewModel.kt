@@ -161,11 +161,10 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
         launch { _orderBySelection.value=selection }
     }
     fun saveNewSong(songEntity: SongEntity){
-
         launch {
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
-           _processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
+            //_processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
         }
     }
 
@@ -234,6 +233,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
         launch {
             _songById.value=repository.fetchSongById(idSong)
             countItemsInserted++
+            _processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
             if(itemsCount==countItemsInserted || itemsCount== countItemsInserted-1){
                 fetchAllSong()
                 itemsCount=0

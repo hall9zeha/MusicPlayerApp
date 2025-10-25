@@ -181,9 +181,9 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
         }
         fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
     }
-    fun setNumberOfTracks(@Nullable itemCount: Int?=null){
-        listFragmentInstance?.setNumberOfTrack()?.let{(currentTrack, totalTracks)->
-            binding?.tvNumberSong?.text=String.format("#%s/%s", currentTrack, itemCount?:totalTracks)
+    fun setNumberOfTracks(@Nullable itemCount: Int?=null, scrollToPosition:Boolean=true){
+        listFragmentInstance?.setNumberOfTrack(itemCount = itemCount?:0, scrollToPosition=scrollToPosition)?.let{(currentTrack, totalTracks)->
+            binding?.tvNumberSong?.text=String.format("#%s/%s", currentTrack, totalTracks)
         }
     }
     private fun getSongOfAdapter(idSong: Long): SongEntity?{

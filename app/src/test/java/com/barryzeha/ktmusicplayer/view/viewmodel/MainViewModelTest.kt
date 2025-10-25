@@ -52,6 +52,7 @@ class MainViewModelTest {
     lateinit var mockPreferences: MyPreferences
     lateinit var viewModel:MainViewModel
     var fakeSongs:List<SongEntity> = listOf()
+    var fakeSong:SongEntity = SongEntity()
 
 
     @Before
@@ -62,9 +63,12 @@ class MainViewModelTest {
         mockPreferences = mockk(relaxed = true)
 
         fakeSongs=listOf(
-            SongEntity(id = 1, description = "Fake Song 1"),
-            SongEntity(id = 2, description = "Fake Song 2"),
-            SongEntity(id = 3, description = "Fake Song 3")
+            SongEntity(id = 1, description = "Fake Song 1", album = "album 1"),
+            SongEntity(id = 2, description = "Fake Song 2", album ="album 2"),
+            SongEntity(id = 3, description = "Fake Song 3", album = "album 3")
+        )
+        fakeSong = SongEntity(
+            id = 4, description = "Fake Song 4", album = "album 4"
         )
         coEvery { mockRepository.fetchPlaylistOrderBy(any(), any()) } returns emptyList()
         coEvery { mockRepository.fetchPlaylists() } returns emptyList()
@@ -104,12 +108,57 @@ class MainViewModelTest {
 
     @Test
     fun fetchPlaylistWithSongsBy()=runTest{
+        coEvery{ mockRepository.fetchPlaylistOrderBy(1,1)} returns fakeSongs
 
+        viewModel.fetchPlaylistWithSongsBy(1,1)
+        advanceUntilIdle()
+        val result = viewModel.allSongs.getOrAwaitValue()
+
+        coVerify(exactly = 1) {mockRepository.fetchPlaylistOrderBy(1,1)  }
+        assertThat(result.size).isEqualTo(fakeSongs.size)
+        assertThat(result).isEqualTo(fakeSongs)
     }
 
     @Test
     fun saveNewSong() = runTest{
 
+        coEvery{ mockRepository.saveNewSong(fakeSong)} returns 1L
+        coEvery{mockRepository.fetchSongById(1L)} returns fakeSong
+        coEvery { mockRepository.fetchAllSongs() } returns listOf(fakeSong)
+
+        viewModel.setItemsCount(1)
+        viewModel.saveNewSong(fakeSong)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) {mockRepository.saveNewSong(fakeSong) }
+        coVerify(exactly = 1) {mockRepository.fetchSongById(1L) }
+
+        val info = viewModel.progressRegisterSaved.getOrAwaitValue()
+
+        assertThat(info.first).isEqualTo(1)
+        assertThat(info.second).isEqualTo(1)
+
+    }
+
+    @Test
+    fun saveNewSong_emitsIntermediateProgressValue()=runTest{
+
+        coEvery{mockRepository.fetchSongById(1L)} returns fakeSong
+        coEvery{mockRepository.fetchAllSongs()} returns listOf(fakeSong)
+
+        val emittedValues = mutableListOf<Pair<Int,Int>>()
+
+        val observer = Observer<Pair<Int,Int>>{value->
+            emittedValues.add(value)
+        }
+        viewModel.setItemsCount(1)
+        viewModel.progressRegisterSaved.observeForever(observer)
+        viewModel.getSongById(1L)
+        advanceUntilIdle()
+
+        viewModel.progressRegisterSaved.removeObserver(observer)
+
+        assertThat(emittedValues).contains(Pair(1,1))
     }
 
     fun<T> LiveData<T>.getOrAwaitValue(

@@ -42,10 +42,10 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
             updateUIOnceTime(it)
-            setNumberOfTracks()
+            setNumberOfTracks(scrollToPosition = false)
         }
-        mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner) { (totalRegisters, count) ->
-            setNumberOfTracks(count)
+        mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner) { (_, count) ->
+            setNumberOfTracks(itemCount = count, scrollToPosition = false)
         }
         mainViewModel.musicState.observe(viewLifecycleOwner){
             updateUI(it)
@@ -65,9 +65,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     }
     private fun updateUI(musicState: MusicState)=with(bind){
         miniPlaybackSeekBar.max = musicState.duration.toInt()
-        tvInitTime.text = createTime(musicState.currentDuration).third
-        //loadSeekBar.progress = musicState.currentDuration.toInt()
-
+        if(!isUserSeeking) tvInitTime.text = createTime(musicState.currentDuration).third
         // Updates the SeekBar progress with a slight delay synced to the screen refresh rate
         // to reduce visual stuttering. Only applies when the user is not interacting with the SeekBar.
         miniPlaybackSeekBar.setProgressSynchronized(requireContext(),isUserSeeking,musicState.currentDuration)

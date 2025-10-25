@@ -178,14 +178,13 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner) { currentTRack ->
             updateUIOnceTime(currentTRack)
-            playbackControlsFragment?.setNumberOfTracks()
-            setNumberOfTrack(false)
+            //playbackControlsFragment?.setNumberOfTracks(scrollToPosition = false)
+            //setNumberOfTrack(false)
         }
         mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner) { (totalRegisters, count) ->
             bind?.pbLoad?.apply {
                 max = totalRegisters
                 progress = count
-                setNumberOfTrack(itemCount = count)
             }
         }
         mainViewModel.isPlaying.observe(viewLifecycleOwner) { statePlay ->
@@ -244,7 +243,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     musicPlayerService?.nextSong()
                 }
                 musicPlayerService?.removeMediaItem(song)
-                setNumberOfTrack(scrollToPosition = false)
+                playbackControlsFragment?.setNumberOfTracks(scrollToPosition = false)
             }
         }
         mainViewModel.deleteAllRows.observe(viewLifecycleOwner) { deleteRows ->
@@ -539,7 +538,9 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 if (scrollToPosition) bind?.rvSongs?.scrollToPosition(realPos)
             }
         }
-        val numbersOfTrack=Pair((if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),(musicListAdapter?.getSongItemCount()!! + itemCount))
+        val numbersOfTrack=Pair(
+            first=(if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),
+            second = (musicListAdapter?.getSongItemCount()!! + itemCount))
         return numbersOfTrack
     }
     private fun updateService() {
