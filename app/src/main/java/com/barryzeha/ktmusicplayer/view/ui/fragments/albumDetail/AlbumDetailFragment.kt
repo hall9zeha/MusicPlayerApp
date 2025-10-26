@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -59,10 +60,11 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         songEntity?.let { song->
             getAlbumInfo(song)
         }
-       /*activity?.onBackPressedDispatcher?.addCallback(this,object: OnBackPressedCallback(true){
+      /* activity?.onBackPressedDispatcher?.addCallback(this,object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
                //navController?.navigate(R.id.playlistFragment)
-                navController?.navigateUp()
+                //navController?.navigateUp()
+
             }
         })*/
     }
@@ -98,7 +100,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
             bind.ctlContentDetail?.visibility = View.VISIBLE
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTrack->
-            albumAdapter?.changeBackgroundColorSelectedItem(currentTrack.idSong)
+            albumAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
         }
     }
     private fun getAlbumInfo(song:SongEntity){
@@ -205,11 +207,13 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
         super.onResume()
         mPrefs.saveFragmentOfNav = ALBUM_DETAIL_FRAGMENT
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
-        mPrefs.isOpenQueue=false
-        musicPlayerService?.reloadIndexOfSong()
+        if(navController?.navigateUp()!!) {
+            mPrefs.isOpenQueue = false
+            musicPlayerService?.reloadIndexOfSong()
+            navController?.navigateUp()
+        }
     }
     companion object {
         @JvmStatic

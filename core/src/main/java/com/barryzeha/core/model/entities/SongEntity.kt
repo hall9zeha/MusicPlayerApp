@@ -1,6 +1,7 @@
 package com.barryzeha.core.model.entities
 
 import android.os.Parcelable
+import androidx.annotation.Keep
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -14,6 +15,7 @@ import kotlinx.parcelize.Parcelize
  * Created by Barry Zea H. on 30/4/24.
  * Copyright (c)  All rights reserved.
  **/
+@Keep
 @Parcelize
 @Entity(indices = [Index(value = ["id"], unique = true)])
 data class SongEntity(

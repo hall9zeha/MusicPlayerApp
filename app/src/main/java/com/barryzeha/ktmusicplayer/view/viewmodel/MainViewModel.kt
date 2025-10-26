@@ -164,7 +164,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
         launch {
             val idInserted=repository.saveNewSong(songEntity)
             getSongById(idInserted)
-            //_processedRegistersInfo.value = Pair(itemsCount.toInt(), countItemsInserted.toInt())
         }
     }
 

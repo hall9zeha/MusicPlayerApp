@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.annotation.LayoutRes
 import com.barryzeha.core.common.CLEAR_MODE
 import com.barryzeha.core.common.REPEAT_ALL
@@ -51,11 +52,11 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
         this?.let {
             btnPlay.setOnClickListener {
                 if (musicPlayerService?.playListSize()!! > 0) {
-                    if (!musicPlayerService!!.playingState() && musicPlayerService?.currentSongState()!!.duration <= 0) musicPlayerService?.getSongsList()
-                        ?.get(0)
-                        ?.let { song ->
-                            musicPlayerService?.startPlayer(song)
-                        }
+                    if (!musicPlayerService!!.playingState() && musicPlayerService?.currentSongState()!!.duration <= 0) {
+                        musicPlayerService?.getSongsList()
+                            ?.get(0)
+                            ?.let { song -> musicPlayerService?.startPlayer(song)}
+                    }
                     else {
                         if (musicPlayerService?.playingState()!!) {
                             musicPlayerService?.pausePlayer()
@@ -70,14 +71,12 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
             btnPrevious.setOnClickListener {
                 if (musicPlayerService?.getCurrentSongPosition()!! > 0) {
                     musicPlayerService?.prevSong()
-                    listFragmentInstance?.setNumberOfTrack(true)
                     setNumberOfTracks()
                 }
             }
             btnNext.setOnClickListener {
                 if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!!) {
                     musicPlayerService?.nextSong()
-                    listFragmentInstance?.setNumberOfTrack(true)
                     setNumberOfTracks()
                 } else {
                     getSongOfAdapter(-1)?.let { song ->

@@ -65,6 +65,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -93,17 +94,17 @@ class MusicPlayerService : Service(){
     private lateinit var mediaPlayerNotify:Notification
     private var playBackState:PlaybackState? = null
     private var mediaMetadata:MediaMetadata? = null
-
     private val binder: Binder = MusicPlayerServiceBinder()
     private var _activity:AppCompatActivity?= null
     private lateinit var exoPlayer:ExoPlayer
     private var positionReset= -1
-
+    private var hasSetCurrentTrack:Boolean=false
+    private var playlistEnded:Boolean=false
     private var _songController: ServiceSongListener? = null
-    val songController: ServiceSongListener get() = _songController!!
+
     private var isForegroundService = false
     private var currentMusicState = MusicState()
-    val _currentMusicState:MusicState get() = currentMusicState
+
     private val serviceScope = CoroutineScope(Job() + Main)
     private var songRunnable: Runnable = Runnable {}
     private var songHandler: Handler = Handler(Looper.getMainLooper())
@@ -708,11 +709,18 @@ class MusicPlayerService : Service(){
     }
 
     private fun initExoPlayer(song:SongEntity){
+
+        hasSetCurrentTrack = false
         songEntity=song
-        exoPlayer.seekTo(findMediaItemIndexById(mainMediaItemList,song.id.toString()),0)
+        val itemIndex=findMediaItemIndexById(
+            if(isOpenQueue())mediaItemsQueue else mainMediaItemList,
+            song.id.toString())
+        positionReset = itemIndex
+        exoPlayer.seekTo(itemIndex,0)
         exoPlayer.prepare()
         exoPlayer.play()
         setPlayingState(true)
+        setPlaylistEnded(false)
 
     }
     @OptIn(UnstableApi::class)
@@ -721,31 +729,41 @@ class MusicPlayerService : Service(){
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
-                        val song=if(positionReset>-1) (if(mPrefs.isOpenQueue) playingQueue[positionReset]else songsList[positionReset]) else songEntity
+                     val song=if(positionReset>-1) (if(isOpenQueue()) playingQueue[positionReset]else songsList[positionReset]) else songEntity
                          // Set info currentSongEntity
                      setPlayingState(exoPlayer.isPlaying)
                      fetchSongMetadata(song)?.let{
                              currentMusicState=it
                              // Para encontrar la posición del item en la lista de nuestra vista
                              // por su id
-                             // por ahora lo guardamos en onPositionDiscontinuity
                              //mPrefs.idSong=it.idSong
                          }
                      positionReset=-1
 
                  }
-                 if(playbackState == Player.STATE_ENDED  && _songController==null){
-                     if(mPrefs.currentIndexSong < songsList.size -1 ){
-                         nextOrPrevTRack((mPrefs.currentIndexSong + 1).toInt())
-                     }
-                 }
-                 else if (playbackState == Player.STATE_ENDED) {
+                 // Si no está en modo repetir toda la lista al terminar de reproducir toda la lista
+                 // volver a la primera pista y detener el reproductor
+
+                 if(playbackState == Player.STATE_ENDED ){
+                     stopLooper()
+                     exoPlayer.seekTo(0,0)
+                     exoPlayer.stop()
                      currentMusicState = currentMusicState.copy(
                          isPlaying = false,
-                         latestPlayed = false
-                     )
+                         latestPlayed = false,
+                         currentPosition = 0,
+                         currentDuration = 0,
+                         )
                      _songController?.currentTrack(currentMusicState)
+                     setPlayingState(false)
+                     startLooper()
+                     setPlaylistEnded(true)
                  }
+                 if(!hasSetCurrentTrack && playingState() ){
+                     _songController?.currentTrack(currentMusicState)
+                     hasSetCurrentTrack =true
+                 }
+
              }
              override fun onPositionDiscontinuity(
                  oldPosition: Player.PositionInfo,
@@ -754,44 +772,53 @@ class MusicPlayerService : Service(){
              ) {
                  super.onPositionDiscontinuity(oldPosition, newPosition, reason)
                     if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
-                        if (songsList.isNotEmpty()) {
-                            val song=if(mPrefs.isOpenQueue)playingQueue[newPosition.mediaItemIndex]else songsList[newPosition.mediaItemIndex]
-                            songEntity = song
-                            fetchSongMetadata(song)?.let { songInfo->
-                                currentMusicState = songInfo.copy(
-                                    isPlaying = exoPlayer.isPlaying,
-                                    currentPosition = newPosition.mediaItemIndex.toLong(),
-                                )
-                                _songController?.currentTrack(currentMusicState)
-                                // Para encontrar la posición del item en la lista de nuestra vista
-                                // por su id
-                                mPrefs.idSong = song.id
-                                mPrefs.currentIndexSong = newPosition.mediaItemIndex.toLong()
-                                if(_songController == null){
-                                    mPrefs.controlFromNotify = true
-                                    mPrefs.nextOrPrevFromNotify = true
-                                    setPlayingState(exoPlayer.isPlaying)
+                         if (songsList.isNotEmpty()) {
+                                val song =
+                                    if (isOpenQueue()) playingQueue[newPosition.mediaItemIndex] else songsList[newPosition.mediaItemIndex]
+                                songEntity = song
+                                fetchSongMetadata(song)?.let { songInfo ->
+                                    currentMusicState = songInfo.copy(
+                                        isPlaying = exoPlayer.isPlaying,
+                                        currentPosition = newPosition.mediaItemIndex.toLong(),
+                                    )
+                                    _songController?.currentTrack(currentMusicState)
+                                    // Para encontrar la posición del item en la lista de nuestra vista
+                                    // por su id
                                     mPrefs.idSong = song.id
+                                    mPrefs.currentIndexSong = newPosition.mediaItemIndex.toLong()
+                                    if (_songController == null) {
+                                        mPrefs.controlFromNotify = true
+                                        mPrefs.nextOrPrevFromNotify = true
+                                        setPlayingState(exoPlayer.isPlaying)
+                                        mPrefs.idSong = song.id
+                                    }
                                 }
                             }
-                        }
                     }
              }
              override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                  super.onMediaItemTransition(mediaItem, reason)
                  //Si ya no estamos reproduciendo la lista: que puede ser álbum, artista etc
                  // es porque volveremos a la lista principal y habremos limpiado playingQueue
-                 // entonces que volveremos a reproducir la pista que estábamos reproduciendo en playingQueue
+                 // entonces volveremos a reproducir la pista que estábamos reproduciendo en playingQueue
                  if(playingQueueList) {
                      if (exoPlayer.mediaItemCount == mainMediaItemList.size) {
-                         //TODO reproducir la misma canción en la lista principal que se estaba reproduciendo en la lista de playingQueue
+                         //TODO mejorar la transición desde la lista de reproducción de album detail () a la lista principal
+                         // cuando salimos de album detail
+                         //stopLooper()
                          exoPlayer.seekTo(
                              findMediaItemIndexById(
                                  mainMediaItemList,
                                  mPrefs.idSong.toString()
                              ), currentMusicState.currentPosition
                          )
-                         playingQueueList=false
+                         setIsOpenQueue(false)
+                         serviceScope.launch(Main) {
+                             delay(1000)
+                             setPlayingState(false)
+                             _songController?.currentTrack(currentMusicState)
+                         }
+                         //startLooper()
                      }
                  }
 
@@ -872,10 +899,10 @@ class MusicPlayerService : Service(){
     // con el parámetro (isSort), pero en exoplayer flavor no, aún así debemos ponerlo porque el fragmento de lista
     // lo usa así tanto para bass como exoplayer.
     fun clearPlayList(isSort:Boolean=false){
+        exoPlayer.stop()
         mainMediaItemList.clear()
         songsList.clear()
         exoPlayer.clearMediaItems()
-        //exoPlayer.release()
         currentMusicState=MusicState()
         _songController?.currentTrack(currentMusicState)
         positionReset=0
@@ -893,14 +920,23 @@ class MusicPlayerService : Service(){
     fun playingState():Boolean{
         return mPrefs.isPlaying
     }
+    private fun setPlayingState(state:Boolean){
+        mPrefs.isPlaying=state
+    }
+    private fun setIsOpenQueue(state:Boolean){
+        mPrefs.isOpenQueue = state
+    }
+    private fun isOpenQueue() = mPrefs.isOpenQueue
+
+    fun playlistEnded():Boolean = playlistEnded
+    private fun setPlaylistEnded(state:Boolean){
+        playlistEnded = state
+    }
     fun currentSongState():MusicState{
         return currentMusicState
     }
     fun playListSize():Int{
         return if(songsList.isNotEmpty()) songsList.size else 0
-    }
-    private fun setPlayingState(state:Boolean){
-        mPrefs.isPlaying=state
     }
     fun checkIfSongIsFavorite(id:Long){
         serviceScope.launch(Dispatchers.IO) {
@@ -911,18 +947,20 @@ class MusicPlayerService : Service(){
         }
     }
     fun openQueue(songs:List<SongEntity>, startPosition:Int){
+        setPlaylistEnded(false)
         mPrefs.currentIndexSong = startPosition.toLong()
+        setIsOpenQueue(true)
         playingQueue = songs.toMutableList()
         songs.forEach { s->mediaItemsQueue.add(convertToMediaItem(s)) }
         exoPlayer.clearMediaItems()
         exoPlayer.addMediaItems(mediaItemsQueue)
         startPlayer(songs[startPosition])
-        playingQueueList = true
+
     }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
-            if(playingState()){songHandler.post(songRunnable)}
             initExoPlayer(song)
+            startLooper()
         }
 
     }
@@ -946,7 +984,8 @@ class MusicPlayerService : Service(){
         return Pair(0,0)
     }
     fun resumePlayer(){
-        if(exoPlayer.mediaItemCount == mainMediaItemList.size) {
+        setPlaylistEnded(false)
+        if(exoPlayer.mediaItemCount == mainMediaItemList.size || exoPlayer.mediaItemCount == mediaItemsQueue.size) {
             if (!exoPlayer.isPlaying) {
                 exoPlayer.prepare()
                 exoPlayer.play()
@@ -959,11 +998,13 @@ class MusicPlayerService : Service(){
         }
     }
     fun nextSong(){
+        setPlaylistEnded(false)
         setPlayingState(exoPlayer.isPlaying)
         exoPlayer.seekToNextMediaItem()
         clearABLoopOfPreferences()
     }
     fun prevSong(){
+        setPlaylistEnded(false)
         setPlayingState(exoPlayer.isPlaying)
         exoPlayer.seekToPreviousMediaItem()
         clearABLoopOfPreferences()

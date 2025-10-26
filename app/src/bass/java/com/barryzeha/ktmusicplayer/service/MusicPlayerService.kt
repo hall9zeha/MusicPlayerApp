@@ -117,6 +117,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private var bluetoothIsConnect:Boolean = false
     private var nextOrPrevAnimValue=-1
     private var listIsShuffled:Boolean=false
+    private var playListEnded:Boolean=false
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
     private var firstCallingToSongState:Boolean = true
@@ -740,6 +741,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
+    fun playlistEnded():Boolean=playListEnded
+    private fun setPlaylistEnded(state:Boolean){
+        playListEnded=state
+    }
     fun checkIfSongIsFavorite(id:Long){
         serviceScope.launch(Dispatchers.IO) {
             currentMusicState = fetchSongMetadata(repository.fetchSongById(id))!!
@@ -764,6 +769,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     private fun play(song:SongEntity?){
             if (mainSongsList.isNotEmpty()) {
+                setPlaylistEnded(false)
                 //try {
                     song?.let {
                         songEntity = it
@@ -895,6 +901,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun getCurrentSongPosition():Int = mPrefs.currentIndexSong.toInt()?:0
     fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
+        setPlaylistEnded(false)
         if (mPrefs.isPlaying){
             play(if(mPrefs.isOpenQueue)playingQueue[indexOfSong] else mainSongsList[indexOfSong])
         }
@@ -1003,6 +1010,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     else -> {
                         if (mainSongsList.isNotEmpty()) setMusicForPlay(mainSongsList[0])
                         bassManager?.stopCheckingPlayback()
+                        //Finish play list
+                        setPlaylistEnded(true)
                     }
                 }
 

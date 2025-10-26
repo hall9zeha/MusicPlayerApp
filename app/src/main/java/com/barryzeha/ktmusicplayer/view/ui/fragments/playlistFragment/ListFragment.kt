@@ -8,6 +8,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
@@ -178,8 +179,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner) { currentTRack ->
             updateUIOnceTime(currentTRack)
-            //playbackControlsFragment?.setNumberOfTracks(scrollToPosition = false)
-            //setNumberOfTrack(false)
         }
         mainViewModel.progressRegisterSaved.observe(viewLifecycleOwner) { (totalRegisters, count) ->
             bind?.pbLoad?.apply {
@@ -290,9 +289,11 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             mainViewModel.setCurrentPosition(mPrefs.currentIndexSong.toInt())
             //Move to the beginning of the list when all tracks have finished playing
-            if (musicPlayerService?.getCurrentSongPosition()!! >= musicPlayerService?.playListSize()!! - 1) rvSongs.scrollToPosition(
-                0
-            )
+            if (musicPlayerService?.playlistEnded()!!) {
+                rvSongs.scrollToPosition(
+                    0
+                )
+            }
         }
     }
     private fun updateUI(musicState: MusicState) {

@@ -61,6 +61,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
     fun updateUIOnceTime(musicState: MusicState)=with(bind){
         tvEndTime.text = createTime(musicState.duration).third
         miniPlaybackSeekBar.max = musicState.duration.toInt()
+        miniPlaybackSeekBar.progress = musicState.currentDuration.toInt()
         tvInitTime.text = createTime(musicState.currentDuration).third
     }
     private fun updateUI(musicState: MusicState)=with(bind){
@@ -90,6 +91,7 @@ class PlaybackControlsFragment : AbsPlaybackControlsFragment(R.layout.small_play
             }
         }
     }
+
     override fun play() {
         super.play()
         musicPlayerService?.resumePlayer()
