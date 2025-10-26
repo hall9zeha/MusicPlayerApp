@@ -939,11 +939,13 @@ class MusicPlayerService : Service(){
         return if(songsList.isNotEmpty()) songsList.size else 0
     }
     fun checkIfSongIsFavorite(id:Long){
-        serviceScope.launch(Dispatchers.IO) {
-            fetchSongMetadata(repository.fetchSongById(id))?.let{data->
-              currentMusicState = data
-              initNotify()
-          }
+        if(id>0) {
+            serviceScope.launch(Dispatchers.IO) {
+                fetchSongMetadata(repository.fetchSongById(id))?.let { data ->
+                    currentMusicState = data
+                    initNotify()
+                }
+            }
         }
     }
     fun openQueue(songs:List<SongEntity>, startPosition:Int){

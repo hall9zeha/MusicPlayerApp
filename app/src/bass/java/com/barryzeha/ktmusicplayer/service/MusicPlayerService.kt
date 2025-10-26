@@ -746,9 +746,11 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         playListEnded=state
     }
     fun checkIfSongIsFavorite(id:Long){
-        serviceScope.launch(Dispatchers.IO) {
-            currentMusicState = fetchSongMetadata(repository.fetchSongById(id))!!
-            initNotify()
+        if(id>0) {
+            serviceScope.launch(Dispatchers.IO) {
+                currentMusicState = fetchSongMetadata(repository.fetchSongById(id))!!
+                initNotify()
+            }
         }
     }
     fun openQueue(songs:List<SongEntity>, startPosition:Int){
