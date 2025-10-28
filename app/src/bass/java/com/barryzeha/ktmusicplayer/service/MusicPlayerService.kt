@@ -118,6 +118,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private var nextOrPrevAnimValue=-1
     private var listIsShuffled:Boolean=false
     private var playListEnded:Boolean=false
+    private var isOpenQueue:Boolean=false
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
     private var firstCallingToSongState:Boolean = true
@@ -143,6 +144,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         mediaSession.setCallback(mediaSessionCallback())
         setUpPlaylist()
         setUpHeadsetAndBluetoothReceiver()
+
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
         headsetReceiver = object:BroadcastReceiver(){
@@ -649,7 +651,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
    private fun findItemSongIndexById(idSong:Long):Int?{
-       if(mPrefs.isOpenQueue){
+       if(isOpenQueue()){
            if (playingQueue.isNotEmpty()) {
                val index = playingQueue.indexOfFirst { it.id == idSong }
                return if (index > -1) index else 0
@@ -741,6 +743,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
+    fun isOpenQueue():Boolean = isOpenQueue
+    private fun setIsOpenQueue(state:Boolean){
+        isOpenQueue = state
+    }
     fun playlistEnded():Boolean=playListEnded
     private fun setPlaylistEnded(state:Boolean){
         playListEnded=state
@@ -754,6 +760,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     fun openQueue(songs:List<SongEntity>, startPosition:Int){
+        setIsOpenQueue(true)
         mPrefs.currentIndexSong = startPosition.toLong()
         indexOfSong = startPosition
         playingQueue = songs.toMutableList()
@@ -832,7 +839,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
-        if(mPrefs.isOpenQueue){
+        if(isOpenQueue()){
             if(playingQueue.isNotEmpty()){
                 if(indexOfSong < playingQueue.size -1){
                     if(mPrefs.songMode == SHUFFLE) indexOfSong = Random.nextInt(0,playingQueue.size-1)
@@ -862,7 +869,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun prevSong(){
         if(mainSongsList.isNotEmpty()){
             if(indexOfSong > 0) {
-                if(mPrefs.isOpenQueue){
+                if(isOpenQueue()){
                     if(mPrefs.songMode == SHUFFLE) indexOfSong =Random.nextInt(0, playingQueue.size-1)
                     else  indexOfSong -=1
                 }else{
@@ -881,6 +888,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun reloadIndexOfSong(){
         // Obtenemos la posición en la lista principal de la pista que hayamos reproducido
         // de cualquier otra lista como AlbumDetail
+        setIsOpenQueue(false)
         indexOfSong = findItemSongIndexById(songEntity.id)!!
     }
     fun fastForward(){
@@ -898,17 +906,17 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         if(mPrefs.songMode == AB_LOOP) mPrefs.songMode = CLEAR_MODE
     }
     fun getSongsList():List<SongEntity>{
-        return if(mPrefs.isOpenQueue) playingQueue else mainSongsList
+        return if(isOpenQueue()) playingQueue else mainSongsList
     }
     fun getCurrentSongPosition():Int = mPrefs.currentIndexSong.toInt()?:0
     fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
         setPlaylistEnded(false)
         if (mPrefs.isPlaying){
-            play(if(mPrefs.isOpenQueue)playingQueue[indexOfSong] else mainSongsList[indexOfSong])
+            play(if(isOpenQueue())playingQueue[indexOfSong] else mainSongsList[indexOfSong])
         }
         else{
-            setMusicForPlay(if(mPrefs.isOpenQueue)playingQueue[indexOfSong]else mainSongsList[indexOfSong], animDirection)
+            setMusicForPlay(if(isOpenQueue())playingQueue[indexOfSong]else mainSongsList[indexOfSong], animDirection)
         }
     }
     private fun setMusicForPlay(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
@@ -975,7 +983,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     override fun onFinishPlayback() {
-        if(mPrefs.isOpenQueue){
+        if(isOpenQueue()){
             if (indexOfSong < playingQueue.size - 1 && playingQueue.isNotEmpty()) {
                 when (mPrefs.songMode) {
                     REPEAT_ONE -> {if (playingState()) {bassManager?.repeatSong()}}

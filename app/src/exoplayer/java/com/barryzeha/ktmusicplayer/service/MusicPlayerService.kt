@@ -135,7 +135,7 @@ class MusicPlayerService : Service(){
     // En esta lista cargamos momentaneamente las las canciones del fragmento AlbumDetail
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
     private var mediaItemsQueue:MutableList<MediaItem> = arrayListOf()
-    private var playingQueueList:Boolean = false
+    private var isOpenQueue:Boolean = false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -801,7 +801,7 @@ class MusicPlayerService : Service(){
                  //Si ya no estamos reproduciendo la lista: que puede ser álbum, artista etc
                  // es porque volveremos a la lista principal y habremos limpiado playingQueue
                  // entonces volveremos a reproducir la pista que estábamos reproduciendo en playingQueue
-                 if(playingQueueList) {
+                 if(isOpenQueue()) {
                      if (exoPlayer.mediaItemCount == mainMediaItemList.size) {
                          //TODO mejorar la transición desde la lista de reproducción de album detail () a la lista principal
                          // cuando salimos de album detail
@@ -924,9 +924,9 @@ class MusicPlayerService : Service(){
         mPrefs.isPlaying=state
     }
     private fun setIsOpenQueue(state:Boolean){
-        mPrefs.isOpenQueue = state
+        isOpenQueue = state
     }
-    private fun isOpenQueue() = mPrefs.isOpenQueue
+    private fun isOpenQueue() = isOpenQueue
 
     fun playlistEnded():Boolean = playlistEnded
     private fun setPlaylistEnded(state:Boolean){
@@ -1018,6 +1018,7 @@ class MusicPlayerService : Service(){
     fun reloadIndexOfSong(){
         // Obtenemos la posición en la lista principal de la pista que hayamos reproducido
         // de cualquier otra lista como AlbumDetail
+        setIsOpenQueue(false)
         exoPlayer.clearMediaItems()
         mediaItemsQueue.clear()
         exoPlayer.addMediaItems(mainMediaItemList)

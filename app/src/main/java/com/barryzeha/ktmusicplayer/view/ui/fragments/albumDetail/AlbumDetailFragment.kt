@@ -90,7 +90,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     }
     private fun setupObservers(view:View){
         albumDetailViewModel.songsByAlbum.observe(viewLifecycleOwner){songs->
-          /*   view.doOnPreDraw {
+            /*view.doOnPreDraw {
                  startPostponedEnterTransition()
              }*/
             if(songs.isNotEmpty()) setAlbumInfo(songs)
@@ -150,7 +150,6 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
 
     private fun setupListeners()=with(bind){
         btnPlaying.setOnClickListener{
-            mPrefs.isOpenQueue = true
             musicPlayerService?.openQueue(albumSongs,0)
         }
         btnShuffle.setOnClickListener {
@@ -187,7 +186,6 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     }
     private fun onItemClick(position: Int, songEntity: SongEntity) {
         musicPlayerService?.openQueue(albumSongs,position-1)
-        mPrefs.isOpenQueue = true
     }
 
     override fun currentTrack(musicState: MusicState?) {
@@ -210,7 +208,6 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     override fun onDestroyView() {
         super.onDestroyView()
         if(navController?.navigateUp()!!) {
-            mPrefs.isOpenQueue = false
             musicPlayerService?.reloadIndexOfSong()
             navController?.navigateUp()
         }
