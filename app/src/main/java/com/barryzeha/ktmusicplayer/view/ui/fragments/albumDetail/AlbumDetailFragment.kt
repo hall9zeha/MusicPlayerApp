@@ -1,6 +1,7 @@
 package com.barryzeha.ktmusicplayer.view.ui.fragments.albumDetail
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -100,7 +101,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
             bind.ctlContentDetail?.visibility = View.VISIBLE
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){currentTrack->
-            albumAdapter?.changeBackgroundColorSelectedItem(mPrefs.idSong)
+            albumAdapter?.changeBackgroundColorSelectedItem(currentTrack.idSong)
         }
     }
     private fun getAlbumInfo(song:SongEntity){

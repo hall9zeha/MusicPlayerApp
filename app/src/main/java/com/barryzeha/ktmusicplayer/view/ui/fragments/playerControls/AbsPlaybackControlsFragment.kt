@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
@@ -75,10 +76,12 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
                 }
             }
             btnNext.setOnClickListener {
-                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!!) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!! -1) {
                     musicPlayerService?.nextSong()
+                    Log.e("ITEM_POS_NEXT", "current-song-position: ${musicPlayerService?.getCurrentSongPosition()!!} -> queue-size: ${musicPlayerService?.playListSize()!!}" )
                     setNumberOfTracks()
                 } else {
+                    Log.e("BTN_NEXT_RETURN_TO_START", "current-song-position: ${musicPlayerService?.getCurrentSongPosition()!!} -> queue-size: ${musicPlayerService?.playListSize()!!}" )
                     getSongOfAdapter(-1)?.let { song ->
                         musicPlayerService?.startPlayer(song)
                         setNumberOfTracks()
