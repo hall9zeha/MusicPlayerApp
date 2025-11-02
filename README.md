@@ -32,6 +32,7 @@ Versión con librería Bass [Descargar](https://github.com/hall9zeha/MusicPlayer
 - Filtro por: Artista, Álbum, Género, Favoritos
 - Búsqueda de canción por nombre
 - Agregar canción a favoritos
+- Compartir archivo de música
 - Creación de listas de reproducción
 - Avance y retroceso rápido.
 - Notificaciones multimedia.

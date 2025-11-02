@@ -841,7 +841,6 @@ class MusicPlayerService : Service(){
        if(!songsList.contains(song)){ songsList.add(song)
             val newMediaItem = song.convertToMediaItem()
             mainMediaItemList.add(newMediaItem)
-            //exoPlayer.addMediaItem(MediaItem.fromUri(song.pathLocation.toString()))
             exoPlayer.addMediaItem(newMediaItem)
         }
     }

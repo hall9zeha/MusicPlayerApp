@@ -31,6 +31,7 @@ Version with Bass library [Descargar](https://github.com/hall9zeha/MusicPlayerAp
 - Filter by: Artist, Album, Genre, Favorites
 - Song search by name
 - Add song to favorites
+- Share song file
 - Create playlists
 - Fast forward and rewind.
 - Multimedia notifications.
