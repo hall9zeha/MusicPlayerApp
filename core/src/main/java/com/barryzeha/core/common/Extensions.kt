@@ -44,7 +44,9 @@ import java.lang.Exception
 import java.nio.file.Files
 import java.nio.file.attribute.BasicFileAttributes
 import kotlin.math.roundToInt
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 
 /**
@@ -180,7 +182,9 @@ fun <T> Fragment.getFragment(@IdRes id: Int): T {
 }
 
 fun SeekBar.setProgressSynchronized(context:Context, isUserSeeking:Boolean, currentPosition:Long){
-    val frameTime = (1/ (context.display?.refreshRate!! )).toDouble().milliseconds
+    val frameTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        (1.0 / (context.display?.refreshRate ?: 60f)).seconds
+    else Duration.ZERO
     CoroutineScope(Dispatchers.Main).launch {
         delay(frameTime)
         if(!isUserSeeking) {
