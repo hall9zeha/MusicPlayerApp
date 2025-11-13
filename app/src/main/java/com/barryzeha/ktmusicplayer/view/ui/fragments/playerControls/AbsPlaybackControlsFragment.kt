@@ -76,12 +76,10 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
                 }
             }
             btnNext.setOnClickListener {
-                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!! -1) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!!) {
                     musicPlayerService?.nextSong()
-                    Log.e("ITEM_POS_NEXT", "current-song-position: ${musicPlayerService?.getCurrentSongPosition()!!} -> queue-size: ${musicPlayerService?.playListSize()!!}" )
                     setNumberOfTracks()
                 } else {
-                    Log.e("BTN_NEXT_RETURN_TO_START", "current-song-position: ${musicPlayerService?.getCurrentSongPosition()!!} -> queue-size: ${musicPlayerService?.playListSize()!!}" )
                     getSongOfAdapter(-1)?.let { song ->
                         musicPlayerService?.startPlayer(song)
                         setNumberOfTracks()
