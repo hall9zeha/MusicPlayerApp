@@ -1,5 +1,5 @@
 [versions]
-agp = "8.11.2"
+agp = "8.13.0"
 #kotlin = "1.9.23"
 kotlin = "2.2.20"
 # If you want to update this version, you will need to update both the target SDK and the compile SDK to 36.
