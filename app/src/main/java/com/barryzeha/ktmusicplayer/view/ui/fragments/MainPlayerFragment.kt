@@ -315,8 +315,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         }
     }
     private fun setupAnimator(){
-        frontAnimator= AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.front_animator) as AnimatorSet
-        backAnimator = AnimatorInflater.loadAnimator(requireContext(),coreRes.anim.back_animator) as AnimatorSet
+        frontAnimator= AnimatorInflater.loadAnimator(requireContext(),coreRes.animator.front_animator) as AnimatorSet
+        backAnimator = AnimatorInflater.loadAnimator(requireContext(),coreRes.animator.back_animator) as AnimatorSet
     }
 
     private fun setAlbumCoverViewAnimator(frontView:Any?, backView:Any?){

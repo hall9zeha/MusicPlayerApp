@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
    <application
         tools:node="remove"
-        android:theme ="@style/Theme.KTMusicPlayer"
+        android:theme ="@style/splashScreenTheme"
         >
        <activity
             android:name=".ui.activities.MainEqualizerActivity"

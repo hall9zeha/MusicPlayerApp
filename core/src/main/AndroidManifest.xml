@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.barryzeha.core">
     <application
-        tools:node="remove"
-        android:theme ="@style/Theme.KTMusicPlayer">
+        tools:node="merge"
+        android:theme ="@style/splashScreenTheme">
     </application>
 </manifest>
