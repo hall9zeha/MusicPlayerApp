@@ -204,6 +204,54 @@ open class BassManager {
         BASS.BASS_ChannelSetPosition( getActiveChannel(),getCurrentPositionToBytes(0),BASS.BASS_POS_BYTE)
     }
 
+    fun getBassErrorMessage(code: Int): String {
+        return when (code) {
+            0 -> "BASS_OK (no error)"
+            1 -> "BASS_ERROR_MEM: Memory error"
+            2 -> "BASS_ERROR_FILEOPEN: Cannot open the file"
+            3 -> "BASS_ERROR_DRIVER: Cannot find a valid driver"
+            4 -> "BASS_ERROR_BUFLOST: Buffer lost"
+            5 -> "BASS_ERROR_HANDLE: Invalid handle"
+            6 -> "BASS_ERROR_FORMAT: Unsupported sample format"
+            7 -> "BASS_ERROR_POSITION: Invalid position"
+            8 -> "BASS_ERROR_INIT: BASS not initialized"
+            9 -> "BASS_ERROR_START: BASS_Start has not been called"
+            14 -> "BASS_ERROR_ALREADY: Already initialized"
+            17 -> "BASS_ERROR_NOTAUDIO: Not an audio file"
+            18 -> "BASS_ERROR_NOCHAN: No free channel available"
+            19 -> "BASS_ERROR_ILLTYPE: Illegal type"
+            20 -> "BASS_ERROR_ILLPARAM: Illegal parameter"
+            21 -> "BASS_ERROR_NO3D: No 3D support"
+            22 -> "BASS_ERROR_NOEAX: No EAX support"
+            23 -> "BASS_ERROR_DEVICE: Invalid device"
+            24 -> "BASS_ERROR_NOPLAY: The channel is not playing"
+            25 -> "BASS_ERROR_FREQ: Illegal frequency"
+            27 -> "BASS_ERROR_NOTFILE: Not a (streamable) file"
+            29 -> "BASS_ERROR_NOHW: No hardware support"
+            31 -> "BASS_ERROR_EMPTY: Empty file"
+            32 -> "BASS_ERROR_NONET: No internet/network connection"
+            33 -> "BASS_ERROR_CREATE: Can't create the object"
+            34 -> "BASS_ERROR_NOFX: Effects not available"
+            37 -> "BASS_ERROR_NOTAVAIL: Not available"
+            38 -> "BASS_ERROR_DECODE: The channel is a decoding channel only"
+            39 -> "BASS_ERROR_DX: DirectX resources unavailable"
+            40 -> "BASS_ERROR_TIMEOUT: Timeout"
+            41 -> "BASS_ERROR_FILEFORM: Unsupported or invalid file format"
+            42 -> "BASS_ERROR_SPEAKER: Invalid speaker"
+            43 -> "BASS_ERROR_VERSION: Invalid BASS version"
+            44 -> "BASS_ERROR_CODEC: Codec not available"
+            45 -> "BASS_ERROR_ENDED: The channel has ended"
+            46 -> "BASS_ERROR_BUSY: Device or resource busy"
+            47 -> "BASS_ERROR_UNSTREAMABLE: Unstreamable file"
+            48 -> "BASS_ERROR_PROTOCOL: Unsupported protocol"
+            49 -> "BASS_ERROR_DENIED: Access denied"
+            50 -> "BASS_ERROR_FREEING: Being freed"
+            51 -> "BASS_ERROR_CANCEL: Cancelled"
+            500 -> "BASS_ERROR_JAVA_CLASS: Object class problem"
+
+            else -> "Unknown BASS error code"
+        }
+    }
     interface PlaybackManager{
         fun onFinishPlayback()
     }

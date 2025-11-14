@@ -60,6 +60,7 @@ import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import com.barryzeha.ktmusicplayer.utils.BassManager
 import com.google.android.material.snackbar.Snackbar
+import com.un4seen.bass.BASS.BASS_ErrorGetCode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -810,9 +811,11 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         )
                         mPrefs.currentIndexSong = indexOfSong.toLong()
                     } else {
+                        val errorCode = BASS_ErrorGetCode()
+                        val errorMsg = bassManager?.getBassErrorMessage(errorCode)
                         _activity?.showSnackBar(
                             _activity?.findViewById(android.R.id.content)!!,
-                            coreRes.string.cantPlayMsg,
+                            errorMsg?.let{it.substringAfter(":")}?:run{coreRes.string.cantPlayMsg.toString()},
                             Snackbar.LENGTH_LONG
                         )
                     }
