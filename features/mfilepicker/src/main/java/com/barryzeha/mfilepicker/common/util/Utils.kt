@@ -46,31 +46,4 @@ fun getParentDirectories(path: String): String {
         }
     }
     return ""
-
-}
-fun getStorageIdentifier(path: String): String? {
-    // Expresiones regulares para detectar el número de almacenamiento en rutas emuladas y en tarjetas SD
-    val emulatedRegex = "emulated/(\\d+)/".toRegex()
-    val sdCardRegex = "storage/(extSdCard|external_sd)/".toRegex()
-
-    // Intentar encontrar una coincidencia para emulated
-    val emulatedMatchResult = emulatedRegex.find(path)
-    if (emulatedMatchResult != null) {
-        // Devolver solo el número de almacenamiento
-        return emulatedMatchResult.groups[1]?.value
-    }
-
-    // Intentar encontrar una coincidencia para SD card
-    val sdCardMatchResult = sdCardRegex.find(path)
-    if (sdCardMatchResult != null) {
-        // Devolver el nombre de la SD card (extSdCard o external_sd)
-        return sdCardMatchResult.groups[1]?.value
-    }
-
-    // Si no se encuentra ninguna coincidencia, retornar null
-    return null
-}
-//TODO eliminar lo que queda del provider
-fun getUriFromFile(file: File, context: Context): Uri {
-    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 }

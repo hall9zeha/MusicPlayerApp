@@ -1,5 +1,6 @@
 package com.barryzeha.mfilepicker.filetype
 
+import com.barryzeha.mfilepicker.BuildConfig
 import com.barryzeha.mfilepicker.R
 import com.barryzeha.mfilepicker.interfaces.FileType
 import java.io.File
@@ -18,16 +19,16 @@ class AudioFileType : FileType {
         get() = R.drawable.ic_audio_file
 
     override fun verify(fileName: String): Boolean {
-        val isHasSuffix = fileName.contains(".")
-        if (fileName.startsWith(".")) return false
+        val isHasSuffix = fileName.lowercase().contains(".")
+        if (fileName.lowercase().startsWith(".")) return false
         if (!isHasSuffix) return false
-        val suffix = fileName.substring(fileName.lastIndexOf(".") + 1)
+        val suffix = fileName.lowercase().substring(fileName.lowercase().lastIndexOf(".") + 1)
         return when (suffix) {
-            "aif", "iff", "m4a", "mid", "mp3", "mpa", "wav", "wma", "ogg", "flac", "ape", "alac" -> {
+            "aif", "iff", "m4a", "mid", "mp3", "mpa", "wav", "wma", "ogg", "flac", "ape", "alac","dsf","opus" -> {
                 true
             }
-
             else -> false
         }
+
     }
 }

@@ -20,6 +20,7 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
@@ -35,14 +36,15 @@ android {
     productFlavors {
         create("exoplayer"){
             dimension="version"
-            applicationId="com.barryzeha.ktmusicplayer.exoplayer"
+            applicationIdSuffix="exoplayer"
             manifestPlaceholders["appLabel"]="KMusic Exo"
+            buildConfigField("String","PLAYER_TYPE","\"EXOPLAYER\"")
         }
         create("bass"){
             dimension="version"
-
-            applicationId="com.barryzeha.ktmusicplayer.bass"
+            applicationIdSuffix="bass"
             manifestPlaceholders["appLabel"]="KMusic Bass"
+            buildConfigField("String","PLAYER_TYPE","\"BASS\"")
         }
 
     }

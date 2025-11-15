@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuInflater
@@ -123,7 +124,7 @@ class FilePickerActivity : AppCompatActivity() {
         fileList.clear()
         if(dirs.size>1){
             setTitle(applicationInfo.nonLocalizedLabel.toString())
-            //Para que no agrege una la misma posición repetida al ordenar nuestra lista por fecha o alfabeticamente
+            //Para que no agrege la misma posición repetida al ordenar nuestra lista por fecha o alfabeticamente
             //si es verdadero no agregará otra posición porque no navegaremos a un nuevo directorio
             if(!sortAction)listTreeOfNav.add(Pair(position, null))
             dirs.forEach { file ->
@@ -145,7 +146,7 @@ class FilePickerActivity : AppCompatActivity() {
             }
         }else {
             val directory = dirs[0]
-            //Para que no agrege una la misma posición repetida al ordenar nuestra lista por fecha o alfabeticamente
+            //Para que no agrege la misma posición repetida al ordenar nuestra lista por fecha o alfabeticamente
             //si es verdadero no agregará otra posición porque no navegaremos a un nuevo directorio
             if(!sortAction)listTreeOfNav.add(Pair(position, directory))
             // Para mostrar la nueva lista desde el inicio cuando navegamos en los directorios
@@ -155,11 +156,10 @@ class FilePickerActivity : AppCompatActivity() {
             }
             val files = directory?.listFiles()
             if (files != null) {
-                //
+
                 if (checkIfRootDir(directory)) setTitle(directory.parent)
                 else setTitle(directory.name)
 
-                //val filesList = files.sortedByDescending { it.lastCreated()}
                 val filesList = filteredListBySortOption(files)
                 filesList.forEach { file ->
 
@@ -362,7 +362,7 @@ class FilePickerActivity : AppCompatActivity() {
                     if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
                        filesSorted= files.sortedByDescending { it.lastCreated()}
                     }else{
-                        files.sortedBy { it.name.toString()}
+                        filesSorted = files.sortedBy { it.name.toString()}
                     }
                 }
                 else->{
