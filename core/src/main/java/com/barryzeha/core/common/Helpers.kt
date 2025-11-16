@@ -134,11 +134,11 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
             discNumber = discNumber,
             composer = composer,
             artistSort = artistSort,
-            bitRate = bitRate,
+            bitRate = normalizeBitrate(bitRate,format),
             songLengthFormatted = songLengthFormatted,
             songLength = songLength,
             format = format,
-            freq = sampleRate.toString(),
+            freq = normalizeSampleRate(sampleRate.toString(),format),
             fileSize = fileSizeFormatted,
             channels = channels
             //coverArt = bitmapCoverArt
@@ -146,6 +146,25 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
 
     }
      return null
+}
+private fun normalizeBitrate(biteRateRaw:String,format:String):String{
+    val raw = biteRateRaw.toIntOrNull()?:return "0"
+    if (format.equals("DSF", ignoreCase = true) ||
+        format.equals("DFF", ignoreCase = true)
+    ) {
+        return (raw / 1000).toString()
+    }
+    return raw.toString()
+}
+private fun normalizeSampleRate(sampleRateRaw:String, format:String):String{
+    val raw = sampleRateRaw.toIntOrNull()?:return "0"
+    if (!format.equals("DSF", ignoreCase = true) &&
+        !format.equals("DFF", ignoreCase = true)
+    ) {
+        return (raw / 1000).toString()
+    }
+    val basePcmRate = raw / 128
+    return (basePcmRate / 1000).toString()
 }
 fun fetchTimeOfSong(pathFile: String?):AudioMetadata?{
     var metadata: AudioFile? = null
