@@ -36,15 +36,13 @@ android {
     productFlavors {
         create("exoplayer"){
             dimension="version"
-            applicationIdSuffix="exoplayer"
+            applicationIdSuffix=".exoplayer"
             manifestPlaceholders["appLabel"]="KMusic Exo"
-            buildConfigField("String","PLAYER_TYPE","\"EXOPLAYER\"")
         }
         create("bass"){
             dimension="version"
-            applicationIdSuffix="bass"
+            applicationIdSuffix=".bass"
             manifestPlaceholders["appLabel"]="KMusic Bass"
-            buildConfigField("String","PLAYER_TYPE","\"BASS\"")
         }
 
     }
