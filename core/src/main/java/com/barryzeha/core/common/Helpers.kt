@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.os.Build
+import android.os.Environment
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
@@ -24,7 +25,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -39,6 +39,7 @@ import kotlin.math.min
 private const val CHANNEL_ID = "KtMusic_Notify_Id"
 private const val CHANNEL_NAME = "KtMusic_Channel"
 private const val NOTIFICATION_ID = 202405
+private const val DEFAULT_COVER_ART_ASSET = "ktmusic_icon.jpg"
 
 const val TEXT_COLOR_PRIMARY_INVERSE_NO_DISABLE=0
 const val COLOR_PRIMARY=1
@@ -57,7 +58,16 @@ fun checkPermissions(context: Context, permissions:List<String>, isGranted:(Bool
             permissionsGranted.add(Pair(permission,true))
             grantedCount++
         }else{
-            permissionsGranted.add(Pair(permission,false))
+            if(permission=="android.permission.MANAGE_EXTERNAL_STORAGE" && Build.VERSION.SDK_INT >=Build.VERSION_CODES.R ) {
+                if (Environment.isExternalStorageManager()) {
+                    permissionsGranted.add(Pair(permission, true))
+                    grantedCount++
+                } else {
+                    permissionsGranted.add(Pair(permission, false))
+                }
+            }else{
+                permissionsGranted.add(Pair(permission, false))
+            }
         }
    }
     isGranted((grantedCount == permissions.size),permissionsGranted)
@@ -148,13 +158,13 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
      return null
 }
 private fun normalizeBitrate(biteRateRaw:String,format:String):String{
-    val raw = biteRateRaw.toIntOrNull()?:return "0"
+    val onlyNumbers = if(!biteRateRaw.isNullOrEmpty()){biteRateRaw.filter{it.isDigit()}}else "0"
     if (format.equals("DSF", ignoreCase = true) ||
         format.equals("DFF", ignoreCase = true)
     ) {
-        return (raw / 1000).toString()
+        return (onlyNumbers.toInt() / 1000).toString()
     }
-    return raw.toString()
+    return onlyNumbers
 }
 private fun normalizeSampleRate(sampleRateRaw:String, format:String):String{
     val raw = sampleRateRaw.toIntOrNull()?:return "0"
@@ -195,6 +205,7 @@ fun fetchShortMetadataAlbumInfo(context: Context,pathFile:String):AudioMetadata?
                 defaultValue
             }
         // Extract metadata with default values
+
         val title = getTagField(FieldKey.TITLE, nameFile)
         val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
         val album = getTagField(FieldKey.ALBUM, "Album Unknown")
@@ -217,12 +228,7 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
     metadata?.let {
         val tag = metadata.tag
         val nameFile = metadata.file.name.substringBeforeLast(".")
-       /* val coverArtData = try{
-        tag.firstArtwork.binaryData
-        }catch(e:Exception){
-            null
-        }
-        val bitmapCoverArt = getBitmap(context,coverArtData,true) ?: BitmapFactory.decodeStream(context.assets.open("placeholder_cover.jpg"))*/
+
         fun getTagField(fieldKey: FieldKey, defaultValue: String) =
             try {
                 tag?.getFirst(fieldKey)?.takeIf { it.isNotEmpty() } ?: defaultValue
@@ -230,6 +236,7 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
                 defaultValue
             }
         // Extract metadata with default values
+        val format = try { metadata.audioHeader.format } catch (ex: Exception) { "unknown" }
         val title = getTagField(FieldKey.TITLE, nameFile)
         val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
         val album = getTagField(FieldKey.ALBUM, "Album Unknown")
@@ -242,10 +249,9 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
             title = title,
             artist = artist,
             album = album,
-            bitRate = bitRate,
+            bitRate = normalizeBitrate(bitRate, format),
             songLengthFormatted = songLengthFormatted,
             songLength = songLength,
-            //coverArt = bitmapCoverArt
         )
     }
     return null
@@ -278,15 +284,6 @@ fun createTime(duration: Long): Triple<Int,Int,String> {
     }
     return Triple(minutes.toInt(),seconds.toInt(),formattedDuration)
 }
-fun getBiteArrayOfImageEmbedded(pathFile: String?):ByteArrayInputStream?{
-       return if (!pathFile.isNullOrEmpty()) {
-            mmr.setDataSource(pathFile)
-            val picture = mmr.embeddedPicture
-            ByteArrayInputStream(picture)
-        } else {
-            null
-        }
-}
 fun getSongMetadata(context: Context, path: String?,withBitmap:Boolean=false, isForNotify:Boolean=false): MusicState? {
     if(!path.isNullOrEmpty()){
         val metadata= fetchShortFileMetadata(context,path)
@@ -310,27 +307,39 @@ fun getSongMetadata(context: Context, path: String?,withBitmap:Boolean=false, is
     return MusicState(
         artist = "Unknown",
         album ="Album Unknown",
-        albumArt = BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
+        albumArt = BitmapFactory.decodeStream(context.assets.open(DEFAULT_COVER_ART_ASSET))
         )
 }
 fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitmap?{
-    return pathFile?.let {
-        val byteArrayImage = try{getBiteArrayOfImageEmbedded(pathFile)}catch(ex:Exception){null}
-        byteArrayImage?.let {
-            val originalBitmap = BitmapFactory.decodeStream(byteArrayImage)
-            try {
-                if (isForNotify) scaleBitmap(originalBitmap, 156, 156)
-                else originalBitmap
-            }catch(ex:Exception) {
-                null
-            }finally {
-               // mmr.release()
-            }
-        }?:run{
-           BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
+    if (pathFile.isNullOrEmpty()) {
+        return BitmapFactory.decodeStream(context.assets.open(DEFAULT_COVER_ART_ASSET))
+    }
+    // Intentar extraer el cover art usando Jaudiotagger
+    val artworkBytes: ByteArray? = try {
+        val audioFile = AudioFileIO.read(File(pathFile))
+        val tag = audioFile.tag
+        val artwork = tag?.firstArtwork
+        artwork?.binaryData
+    } catch (ex: Exception) {
+        Log.e("BITMAP_ERROR", "Error extrayendo coverart con Jaudiotagger: ${ex.message}")
+        null
+    }
+    // Crear el bitmap si existe
+    val bitmap = artworkBytes?.let {
+        BitmapFactory.decodeByteArray(it, 0, it.size)
+    }
+    // Fallback si no hay artwork o decode falló
+    val finalBitmap = bitmap ?: BitmapFactory.decodeStream(context.assets.open(DEFAULT_COVER_ART_ASSET))
+
+    // Scaling opcional para notificaciones
+    return if (isForNotify) {
+        try {
+            scaleBitmap(finalBitmap, 156, 156)
+        } catch (ex: Exception) {
+            finalBitmap
         }
-    }?:run{
-       BitmapFactory.decodeStream(context.assets.open("ktmusic_icon.jpg"))
+    } else {
+        finalBitmap
     }
 }
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
@@ -400,7 +409,7 @@ fun shareSong(context:Context, filePath:String){
             putExtra(Intent.EXTRA_STREAM,uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(shareIntent,"Compartir archivo con..."))
+        context.startActivity(Intent.createChooser(shareIntent,context.getString(R.string.share_song_with)))
 
     }catch(e:Exception){
         e.printStackTrace()

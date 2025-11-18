@@ -160,6 +160,60 @@
         android:layout_marginTop="8dp"
         >
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardManagerStorage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:strokeWidth="0dp"
+            app:cardElevation="1dp"
+            android:layout_margin="8dp"
+            >
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvManagerStorageTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Manager storage"
+                    tools:maxLines="5"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:justificationMode="inter_word"
+                    android:layout_margin="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tvManagerStorage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manageExternalStorageMsg"
+                    tools:maxLines="4"
+                    android:justificationMode="inter_word"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvManagerStorageTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnManagerStorage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/grant"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:tag="android.permission.MANAGE_EXTERNAL_STORAGE"
+                    app:cornerRadius="6dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="4dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvManagerStorage"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardNotify"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -212,61 +266,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvNotifyPermission"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardMediaAudio"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:strokeWidth="0dp"
-            app:cardElevation="1dp"
-            android:layout_margin="8dp"
-            >
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            >
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tvReadMediaTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Read media audio"
-                tools:maxLines="4"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:justificationMode="inter_word"
-                android:layout_margin="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-
-                />
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tvReadMediaPermission"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/readMediaAudioMsg"
-                tools:maxLines="4"
-                android:justificationMode="inter_word"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvReadMediaTitle"
-                app:layout_constraintEnd_toEndOf="parent"
-                />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnReadMediaPermission"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/grant"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:tag="android.permission.READ_MEDIA_AUDIO"
-                app:cornerRadius="6dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="4dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvReadMediaPermission"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardBtPermission"

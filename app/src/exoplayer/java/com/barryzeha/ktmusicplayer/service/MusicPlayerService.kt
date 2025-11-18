@@ -1085,9 +1085,13 @@ class MusicPlayerService : Service(){
                 latestPlayed = true
             )
         }
+        try{
+            //TODO corregir cuando el índice es cero y se guarda sin cambiar mientras se recupera ocurre un error
         exoPlayer.seekTo(mPrefs.currentIndexSong.toInt() - 1 ,songState.songState.currentPosition)
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false
+        }
+        catch(ex:Exception){}
         _songController?.currentTrack(currentMusicState)
         setPlayingState(false)
     }

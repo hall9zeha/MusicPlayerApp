@@ -305,7 +305,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         var clicked = false
         val permissionList: List<String> =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                listOf(Manifest.permission.READ_MEDIA_AUDIO)
+                //listOf(Manifest.permission.READ_MEDIA_AUDIO)
+                listOf(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
             } else {
                 listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
             }

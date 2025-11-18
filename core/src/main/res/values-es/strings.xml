@@ -74,5 +74,7 @@
     <string name="welcomeToApp">Bienvenido a </string>
     <string name="volume">Volumen</string>
     <string name="writeExternalStorageMsg">Se necesita habilitar el permiso de Write External storage para realizar la escritura de metadatos y etiquetas de audio cuando use el editor de etiquetas en sus canciones</string>
+    <string name="manageExternalStorageMsg">Se necesita habilitar el permiso Manage External Storage para que la aplicación pueda acceder correctamente a todos los formatos de audio presentes en su dispositivo. Este permiso permite que la aplicación pueda localizar y reproducir toda su música sin limitaciones.</string>
     <string name="share_song">Compartir canción</string>
+    <string name="share_song_with">Compartir canción con…</string>
 </resources>

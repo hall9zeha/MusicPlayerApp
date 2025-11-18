@@ -54,8 +54,10 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
     private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
-            Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.READ_PHONE_STATE,
+            // Testing
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+            //******************************************
             // It is required to detect connection and disconnection events of Bluetooth devices when the mobile Bluetooth service is active.
             Manifest.permission.BLUETOOTH_CONNECT)
     }else{

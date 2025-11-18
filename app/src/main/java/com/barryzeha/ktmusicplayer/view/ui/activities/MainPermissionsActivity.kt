@@ -2,8 +2,11 @@ package com.barryzeha.ktmusicplayer.view.ui.activities
 
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.os.Build.*
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -27,6 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainPermissionsActivity : AppCompatActivity() {
     private lateinit var launcherPermission: ActivityResultLauncher<String>
+    private lateinit var launcherManageStorage: ActivityResultLauncher<Intent>
     private lateinit var bind:ActivityMainPermissionsBinding
     private val mainViewModel:MainViewModel by viewModels()
     private  var musicPlayerService:MusicPlayerService?=null
@@ -34,7 +38,7 @@ class MainPermissionsActivity : AppCompatActivity() {
     private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
-            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             Manifest.permission.READ_PHONE_STATE,
             // It is required to detect connection and disconnection events of Bluetooth devices when the mobile Bluetooth service is active.
             Manifest.permission.BLUETOOTH_CONNECT
@@ -82,6 +86,25 @@ class MainPermissionsActivity : AppCompatActivity() {
             }
             permissionStatusMap.remove(requestedPermission)
         }
+        launcherManageStorage =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                // Esto se ejecuta cuando vuelve de la pantalla
+                if (Environment.isExternalStorageManager()) {
+                    // Ya está concedido
+                    updateUIButtonAsGranted()
+                    initCheckPermission()
+                } else {
+                    // No lo concedió
+                }
+            }
+    }
+    fun updateUIButtonAsGranted() {
+        bind.btnManagerStorage.apply {
+            text = getString(coreRes.string.granted)
+            isClickable = false
+            setIconResource(coreRes.drawable.ic_check_rounded)
+            iconGravity = MaterialButton.ICON_GRAVITY_END
+        }
     }
     private fun showViews()=with(bind){
         bind.tvWelcomeToApp.text = String.format("%s %s" ,getString(coreRes.string.welcomeToApp),applicationInfo.loadLabel(packageManager).toString())
@@ -116,6 +139,11 @@ class MainPermissionsActivity : AppCompatActivity() {
 
         checkPermissions(this,permissionList){isGranted,permissions->
             if(isGranted){
+
+                bind.btnManagerStorage.text=getString(coreRes.string.granted);bind.btnManagerStorage.isClickable=false
+                bind.btnManagerStorage.setIconResource(coreRes.drawable.ic_check_rounded)
+                bind.btnManagerStorage.iconGravity= MaterialButton.ICON_GRAVITY_END
+
                 bind.btnBtPermission.text=getString(coreRes.string.granted);bind.btnBtPermission.isClickable=false
                 bind.btnBtPermission.setIconResource(coreRes.drawable.ic_check_rounded)
                 bind.btnBtPermission.iconGravity= MaterialButton.ICON_GRAVITY_END
@@ -123,10 +151,6 @@ class MainPermissionsActivity : AppCompatActivity() {
                 bind.btnNotifyPermission.text=getString(coreRes.string.granted); bind.btnNotifyPermission.isClickable=false
                 bind.btnNotifyPermission.setIconResource(coreRes.drawable.ic_check_rounded)
                 bind.btnNotifyPermission.iconGravity= MaterialButton.ICON_GRAVITY_END
-
-                bind.btnReadMediaPermission.text=getString(coreRes.string.granted);bind.btnReadMediaPermission.isClickable=false
-                bind.btnReadMediaPermission.setIconResource(coreRes.drawable.ic_check_rounded)
-                bind.btnReadMediaPermission.iconGravity= MaterialButton.ICON_GRAVITY_END
 
                 bind.btnWriteStoragePermission.text=getString(coreRes.string.granted);bind.btnWriteStoragePermission.isClickable=false
                 bind.btnWriteStoragePermission.setIconResource(coreRes.drawable.ic_check_rounded)
@@ -153,6 +177,16 @@ class MainPermissionsActivity : AppCompatActivity() {
                         button.setOnClickListener {
                             permissionStatusMap[permission]=false
                             launcherPermission.launch(permission)
+                        }
+                        if(permission=="android.permission.MANAGE_EXTERNAL_STORAGE"){
+                            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                                data = Uri.parse("package:$packageName")
+                            }
+
+                            button.setOnClickListener {
+                                permissionStatusMap[permission]=false
+                                launcherManageStorage.launch(intent)
+                            }
                         }
                     }else{
                         button.text=getString(coreRes.string.granted);button.isClickable=false

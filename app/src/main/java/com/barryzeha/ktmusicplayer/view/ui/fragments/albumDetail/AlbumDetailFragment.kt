@@ -53,11 +53,11 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     private var albumName:String?=null
     private var navController: NavController?= null
     private var albumSongs:List<SongEntity> = listOf()
-
+    private var songEntity: SongEntity?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         activity?.setTheme(com.barryzeha.core.R.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
-        val songEntity = arguments.extraAlbum
+        songEntity = arguments.extraAlbum
         songEntity?.let { song->
             getAlbumInfo(song)
         }
@@ -118,9 +118,9 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     private fun setAlbumInfo(songs:List<SongEntity>)=with(bind){
         val song = songs[0]
         var totalSongTime = 0L
-        ivMusicCover.loadImage(getBitmap(requireContext(),song.pathLocation)!!)
+        ivMusicCover.loadImage(getBitmap(requireContext(),songEntity?.pathLocation)!!)
         lifecycleScope.launch(Dispatchers.IO) {
-            val songMeta= fetchShortMetadataAlbumInfo(requireContext(),song.pathLocation!!)
+            val songMeta= fetchShortMetadataAlbumInfo(requireContext(),songEntity?.pathLocation!!)
             songs.forEach { track->
                 totalSongTime += track.duration
             }
