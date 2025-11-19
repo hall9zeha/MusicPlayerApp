@@ -31,6 +31,7 @@ import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.util.UnstableApi
@@ -50,6 +51,7 @@ import com.barryzeha.core.common.PREVIOUS
 import com.barryzeha.core.common.fetchShortFileMetadata
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getSongMetadata
+import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
@@ -64,7 +66,9 @@ import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import com.barryzeha.ktmusicplayer.utils.convertToMediaItem
 import com.barryzeha.ktmusicplayer.utils.metadataToMusicState
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
@@ -825,6 +829,23 @@ class MusicPlayerService : Service(){
                      setUpEqualizer(audioSessionId)
                  }
              }
+             override fun onPlayerError(error: PlaybackException) {
+                 super.onPlayerError(error)
+                 _activity?.showSnackBar(
+                     _activity?.findViewById(android.R.id.content)!!
+                     ,msg = "${error.message.toString()} or Unsupported format" ,
+                     Snackbar.LENGTH_SHORT)
+                 nextSong()
+                 if (getCurrentSongPosition() < songsList.size) {
+                     exoPlayer.prepare()
+                     exoPlayer.play()
+                     setPlayingState(exoPlayer.isPlaying)
+                 }
+                 serviceScope.launch(Main) {
+                     delay(1000)
+                     _songController?.currentTrack(currentMusicState.copy(isPlaying = exoPlayer.isPlaying))
+                 }
+             }
          }
        return playerListener
     }
@@ -1086,12 +1107,14 @@ class MusicPlayerService : Service(){
             )
         }
         try{
-            //TODO corregir cuando el índice es cero y se guarda sin cambiar mientras se recupera ocurre un error
-        exoPlayer.seekTo(mPrefs.currentIndexSong.toInt() - 1 ,songState.songState.currentPosition)
+        val indexOfSong=findMediaItemIndexById(mainMediaItemList,mPrefs.idSong.toString())
+        exoPlayer.seekTo(indexOfSong,songState.songState.currentPosition)
         exoPlayer.prepare()
         exoPlayer.playWhenReady=false
         }
-        catch(ex:Exception){}
+        catch(ex:Exception){
+            ex.printStackTrace()
+        }
         _songController?.currentTrack(currentMusicState)
         setPlayingState(false)
     }

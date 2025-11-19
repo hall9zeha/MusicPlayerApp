@@ -1,8 +1,10 @@
 package com.barryzeha.ktmusicplayer.utils
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.un4seen.bass.BASS
@@ -31,6 +33,7 @@ private var idSong:Long?=null
 // For A-B looper
 private var startAbLoopPosition:Long=0
 private var endAbLopPosition:Long=0
+private var context: Context?=null
 
 open class BassManager {
 
@@ -41,7 +44,7 @@ open class BassManager {
     }
      fun getInstance(playbackManager: PlaybackManager):BassManager?{
         instance?.let{ return it}?:run{
-
+            context= MyApp.context
             instance=BassManager()
             this.playbackManager = playbackManager
             if (!BASS.BASS_Init(-1, SAMPLE192, BASS.BASS_DEVICE_FREQ)) {
@@ -205,51 +208,54 @@ open class BassManager {
     }
 
     fun getBassErrorMessage(code: Int): String {
-        return when (code) {
-            0 -> "BASS_OK (no error)"
-            1 -> "BASS_ERROR_MEM: Memory error"
-            2 -> "BASS_ERROR_FILEOPEN: Cannot open the file"
-            3 -> "BASS_ERROR_DRIVER: Cannot find a valid driver"
-            4 -> "BASS_ERROR_BUFLOST: Buffer lost"
-            5 -> "BASS_ERROR_HANDLE: Invalid handle"
-            6 -> "BASS_ERROR_FORMAT: Unsupported sample format"
-            7 -> "BASS_ERROR_POSITION: Invalid position"
-            8 -> "BASS_ERROR_INIT: BASS not initialized"
-            9 -> "BASS_ERROR_START: BASS_Start has not been called"
-            14 -> "BASS_ERROR_ALREADY: Already initialized"
-            17 -> "BASS_ERROR_NOTAUDIO: Not an audio file"
-            18 -> "BASS_ERROR_NOCHAN: No free channel available"
-            19 -> "BASS_ERROR_ILLTYPE: Illegal type"
-            20 -> "BASS_ERROR_ILLPARAM: Illegal parameter"
-            21 -> "BASS_ERROR_NO3D: No 3D support"
-            22 -> "BASS_ERROR_NOEAX: No EAX support"
-            23 -> "BASS_ERROR_DEVICE: Invalid device"
-            24 -> "BASS_ERROR_NOPLAY: The channel is not playing"
-            25 -> "BASS_ERROR_FREQ: Illegal frequency"
-            27 -> "BASS_ERROR_NOTFILE: Not a (streamable) file"
-            29 -> "BASS_ERROR_NOHW: No hardware support"
-            31 -> "BASS_ERROR_EMPTY: Empty file"
-            32 -> "BASS_ERROR_NONET: No internet/network connection"
-            33 -> "BASS_ERROR_CREATE: Can't create the object"
-            34 -> "BASS_ERROR_NOFX: Effects not available"
-            37 -> "BASS_ERROR_NOTAVAIL: Not available"
-            38 -> "BASS_ERROR_DECODE: The channel is a decoding channel only"
-            39 -> "BASS_ERROR_DX: DirectX resources unavailable"
-            40 -> "BASS_ERROR_TIMEOUT: Timeout"
-            41 -> "BASS_ERROR_FILEFORM: Unsupported or invalid file format"
-            42 -> "BASS_ERROR_SPEAKER: Invalid speaker"
-            43 -> "BASS_ERROR_VERSION: Invalid BASS version"
-            44 -> "BASS_ERROR_CODEC: Codec not available"
-            45 -> "BASS_ERROR_ENDED: The channel has ended"
-            46 -> "BASS_ERROR_BUSY: Device or resource busy"
-            47 -> "BASS_ERROR_UNSTREAMABLE: Unstreamable file"
-            48 -> "BASS_ERROR_PROTOCOL: Unsupported protocol"
-            49 -> "BASS_ERROR_DENIED: Access denied"
-            50 -> "BASS_ERROR_FREEING: Being freed"
-            51 -> "BASS_ERROR_CANCEL: Cancelled"
-            500 -> "BASS_ERROR_JAVA_CLASS: Object class problem"
+        return context?.let {ctx->
+        when (code) {
+                1 -> ctx.getString(R.string.BASS_ERROR_MEM)
+                2 -> ctx.getString(R.string.BASS_ERROR_FILEOPEN)
+                3 -> ctx.getString(R.string.BASS_ERROR_DRIVER)
+                4 -> ctx.getString(R.string.BASS_ERROR_BUFLOST)
+                5 -> ctx.getString(R.string.BASS_ERROR_HANDLE)
+                6 -> ctx.getString(R.string.BASS_ERROR_FORMAT)
+                7 -> ctx.getString(R.string.BASS_ERROR_POSITION)
+                8 -> ctx.getString(R.string.BASS_ERROR_INIT)
+                9 -> ctx.getString(R.string.BASS_ERROR_START)
+                14 -> ctx.getString(R.string.BASS_ERROR_ALREADY)
+                17 -> ctx.getString(R.string.BASS_ERROR_NOTAUDIO)
+                18 -> ctx.getString(R.string.BASS_ERROR_NOCHAN)
+                19 -> ctx.getString(R.string.BASS_ERROR_ILLTYPE)
+                20 -> ctx.getString(R.string.BASS_ERROR_ILLPARAM)
+                21 -> ctx.getString(R.string.BASS_ERROR_NO3D)
+                22 -> ctx.getString(R.string.BASS_ERROR_NOEAX)
+                23 -> ctx.getString(R.string.BASS_ERROR_DEVICE)
+                24 -> ctx.getString(R.string.BASS_ERROR_NOPLAY)
+                25 -> ctx.getString(R.string.BASS_ERROR_FREQ)
+                27 -> ctx.getString(R.string.BASS_ERROR_NOTFILE)
+                29 -> ctx.getString(R.string.BASS_ERROR_NOHW)
+                31 -> ctx.getString(R.string.BASS_ERROR_EMPTY)
+                32 -> ctx.getString(R.string.BASS_ERROR_NONET)
+                33 -> ctx.getString(R.string.BASS_ERROR_CREATE)
+                34 -> ctx.getString(R.string.BASS_ERROR_NOFX)
+                37 -> ctx.getString(R.string.BASS_ERROR_NOTAVAIL)
+                38 -> ctx.getString(R.string.BASS_ERROR_DECODE)
+                39 -> ctx.getString(R.string.BASS_ERROR_DX)
+                40 -> ctx.getString(R.string.BASS_ERROR_TIMEOUT)
+                41 -> ctx.getString(R.string.BASS_ERROR_FILEFORM)
+                42 -> ctx.getString(R.string.BASS_ERROR_SPEAKER)
+                43 -> ctx.getString(R.string.BASS_ERROR_VERSION)
+                44 -> ctx.getString(R.string.BASS_ERROR_CODEC)
+                45 -> ctx.getString(R.string.BASS_ERROR_ENDED)
+                46 -> ctx.getString(R.string.BASS_ERROR_BUSY)
+                47 -> ctx.getString(R.string.BASS_ERROR_UNSTREAMABLE)
+                48 -> ctx.getString(R.string.BASS_ERROR_PROTOCOL)
+                49 -> ctx.getString(R.string.BASS_ERROR_DENIED)
+                50 -> ctx.getString(R.string.BASS_ERROR_FREEING)
+                51 -> ctx.getString(R.string.BASS_ERROR_CANCEL)
+                500 -> ctx.getString(R.string.BASS_ERROR_JAVA_CLASS)
 
-            else -> "Unknown BASS error code"
+                else -> ctx.getString(R.string.UNKNOWN_ERROR)
+            }
+        }?:run{
+            "Unknown error"
         }
     }
     interface PlaybackManager{
