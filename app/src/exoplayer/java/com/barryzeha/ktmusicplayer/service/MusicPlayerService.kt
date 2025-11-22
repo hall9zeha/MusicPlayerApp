@@ -362,14 +362,14 @@ class MusicPlayerService : Service(){
             override fun onCustomAction(action: String, extras: Bundle?) {
                 if(ACTION_CLOSE == action){
                     exoPlayer.stop()
-                    exoPlayer.release()
-                    songHandler.removeCallbacks(songRunnable)
+                    _songController?.stop()
+                    setPlayingState(false)
+                    //clearABLoopOfPreferences()
                     // Remove notification of foreground service process
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
-                    _songController?.stop()
-                    // Close application
                     _activity?.finish()
+                    // Close application
                     exitProcess(0)
                 }
                 if(ACTION_FAVORITE == action){
@@ -443,17 +443,15 @@ class MusicPlayerService : Service(){
                 }
             }
             SongAction.Close -> {
-                exoPlayer.stop()
-                exoPlayer.release()
-                songHandler.removeCallbacks(songRunnable)
-
                 // Remove notification of foreground service process
+                exoPlayer.stop()
+                _songController?.stop()
+                setPlayingState(false)
+                clearABLoopOfPreferences()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
-                _songController?.stop()
                 // Close application
                 _activity?.finish()
-
             }
             SongAction.Nothing -> {}
         }
@@ -1107,16 +1105,20 @@ class MusicPlayerService : Service(){
             )
         }
         try{
-        val indexOfSong=findMediaItemIndexById(mainMediaItemList,mPrefs.idSong.toString())
-        exoPlayer.seekTo(indexOfSong,songState.songState.currentPosition)
-        exoPlayer.prepare()
-        exoPlayer.playWhenReady=false
+            if(!playingState()) {
+                val indexOfSong =
+                    findMediaItemIndexById(mainMediaItemList, mPrefs.idSong.toString())
+                exoPlayer.seekTo(indexOfSong, songState.songState.currentPosition)
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady = playingState()
+            }
         }
         catch(ex:Exception){
             ex.printStackTrace()
         }
         _songController?.currentTrack(currentMusicState)
-        setPlayingState(false)
+        setPlayingState(exoPlayer.isPlaying)
+        checkIfPhoneIsLock()
     }
 
     private fun fetchSongMetadata(song:SongEntity):MusicState?{
@@ -1146,21 +1148,17 @@ class MusicPlayerService : Service(){
         unregisterReceiver(headsetReceiver)
         unregisterReceiver(bluetoothReceiver)
         isForegroundService = false
+        exoPlayer.release()
         _songController?.stop()
-        mediaSession.release()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
         super.onDestroy()
     }
-    // TODO
-    // Si queremos mantener las notificaciones una vez cerrada la aplicación
-    // no debemos sobreescribir onTaskRemoved - volveremos más tarde para implementar algo con eso
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         cancelPersistentNotify(applicationContext)
-        clearABLoopOfPreferences()
+        //clearABLoopOfPreferences()
         stopSelf()
-        exitProcess(0)
     }
     inner class MusicPlayerServiceBinder : Binder() {
         fun getService(): MusicPlayerService {

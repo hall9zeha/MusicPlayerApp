@@ -428,10 +428,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     setPlayingState(false)
                     pausePlayer()
                     serviceScope.launch(Dispatchers.IO) {
-                        delay(1000)
+                        delay(500)
                         bassManager?.releasePlayback()
                         songHandler.removeCallbacks(songRunnable)
                         _songController?.stop()
+                        setPlayingState(false)
+                        clearABLoopOfPreferences()
                         // Remove notification of foreground service process
                         stopForeground(STOP_FOREGROUND_REMOVE)
                         stopSelf()
@@ -487,14 +489,15 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }
             }
             SongAction.Close -> {
-                bassManager?.releasePlayback()
-                songHandler.removeCallbacks(songRunnable)
+                bassManager?.channelPause()
+                clearABLoopOfPreferences()
+                setPlayingState(false)
                 // Remove notification of foreground service process
                 stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
                 _songController?.stop()
                 // Close application
                 _activity?.finish()
+                stopSelf()
             }
             SongAction.Nothing -> {}
         }
@@ -933,38 +936,36 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
 
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
-            val song = songState.songEntity
-            songEntity = song
-            // Set info currentSongEntity
-            fetchSongMetadata(song)?.let { musicState ->
-                currentMusicState = musicState.copy(
-                    currentDuration = songState.songState.currentPosition,
-                    latestPlayed = true,
-                    nextOrPrev = animDirection,
-                    isFavorite = song.favorite
-                )
-            }
-            setPlayingState(false)
+        val song = songState.songEntity
+        songEntity = song
+        checkIfPhoneIsLock()
+        // Set info currentSongEntity
+        fetchSongMetadata(song)?.let { musicState ->
+            currentMusicState = musicState.copy(
+                currentDuration = songState.songState.currentPosition,
+                latestPlayed = true,
+                nextOrPrev = animDirection,
+                isFavorite = song.favorite
+            )
+        }
+        if (!playingState()) {
             currentSongProgress = songState.songState.currentPosition
             bassManager?.streamCreateFile(songState.songEntity)
             bassManager?.setSongStateSaved(
                 bassManager?.getActiveChannel()!!,
                 songState.songState.currentPosition
             )
-            findItemSongIndexById(songState.songEntity.id)?.let {
-                indexOfSong = it
-            }
-            if (!checkIfPhoneIsLock()) {
-               _songController?.currentTrack(currentMusicState)
-
-            }
-            // Al cargar la información de una pista guardada
-            // se ejecutaba una primera vez el evento currentTRack de la interface
-            // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
-            // para evitarlo
-            executeOnceTime = true
-
-
+        }
+        findItemSongIndexById(songState.songEntity.id)?.let {
+            indexOfSong = it
+        }
+        setPlayingState(playingState())
+        _songController?.currentTrack(currentMusicState)
+        // Al cargar la información de una pista guardada
+        // se ejecutaba una primera vez el evento currentTrack de la interface
+        // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
+        // para evitarlo
+        executeOnceTime = true
     }
     private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {
@@ -1038,18 +1039,15 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         _songController?.stop()
         bassManager?.releasePlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        clearABLoopOfPreferences()
         stopSelf()
         super.onDestroy()
     }
-    //TODO
-    // Si queremos mantener las notificaciones una vez cerrada la aplicación
-    // no debemos sobreescribir onTaskRemoved - volveremos más tarde para implementar algo con eso
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         clearABLoopOfPreferences()
         cancelPersistentNotify(applicationContext)
         stopSelf()
-        exitProcess(0)
     }
     inner class MusicPlayerServiceBinder : Binder() {
         fun getService(): MusicPlayerService {
