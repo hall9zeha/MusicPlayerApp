@@ -1028,11 +1028,11 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         setPlaylistEnded(true)
                     }
                 }
-
             }
         }
     }
     override fun onDestroy() {
+        super.onDestroy()
         unregisterReceiver(headsetReceiver)
         unregisterReceiver(bluetoothReceiver)
         isForegroundService = false
@@ -1041,7 +1041,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         stopForeground(STOP_FOREGROUND_REMOVE)
         clearABLoopOfPreferences()
         stopSelf()
-        super.onDestroy()
     }
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)

@@ -364,13 +364,16 @@ class MusicPlayerService : Service(){
                     exoPlayer.stop()
                     _songController?.stop()
                     setPlayingState(false)
-                    //clearABLoopOfPreferences()
-                    // Remove notification of foreground service process
-                    stopForeground(STOP_FOREGROUND_REMOVE)
-                    stopSelf()
-                    _activity?.finish()
-                    // Close application
-                    exitProcess(0)
+                    clearABLoopOfPreferences()
+                    serviceScope.launch {
+                        delay(500)
+                        // Remove notification of foreground service process
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                        _activity?.finish()
+                        // Close application
+                        exitProcess(0)
+                    }
                 }
                 if(ACTION_FAVORITE == action){
                     serviceScope.launch(Dispatchers.IO) {
@@ -1157,7 +1160,7 @@ class MusicPlayerService : Service(){
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         cancelPersistentNotify(applicationContext)
-        //clearABLoopOfPreferences()
+        clearABLoopOfPreferences()
         stopSelf()
     }
     inner class MusicPlayerServiceBinder : Binder() {
