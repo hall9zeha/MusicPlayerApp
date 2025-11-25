@@ -28,6 +28,7 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.databinding.ItemSongBinding
 import com.barryzeha.ktmusicplayer.databinding.ListItemHeaderBinding
+import com.google.android.material.card.MaterialCardView
 import com.l4digital.fastscroll.FastScroller
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,16 +77,17 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if(holder is MViewHolder) {
+            val typedArray = mColorList(context)
             try {
                 if (selectedPos == position) {
                     (holder as MViewHolder).bind.root.setBackgroundColor(
-                        mColorList(context).getColor(COLOR_PRIMARY, 0).adjustAlpha(0.3f)
+                        typedArray.getColor(COLOR_PRIMARY, 0).adjustAlpha(0.3f)
                     )
                 } else {
                     (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
                 }
             } finally {
-                mColorList(context).recycle()
+                typedArray.recycle()
             }
 
             val songPosition = getOriginalPosition(getItem(position))
@@ -154,7 +156,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                         if (MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal) mColorList(
                             context
                         ).getColor(
-                            COLOR_ACCENT, COLOR_TRANSPARENT
+                            COLOR_ACCENT, Color.TRANSPARENT
                         ).adjustAlpha(0.3f) else ContextCompat.getColor(
                             context,
                             com.barryzeha.core.R.color.primaryColor
@@ -395,9 +397,6 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         fun onBind(value:String)=with(bind){
             tvHeaderDescription.text=value
             val alpha = 148
-            val colorWithAlpha = (alpha shl 24) or (mColorList(context).getColor(COLOR_PRIMARY,
-                COLOR_PRIMARY) and 0x00FFFFFF)
-            //this.root.setBackgroundColor(colorWithAlpha)
             val textHeaderColor = if(MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(
                 COLOR_ACCENT,COLOR_PRIMARY)else mColorList(context).getColor(COLOR_PRIMARY,COLOR_PRIMARY)
             tvHeaderDescription.setTextColor(textHeaderColor)

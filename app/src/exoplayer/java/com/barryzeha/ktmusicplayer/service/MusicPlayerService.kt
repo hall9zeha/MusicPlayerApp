@@ -1152,6 +1152,7 @@ class MusicPlayerService : Service(){
         unregisterReceiver(bluetoothReceiver)
         isForegroundService = false
         exoPlayer.release()
+        mediaSession.release()
         _songController?.stop()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -1160,7 +1161,6 @@ class MusicPlayerService : Service(){
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         cancelPersistentNotify(applicationContext)
-        clearABLoopOfPreferences()
         stopSelf()
     }
     inner class MusicPlayerServiceBinder : Binder() {

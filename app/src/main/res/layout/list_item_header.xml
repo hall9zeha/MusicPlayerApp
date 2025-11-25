@@ -25,13 +25,14 @@
         app:layout_constraintTop_toTopOf="parent"
 
         />
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/ivArrow"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:contentDescription="not functionality"
-        android:src="@drawable/ic_arrow_down"
-        style="@style/Widget.Material3.Button.IconButton.Outlined"
+        app:icon="@drawable/ic_arrow_down"
+        style="@style/Widget.Material3.Button.IconButton"
+        app:iconGravity="textStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

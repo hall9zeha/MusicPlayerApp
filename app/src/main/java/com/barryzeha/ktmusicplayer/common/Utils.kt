@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.view.Gravity
@@ -310,17 +311,17 @@ fun getPlayListName(mPrefs:MyPreferences, headerTextRes:(Int)->Unit){
 fun changeBackgroundColor(context:Context,colored:Boolean):ColorStateList{
     return if(colored) {
         ColorStateList.valueOf(
-            if(MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(COLOR_ACCENT, COLOR_TRANSPARENT)else ContextCompat.getColor(context,R.color.primaryColor)
+            if(MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(COLOR_ACCENT, Color.TRANSPARENT)else ContextCompat.getColor(context,R.color.primaryColor)
         )?.withAlpha(128)!!
         }
         else {ColorStateList.valueOf(
-        mColorList(context).getColor(COLOR_BACKGROUND, COLOR_TRANSPARENT))
+        mColorList(context).getColor(COLOR_BACKGROUND, Color.TRANSPARENT))
         }
 }
 fun changeColorOfIcon(context:Context, colored: Boolean):ColorStateList{
     return if(colored) {
         ColorStateList.valueOf(
-            if(mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(COLOR_ACCENT, COLOR_TRANSPARENT)else ContextCompat.getColor(context,R.color.primaryColor)
+            if(mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(COLOR_ACCENT, Color.TRANSPARENT)else ContextCompat.getColor(context,R.color.primaryColor)
         )
     }
     else {ColorStateList.valueOf(ContextCompat.getColor(context,R.color.controls_colors))

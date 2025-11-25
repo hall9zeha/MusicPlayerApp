@@ -118,4 +118,5 @@
     <string name="BASS_ERROR_CANCEL">Cancelled</string>
     <string name="BASS_ERROR_JAVA_CLASS">Object class problem</string>
     <string name="UNKNOWN_ERROR">Unknown BASS error code</string>
+    <string name="button_song_options">Song options</string>
 </resources>

@@ -1037,6 +1037,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         unregisterReceiver(bluetoothReceiver)
         isForegroundService = false
         _songController?.stop()
+        mediaSession.release()
         bassManager?.releasePlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
         clearABLoopOfPreferences()
@@ -1044,7 +1045,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        clearABLoopOfPreferences()
         cancelPersistentNotify(applicationContext)
         stopSelf()
     }

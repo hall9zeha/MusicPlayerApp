@@ -363,7 +363,7 @@ fun mColorList(context:Context)=
         com.google.android.material.R.attr.colorOnPrimary,
         com.google.android.material.R.attr.colorSurface,
         android.R.attr.colorBackground,
-        android.R.color.transparent,
+        android.R.color.transparent
     ))
 fun showDialog(context:Context,titleRes:Int, msgRes:Int, block:()->Unit){
     val dialog= MaterialAlertDialogBuilder(context).apply {
