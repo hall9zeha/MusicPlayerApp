@@ -34,6 +34,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.audioeffects.common.EffectsPreferences
@@ -68,7 +69,6 @@ import com.barryzeha.ktmusicplayer.utils.convertToMediaItem
 import com.barryzeha.ktmusicplayer.utils.metadataToMusicState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
@@ -128,7 +128,7 @@ class MusicPlayerService : Service(){
     private var bluetoothIsConnect:Boolean = false
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
-    private var firstCallingToSongState:Boolean = true
+    private var songStateRestored:Boolean = false
     // For A-B looper
     private var startAbLoopPosition:Long=0
     private var endAbLopPosition:Long=0
@@ -144,6 +144,9 @@ class MusicPlayerService : Service(){
     private var mediaItemsQueue:MutableList<MediaItem> = arrayListOf()
     private var isOpenQueue:Boolean = false
     private var indexSongOfQueue:Int =0
+    // Test current position
+    private var currentTrackPosition = 0L
+    private var bootsTrapMediaItem:MediaItem? =null
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -470,7 +473,6 @@ class MusicPlayerService : Service(){
         serviceScope.launch{
             // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
             // si no hay algo seleccionado previamente solo devolverá la lista por defecto
-            //val songs=repository.fetchAllSongsBy(mPrefs.playListSortOption)
             val songs=repository.fetchPlaylistOrderBy(mPrefs.playlistId.toLong(), mPrefs.playListSortOption)
             withContext(Dispatchers.IO) {
                 songs.forEach { s ->
@@ -479,6 +481,18 @@ class MusicPlayerService : Service(){
                 }
                 withContext(Main) {
                     exoPlayer.addMediaItems(mainMediaItemList)
+                    val realIndex = mainMediaItemList.indexOfFirst { it.mediaId == mPrefs.idSong.toString() && it !== bootsTrapMediaItem}
+                    val bootstrapIndex = exoPlayer.currentMediaItemIndex
+                    // Si no existe la canción real, no mover ni eliminar nada
+                    if (realIndex == -1) return@withContext
+                    // Si bootstrap ya está donde debe, no mover
+                    if (bootstrapIndex != realIndex) {
+                        exoPlayer.moveMediaItem(bootstrapIndex, realIndex)
+                    }
+                    // Elimina el duplicado SOLO si existe
+                    if (realIndex + 1 < exoPlayer.mediaItemCount) {
+                        exoPlayer.removeMediaItem(realIndex +1)
+                    }
                 }
 
             }
@@ -557,7 +571,7 @@ class MusicPlayerService : Service(){
             )
         }
     }
-    // Usando la actualización de la notificación con info de la pista en reproducción desde el servicio mismo
+    // Usando la actualización de la notificación con información de la pista en reproducción desde el servicio mismo
     // nos ayuda a controlar el estado de la notificación cuando el móvil esta en modo de bloqueo
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
     // dentro de la función initExoplayer()
@@ -633,7 +647,7 @@ class MusicPlayerService : Service(){
         }
     }
     fun getStateSaved() {
-        if(firstCallingToSongState) {
+        if(!songStateRestored) {
             serviceScope.launch{
                 songState = repository.fetchSongState()
                 if (!songState.isNullOrEmpty()) setSongStateSaved(songState[0])
@@ -905,7 +919,7 @@ class MusicPlayerService : Service(){
         mPrefs.isPopulateServicePlaylist=false
     }
     // Ya que el fragmento de lista no es diferente para cada versión, en bass flavor se implemnta clearPlayList
-    // con el parámetro (isSort), pero en exoplayer flavor no, aún así debemos ponerlo porque el fragmento de lista
+    // con el parámetro (isSort), pero en la versión de exoplayer no, aún así debemos ponerlo porque el fragmento de lista
     // lo usa así tanto para bass como exoplayer.
     fun clearPlayList(isSort:Boolean=false){
         exoPlayer.stop()
@@ -1001,17 +1015,12 @@ class MusicPlayerService : Service(){
     }
     fun resumePlayer(){
         setPlaylistEnded(false)
-        if(exoPlayer.mediaItemCount == mainMediaItemList.size || exoPlayer.mediaItemCount == mediaItemsQueue.size) {
-            if (!exoPlayer.isPlaying) {
-                exoPlayer.prepare()
-                exoPlayer.play()
-                setPlayingState(true)
-            }
-            updateNotifyForLegacySdkVersions()
-        }else{
-            Toast.makeText(this, "cargando medios...", Toast.LENGTH_SHORT).show()
-            setPlayingState(false)
+        if (!exoPlayer.isPlaying) {
+            exoPlayer.prepare()
+            exoPlayer.play()
+            setPlayingState(true)
         }
+        updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
         
@@ -1025,10 +1034,6 @@ class MusicPlayerService : Service(){
         setPlayingState(exoPlayer.isPlaying)
         exoPlayer.seekToPreviousMediaItem()
         clearABLoopOfPreferences()
-        //exoPlayer.seekToPrevious()
-        // retrocede al principio de la pista hay que hacer click dos veces
-        // para que retroceda a la pista anterior
-
     }
     fun reloadIndexOfSong(){
         // Obtenemos la posición en la lista principal de la pista que hayamos reproducido
@@ -1099,6 +1104,7 @@ class MusicPlayerService : Service(){
 
     private fun setSongStateSaved(songState: SongStateWithDetail){
         songEntity=songState.songEntity
+        currentTrackPosition = songState.songState.currentPosition
         // Set info currentSongEntity
         fetchSongMetadata(songEntity)?.let{ musicState->
             currentMusicState = musicState.copy(
@@ -1109,10 +1115,14 @@ class MusicPlayerService : Service(){
         }
         try{
             if(!playingState()) {
-                val indexOfSong =
-                    findMediaItemIndexById(mainMediaItemList, mPrefs.idSong.toString())
-                exoPlayer.seekTo(indexOfSong, songState.songState.currentPosition)
+                val mediaItem = songEntity.convertToMediaItem()
+                bootsTrapMediaItem = mediaItem
+                val indexOfSong =exoPlayer.currentTimeline.takeIf { !it.isEmpty }?.let {
+                    findMediaItemIndexById(mainMediaItemList.toList(), mPrefs.idSong.toString())
+                }?:0
+                exoPlayer.addMediaItem(mediaItem)
                 exoPlayer.prepare()
+                exoPlayer.seekTo(songState.songState.currentPosition)
                 exoPlayer.playWhenReady = playingState()
             }
         }
