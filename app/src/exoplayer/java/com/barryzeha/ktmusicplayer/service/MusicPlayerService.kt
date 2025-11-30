@@ -461,7 +461,6 @@ class MusicPlayerService : Service(){
             }
             SongAction.Nothing -> {}
         }
-
         return START_NOT_STICKY
     }
 
@@ -494,7 +493,6 @@ class MusicPlayerService : Service(){
                         exoPlayer.removeMediaItem(realIndex +1)
                     }
                 }
-
             }
             setUpExoplayerListener()
             playerListener?.let{listener->exoPlayer.addListener(listener)}
