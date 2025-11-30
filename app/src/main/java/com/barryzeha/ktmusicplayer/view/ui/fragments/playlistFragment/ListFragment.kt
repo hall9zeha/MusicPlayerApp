@@ -192,7 +192,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         mainViewModel.allSongs.observe(viewLifecycleOwner) { songList ->
             // We remove the permanently on screen state
             keepScreenOn(requireActivity(), false)
-
             // The adapter update must occur on the main thread. Otherwise, it will cause problems recreating the view when we rotate the screen.
             sortPlayList(
                 mPrefs.playListSortOption, songList
