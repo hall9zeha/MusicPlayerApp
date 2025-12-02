@@ -853,6 +853,9 @@ class MusicPlayerService : Service(){
                      exoPlayer.prepare()
                      exoPlayer.play()
                      setPlayingState(exoPlayer.isPlaying)
+                 }else{
+                     exoPlayer.stop()
+                     setPlayingState(false)
                  }
                  serviceScope.launch(Main) {
                      delay(1000)

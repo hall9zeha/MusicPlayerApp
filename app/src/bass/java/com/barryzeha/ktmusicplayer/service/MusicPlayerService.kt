@@ -821,6 +821,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             errorMsg?.let{it.substringAfter(":")}?:run{coreRes.string.cantPlayMsg.toString()},
                             Snackbar.LENGTH_LONG
                         )
+                        setPlayingState(if(isOpenQueue)indexOfSong < playingQueue.size-1 else indexOfSong < mainSongsList.size-1)
                     }
                     song?.let {
                         if (executeOnceTime) _songController?.currentTrack(currentMusicState)
