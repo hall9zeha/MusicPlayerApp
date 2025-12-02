@@ -138,7 +138,7 @@
         app:layout_constraintTop_toBottomOf="@id/tvSongDescription"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         >
 
         <com.google.android.material.textview.MaterialTextView
@@ -319,7 +319,7 @@
     <SeekBar
         android:id="@+id/mainSeekBar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
         tools:progress="70"
         android:thumb="@drawable/seekbar_thumb"
         app:layout_constraintStart_toStartOf="parent"
@@ -327,7 +327,7 @@
         app:layout_constraintTop_toBottomOf="@id/ctlMisc"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="4dp"/>
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvNumberSong"
         android:layout_width="wrap_content"
