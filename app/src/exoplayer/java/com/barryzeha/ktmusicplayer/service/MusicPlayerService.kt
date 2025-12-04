@@ -730,7 +730,6 @@ class MusicPlayerService : Service(){
                indexSongOfQueue = 0
            }}
             .let{ if(it>-1) it else 0 }
-
         positionReset =  itemIndex
         exoPlayer.seekTo(itemIndex,0)
         exoPlayer.prepare()
