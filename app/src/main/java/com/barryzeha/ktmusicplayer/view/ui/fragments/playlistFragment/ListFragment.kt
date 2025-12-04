@@ -559,7 +559,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     override fun currentTrack(musicState: MusicState?) {
         super.currentTrack(musicState)
         musicState?.let { mainViewModel.setCurrentTrack(musicState) }
-
     }
     // The overridden method onConnectedService is not fired here because it is executed after the first fragment.
     // We obtain the connection to the service through the view model sent from the main activity.
@@ -580,7 +579,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     }
     override fun onStop() {
         mPrefs.currentView = MAIN_FRAGMENT
-        if(mPrefs.idSong>-1) mainViewModel.saveCurrentStateSong(currentMusicState)
+        mainViewModel.saveCurrentStateSong(currentMusicState)
         super.onStop()
     }
 

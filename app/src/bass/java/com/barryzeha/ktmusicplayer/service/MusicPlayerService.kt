@@ -715,6 +715,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         // Cuando no es para ordenar la lista por(artista, álbum, género) será para eliminar y cargar una nueva lista de reproducción
         if(!isSort){
             setPlayingState(false)
+            currentMusicState = MusicState()
             _songController?.currentTrack(MusicState())
             bassManager?.setSongStateSaved(0,0)
             bassManager?.clearBassChannel()

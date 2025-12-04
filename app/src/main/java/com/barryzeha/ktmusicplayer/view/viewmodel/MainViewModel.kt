@@ -201,9 +201,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     }
     fun checkIfIsFavorite(idSong:Long){
         launch{
-            val entity = repository.fetchSongById(idSong)
-            entity?.let {e->
-                _isFavorite.value = e.favorite
+            if(mPrefs.idSong>0) {
+                val entity = repository.fetchSongById(idSong)
+                entity?.let { e ->
+                    _isFavorite.value = e.favorite
+                }
             }
         }
     }
@@ -358,7 +360,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     }
     // Guardar el estado de la pista actual
     fun saveCurrentStateSong(currentMusicState: MusicState){
-        if(currentMusicState.idSong>0) {
+        if(currentMusicState.idSong>0 && mPrefs.idSong>0) {
             saveSongState(
                 SongState(
                     idSongState = 1,

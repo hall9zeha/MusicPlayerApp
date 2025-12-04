@@ -919,7 +919,7 @@ class MusicPlayerService : Service(){
         }
         mPrefs.isPopulateServicePlaylist=false
     }
-    // Ya que el fragmento de lista no es diferente para cada versión, en bass flavor se implemnta clearPlayList
+    // Ya que el fragmento de lista no es diferente para cada versión, en bass flavor se implementa clearPlayList
     // con el parámetro (isSort), pero en la versión de exoplayer no, aún así debemos ponerlo porque el fragmento de lista
     // lo usa así tanto para bass como exoplayer.
     fun clearPlayList(isSort:Boolean=false){

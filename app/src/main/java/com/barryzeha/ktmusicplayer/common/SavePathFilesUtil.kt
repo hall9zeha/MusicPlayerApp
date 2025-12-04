@@ -23,8 +23,7 @@ import java.util.Date
  * Copyright (c)  All rights reserved.
  **/
 
-private  const  val CONSUMER_COUNT = 4
-private val operationsMutex = Mutex()
+
 private var audioFileCount:Int=0
 // Function to process multiple directory paths sequentially
 fun processSongPaths(
@@ -32,10 +31,7 @@ fun processSongPaths(
     itemsCount:(itemsNum:Int)->Unit,
     fileProcessed: (song:SongEntity) -> Unit
 ) {
-    val channel = Channel<File>(Channel.UNLIMITED)  // Channel without buffer limit
-    audioFileCount=0
-    var listFilesProcessed:MutableList<SongEntity> = arrayListOf()
-
+   audioFileCount=0
     // Coroutine to queue files in the channel
     CoroutineScope(Dispatchers.IO).launch {
         try {
@@ -47,29 +43,23 @@ fun processSongPaths(
 
             // Enqueue files from all directories
             paths.forEach { path ->
-                enqueueFiles(File(path), channel)
+                enqueueFiles(File(path),fileProcessed)
             }
         } finally {
-            channel.close()  // Close the channel when you have finished sending data
+
         }
     }
-    // Single coroutine to process files sequentially
-     CoroutineScope(Dispatchers.IO).launch {
-            for (file in channel) {
-                processFile(file, MyApp.context,fileProcessed)
-                }
-           }
 }
 
-private fun enqueueFiles(file: File, channel: Channel<File>) {
+private suspend fun enqueueFiles(file: File,fileProcessed: (SongEntity) -> Unit) {
     if (file.isDirectory) {
         // Queue files in the directory recursively
         file.listFiles()?.forEach { subFile ->
-            enqueueFiles(subFile, channel)
+            enqueueFiles(subFile,fileProcessed)
         }
     } else {
-            // Send file to channel
-            channel.trySend(file).isSuccess
+        // Send file to process
+        processFile(file,MyApp.context, fileProcessed)
     }
 }
 private fun countAudioFile(file: File) {
@@ -88,7 +78,6 @@ private suspend fun processFile(
     fileProcessed: (SongEntity) -> Unit
 ){
     if (AudioFileType().verify(file.name)) {
-        operationsMutex.withLock {
             val realPathFromFile = file.absolutePath
             val parentDir = getParentDirectories(file.path.toString())
             val metadata = fetchCompleteFileMetadata(context, realPathFromFile)
@@ -112,9 +101,6 @@ private suspend fun processFile(
                     }
                 }
             }
-        }
-
     }
-
 }
 
