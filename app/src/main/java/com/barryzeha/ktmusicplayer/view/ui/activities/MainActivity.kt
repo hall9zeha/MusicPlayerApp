@@ -96,7 +96,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         }
     }
     private fun setUpObservers(){
-        mainViewModel.fetchSongState()
+
         mainViewModel.playLists.observe(this){lists->
             this.playlists = lists
             addItemOnMenuDrawer(playlists)
