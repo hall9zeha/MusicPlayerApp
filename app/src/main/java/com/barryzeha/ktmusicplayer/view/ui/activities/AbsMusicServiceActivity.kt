@@ -70,6 +70,7 @@ open class AbsMusicServiceActivity : AppCompatActivity(),ServiceConnection, Serv
     @CallSuper
     override fun onDestroy() {
         super.onDestroy()
+        musicPlayerService?.setTrackIsAvailable(false)
         musicPlayerService?.unregisterController()
         musicPlayerService?.let{unbindService(this)}
     }

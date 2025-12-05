@@ -129,7 +129,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private var isPlayingBeforeCallPhone:Boolean = false
     // En esta lista cargamos momentaneamente las canciones del fragmento AlbumDetail
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
-
+    private var currentTrackAvailable=false
 
     override fun onCreate() {
         super.onCreate()
@@ -309,6 +309,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 songs.forEach { s ->
                       mainSongsList.add(s)
                 }
+                findItemSongIndexById(mPrefs.idSong)?.let {indexOfSong = it}
             }
             initMusicStateLoop()
         }
@@ -748,6 +749,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
+    fun trackIsAvailable() = currentTrackAvailable
+    fun setTrackIsAvailable(value:Boolean){currentTrackAvailable = value}
     fun isOpenQueue():Boolean = isOpenQueue
     private fun setIsOpenQueue(state:Boolean){
         isOpenQueue = state
@@ -929,6 +932,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     private fun setMusicForPlay(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
         val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
+        findItemSongIndexById(song.id)?.let {indexOfSong = it}
         mPrefs.idSong = song.id
         setSongStateSaved(songState, animDirection)
 
@@ -957,9 +961,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 bassManager?.getActiveChannel()!!,
                 songState.songState.currentPosition
             )
-        }
-        findItemSongIndexById(songState.songEntity.id)?.let {
-            indexOfSong = it
         }
         setPlayingState(playingState())
         _songController?.currentTrack(currentMusicState)

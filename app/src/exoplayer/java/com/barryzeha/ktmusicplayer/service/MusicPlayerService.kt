@@ -147,6 +147,7 @@ class MusicPlayerService : Service(){
     // Test current position
     private var currentTrackPosition = 0L
     private var bootsTrapMediaItem:MediaItem? =null
+    private var currentTrackAvailable=false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -946,6 +947,8 @@ class MusicPlayerService : Service(){
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
+    fun trackIsAvailable() = currentTrackAvailable
+    fun setTrackIsAvailable(value:Boolean){currentTrackAvailable = value}
     private fun setIsOpenQueue(state:Boolean){
         isOpenQueue = state
     }

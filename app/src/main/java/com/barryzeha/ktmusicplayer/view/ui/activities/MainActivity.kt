@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -25,7 +24,6 @@ import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.ktmusicplayer.R
-import com.barryzeha.ktmusicplayer.common.changeBackgroundColor
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
@@ -47,15 +45,12 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
     private var menu:Menu?=null
     private val launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var playlists:List<PlaylistEntity> = arrayListOf()
-
     private var navController:NavController?=null
-    private var currentTrackAvailable:Boolean = false
 
     private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.READ_PHONE_STATE,
-            // Testing
             Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             //******************************************
             // It is required to detect connection and disconnection events of Bluetooth devices when the mobile Bluetooth service is active.
@@ -71,7 +66,6 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         super.onCreate(savedInstanceState)
         installSplashScreen().apply{
             lifecycleScope.launch {
-                //setKeepOnScreenCondition{true}
                 delay(1500)
                 setKeepOnScreenCondition{false}
             }
@@ -103,12 +97,6 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
     }
     private fun setUpObservers(){
         mainViewModel.fetchSongState()
-        mainViewModel.currentTrack.observe(this){
-            currentTrackAvailable =true
-        }
-        mainViewModel.serviceInstance.observe(this){(serviceConn, serviceInst)->
-           if(!currentTrackAvailable)serviceInst.getStateSaved()
-        }
         mainViewModel.playLists.observe(this){lists->
             this.playlists = lists
             addItemOnMenuDrawer(playlists)
