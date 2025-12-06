@@ -808,6 +808,7 @@ class MusicPlayerService : Service(){
                                     mPrefs.idSong = song.id
                                 }
                             }
+                            saveStateOfSong(song)
                         }
                     }
 
@@ -1104,7 +1105,20 @@ class MusicPlayerService : Service(){
             }
         }
     }
-
+    private fun saveStateOfSong(song:SongEntity){
+        serviceScope.launch {
+            delay(1000)
+            if (currentMusicState.idSong > 0) {
+                val songState = SongState(
+                    idSongState = 1,
+                    idSong = song.id,
+                    songDuration = song.duration,
+                    currentPosition = currentMusicState.currentPosition
+                )
+                repository.saveSongState(songState)
+            }
+        }
+    }
     private fun setSongStateSaved(songState: SongStateWithDetail){
         songEntity=songState.songEntity
         currentTrackPosition = songState.songState.currentPosition

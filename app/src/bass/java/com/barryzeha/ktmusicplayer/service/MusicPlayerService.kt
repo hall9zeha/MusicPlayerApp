@@ -479,7 +479,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 nextOrPrevTrack(NEXT)
             }
             SongAction.Previous -> {
-               nextOrPrevTrack(PREVIOUS)
+                nextOrPrevTrack(PREVIOUS)
             }
             SongAction.Favorite -> {
                 serviceScope.launch(Dispatchers.IO) {
@@ -923,24 +923,37 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     private fun setOrPlaySong(indexOfSong:Int,animDirection:Int= DEFAULT_DIRECTION){
         setPlaylistEnded(false)
-        if (mPrefs.isPlaying){
-            play(if(isOpenQueue())playingQueue[indexOfSong] else mainSongsList[indexOfSong])
+        val song = if(isOpenQueue())playingQueue[indexOfSong] else mainSongsList[indexOfSong]
+        if (playingState()){
+            play(song)
+        }else{
+            setMusicForPlay(song, animDirection)
         }
-        else{
-            setMusicForPlay(if(isOpenQueue())playingQueue[indexOfSong]else mainSongsList[indexOfSong], animDirection)
-        }
+        saveStateOfSong(song)
     }
     private fun setMusicForPlay(song: SongEntity, animDirection:Int= DEFAULT_DIRECTION){
         val songState = SongStateWithDetail(SongState(currentPosition = 0),song)
         findItemSongIndexById(song.id)?.let {indexOfSong = it}
         mPrefs.idSong = song.id
         setSongStateSaved(songState, animDirection)
-
     }
     fun setPlayerProgress(progress:Long){
        bassManager?.setChannelProgress(progress){currentSongProgress=it}
     }
-
+    private fun saveStateOfSong(song:SongEntity){
+        serviceScope.launch {
+            delay(1000)
+            if (currentMusicState.idSong > 0) {
+                val songState = SongState(
+                    idSongState = 1,
+                    idSong = song.id,
+                    songDuration = song.duration,
+                    currentPosition = currentMusicState.currentPosition
+                )
+                repository.saveSongState(songState)
+            }
+        }
+    }
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
         val song = songState.songEntity
         songEntity = song
