@@ -129,7 +129,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private var isPlayingBeforeCallPhone:Boolean = false
     // En esta lista cargamos momentaneamente las canciones del fragmento AlbumDetail
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
-    private var currentTrackAvailable=false
+    private var trackStateLoaded=false
 
     override fun onCreate() {
         super.onCreate()
@@ -314,7 +314,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             initMusicStateLoop()
         }
     }
-    fun getStateSaved() {
+    fun loadPlaybackSavedState() {
         if(firstCallingToSongState) {
                 serviceScope.launch(Dispatchers.IO) {
                     songState = repository.fetchSongState()
@@ -749,8 +749,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
-    fun trackIsAvailable() = currentTrackAvailable
-    fun setTrackIsAvailable(value:Boolean){currentTrackAvailable = value}
+    fun isTrackStateLoaded() = trackStateLoaded
+    fun setTrackStateLoaded(value:Boolean){trackStateLoaded = value}
     fun isOpenQueue():Boolean = isOpenQueue
     private fun setIsOpenQueue(state:Boolean){
         isOpenQueue = state
@@ -811,7 +811,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             latestPlayed = false,
                             nextOrPrev = nextOrPrevAnimValue
                         )!!
-
                         EqualizerManager.applyEqualizer(
                             bassManager?.getActiveChannel()!!,
                             effectsPrefs
@@ -955,6 +954,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
+
         val song = songState.songEntity
         songEntity = song
         checkIfPhoneIsLock()
@@ -982,6 +982,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
         // para evitarlo
         executeOnceTime = true
+        setTrackStateLoaded(true)
     }
     private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {

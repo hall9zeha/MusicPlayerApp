@@ -1,7 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.viewmodel
 
 import android.content.ServiceConnection
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
@@ -40,6 +39,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
 
     private var countItemsInserted:Long=0
     private var itemsCount:Long=0
+    private var musicService: MusicPlayerService?=null
 
     private var _navControllerInstance:MutableLiveData<NavController> = MutableLiveData()
     val navControllerInstance:LiveData<NavController> = _navControllerInstance
@@ -374,7 +374,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
             )
         }
     }
+    fun setServiceInstance(serviceInstance: MusicPlayerService?){
+        musicService = serviceInstance
+    }
     override fun onCleared() {
+        musicService?.setTrackStateLoaded(false)
         destroyScope()
         super.onCleared()
     }

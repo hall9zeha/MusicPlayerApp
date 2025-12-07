@@ -26,7 +26,6 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.C
@@ -34,7 +33,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
-import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.barryzeha.audioeffects.common.EffectsPreferences
@@ -147,7 +145,7 @@ class MusicPlayerService : Service(){
     // Test current position
     private var currentTrackPosition = 0L
     private var bootsTrapMediaItem:MediaItem? =null
-    private var currentTrackAvailable=false
+    private var trackStateLoaded=false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -948,8 +946,8 @@ class MusicPlayerService : Service(){
     private fun setPlayingState(state:Boolean){
         mPrefs.isPlaying=state
     }
-    fun trackIsAvailable() = currentTrackAvailable
-    fun setTrackIsAvailable(value:Boolean){currentTrackAvailable = value}
+    fun isTrackStateLoaded() = trackStateLoaded
+    fun setTrackStateLoaded(value:Boolean){trackStateLoaded = value}
     private fun setIsOpenQueue(state:Boolean){
         isOpenQueue = state
     }

@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -146,9 +145,12 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     private fun setUpObservers(){
         (bind?.ivDiscMusicCover as ImageView).loadImage(coreRes.mipmap.ic_launcher)
         (bind?.ivMusicCover as ImageView).loadImage(coreRes.mipmap.ic_launcher)
-        mainViewModel.serviceInstance.observe(this){(serviceConn, serviceInst)->
+        mainViewModel.serviceInstance.observe(viewLifecycleOwner){(serviceConn, serviceInst)->
             musicPlayerService?.let {
-                if(!musicPlayerService!!.trackIsAvailable()) serviceInst.getStateSaved()
+                if(!musicPlayerService!!.isTrackStateLoaded()){
+                    serviceInst.loadPlaybackSavedState()
+                }
+                mainViewModel.setServiceInstance(musicPlayerService)
             }
         }
         mainViewModel.fragmentInstance.observe(viewLifecycleOwner){instance->
@@ -164,7 +166,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         }
         mainViewModel.currentTrack.observe(viewLifecycleOwner){
            it?.let{currentTrack->
-               musicPlayerService?.setTrackIsAvailable(true)
                mainViewModel.checkIfIsFavorite(currentTrack.idSong)
                updateUIOnceTime(currentTrack)
                setNumberOfTrack(mPrefs.idSong)
