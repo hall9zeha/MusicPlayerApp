@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -23,61 +24,66 @@ private const val SAMPLE48 = 48000
 private const val SAMPLE96 = 96000
 private const val SAMPLE192 = 192000
 private const val TAG = "BASS-MANAGER"
-private var mainChannel:Int?=0
-private val handler = Handler(Looper.getMainLooper())
-private val aBLoopHandler = Handler(Looper.getMainLooper())
-private var checkRunnable: Runnable? = null
+
 private var updateTimer: Timer? = null
 private var idSong:Long?=null
 
-// For A-B looper
-private var startAbLoopPosition:Long=0
-private var endAbLopPosition:Long=0
-private var context: Context?=null
+class BassManager {
+    private var mainChannel:Int?=0
+    private val handler = Handler(Looper.getMainLooper())
+    private val aBLoopHandler = Handler(Looper.getMainLooper())
+    private var checkRunnable: Runnable? = null
+    private  var playbackManager:PlaybackManager?=null
+    companion object {
+        // For A-B looper
+        private var startAbLoopPosition:Long=0
+        private var endAbLopPosition:Long=0
+        @SuppressLint("StaticFieldLeak")
+        private var context: Context?=null
+        @SuppressLint("StaticFieldLeak")
+        @Volatile
+        private var instance: BassManager? = null
 
-open class BassManager {
+        fun getInstance():BassManager{
+            return instance ?: synchronized(this) {
+                instance ?: BassManager().apply {
+                    initializeBass()
+                }.also { instance = it }
+            }
+        }
 
-    private var instance: BassManager? = null
-    private  lateinit var playbackManager:PlaybackManager
-    init {
-        BASS.BASS_Init(-1, 44100, 0)
     }
-     fun getInstance(playbackManager: PlaybackManager):BassManager?{
-        instance?.let{ return it}?:run{
-            context= MyApp.context
-            instance=BassManager()
-            this.playbackManager = playbackManager
-            if (!BASS.BASS_Init(-1, SAMPLE192, BASS.BASS_DEVICE_FREQ)) {
+    private fun initializeBass(){
+        context= MyApp.context
+        if (!BASS.BASS_Init(-1, SAMPLE192, BASS.BASS_DEVICE_FREQ)) {
+            Log.i(TAG, "Can't initialize device")
+            Log.i(TAG, "init with sample " + SAMPLE96 + "Hz")
+            if (!BASS.BASS_Init(-1, SAMPLE96, BASS.BASS_DEVICE_FREQ)) {
                 Log.i(TAG, "Can't initialize device")
-                Log.i(TAG, "init with sample " + SAMPLE96 + "Hz")
-                if (!BASS.BASS_Init(-1, SAMPLE96, BASS.BASS_DEVICE_FREQ)) {
+                Log.i(TAG, "init with sample " + SAMPLE48 + "Hz")
+                if (!BASS.BASS_Init(-1, SAMPLE48, BASS.BASS_DEVICE_FREQ)) {
                     Log.i(TAG, "Can't initialize device")
-                    Log.i(TAG, "init with sample " + SAMPLE48 + "Hz")
-                    if (!BASS.BASS_Init(-1, SAMPLE48, BASS.BASS_DEVICE_FREQ)) {
+                    Log.i(TAG, "init with sample " + SAMPLE44 + "Hz")
+                    if (!BASS.BASS_Init(-1, SAMPLE44, BASS.BASS_DEVICE_FREQ)) {
                         Log.i(TAG, "Can't initialize device")
-                        Log.i(TAG, "init with sample " + SAMPLE44 + "Hz")
-                        if (!BASS.BASS_Init(-1, SAMPLE44, BASS.BASS_DEVICE_FREQ)) {
-                            Log.i(TAG, "Can't initialize device")
-                        }
                     }
                 }
             }
-            val info = BASS_INFO()
-            if (BASS.BASS_GetInfo(info)) {
-                Log.i(TAG, "Min Buffer :" + info.minbuf)
-                Log.i(TAG, "Direct Sound Ver :" + info.dsver)
-                Log.i(TAG, "Latency :" + info.latency)
-                Log.i(TAG, "speakers :" + info.speakers)
-                Log.i(TAG, "freq :" + info.freq)
-            }
+        }
+        val info = BASS_INFO()
+        if (BASS.BASS_GetInfo(info)) {
+            Log.i(TAG, "Min Buffer :" + info.minbuf)
+            Log.i(TAG, "Direct Sound Ver :" + info.dsver)
+            Log.i(TAG, "Latency :" + info.latency)
+            Log.i(TAG, "speakers :" + info.speakers)
+            Log.i(TAG, "freq :" + info.freq)
         }
         configure()
         val nativeDir =MyApp.context.applicationInfo.nativeLibraryDir
         val pluginsList = File(nativeDir).list { dir, name -> name.matches("libbass.+\\.so|libtags\\.so".toRegex()) }
         pluginsList?.forEach { plugin->
-             BASS.BASS_PluginLoad(plugin,0)
-         }
-        return instance
+            BASS.BASS_PluginLoad(plugin,0)
+        }
     }
     private fun configure(){
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_FLOATDSP, 1)
@@ -99,6 +105,12 @@ open class BassManager {
     }
     fun stopCheckingPlayback(){
         stopRunnable()
+    }
+    fun unregisterOnFinishPlayback(){
+        playbackManager=null
+    }
+    fun registerOnFinishPlayback(mPlaybackManager: PlaybackManager){
+        playbackManager = mPlaybackManager
     }
     private fun stopRunnable(){
         checkRunnable?.let{
@@ -126,6 +138,9 @@ open class BassManager {
     }
     fun channelPause(){
         BASS.BASS_ChannelPause(getActiveChannel())
+    }
+    fun channelStop(){
+        BASS.BASS_ChannelStop(getActiveChannel())
     }
     fun fastForwardOrRewind(isForward:Boolean,currentProgress: (Long) -> Unit){
         val progressOnSeconds = getCurrentPositionInSeconds(getActiveChannel())

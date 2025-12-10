@@ -336,3 +336,14 @@ fun animateButtonsAbLoop(view:View){
     view.startAnimation(anim)
 
 }
+fun SongEntity.toMusicState():MusicState{
+    return MusicState(
+        idSong = this.id,
+        title = this.description!!,
+        artist = this.artist,
+        album = this.album,
+        duration = this.duration,
+        songPath = this.pathLocation!!,
+        isFavorite = this.favorite
+    )
+}
