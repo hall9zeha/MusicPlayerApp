@@ -974,7 +974,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             )
             _songController?.currentTrack(currentMusicState)
         }
-        Log.e("MAIN_CHANNEL_STATE", playingState().toString())
         if (!playingState()) {
             currentSongProgress = songState.songState.currentPosition
             bassManager?.streamCreateFile(songState.songEntity)
