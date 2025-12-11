@@ -643,7 +643,7 @@ class MusicPlayerService : Service(){
             }
         }
     }
-    fun getStateSaved() {
+    fun loadPlaybackSavedState() {
         if(!songStateRestored) {
             serviceScope.launch{
                 songState = repository.fetchSongState()
