@@ -119,7 +119,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
     // Action Next
     val nextAction = Notification.Action.Builder(
         Icon.createWithResource(context, R.drawable.ic_next),
-        "Previous",
+        "Next",
         createActionPendingIntent(context,SongAction.Next.ordinal.toString(),3)
     ).build()
 
