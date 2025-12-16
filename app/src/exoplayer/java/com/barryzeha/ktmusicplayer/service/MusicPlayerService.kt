@@ -1180,7 +1180,6 @@ class MusicPlayerService : Service(){
         mediaSession.release()
         _songController?.stop()
         stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
         super.onDestroy()
     }
     override fun onTaskRemoved(rootIntent: Intent?) {

@@ -104,7 +104,7 @@
     </style>
    <style name="myToolbarDrawerStyle" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
        <!-- <item name="drawerArrowStyle">@style/MyDrawerArrowToggle</item>-->
-      <!-- <item name="titleTextStyle">@style/CustomToolbarTitleStyle</item>-->
+       <!-- <item name="titleTextStyle">@style/CustomToolbarTitleStyle</item>-->
 
     </style>
     <!--<style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">

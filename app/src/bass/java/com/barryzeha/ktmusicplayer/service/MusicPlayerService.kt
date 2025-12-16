@@ -135,12 +135,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
 
     override fun onCreate() {
         super.onCreate()
-
         bassManager = BassManager.getInstance()
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mPrefs.isPopulateServicePlaylist=false
-
         mediaStyle = MediaStyle().setMediaSession(mediaSession.sessionToken)
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
@@ -1063,7 +1061,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     override fun onDestroy() {
-        super.onDestroy()
         unregisterReceiver(headsetReceiver)
         unregisterReceiver(bluetoothReceiver)
         isForegroundService = false
@@ -1072,7 +1069,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         bassManager?.releasePlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
         clearABLoopOfPreferences()
-        stopSelf()
+        super.onDestroy()
     }
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
