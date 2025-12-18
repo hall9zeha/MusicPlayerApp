@@ -556,20 +556,17 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
         fastForwardOrRewindHandler?.post(forwardOrRewindRunnable!!)
     }
     private fun getSongOfList(position:Int): SongEntity?{
-        if(mPrefs.currentIndexSong>-1) {
+        if(mPrefs.currentIndexSong>-1 && musicPlayerService?.playListSize()!!>0) {
             mPrefs.currentIndexSong = position.toLong()
             mainViewModel.setCurrentPosition(position)
-            musicPlayerService?.getSongsList()?.let{songsList->
-               return songsList[position]
+            return musicPlayerService?.getSongsList()?.let{songsList->
+                songsList[position]
            }?:run{
-                return null
-            }
+               return null
+           }
         }else{
-            mainViewModel.setCurrentPosition(0)
-            musicPlayerService?.getSongsList()?.let{songsList->
-                return songsList[0]
-            }?:run { return null }
-       }
+            return null
+        }
     }
     private fun updateService(){
         serviceConnection?.let{

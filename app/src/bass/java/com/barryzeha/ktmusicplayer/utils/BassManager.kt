@@ -51,7 +51,6 @@ class BassManager {
                 }.also { instance = it }
             }
         }
-
     }
     private fun initializeBass(){
         context= MyApp.context
@@ -148,9 +147,7 @@ class BassManager {
         setChannelProgress(forwardProgress){currentProgress(it)}
 
     }
-
     fun setChannelProgress(progress:Long, currentProgress:(Long)->Unit){
-
         val progressBytes = BASS.BASS_ChannelSeconds2Bytes(getActiveChannel(), progress / 1000.0)
         /*updateTimer?.cancel()
         updateTimer = Timer()
@@ -161,7 +158,6 @@ class BassManager {
         currentProgress(progress)
           /*  }
         }, 100) */// Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
-
     }
     fun repeatSong(){
         BASS.BASS_ChannelPlay(getActiveChannel(), true)
@@ -187,7 +183,6 @@ class BassManager {
         aBLoopHandler.postDelayed({
             startAbLoop()
         },500)
-
     }
     fun stopAbLoop() = aBLoopHandler.removeCallbacksAndMessages(null)
 

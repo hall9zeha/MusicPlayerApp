@@ -55,7 +55,7 @@ class AlbumDetailFragment : BaseFragment(R.layout.fragment_album_detail) {
     private var albumSongs:List<SongEntity> = listOf()
     private var songEntity: SongEntity?=null
     override fun onCreate(savedInstanceState: Bundle?) {
-        activity?.setTheme(com.barryzeha.core.R.style.Base_Theme_KTMusicPlayer)
+        activity?.setTheme(coreRes.style.Base_Theme_KTMusicPlayer)
         super.onCreate(savedInstanceState)
         songEntity = arguments.extraAlbum
         songEntity?.let { song->

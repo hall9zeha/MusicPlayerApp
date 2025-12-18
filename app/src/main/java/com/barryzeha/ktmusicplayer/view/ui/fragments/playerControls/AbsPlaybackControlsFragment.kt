@@ -76,7 +76,8 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
                 }
             }
             btnNext.setOnClickListener {
-                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!!) {
+                if (musicPlayerService?.getCurrentSongPosition()!! < musicPlayerService?.playListSize()!! &&
+                    musicPlayerService?.playListSize()!! > 0) {
                     musicPlayerService?.nextSong()
                     setNumberOfTracks()
                 } else {
@@ -189,7 +190,8 @@ abstract class AbsPlaybackControlsFragment(@LayoutRes layout:Int): BaseFragment(
     private fun getSongOfAdapter(idSong: Long): SongEntity?{
         val song = if(idSong>-1){ listFragmentInstance?.musicListAdapter?.getSongById(idSong)}else{
             //We search in position 1 because we will first have an item header in position 0
-            listFragmentInstance?.musicListAdapter?.getSongByPosition(1)
+            if(listFragmentInstance?.musicListAdapter?.itemCount!!>0)listFragmentInstance?.musicListAdapter?.getSongByPosition(1)
+            else null
         }
         song?.let{
             val (numberedPosition, realPosition) =  listFragmentInstance?.musicListAdapter?.getPositionByItem(it)!!
