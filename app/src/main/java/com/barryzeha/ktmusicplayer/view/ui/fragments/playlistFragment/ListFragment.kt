@@ -414,7 +414,10 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     lifecycleScope.launch {
                         withContext(Dispatchers.Main) {
                              musicPlayerService?.currentSongState()?.let {song->
-                                 val songEntity = SongEntity(id = song.idSong,album = song.album)
+                                 val songEntity = SongEntity(
+                                     id = song.idSong,
+                                     album = song.album,
+                                     pathLocation = song.songPath)
                                  delay(300)
                                  navController?.navigate(R.id.albumDetailFragment, bundleOf("extra_album" to songEntity))
                              }
