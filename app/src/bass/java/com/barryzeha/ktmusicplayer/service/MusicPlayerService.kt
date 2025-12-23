@@ -136,6 +136,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     override fun onCreate() {
         super.onCreate()
         bassManager = BassManager.getInstance()
+        bassManager?.registerOnFinishPlayback(this)
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mPrefs.isPopulateServicePlaylist=false
@@ -802,7 +803,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     }
                     if (bassManager?.getActiveChannel() != 0) {
                         bassManager?.channelPlay(currentSongProgress)
-                        bassManager?.registerOnFinishPlayback(this)
                         bassManager?.startCheckingPlayback()
 
                         setPlayingState(true)
