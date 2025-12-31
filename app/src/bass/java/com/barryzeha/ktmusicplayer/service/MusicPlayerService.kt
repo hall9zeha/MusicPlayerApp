@@ -765,8 +765,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun checkIfSongIsFavorite(id:Long){
         if(id>0) {
             serviceScope.launch(Dispatchers.IO) {
-                currentMusicState = fetchSongMetadata(repository.fetchSongById(id))!!
-                initNotify()
+                fetchSongMetadata(repository.fetchSongById(id))?.let{ metadata->
+                    currentMusicState = metadata
+                    initNotify()
+                }
             }
         }
     }
@@ -804,7 +806,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     if (bassManager?.getActiveChannel() != 0) {
                         bassManager?.channelPlay(currentSongProgress)
                         bassManager?.startCheckingPlayback()
-
+                        bassManager?.registerOnFinishPlayback(this)
                         setPlayingState(true)
                         mPrefs.idSong = songEntity.id
                         currentMusicState = fetchSongMetadata(songEntity)?.copy(
@@ -828,6 +830,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             Snackbar.LENGTH_LONG
                         )
                         setPlayingState(if(isOpenQueue)indexOfSong < playingQueue.size-1 else indexOfSong < mainSongsList.size-1)
+                        nextSong()
                     }
                     song?.let {
                         if (executeOnceTime) _songController?.currentTrack(currentMusicState)

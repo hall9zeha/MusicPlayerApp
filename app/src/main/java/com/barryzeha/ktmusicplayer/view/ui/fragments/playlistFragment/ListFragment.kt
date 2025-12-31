@@ -488,9 +488,9 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     }
     private fun onItemClick(position: Int, song: SongEntity) {
         musicListAdapter?.getPositionByItem(song)?.let { pos ->
+            mPrefs.idSong = song.id
             musicPlayerService?.startPlayer(song)
             musicPlayerService?.clearABLoopOfPreferences()
-            mPrefs.idSong = song.id
             mainViewModel.setCurrentPosition(pos.first)
             if(isFiltering){
                 musicListAdapter?.changeBackgroundColorSelectedItem(song.id,true)
