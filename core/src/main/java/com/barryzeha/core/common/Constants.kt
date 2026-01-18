@@ -26,7 +26,7 @@ const val LIST_PLAYER = "listPlayer"
 const val SETTINGS = "settings"
 const val SONG_INFO_EXTRA_KEY = "songInfoExtraKey"
 // Song metadata default
-const val ALBUM_UNKNOWN="Album Unknown"
+const val ALBUM_UNKNOWN="Unknown album"
 // Song mode
 const val REPEAT_ALL = 0
 const val REPEAT_ONE = 1

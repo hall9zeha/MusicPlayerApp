@@ -92,7 +92,7 @@ class MusicPlayerService : Service(){
     lateinit var effectsPrefs:EffectsPreferences
 
     private var songsList: MutableList<SongEntity> = mutableListOf()
-
+    private var playlistLoaded:Boolean=false
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaStyle: MediaStyle
     private lateinit var notificationManager: NotificationManager
@@ -146,6 +146,7 @@ class MusicPlayerService : Service(){
     private var currentTrackPosition = 0L
     private var bootsTrapMediaItem:MediaItem? =null
     private var trackStateLoaded=false
+    private var openFromIntent=false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -260,7 +261,7 @@ class MusicPlayerService : Service(){
                             when (state) {
                                 TelephonyManager.CALL_STATE_IDLE -> {
                                     if(!playingState() && isPlayingBeforeCallPhone){
-                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        if(checkIfPhoneIsLocked())resumePlayer()
                                         else _songController?.play()
                                         isPlayingBeforeCallPhone = false
                                     }
@@ -269,7 +270,7 @@ class MusicPlayerService : Service(){
                                 }
                                 TelephonyManager.CALL_STATE_RINGING -> {
                                     if(playingState()){
-                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        if(checkIfPhoneIsLocked())pausePlayer()
                                         else _songController?.pause()
                                         isPlayingBeforeCallPhone = true
 
@@ -285,7 +286,7 @@ class MusicPlayerService : Service(){
                             when (state) {
                                 TelephonyManager.CALL_STATE_IDLE -> {
                                     if(!playingState() && isPlayingBeforeCallPhone){
-                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        if(checkIfPhoneIsLocked())resumePlayer()
                                         else _songController?.play()
                                         isPlayingBeforeCallPhone = false
                                     }
@@ -293,7 +294,7 @@ class MusicPlayerService : Service(){
                                 TelephonyManager.CALL_STATE_OFFHOOK -> Log.d("PHONE_MANAGER","OFF-HOOK")
                                 TelephonyManager.CALL_STATE_RINGING -> {
                                     if(playingState()){
-                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        if(checkIfPhoneIsLocked())pausePlayer()
                                         else _songController?.pause()
                                         isPlayingBeforeCallPhone = true
                                     }
@@ -487,7 +488,7 @@ class MusicPlayerService : Service(){
                     if (bootstrapIndex != realIndex) {
                         exoPlayer.moveMediaItem(bootstrapIndex, realIndex)
                     }
-                    // Elimina el duplicado SOLO si existe
+                    // Elimina el duplicado solo si existe
                     if (realIndex + 1 < exoPlayer.mediaItemCount) {
                         exoPlayer.removeMediaItem(realIndex +1)
                     }
@@ -662,7 +663,6 @@ class MusicPlayerService : Service(){
                     latestPlayed = false
                 )
             }
-
             //if(exoPlayer.isPlaying) {
                 _songController?.musicState(currentMusicState)
                 updateNotify()
@@ -730,18 +730,27 @@ class MusicPlayerService : Service(){
            }}
             .let{ if(it>-1) it else 0 }
         positionReset =  itemIndex
-        exoPlayer.seekTo(itemIndex,0)
+        if(openFromIntent){
+            exoPlayer.setMediaItems(mainMediaItemList)
+            openFromIntent=false
+        }
         exoPlayer.prepare()
+        exoPlayer.seekTo(itemIndex,0)
         exoPlayer.play()
         setPlayingState(true)
         setPlaylistEnded(false)
     }
+
     @OptIn(UnstableApi::class)
     private fun setUpExoplayerListener():Player.Listener?{
          playerListener = object : Player.Listener {
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
                  if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
+                     if(!playlistLoaded) {
+                         _songController?.onPlaylistLoaded()
+                         playlistLoaded=true
+                     }
                      // Set currentSongEntity info
                      setPlayingState(exoPlayer.isPlaying)
                      exoPlayer.metadataToMusicState()?.let{
@@ -751,7 +760,6 @@ class MusicPlayerService : Service(){
                              //mPrefs.idSong=it.idSong
                          }
                      positionReset=-1
-
                  }
                  // Si no está en modo repetir toda la lista al terminar de reproducir toda la lista
                  // volver a la primera pista y detener el reproductor
@@ -784,6 +792,7 @@ class MusicPlayerService : Service(){
              ) {
                  super.onPositionDiscontinuity(oldPosition, newPosition, reason)
                     if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
+
                         indexSongOfQueue = newPosition.mediaItemIndex
                         if (songsList.isNotEmpty()) {
                             val song =
@@ -880,6 +889,13 @@ class MusicPlayerService : Service(){
             exoPlayer.addMediaItem(newMediaItem)
         }
     }
+    // From opening song from intent action
+    fun setIsOpenedFromIntent(value: Boolean){
+        openFromIntent = value
+    }
+    fun onOpenFromIntent(){
+       _songController?.onPlaylistLoaded()
+    }
     fun removeMediaItem(song: SongEntity){
         val mediaItemIndex = findMediaItemIndexById(mainMediaItemList,song.id.toString())
         mainMediaItemList.removeAt(mediaItemIndex)
@@ -933,7 +949,7 @@ class MusicPlayerService : Service(){
     fun unregisterController(){
         _songController=null
     }
-    private fun checkIfPhoneIsLock():Boolean{
+    private fun checkIfPhoneIsLocked():Boolean{
         if(_songController==null){
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
@@ -1146,7 +1162,7 @@ class MusicPlayerService : Service(){
         }
         _songController?.currentTrack(currentMusicState)
         setPlayingState(exoPlayer.isPlaying)
-        checkIfPhoneIsLock()
+        checkIfPhoneIsLocked()
     }
 
     private fun fetchSongMetadata(song:SongEntity):MusicState?{

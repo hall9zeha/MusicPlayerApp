@@ -251,7 +251,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             when (state) {
                                 TelephonyManager.CALL_STATE_IDLE -> {
                                     if(!playingState() && isPlayingBeforeCallPhone){
-                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        if(checkIfPhoneIsLocked())resumePlayer()
                                         else _songController?.play()
                                         isPlayingBeforeCallPhone = false
                                     }
@@ -260,7 +260,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                 }
                                 TelephonyManager.CALL_STATE_RINGING -> {
                                     if(playingState()){
-                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        if(checkIfPhoneIsLocked())pausePlayer()
                                         else _songController?.pause()
                                         isPlayingBeforeCallPhone = true
 
@@ -276,7 +276,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             when (state) {
                                 TelephonyManager.CALL_STATE_IDLE -> {
                                     if(!playingState() && isPlayingBeforeCallPhone){
-                                        if(checkIfPhoneIsLock())resumePlayer()
+                                        if(checkIfPhoneIsLocked())resumePlayer()
                                         else _songController?.play()
                                         isPlayingBeforeCallPhone = false
                                     }
@@ -284,7 +284,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                 TelephonyManager.CALL_STATE_OFFHOOK -> Log.d("PHONE_MANAGER","OFF-HOOK")
                                 TelephonyManager.CALL_STATE_RINGING -> {
                                     if(playingState()){
-                                        if(checkIfPhoneIsLock())pausePlayer()
+                                        if(checkIfPhoneIsLocked())pausePlayer()
                                         else _songController?.pause()
                                         isPlayingBeforeCallPhone = true
                                     }
@@ -310,6 +310,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                       mainSongsList.add(s)
                 }
                 findItemSongIndexById(mPrefs.idSong)?.let {indexOfSong = it}
+                _songController?.onPlaylistLoaded()
             }
             initMusicStateLoop()
         }
@@ -403,14 +404,14 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 setPlayingState(false)
                 if(_songController !=null)_songController?.pause()
                 else pausePlayer()
-                checkIfPhoneIsLock()
+                checkIfPhoneIsLocked()
             }
             override fun onPlay() {
                 super.onPlay()
                 setPlayingState(true)
                 if(_songController !=null)_songController?.play()
                 else resumePlayer()
-                checkIfPhoneIsLock()
+                checkIfPhoneIsLocked()
             }
             override fun onSkipToNext() {
                 super.onSkipToNext()
@@ -465,13 +466,13 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 setPlayingState(false)
                 if (_songController != null) _songController?.pause()
                 else pausePlayer()
-                checkIfPhoneIsLock()
+                checkIfPhoneIsLocked()
             }
             SongAction.Resume -> {
                 setPlayingState(true)
                 if(_songController !=null)_songController?.play()
                 else resumePlayer()
-                checkIfPhoneIsLock()
+                checkIfPhoneIsLocked()
             }
             SongAction.Stop -> {
                 _songController?.stop()
@@ -681,8 +682,15 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun setSongController(controller:ServiceSongListener){
         _songController=controller
     }
+    @Synchronized
     fun setNewMediaItem(song:SongEntity){
-       if(!mainSongsList.contains(song)){ mainSongsList.add(song)}
+       if(!mainSongsList.contains(song)){mainSongsList.add(song)}
+    }
+    // From opening song from intent action
+    fun setIsOpenedFromIntent(value: Boolean){
+    }
+    fun onOpenFromIntent(){
+        _songController?.onPlaylistLoaded()
     }
     fun removeMediaItem(song: SongEntity){
        if(mainSongsList.contains(song)) {
@@ -733,7 +741,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun unregisterController(){
         _songController=null
     }
-    private fun checkIfPhoneIsLock():Boolean{
+    private fun checkIfPhoneIsLocked():Boolean{
         if(_songController==null){
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
@@ -877,14 +885,21 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
         nextOrPrevAnimValue = NEXT
         setOrPlaySong(indexOfSong, NEXT)
-        checkIfPhoneIsLock()
+        checkIfPhoneIsLocked()
         mPrefs.currentIndexSong = indexOfSong.toLong()
 
         stopAbLoop()
         clearABLoopOfPreferences()
     }
+    private fun reconcileCurrentSongInQueue(){
+        if (songEntity.id>0 && !mainSongsList.contains(songEntity)) {
+            mainSongsList.add(songEntity)
+            indexOfSong = mainSongsList.lastIndex
+        }
+    }
     fun prevSong(){
         if(mainSongsList.isNotEmpty()){
+            reconcileCurrentSongInQueue()
             if(indexOfSong > 0) {
                 if(isOpenQueue()){
                     if(mPrefs.songMode == SHUFFLE) indexOfSong =Random.nextInt(0, playingQueue.size-1)
@@ -895,7 +910,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }
                 nextOrPrevAnimValue = PREVIOUS
                 setOrPlaySong(indexOfSong, PREVIOUS)
-                checkIfPhoneIsLock()
+                checkIfPhoneIsLocked()
                 mPrefs.currentIndexSong = indexOfSong.toLong()
             }
         }
@@ -963,7 +978,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
         val song = songState.songEntity
         songEntity = song
-        checkIfPhoneIsLock()
+        checkIfPhoneIsLocked()
         // Set info currentSongEntity
         fetchSongMetadata(song)?.let { musicState ->
             currentMusicState = musicState.copy(

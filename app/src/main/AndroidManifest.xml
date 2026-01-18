@@ -41,6 +41,7 @@
         <activity
             android:name=".view.ui.activities.MainActivity"
             android:configChanges="orientation"
+            android:launchMode="singleTask"
             android:exported="true"
             android:label="${appLabel}"
             android:windowSoftInputMode="adjustResize">
@@ -48,6 +49,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+
         </activity>
         <activity
             android:name=".view.ui.activities.MainPermissionsActivity"

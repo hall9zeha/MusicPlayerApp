@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -219,6 +220,9 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         mainViewModel.songById.observe(viewLifecycleOwner) { song ->
             song?.let {
                 musicPlayerService?.setNewMediaItem(song)
+                if (mainViewModel.openSongFromIntent) {
+                    mainViewModel.setSongFromIntent(song)
+                }
             }
         }
         mainViewModel.currentSongListPosition.observe(viewLifecycleOwner) { positionSelected ->

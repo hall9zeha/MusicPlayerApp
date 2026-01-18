@@ -41,6 +41,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var itemsCount:Long=0
     private var musicService: MusicPlayerService?=null
 
+    private var _openSongFromIntent:Boolean = false
+    val openSongFromIntent: Boolean  get() = _openSongFromIntent
+
     private var _navControllerInstance:MutableLiveData<NavController> = MutableLiveData()
     val navControllerInstance:LiveData<NavController> = _navControllerInstance
 
@@ -75,6 +78,8 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     val deletePlayList:LiveData<Int?> = _deletePlayList
     private var _songById:SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
     val songById:LiveData<SongEntity> = _songById
+    private var _songFromIntent: SingleMutableLiveData<SongEntity> = SingleMutableLiveData()
+    val songFromIntent: LiveData<SongEntity> = _songFromIntent
 
     private var _currentSongListPosition:MutableLiveData<Int> = MutableLiveData()
     val currentSongListPosition:LiveData<Int> = _currentSongListPosition
@@ -166,7 +171,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
             getSongById(idInserted)
         }
     }
-
     fun saveSongs(songList:List<SongEntity>){
         itemsCount=songList.size.toLong()
         launch(Dispatchers.IO){
@@ -376,6 +380,14 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     }
     fun setServiceInstance(serviceInstance: MusicPlayerService?){
         musicService = serviceInstance
+    }
+    fun setOpenSongFromIntent(value: Boolean){
+        _openSongFromIntent = value
+    }
+    fun setSongFromIntent(songEntity: SongEntity){
+        launch {
+            _songFromIntent.value = songEntity
+        }
     }
     override fun onCleared() {
         musicService?.setTrackStateLoaded(false)

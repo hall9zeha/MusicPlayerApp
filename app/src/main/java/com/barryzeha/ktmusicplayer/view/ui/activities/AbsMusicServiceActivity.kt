@@ -116,6 +116,12 @@ open class AbsMusicServiceActivity : AppCompatActivity(),ServiceConnection, Serv
         }
     }
 
+    override fun onPlaylistLoaded() {
+        for(listener in mMusicPlayerServiceListeners){
+            listener.onPlaylistLoaded()
+        }
+    }
+
     override fun onServiceConnected(conn: ServiceConnection, service: IBinder?) { }
     override fun onServiceDisconnected() {
         musicPlayerService = null

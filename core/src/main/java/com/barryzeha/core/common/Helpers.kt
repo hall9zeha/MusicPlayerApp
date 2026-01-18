@@ -11,8 +11,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
@@ -110,16 +112,16 @@ fun <T> startOrUpdateService(context: Context,service:Class<T>,serviceConn:Servi
                 defaultValue
             }
         // Extract metadata with default values
-        val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
+        val artist = getTagField(FieldKey.ARTIST, "Unknown artist")
         val album = getTagField(FieldKey.ALBUM, ALBUM_UNKNOWN)
         val albumArtist = getTagField(FieldKey.ALBUM_ARTIST, "")
-        val genre = getTagField(FieldKey.GENRE, "Unknown Genre")
+        val genre = getTagField(FieldKey.GENRE, "Unknown genre")
         val title = getTagField(FieldKey.TITLE, nameFile)
         val comment = getTagField(FieldKey.COMMENT, "No Comment")
-        val year = getTagField(FieldKey.YEAR, "Unknown Year")
-        val track = getTagField(FieldKey.TRACK, "Unknown")
-        val discNumber = getTagField(FieldKey.DISC_NO, "Unknown")
-        val composer = getTagField(FieldKey.COMPOSER, "Unknown")
+        val year = getTagField(FieldKey.YEAR, "Unknown year")
+        val track = getTagField(FieldKey.TRACK, "Unknown track")
+        val discNumber = getTagField(FieldKey.DISC_NO, "Unknown disc")
+        val composer = getTagField(FieldKey.COMPOSER, "Unknown composer")
         val artistSort = getTagField(FieldKey.ARTIST_SORT, "")
         // Extract audio header data with default values
         val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
@@ -207,10 +209,10 @@ fun fetchShortMetadataAlbumInfo(context: Context,pathFile:String):AudioMetadata?
         // Extract metadata with default values
 
         val title = getTagField(FieldKey.TITLE, nameFile)
-        val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
-        val album = getTagField(FieldKey.ALBUM, "Album Unknown")
+        val artist = getTagField(FieldKey.ARTIST, "Unknown artist")
+        val album = getTagField(FieldKey.ALBUM, "Unknown album")
         val albumArtist = getTagField(FieldKey.ALBUM_ARTIST, "")
-        val year = getTagField(FieldKey.YEAR, "Unknown Year")
+        val year = getTagField(FieldKey.YEAR, "Unknown year")
         val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong()} catch (ex: Exception) { 0L }
         return AudioMetadata(
             title = title,
@@ -238,8 +240,8 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
         // Extract metadata with default values
         val format = try { metadata.audioHeader.format } catch (ex: Exception) { "unknown" }
         val title = getTagField(FieldKey.TITLE, nameFile)
-        val artist = getTagField(FieldKey.ARTIST, "Artist Unknown")
-        val album = getTagField(FieldKey.ALBUM, "Album Unknown")
+        val artist = getTagField(FieldKey.ARTIST, "Unknown artist")
+        val album = getTagField(FieldKey.ALBUM, "Unknown album")
         // Extract audio header data with default values
         val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
         val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong()} catch (ex: Exception) { 0L }
@@ -305,8 +307,8 @@ fun getSongMetadata(context: Context, path: String?,withBitmap:Boolean=false, is
         return null
     }
     return MusicState(
-        artist = "Unknown",
-        album ="Album Unknown",
+        artist = "Unknown artist",
+        album ="Unknown album",
         albumArt = BitmapFactory.decodeStream(context.assets.open(DEFAULT_COVER_ART_ASSET))
         )
 }
@@ -415,4 +417,29 @@ fun shareSong(context:Context, filePath:String){
         e.printStackTrace()
         Log.e("SHARE_SONG_ERROR", e.message.toString() )
     }
+}
+fun uriToPathFileFromMediaStore(
+    context: Context,
+    uri: Uri,
+): String? {
+
+    val projection = arrayOf(MediaStore.Audio.Media.DATA)
+
+    context.contentResolver.query(
+        uri,
+        projection,
+        null,
+        null,
+        null
+    )?.use { cursor ->
+
+        val index = cursor.getColumnIndex(MediaStore.Audio.Media.DATA)
+        if (index != -1 && cursor.moveToFirst()) {
+            val path = cursor.getString(index)
+            if (!path.isNullOrEmpty()) {
+                return path
+            }
+        }
+    }
+    return null
 }

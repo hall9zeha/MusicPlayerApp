@@ -22,16 +22,19 @@ import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.SONG_LIST_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getThemeResValue
+import com.barryzeha.core.common.isServiceRunning
+import com.barryzeha.core.common.uriToPathFileFromMediaStore
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
+import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.databinding.ActivityMainBinding
 import com.barryzeha.ktmusicplayer.databinding.MenuItemViewBinding
+import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.adapters.ViewPagerAdapter
 import com.barryzeha.ktmusicplayer.view.ui.fragments.MainPlayerFragment
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playlistFragment.ListFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,6 +49,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
     private val launcherAudioEffectActivity = registerForActivityResult(MainEqualizerActivity.MainEqualizerContract()){}
     private var playlists:List<PlaylistEntity> = arrayListOf()
     private var navController:NavController?=null
+    private var mSavedInstanceState:Bundle?=null
 
     private val permissionList:MutableList<String> =  if(VERSION.SDK_INT >= VERSION_CODES.TIRAMISU){
         mutableListOf(
@@ -64,6 +68,7 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(getThemeResValue())
         super.onCreate(savedInstanceState)
+        handleIntent(intent, savedInstanceState)
         installSplashScreen().apply{
             lifecycleScope.launch {
                 delay(1500)
@@ -76,7 +81,6 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
          ViewCompat.setOnApplyWindowInsetsListener(bind.mainDrawerLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-
             insets
         }
         setUpViewPager()
@@ -113,6 +117,20 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
         }
         mainViewModel.navControllerInstance.observe(this){instance->
             navController=instance
+        }
+        mainViewModel.songFromIntent.observe(this) { song ->
+            song?.let {
+                if (mainViewModel.openSongFromIntent) {
+                    lifecycleScope.launch {
+                        // We delay playback because there is another observer
+                        // responsible for adding the track to the playlist,
+                        // and it must run before playback starts
+                        mainViewModel.setOpenSongFromIntent(false)
+                        musicPlayerService?.setIsOpenedFromIntent(true)
+                        musicPlayerService?.startPlayer(song)
+                    }
+                }
+            }
         }
     }
     private fun setUpViewPager(){
@@ -285,15 +303,85 @@ class MainActivity : AbsMusicServiceActivity(),  MainPlayerFragment.OnFragmentRe
 
     // We wait for the first fragment to load completely before loading the second one.
     override fun onFragmentReady() {
-        CoroutineScope(Dispatchers.Main).launch {
+        lifecycleScope.launch(Dispatchers.Main) {
             // We delayed the loading of the second fragment by 1.5 seconds
             delay(1500)
             bind.mViewPager.offscreenPageLimit = 2
         }
     }
+    private fun handleIntent(intent:Intent?,savedInstanceState: Bundle?){
+        mSavedInstanceState = savedInstanceState
+        if(intent==null)return
+        when (intent.action) {
+            Intent.ACTION_VIEW -> {
+                    val uri = intent.data
+                    if (uri != null) {
+                        val pathFile = uriToPathFileFromMediaStore(this@MainActivity, uri)
+                        pathFile?.let {
+                            // If the application was closed or running in the background,
+                            // we set this flag to indicate that playback
+                            // comes from an external Intent
+                            mainViewModel.setOpenSongFromIntent(true)
+                            if(savedInstanceState !=null) {
+                                // If the application is already open, we trigger the callback
+                                // that is being observed by this Activity to process
+                                // and play the track received from the external Intent
+                                musicPlayerService?.onOpenFromIntent()
+                            }else if(mSavedInstanceState==null && this.isServiceRunning(MusicPlayerService::class.java)){
+                                // If the application was closed but the playback service
+                                // is still running
+                                lifecycleScope.launch {
+                                    delay(200)
+                                    musicPlayerService?.onOpenFromIntent()
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+    }
+    private fun openSongFromIntent(intent: Intent?, savedInstanceState: Bundle?){
+        if(intent==null) return
+        lifecycleScope.launch(Dispatchers.Main) {
+            when (intent.action) {
+                Intent.ACTION_VIEW -> {
+                    val uri = intent.data
+                    if (uri != null) {
+                        val pathFile = uriToPathFileFromMediaStore(this@MainActivity, uri)
+                        pathFile?.let {
+                            processSongPaths(listOf(it), {itemsCount->
+                                mainViewModel.setItemsCount(itemsCount)
+                            }, { song ->
+                                mainViewModel.setOpenSongFromIntent(true)
+                                mainViewModel.saveNewSong(song)
+                            })
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onPlaylistLoaded() {
+        super.onPlaylistLoaded()
+        // Callback executed once the playlist
+        // has been fully loaded in the playback service
+        if(mainViewModel.openSongFromIntent){
+            // In this case, we use it to process and play
+            // a track opened from an external source,
+            // such as the Android file manager
+            musicPlayerService?.let{service->
+                openSongFromIntent(intent, mSavedInstanceState)
+            }
+        }
+    }
+    override
+    fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        openSongFromIntent(intent, null)
+    }
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
-
         if(bind.mainDrawerLayout.isOpen){
             bind.mainDrawerLayout.closeDrawer(GravityCompat.START)
         }
