@@ -11,6 +11,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -125,13 +128,15 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     // Para comparar el cambio de canción y enviar la metadata a la notificación multimedia
     private var idSong:Long=-1
     private var firstCallingToSongState:Boolean = true
-    // Thelephony manager para controlar la reproducción durante las llamadas
-    private var phoneCallStateReceiver:BroadcastReceiver?=null
-    private var telephonyManager: TelephonyManager?=null
-    private var isPlayingBeforeCallPhone:Boolean = false
     // En esta lista cargamos momentaneamente las canciones del fragmento AlbumDetail
     private var playingQueue:MutableList<SongEntity> = mutableListOf()
     private var trackStateLoaded=false
+    // Audio focus handle to calling
+    private lateinit var audioManager: AudioManager
+    private var focusRequest: AudioFocusRequest?=null
+    private lateinit var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
+    // true ONLY if playback was paused due to audio focus loss
+    private var paudedByAudioFocusHandling:Boolean=false
 
     override fun onCreate() {
         super.onCreate()
@@ -145,6 +150,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         mediaSession.setCallback(mediaSessionCallback())
         setUpPlaylist()
         setUpHeadsetAndBluetoothReceiver()
+        setupAudioFocusListener()
 
     }
     private fun setUpHeadsetAndBluetoothReceiver(){
@@ -239,66 +245,64 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
-
-    fun setupPhoneCallStateReceiver(){
-        telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
-
-        phoneCallStateReceiver = object: BroadcastReceiver(){
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.S){
-                    telephonyManager?.registerTelephonyCallback(context?.mainExecutor!!,object:TelephonyCallback(),TelephonyCallback.CallStateListener{
-                        override fun onCallStateChanged(state: Int) {
-                            when (state) {
-                                TelephonyManager.CALL_STATE_IDLE -> {
-                                    if(!playingState() && isPlayingBeforeCallPhone){
-                                        if(checkIfPhoneIsLocked())resumePlayer()
-                                        else _songController?.play()
-                                        isPlayingBeforeCallPhone = false
-                                    }
-                                }
-                                TelephonyManager.CALL_STATE_OFFHOOK -> {
-                                }
-                                TelephonyManager.CALL_STATE_RINGING -> {
-                                    if(playingState()){
-                                        if(checkIfPhoneIsLocked())pausePlayer()
-                                        else _songController?.pause()
-                                        isPlayingBeforeCallPhone = true
-
-                                    }
-                                }
-                            }
-                        }
-                    })
-                }else {
-                    val phoneStateListener = object : PhoneStateListener() {
-                        override fun onCallStateChanged(state: Int, phoneNumber: String?) {
-                            super.onCallStateChanged(state, phoneNumber)
-                            when (state) {
-                                TelephonyManager.CALL_STATE_IDLE -> {
-                                    if(!playingState() && isPlayingBeforeCallPhone){
-                                        if(checkIfPhoneIsLocked())resumePlayer()
-                                        else _songController?.play()
-                                        isPlayingBeforeCallPhone = false
-                                    }
-                                }
-                                TelephonyManager.CALL_STATE_OFFHOOK -> Log.d("PHONE_MANAGER","OFF-HOOK")
-                                TelephonyManager.CALL_STATE_RINGING -> {
-                                    if(playingState()){
-                                        if(checkIfPhoneIsLocked())pausePlayer()
-                                        else _songController?.pause()
-                                        isPlayingBeforeCallPhone = true
-                                    }
-                                }
-                            }
-                        }
+    //Testing
+    private fun setupAudioFocusListener(){
+        audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener{focusChange->
+            when(focusChange){
+                AudioManager.AUDIOFOCUS_LOSS->{}
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT->{
+                    if(playingState()) {
+                        paudedByAudioFocusHandling = true
+                        if (isUIDetachedFromService()) pausePlayer()
+                        else _songController?.pause()
                     }
-                    telephonyManager?.listen(phoneStateListener, LISTEN_CALL_STATE)
+                }
+                AudioManager.AUDIOFOCUS_GAIN->{
+                    if(paudedByAudioFocusHandling) {
+                        if (isUIDetachedFromService()) resumePlayer()
+                        else _songController?.play()
+                    }
+                    // Audio focus cycle finished reset flag
+                    paudedByAudioFocusHandling = false
                 }
             }
         }
-        registerReceiver(phoneCallStateReceiver, IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED))
     }
+    private fun requestAudioFocus(): Boolean{
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        return if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O) {
+            if(focusRequest==null) {
+                focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setOnAudioFocusChangeListener(audioFocusChangeListener)
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    .build()
+            }
+            focusRequest?.let{audioManager.requestAudioFocus(it) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED}?:run{false}
+        }
+        else{
+            audioManager.requestAudioFocus(
+                audioFocusChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN,
 
+            )== AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        }
+    }
+    private fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusRequest?.let {
+                audioManager.abandonAudioFocusRequest(it)
+            }
+        } else {
+            audioManager.abandonAudioFocus(audioFocusChangeListener)
+        }
+    }
+    //Testing
     @OptIn(UnstableApi::class)
     private fun setUpPlaylist(){
         serviceScope.launch {
@@ -404,14 +408,14 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 setPlayingState(false)
                 if(_songController !=null)_songController?.pause()
                 else pausePlayer()
-                checkIfPhoneIsLocked()
+                isUIDetachedFromService()
             }
             override fun onPlay() {
                 super.onPlay()
                 setPlayingState(true)
                 if(_songController !=null)_songController?.play()
                 else resumePlayer()
-                checkIfPhoneIsLocked()
+                isUIDetachedFromService()
             }
             override fun onSkipToNext() {
                 super.onSkipToNext()
@@ -466,13 +470,13 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 setPlayingState(false)
                 if (_songController != null) _songController?.pause()
                 else pausePlayer()
-                checkIfPhoneIsLocked()
+                isUIDetachedFromService()
             }
             SongAction.Resume -> {
                 setPlayingState(true)
                 if(_songController !=null)_songController?.play()
                 else resumePlayer()
-                checkIfPhoneIsLocked()
+                isUIDetachedFromService()
             }
             SongAction.Stop -> {
                 _songController?.stop()
@@ -741,7 +745,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun unregisterController(){
         _songController=null
     }
-    private fun checkIfPhoneIsLocked():Boolean{
+    private fun isUIDetachedFromService():Boolean{
         if(_songController==null){
             mPrefs.nextOrPrevFromNotify=true
             mPrefs.controlFromNotify = true
@@ -794,7 +798,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             // información  de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
-            play(song)
+            paudedByAudioFocusHandling=false
+            if(requestAudioFocus()) {
+                play(song)
+            }
         }
     }
     private fun play(song:SongEntity?){
@@ -860,7 +867,10 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         return bassManager?.getActiveChannel()!!
     }
     fun resumePlayer(){
-        play(null)
+        paudedByAudioFocusHandling=false
+        if(requestAudioFocus()) {
+            play(null)
+        }
         updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
@@ -885,7 +895,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
         nextOrPrevAnimValue = NEXT
         setOrPlaySong(indexOfSong, NEXT)
-        checkIfPhoneIsLocked()
+        isUIDetachedFromService()
         mPrefs.currentIndexSong = indexOfSong.toLong()
 
         stopAbLoop()
@@ -910,7 +920,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }
                 nextOrPrevAnimValue = PREVIOUS
                 setOrPlaySong(indexOfSong, PREVIOUS)
-                checkIfPhoneIsLocked()
+                isUIDetachedFromService()
                 mPrefs.currentIndexSong = indexOfSong.toLong()
             }
         }
@@ -978,7 +988,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
         val song = songState.songEntity
         songEntity = song
-        checkIfPhoneIsLocked()
+        isUIDetachedFromService()
         // Set info currentSongEntity
         fetchSongMetadata(song)?.let { musicState ->
             currentMusicState = musicState.copy(
@@ -1087,6 +1097,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         bassManager?.releasePlayback()
         stopForeground(STOP_FOREGROUND_REMOVE)
         clearABLoopOfPreferences()
+        abandonAudioFocus()
         super.onDestroy()
     }
     override fun onTaskRemoved(rootIntent: Intent?) {

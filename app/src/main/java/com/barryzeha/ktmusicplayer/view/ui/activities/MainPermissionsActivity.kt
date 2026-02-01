@@ -39,14 +39,12 @@ class MainPermissionsActivity : AppCompatActivity() {
         mutableListOf(
             Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.MANAGE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_STATE,
             // It is required to detect connection and disconnection events of Bluetooth devices when the mobile Bluetooth service is active.
             Manifest.permission.BLUETOOTH_CONNECT
         )
     }else{
         mutableListOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
         )
     }
@@ -88,7 +86,7 @@ class MainPermissionsActivity : AppCompatActivity() {
         }
         launcherManageStorage =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                // Esto se ejecuta cuando vuelve de la pantalla
+                // Esto se ejecuta cuando vuelve de la pantalla de configuración
                 if (Environment.isExternalStorageManager()) {
                     // Ya está concedido
                     updateUIButtonAsGranted()
@@ -160,9 +158,6 @@ class MainPermissionsActivity : AppCompatActivity() {
                 bind.btnReadStoragePermission.setIconResource(coreRes.drawable.ic_check_rounded)
                 bind.btnReadStoragePermission.iconGravity= MaterialButton.ICON_GRAVITY_END
 
-                bind.btnPhonePermission.text=getString(coreRes.string.granted);bind.btnPhonePermission.isClickable=false
-                bind.btnPhonePermission.setIconResource(coreRes.drawable.ic_check_rounded)
-                bind.btnPhonePermission.iconGravity= MaterialButton.ICON_GRAVITY_END
                 bind.btnFinish.visibility = View.VISIBLE
                 bind.btnFinish.post {
                     bind.scrollViewContent.scrollTo(0,bind.btnFinish.bottom)
@@ -192,10 +187,6 @@ class MainPermissionsActivity : AppCompatActivity() {
                         button.text=getString(coreRes.string.granted);button.isClickable=false
                         button.setIconResource(coreRes.drawable.ic_check_rounded)
                         button.iconGravity= MaterialButton.ICON_GRAVITY_END
-                    }
-                    if(permission==Manifest.permission.READ_PHONE_STATE && granted){
-                        // We initialize the call state listener to detect when a phone call is received and pause or continue playback.
-                        musicPlayerService?.setupPhoneCallStateReceiver()
                     }
                 }
             }
