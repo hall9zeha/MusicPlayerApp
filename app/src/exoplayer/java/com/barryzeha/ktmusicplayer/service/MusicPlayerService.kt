@@ -150,6 +150,8 @@ class MusicPlayerService : Service(){
     private lateinit var audioManager: AudioManager
     private var focusRequest: AudioFocusRequest?=null
     private lateinit var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
+    // true ONLY if playback was paused due to audio focus loss
+    private var paudedByAudioFocusHandling:Boolean=false
 
 
     @SuppressLint("ForegroundServiceType")
@@ -258,12 +260,19 @@ class MusicPlayerService : Service(){
             when(focusChange){
                 AudioManager.AUDIOFOCUS_LOSS->{}
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT->{
-                    if(isUIDetachedFromService())pausePlayer()
-                    else _songController?.pause()
+                    if(playingState()) {
+                        paudedByAudioFocusHandling = true
+                        if (isUIDetachedFromService()) pausePlayer()
+                        else _songController?.pause()
+                    }
                 }
                 AudioManager.AUDIOFOCUS_GAIN->{
-                    if (isUIDetachedFromService()) resumePlayer()
-                    else _songController?.play()
+                    if(paudedByAudioFocusHandling) {
+                        if (isUIDetachedFromService()) resumePlayer()
+                        else _songController?.play()
+                    }
+                    // Audio focus cycle finished reset flag
+                    paudedByAudioFocusHandling = false
                 }
             }
         }
@@ -291,6 +300,15 @@ class MusicPlayerService : Service(){
                 AudioManager.AUDIOFOCUS_GAIN,
 
                 )== AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        }
+    }
+    private fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            focusRequest?.let {
+                audioManager.abandonAudioFocusRequest(it)
+            }
+        } else {
+            audioManager.abandonAudioFocus(audioFocusChangeListener)
         }
     }
     private fun mediaSessionCallback():MediaSession.Callback{
@@ -992,6 +1010,7 @@ class MusicPlayerService : Service(){
     }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
+            paudedByAudioFocusHandling=false
             if(requestAudioFocus()) {
                 initExoPlayer(song)
                 startLooper()
@@ -1020,6 +1039,7 @@ class MusicPlayerService : Service(){
     }
     fun resumePlayer(){
         setPlaylistEnded(false)
+        paudedByAudioFocusHandling=false
         if (!exoPlayer.isPlaying && requestAudioFocus()) {
             exoPlayer.prepare()
             exoPlayer.play()
@@ -1183,6 +1203,7 @@ class MusicPlayerService : Service(){
         mediaSession.release()
         _songController?.stop()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        abandonAudioFocus()
         super.onDestroy()
     }
     override fun onTaskRemoved(rootIntent: Intent?) {

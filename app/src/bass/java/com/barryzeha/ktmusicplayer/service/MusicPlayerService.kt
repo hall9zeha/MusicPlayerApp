@@ -245,7 +245,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
         registerReceiver(bluetoothReceiver,bluetoothFilter)
     }
-    //Testing
     private fun setupAudioFocusListener(){
         audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener{focusChange->
             when(focusChange){
@@ -302,7 +301,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             audioManager.abandonAudioFocus(audioFocusChangeListener)
         }
     }
-    //Testing
     @OptIn(UnstableApi::class)
     private fun setUpPlaylist(){
         serviceScope.launch {
