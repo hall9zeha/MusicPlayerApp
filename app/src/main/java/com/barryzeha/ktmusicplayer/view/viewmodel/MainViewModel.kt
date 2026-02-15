@@ -66,6 +66,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var _isFavorite:MutableLiveData<Boolean> = MutableLiveData()
     val isFavorite:LiveData<Boolean> = _isFavorite
 
+    private var _songInfoIsFavorite:MutableLiveData<Boolean> = MutableLiveData()
+    val songInfoIsFavorite:LiveData<Boolean> = _songInfoIsFavorite
+
     private var _updatedRow:MutableLiveData<Int> = MutableLiveData()
     val updateRow:LiveData<Int> = _updatedRow
 
@@ -195,6 +198,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
             }
         }
     }
+    fun updateSongAfterTagEdited(songEntity: SongEntity){
+        launch {repository.updateSong(songEntity)}
+    }
     fun updateFavoriteSong(isFavorite:Boolean,idSong:Long){
         launch {
             val rowUpdated=repository.updateFavoriteSong(isFavorite,idSong)
@@ -209,6 +215,16 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 val entity = repository.fetchSongById(idSong)
                 entity?.let { e ->
                     _isFavorite.value = e.favorite
+                }
+            }
+        }
+    }
+    fun checkSongInfoIfIsFavorite(idSong:Long){
+        launch{
+            if(idSong>0) {
+                val entity = repository.fetchSongById(idSong)
+                entity?.let { e ->
+                    _songInfoIsFavorite.value = e.favorite
                 }
             }
         }
@@ -297,12 +313,12 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     }
     fun setMusicState(musicState: MusicState){
         launch {
-            _musicState.value = musicState
+            _musicState.postValue(musicState)
         }
     }
     fun setCurrentTrack(musicState: MusicState){
        launch {
-            _currentTrack.value = musicState
+            _currentTrack.postValue(musicState)
         }
     }
     fun saveStatePlaying(isPlaying:Boolean){
@@ -341,7 +357,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     // Recargar la información de la pista
     fun reloadSongInfo(){
         launch {
-            if (mPrefs.controlFromNotify) {
+            if (mPrefs.skipFromNotify) {
                 try {
                     val song = repository.fetchSongById(mPrefs.idSong)
                     song?.let {
@@ -359,7 +375,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 } catch (ex: Exception) {
                 }
             }
-            mPrefs.controlFromNotify = false
+            else if(mPrefs.playOrPauseFromNotify){
+                saveStatePlaying(mPrefs.isPlaying)
+            }
+            mPrefs.skipFromNotify = false
+            mPrefs.playOrPauseFromNotify = false
         }
     }
     // Guardar el estado de la pista actual

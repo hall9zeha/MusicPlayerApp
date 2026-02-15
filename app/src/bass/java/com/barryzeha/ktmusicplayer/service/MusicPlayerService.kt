@@ -23,10 +23,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.telephony.PhoneStateListener
-import android.telephony.PhoneStateListener.LISTEN_CALL_STATE
-import android.telephony.TelephonyCallback
-import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
@@ -111,8 +107,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private var _songController: ServiceSongListener? = null
     private var isForegroundService = false
     private var currentMusicState = MusicState()
-    private var songRunnable: Runnable = Runnable {}
-    private var songHandler: Handler = Handler(Looper.getMainLooper())
     private var executeOnceTime:Boolean=false
     private var musicState:MusicState?=null
     private var songEntity:SongEntity=SongEntity()
@@ -136,12 +130,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private var focusRequest: AudioFocusRequest?=null
     private lateinit var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
     // true ONLY if playback was paused due to audio focus loss
-    private var paudedByAudioFocusHandling:Boolean=false
+    private var pausedByAudioFocusHandling:Boolean=false
 
     override fun onCreate() {
         super.onCreate()
         bassManager = BassManager.getInstance()
-        bassManager?.registerOnFinishPlayback(this)
+        bassManager?.registerPlaybackState(this)
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
         mPrefs.isPopulateServicePlaylist=false
@@ -167,8 +161,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                 controller.pause()
                                 controller.musicState(currentMusicState.copy(isPlaying = playingState()))
                             }?:run{
-                                mPrefs.nextOrPrevFromNotify = true
-                                mPrefs.controlFromNotify = true
+                                mPrefs.playOrPauseFromNotify = true
+                                mPrefs.skipFromNotify = true
                             }
                         }
                         Log.e("HEADSET_STATE","disconnect")
@@ -201,8 +195,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                     controller.pause()
                                     controller.musicState(currentMusicState.copy(isPlaying = false))
                                 }?:run{
-                                    mPrefs.nextOrPrevFromNotify = true
-                                    mPrefs.controlFromNotify = true
+                                    mPrefs.playOrPauseFromNotify = true
+                                    mPrefs.skipFromNotify = true
                                 }
                             }
                         }
@@ -219,8 +213,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                             controller.pause()
                                             controller.musicState(currentMusicState.copy(isPlaying = false))
                                         }?:run{
-                                            mPrefs.nextOrPrevFromNotify = true
-                                            mPrefs.controlFromNotify = true
+                                            mPrefs.playOrPauseFromNotify = true
+                                            mPrefs.skipFromNotify = true
                                         }
                                     }
                                 }
@@ -251,18 +245,18 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 AudioManager.AUDIOFOCUS_LOSS->{}
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT->{
                     if(playingState()) {
-                        paudedByAudioFocusHandling = true
-                        if (isUIDetachedFromService()) pausePlayer()
+                        pausedByAudioFocusHandling = true
+                        if (playOrPauseFromNotify()) pausePlayer()
                         else _songController?.pause()
                     }
                 }
                 AudioManager.AUDIOFOCUS_GAIN->{
-                    if(paudedByAudioFocusHandling) {
-                        if (isUIDetachedFromService()) resumePlayer()
+                    if(pausedByAudioFocusHandling) {
+                        if (playOrPauseFromNotify()) resumePlayer()
                         else _songController?.play()
                     }
                     // Audio focus cycle finished reset flag
-                    paudedByAudioFocusHandling = false
+                    pausedByAudioFocusHandling = false
                 }
             }
         }
@@ -304,6 +298,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     @OptIn(UnstableApi::class)
     private fun setUpPlaylist(){
         serviceScope.launch {
+            initNotify()
             withContext(Dispatchers.IO) {
                 // Para cargar por primera vez la lista de canciones de acuerdo al filtro guardado
                 // si no hay algo seleccionado previamente solo devolverá la lista por defecto
@@ -314,7 +309,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 findItemSongIndexById(mPrefs.idSong)?.let {indexOfSong = it}
                 _songController?.onPlaylistLoaded()
             }
-            initMusicStateLoop()
         }
     }
     fun loadPlaybackSavedState() {
@@ -325,29 +319,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }
         }
     }
-    private fun initMusicStateLoop(){
-        initNotify()
-        songRunnable = Runnable {
-            if(bassManager?.getActiveChannel() != 0) {
-                currentMusicState = songEntity.toMusicState().copy(
-                    isPlaying = playingState(),
-                    currentDuration = bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0,
-                    duration = bassManager?.getDuration(bassManager?.getActiveChannel()!!)?:0,
-                    latestPlayed = false
-                )
-            }
-            _songController?.musicState(currentMusicState)
-            updateNotify()
-            songHandler.postDelayed(songRunnable, 500)
-        }
-        songHandler.post(songRunnable)
-    }
     private fun stopLoop(){
-        songHandler.removeCallbacks(songRunnable)
+        bassManager?.unregisterPlaybackState()
         initNotify()
     }
     private fun startLoop(){
-        songHandler.post(songRunnable)
+        bassManager?.registerPlaybackState(this)
     }
     fun updateNotify(musicState:MusicState){
         stopLoop()
@@ -369,8 +346,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                 KeyEvent.KEYCODE_MEDIA_PLAY -> {
                                     if (_songController == null) {
                                         play(null)
-                                        mPrefs.nextOrPrevFromNotify = true
-                                        mPrefs.controlFromNotify = true
+                                        mPrefs.playOrPauseFromNotify = true
                                     } else {
                                         _songController?.play()
                                     }
@@ -378,8 +354,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                                 KeyEvent.KEYCODE_MEDIA_PAUSE -> {
                                     if (_songController == null) {
                                         pausePlayer()
-                                        mPrefs.nextOrPrevFromNotify = true
-                                        mPrefs.controlFromNotify = true
+                                        mPrefs.playOrPauseFromNotify = true
                                     } else {
                                         _songController?.pause()
                                     }
@@ -406,14 +381,14 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 setPlayingState(false)
                 if(_songController !=null)_songController?.pause()
                 else pausePlayer()
-                isUIDetachedFromService()
+                playOrPauseFromNotify()
             }
             override fun onPlay() {
                 super.onPlay()
                 setPlayingState(true)
                 if(_songController !=null)_songController?.play()
                 else resumePlayer()
-                isUIDetachedFromService()
+                playOrPauseFromNotify()
             }
             override fun onSkipToNext() {
                 super.onSkipToNext()
@@ -433,9 +408,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     pausePlayer()
                     serviceScope.launch(Dispatchers.IO) {
                         delay(500)
-                        bassManager?.unregisterOnFinishPlayback()
+                        bassManager?.unregisterPlaybackState()
                         bassManager?.releasePlayback()
-                        songHandler.removeCallbacks(songRunnable)
                         _songController?.stop()
                         setPlayingState(false)
                         clearABLoopOfPreferences()
@@ -468,13 +442,13 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 setPlayingState(false)
                 if (_songController != null) _songController?.pause()
                 else pausePlayer()
-                isUIDetachedFromService()
+                playOrPauseFromNotify()
             }
             SongAction.Resume -> {
                 setPlayingState(true)
                 if(_songController !=null)_songController?.play()
                 else resumePlayer()
-                isUIDetachedFromService()
+                playOrPauseFromNotify()
             }
             SongAction.Stop -> {
                 _songController?.stop()
@@ -496,7 +470,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             SongAction.Close -> {
                 setPlayingState(false)
                 bassManager?.stopCheckingPlayback()
-                bassManager?.unregisterOnFinishPlayback()
+                bassManager?.unregisterPlaybackState()
                 bassManager?.channelStop()
                 clearABLoopOfPreferences()
                 // Remove notification of foreground service process
@@ -517,8 +491,9 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     PREVIOUS->prevSong()
                 }
             }
-            mPrefs.nextOrPrevFromNotify=true
-            mPrefs.controlFromNotify = true
+        if(_songController==null) {
+            mPrefs.skipFromNotify = true
+        }
     }
 
    private fun initNotify(){
@@ -528,7 +503,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         playBackState = PlaybackState.Builder()
             .setState(
                 if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                newState.currentDuration,
+                bassManager?.getCurrentPositionInSeconds()!!,
                 1f
             )
             // Los siguiente controles aparecerán en android 13 y 14
@@ -586,79 +561,51 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
-    private fun updateNotify(){
-            currentMusicState?.let { newState ->
-                val updatePlaybackState = playBackState?.let {
-                    PlaybackState.Builder(it)
-                        .setState(
-                            if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                            newState.currentDuration,
-                            1f
-                        )
-                        .build()
-                }
-                // Actualizamos el progreso y estado de reproducción de la canción
-                mediaSession.setPlaybackState(updatePlaybackState)
-
-                // Actualizamos la información que se muestra de la canción
-                if (idSong != newState.idSong) {// Comparamos los ids para saber si ha cambiado la canción
-                    val updateMediaMetadata = MediaMetadata.Builder()
-                        .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                        .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                        .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                        .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, getBitmap(this,newState.songPath, isForNotify = true))
-                        .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                        .build()
-
-                    // Para android >=12
-                    mediaSession.setMetadata(updateMediaMetadata)
-                    // Reemplazamos temporalmente el nuevo id para la comparación
-                    idSong = newState.idSong
-
-                    // Para android <=10
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                        mediaPlayerNotify = notificationMediaPlayer(
-                            this,
-                            MediaStyle()
-                                .setMediaSession(mediaSession.sessionToken)
-                                .setShowActionsInCompactView(0, 1, 2),
-                            currentMusicState
-                        )
-                    }
-                notificationManager.notify(
-                    NOTIFICATION_ID,
-                    mediaPlayerNotify
-                )
-                }
-            }
-    }
-    private fun updateNotifyForLegacySdkVersions(){
-        // Para android <=10
+    private fun updateNotify(progress: Long? = null) {
         currentMusicState?.let { newState ->
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                val updatePlaybackState = playBackState?.let {
-                    PlaybackState.Builder(it)
-                        .setState(
-                            if (playingState()) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                            currentMusicState.currentDuration,
-                            1f
-                        )
-                        .build()
-                }
-                // Actualizamos el progreso y estado de reproducción de la canción
-                mediaSession.setPlaybackState(updatePlaybackState)
-                    mediaPlayerNotify = notificationMediaPlayer(
-                        this,
-                        MediaStyle()
-                            .setMediaSession(mediaSession.sessionToken)
-                            .setShowActionsInCompactView(0, 1, 2),
-                        currentMusicState.copy(isPlaying = playingState())
+            val updatePlaybackState = playBackState?.let {
+                PlaybackState.Builder(it)
+                    .setState(
+                        if (playingState()) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                        progress ?: bassManager?.getCurrentPositionInSeconds()!!,
+                        1f
                     )
-                notificationManager.notify(
-                    NOTIFICATION_ID,
-                    mediaPlayerNotify
+                    .build()
+            }
+            // Actualizamos el progreso y estado de reproducción de la canción
+            mediaSession.setPlaybackState(updatePlaybackState)
+
+            // Actualizamos la información que se muestra de la canción
+            val updateMediaMetadata = MediaMetadata.Builder()
+                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                .putBitmap(
+                    MediaMetadata.METADATA_KEY_ALBUM_ART,
+                    getBitmap(this, newState.songPath, isForNotify = true)
+                )
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                .build()
+
+            // Para android >=10 y legados, actualizamos la metadata de la sesión para que se actualice el contenido de la notificación
+            mediaSession.setMetadata(updateMediaMetadata)
+            // Reemplazamos temporalmente el nuevo id para la comparación
+            idSong = newState.idSong
+
+            // Para android legado actualizamos la notificación completa porque en algunos casos no se actualiza el contenido de la notificación solo con actualizar la metadata de la sesión
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                mediaPlayerNotify = notificationMediaPlayer(
+                    this,
+                    MediaStyle()
+                        .setMediaSession(mediaSession.sessionToken)
+                        .setShowActionsInCompactView(0, 1, 2),
+                    currentMusicState
                 )
             }
+            notificationManager.notify(
+                NOTIFICATION_ID,
+                mediaPlayerNotify
+            )
         }
     }
    private fun findItemSongIndexById(idSong:Long):Int?{
@@ -738,15 +685,18 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
         executeOnceTime=false
     }
-
-
     fun unregisterController(){
         _songController=null
     }
+    private fun playOrPauseFromNotify():Boolean{
+        if(_songController==null){
+            mPrefs.playOrPauseFromNotify=true
+        }
+        return _songController==null
+    }
     private fun isUIDetachedFromService():Boolean{
         if(_songController==null){
-            mPrefs.nextOrPrevFromNotify=true
-            mPrefs.controlFromNotify = true
+            mPrefs.skipFromNotify = true
         }
         return _songController==null
     }
@@ -791,12 +741,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
-            if(playingState()){songHandler.post(songRunnable)}
+            bassManager?.unregisterPlaybackState()
             // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
             // información  de la pista en reproducción que no requiere cambios constantes
             // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
-            paudedByAudioFocusHandling=false
+            pausedByAudioFocusHandling=false
             if(requestAudioFocus()) {
                 play(song)
             }
@@ -819,7 +769,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                     if (bassManager?.getActiveChannel() != 0) {
                         bassManager?.channelPlay(currentSongProgress)
                         bassManager?.startCheckingPlayback()
-                        bassManager?.registerOnFinishPlayback(this)
+                        bassManager?.registerPlaybackState(this)
                         setPlayingState(true)
                         mPrefs.idSong = songEntity.id
                         currentMusicState = fetchSongMetadata(songEntity)?.copy(
@@ -853,25 +803,22 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 }*/
             }
     }
-    fun pausePlayer(){
-        setPlayingState(false)
-        currentSongProgress=bassManager?.getCurrentPositionInSeconds(bassManager?.getActiveChannel()!!)?:0
-        bassManager?.channelPause()
-        bassManager?.unregisterOnFinishPlayback()
-        bassManager?.stopCheckingPlayback()
-        updateNotifyForLegacySdkVersions()
-    }
     fun getSessionOrChannelId(): Int {
         return bassManager?.getActiveChannel()!!
     }
+    fun pausePlayer(){
+        setPlayingState(false)
+        currentSongProgress=bassManager?.getCurrentPositionInSeconds()?:0
+        bassManager?.channelPause()
+    }
     fun resumePlayer(){
-        paudedByAudioFocusHandling=false
+        pausedByAudioFocusHandling=false
         if(requestAudioFocus()) {
             play(null)
         }
-        updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
+        bassManager?.unregisterPlaybackState()
         if(isOpenQueue()){
             if(playingQueue.isNotEmpty()){
                 if(indexOfSong < playingQueue.size -1){
@@ -906,6 +853,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     fun prevSong(){
+        bassManager?.unregisterPlaybackState()
         if(mainSongsList.isNotEmpty()){
             reconcileCurrentSongInQueue()
             if(indexOfSong > 0) {
@@ -987,6 +935,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         val song = songState.songEntity
         songEntity = song
         isUIDetachedFromService()
+
         // Set info currentSongEntity
         fetchSongMetadata(song)?.let { musicState ->
             currentMusicState = musicState.copy(
@@ -1010,10 +959,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         //_songController?.currentTrack(currentMusicState)
         // Al cargar la información de una pista guardada
         // se ejecutaba una primera vez el evento currentTrack de la interface
-        // ya que el listener la ejecutaba una vez más debemos poner executeOnceTime = true
+        // ya que el listener la ejecutaba una vez más, debemos poner executeOnceTime = true
         // para evitarlo
         executeOnceTime = true
         setTrackStateLoaded(true)
+        bassManager?.startCheckingPlayback()
+        bassManager?.registerPlaybackState(this@MusicPlayerService)
     }
     private fun fetchSongMetadata(song:SongEntity):MusicState?{
         try {
@@ -1034,7 +985,23 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             return null
         }
     }
-    override fun onFinishPlayback() {
+    override fun onPlaybackState() {
+        currentMusicState = songEntity.toMusicState().copy(
+            isPlaying = playingState(),
+            currentDuration = bassManager?.getCurrentPositionInSeconds()
+                ?: 0,
+            duration = bassManager?.getDuration(bassManager?.getActiveChannel()!!) ?: 0,
+            latestPlayed = false
+        )
+        _songController?.musicState(currentMusicState)
+    }
+    override fun onPlayingChanged() {
+        updateNotify()
+    }
+    override fun onPlaybackProgress(progress:Long) {
+        updateNotify(progress)
+    }
+    override fun onPlaybackFinished() {
         if(isOpenQueue()){
             if (indexOfSong < playingQueue.size - 1 && playingQueue.isNotEmpty()) {
                 when (mPrefs.songMode) {
@@ -1053,8 +1020,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         setPlayingState(false)
                         if (playingQueue.isNotEmpty()) setMusicForPlay(playingQueue[0])
                         bassManager?.channelStop()
-                        bassManager?.stopCheckingPlayback()
-                        bassManager?.unregisterOnFinishPlayback()
                         setPlaylistEnded(true)
                     }
                 }
@@ -1077,10 +1042,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         setPlayingState(false)
                         if (mainSongsList.isNotEmpty()) setMusicForPlay(mainSongsList[0])
                         bassManager?.channelStop()
-                        bassManager?.stopCheckingPlayback()
-                        bassManager?.unregisterOnFinishPlayback()
                         //Finish play list
-                        setPlaylistEnded(true)
+                       setPlaylistEnded(true)
                     }
                 }
             }

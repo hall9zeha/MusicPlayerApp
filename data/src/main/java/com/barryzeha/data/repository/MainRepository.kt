@@ -55,4 +55,5 @@ interface MainRepository {
     //Playlist with song cross ref
     suspend fun savePlaylistWithSongCrossRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef):Long
     suspend fun deletePlaylistWithSongCrossRef(playlistWithSongsCrossRef: PlaylistWithSongsCrossRef):Int
+
 }

@@ -16,6 +16,7 @@ import androidx.core.view.get
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.SONG_INFO_EXTRA_KEY
 import com.barryzeha.core.common.createTime
@@ -25,6 +26,7 @@ import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.mColorList
 import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.databinding.SongInfoLayoutBinding
 import com.barryzeha.ktmusicplayer.view.viewmodel.MainViewModel
 import com.barryzeha.mfilepicker.common.util.getParentDirectories
@@ -32,6 +34,9 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFile
@@ -65,6 +70,7 @@ class SongInfoDialogFragment : DialogFragment() {
     private var pathFile:String?=null
     private var imagePath:String?=null
     private var songEntity:SongEntity? = null
+    private var songIfFavorite:Boolean=false
     private val getImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()){uri: Uri?->
             uri?.let{
                 val galleryUri=it
@@ -78,11 +84,7 @@ class SongInfoDialogFragment : DialogFragment() {
                 }
             }
     }
-    private val openDocumentTreeLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()){uri:Uri?->
-        uri?.let{
-            handleUriSAFSelection(uri)
-        }
-    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, coreRes.style.myFullScreenDialog)
@@ -96,11 +98,6 @@ class SongInfoDialogFragment : DialogFragment() {
         activity?.let {
             _bind = SongInfoLayoutBinding.inflate(inflater, container, false)
             _bind?.let { b ->
-                if(mPrefs.directorySAFUri!!.isNotEmpty()){
-                    // After a new reboot of our device to preserve the permissions on the directory we have selected through SAF
-                    val safUri = mPrefs.directorySAFUri
-                    requireContext().contentResolver.takePersistableUriPermission(Uri.parse(safUri), Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
                 b.toolbarInfo.setNavigationIcon(coreRes.drawable.ic_arrow_back)
                 b.toolbarInfo.title = getString(coreRes.string.songInfo)
                 b.toolbarInfo.subtitle = "Song name"
@@ -122,6 +119,7 @@ class SongInfoDialogFragment : DialogFragment() {
         clearInternalAppFilesDir()
         getIntentExtras()
         setupListeners()
+        setupObservers()
     }
     private fun getIntentExtras(){
         arguments?.let{
@@ -130,7 +128,14 @@ class SongInfoDialogFragment : DialogFragment() {
                 pathFile=path
                 setFileInfo(pathFile)
             }
-
+        }
+    }
+    private fun setupObservers(){
+        songEntity?.let {song->
+            viewModel.checkSongInfoIfIsFavorite(song.id)
+            viewModel.songInfoIsFavorite.observe(viewLifecycleOwner){isFav->
+                songIfFavorite=isFav
+            }
         }
     }
     private fun showEditViews(isEnable:Boolean)=with(bind){
@@ -236,102 +241,108 @@ class SongInfoDialogFragment : DialogFragment() {
             true
         }
     }
-    private fun handleUriSAFSelection(treeUri:Uri){
-        // We save the directory uri for later use
-        mPrefs.directorySAFUri = treeUri.toString()
-        // Grant persistent permissions so you don't need to request access again.
-        requireContext().contentResolver.takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        saveFileEdited(pathFile!!,{
-            isEditing = false
-            showEditViews(false)
-            enableViews(true)
-            activity?.showSnackBar(bind.root, coreRes.string.editFileSuccess)
-            pathFile?.let { setFileInfo(it) }
-            viewModel.setIsSongTagEdited(songEntity!!)
+     private fun editAudioFileMetadata(filePath: String?){
+         val title = bind.edtTitle.text.toString()
+         val artist =bind.edtArtist.text.toString()
+         val album = bind.edtAlbum.text.toString()
+         val genre = bind.edtGenre.text.toString()
+         val year = bind.edtYear.text.toString()
+         val numTrack = bind.edtNumTrack.text.toString()
 
-        },{})
-    }
-
-    private fun editAudioFileMetadata(filePath: String?){
-        filePath?.let{
+         filePath?.let{
             try{
-                val audioFile:AudioFile = if(Build.VERSION.SDK_INT<=Build.VERSION_CODES.Q) {
-                    AudioFileIO.read(File(filePath))
-                }else{
-                    AudioFileIO.read(getPathOfAppDirectory(filePath))
-                }
-                var tag =audioFile.tag
-                if(tag==null){
-                    // If the file has no metadata tags, we create them empty.
-                    tag = ID3v24Tag()
-                }
-                val title = bind.edtTitle.text.toString()
-                val artist =bind.edtArtist.text.toString()
-                val album = bind.edtAlbum.text.toString()
-                val genre = bind.edtGenre.text.toString()
-                val year = bind.edtYear.text.toString()
-                val numTrack = bind.edtNumTrack.text.toString()
-
-                if(title.isNotEmpty()){
-                    try{tag.getFirst(FieldKey.TITLE)
-                        tag.setField(FieldKey.TITLE,title)
-                    }catch(ex:Exception){
-                       tag.createField(FieldKey.TITLE,title)
+                lifecycleScope.launch(Dispatchers.IO) {
+                    withContext(Dispatchers.Main) {
+                        enableViews(false)
                     }
-                }
-                if(artist.isNotEmpty()) {
-                    tag.setField(FieldKey.ARTIST, artist)
-                }
-                if(album.isNotEmpty()) {
-                    tag.setField(FieldKey.ALBUM, album)
-                }
-                if(genre.isNotEmpty()) {
-                    tag.setField(FieldKey.GENRE, genre)
-                }
-                if(year.isNotEmpty()) {
-                    tag.setField(FieldKey.YEAR, year)
-                }
-                if(numTrack.isNotEmpty()){
-                    tag.setField(FieldKey.TRACK,numTrack)
-                }
-                if(imagePath !=null){
-                    tag.deleteArtworkField()
-                    val artwork = ArtworkFactory.createArtworkFromFile(File(imagePath!!))
-                    tag.setField(artwork)
+                    val audioFile: AudioFile = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                        AudioFileIO.read(File(filePath))
+                    } else {
+                        AudioFileIO.read(getPathOfAppDirectory(filePath))
+                    }
+                    var tag = audioFile.tag
+                    if (tag == null) {
+                        // If the file has no metadata tags, we create them empty.
+                        tag = ID3v24Tag()
+                    }
 
-                }
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                    if (title.isNotEmpty()) {
+                        try {
+                            tag.getFirst(FieldKey.TITLE)
+                            tag.setField(FieldKey.TITLE, title)
+                        } catch (ex: Exception) {
+                            tag.createField(FieldKey.TITLE, title)
+                        }
+                    }
+                    if (artist.isNotEmpty()) {
+                        tag.setField(FieldKey.ARTIST, artist)
+                    }
+                    if (album.isNotEmpty()) {
+                        tag.setField(FieldKey.ALBUM, album)
+                    }
+                    if (genre.isNotEmpty()) {
+                        tag.setField(FieldKey.GENRE, genre)
+                    }
+                    if (year.isNotEmpty()) {
+                        tag.setField(FieldKey.YEAR, year)
+                    }
+                    if (numTrack.isNotEmpty()) {
+                        tag.setField(FieldKey.TRACK, numTrack)
+                    }
+                    if (imagePath != null) {
+                        tag.deleteArtworkField()
+                        val artwork = ArtworkFactory.createArtworkFromFile(File(imagePath!!))
+                        tag.setField(artwork)
 
-                    if(mPrefs.directorySAFUri?.isEmpty()!!) {
-                        openDocumentTreeLauncher.launch(null)
-                    }else{
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         audioFile.tag = tag
                         audioFile.commit()
-                        enableViews(false)
-                        saveFileEdited(filePath,{
+                        saveFileEdited(filePath, {
                             isEditing = false
                             showEditViews(false)
                             enableViews(true)
-                            activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess)
-                            pathFile?.let{setFileInfo(it)}
-                            viewModel.setIsSongTagEdited(songEntity!!)
-                            },{
+                            activity?.showSnackBar(bind.root, coreRes.string.editFileSuccess)
+                            pathFile?.let { setFileInfo(it) }
+                            processSongPaths(listOf(pathFile.toString()), {}, { song ->
+                                viewModel.setIsSongTagEdited(
+                                    song.copy(
+                                        id = songEntity!!.id,
+                                        favorite = songIfFavorite
+                                    )
+                                )
                             })
-
-                }}else {
-                    audioFile.tag = tag
-                    audioFile.commit()
-                    isEditing = false
-                    showEditViews(false)
-                    viewModel.setIsSongTagEdited(songEntity!!)
-                    activity?.showSnackBar(bind.root,coreRes.string.editFileSuccess, Snackbar.LENGTH_LONG)
+                        }, {
+                        })
+                    } else {
+                        audioFile.tag = tag
+                        audioFile.commit()
+                        isEditing = false
+                        withContext(Dispatchers.Main) {
+                            showEditViews(false)
+                            processSongPaths(listOf(pathFile.toString()), {}, { song ->
+                                viewModel.setIsSongTagEdited(
+                                    song.copy(
+                                        id = songEntity!!.id,
+                                        favorite = songIfFavorite
+                                    )
+                                )
+                            })
+                            activity?.showSnackBar(
+                                bind.root,
+                                coreRes.string.editFileSuccess,
+                                Snackbar.LENGTH_LONG
+                            )
+                        }
+                    }
                 }
 
             }catch(ex:Exception){
                 isEditing = false
                 showEditViews(false)
+                enableViews(true)
                 ex.printStackTrace()
-                Log.e("EDIT-TAG-ERROR", "${ex.message}")
+                Log.e("EDIT_TAG_ERROR", "${ex.message}")
                 activity?.showSnackBar(bind.root,coreRes.string.editFileMsgError, Snackbar.LENGTH_LONG)
             }
         }
@@ -376,114 +387,58 @@ class SongInfoDialogFragment : DialogFragment() {
 
         return outputFile
     }
-    private fun saveFileEdited(originalPathFile: String, onSuccess:()->Unit, onError:()->Unit){
-         CoroutineScope(Dispatchers.IO).launch {
-            try {
+   private fun saveFileEdited(
+       originalPathFile: String,
+       onSuccess: () -> Unit,
+       onError: () -> Unit
+   ) {
+       CoroutineScope(Dispatchers.IO).launch {
+           try {
+               val fileName = originalPathFile.substringAfterLast("/")
 
-                val fileName = originalPathFile.substringAfterLast("/")
-                val pathWithoutName = originalPathFile.substringBeforeLast("/")
-                val songFileInternalPath = File(requireContext().filesDir, fileName)
+               //File edited in the application's temporary directory
+               val editedFile = File(requireContext().filesDir, fileName)
 
-                val contentResolver: ContentResolver = requireContext().contentResolver
+               if (!editedFile.exists()) {
+                   throw IOException("Edited file does not exist")
+               }
 
-                // Create an input file from the edited file (internal directory)
-                val inputFile = songFileInternalPath
-                if (!inputFile.exists()) {
-                    throw IOException("The original file does not exist")
-                }
-                // Access the selected directory with SAF
-                val documentFile =DocumentFile.fromTreeUri(requireContext(), Uri.parse(mPrefs.directorySAFUri))
-                // Check if the directory is valid
-                if (documentFile != null) {
-                    if (!documentFile.canWrite()) {
-                        // Request persistent permission again
-                        openDocumentTreeLauncher.launch(null)
-                    } else {
-                        val uriPath = Uri.parse(mPrefs.directorySAFUri).path
-                        val rootUriDir = uriPath?.substringAfterLast(":")
-                        val parentFileDir = getParentDirectories(originalPathFile)
+               // Actual file with original address
+               val originalFile = File(originalPathFile)
 
-                        val directory = if(rootUriDir == parentFileDir) documentFile
-                        else getSubdirectory(documentFile,parentFileDir.split("/"))
+               if (!originalFile.exists()) {
+                   throw IOException("Original file does not exist")
+               }
 
-                        // We look for the existing file to delete and then copy the one we have edited.
+               //Verify writing permit
+               if (!originalFile.canWrite()) {
+                   throw IOException("No write permission for: $originalPathFile")
+               }
 
-                        if (directory != null && directory.isDirectory) {
-                            // Find the existing file with the same name
-                            val existingFile = directory.findFile(fileName)
-                            // If the file exists, delete it
-                            existingFile?.delete()
-
-                        }
-                        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(songFileInternalPath.extension)
-
-                        val newFile = directory?.createFile(
-                            mimeType.toString().lowercase(),
-                            fileName
-                        )
-                        // Check if the file was created correctly
-                        if (newFile != null) {
-                            // Open an OutputStream for the new file
-                            val outputStream = contentResolver.openOutputStream(newFile.uri)
-
-                            // Open an InputStream for the original file (which has already been edited)
-                            val inputStream = FileInputStream(inputFile)
-
-                            // Copy the contents of the original file to the new file
-                            inputStream.use { input ->
-                                outputStream?.use { output ->
-                                    input.copyTo(output)
-                                }
-                            }
-                            withContext(Dispatchers.Main){
-                                clearInternalAppFilesDir()
-                                onSuccess()
-
-                            }
-                        } else {
-                            withContext(Dispatchers.Main){
-                                clearInternalAppFilesDir()
-                                onError()
-                            }
-                            throw IOException("The file could not be created in the selected directory")
-                        }
-                    }
-                } else {
-                   withContext(Dispatchers.Main){
-                        clearInternalAppFilesDir()
-                        onError()
-                    }
-                    throw IOException("You don't have permission to write to the selected directory")
-
-                }
+               // Directly overwrite
+               editedFile.copyTo(originalFile, overwrite = true)
+               withContext(Dispatchers.Main) {
+                   clearInternalAppFilesDir()
+                   onSuccess()
+               }
 
            } catch (ex: Exception) {
-                ex.printStackTrace()
+               ex.printStackTrace()
+               Log.e("EDIT_TAG_ERROR", ex.message ?: "Unknown error")
+               withContext(Dispatchers.Main) {
+                   clearInternalAppFilesDir()
+                   onError()
 
-                withContext(Dispatchers.Main) {
-                    clearInternalAppFilesDir()
-                    onError()
-                    activity?.showSnackBar(
-                        bind.root,
-                        coreRes.string.editFileMsgError,
-                        Snackbar.LENGTH_LONG
-                    )
-                }
-            }
-        }
-        }
-    private fun getSubdirectory(root: DocumentFile,subDirs:List<String>): DocumentFile? {
-        var currentDir: DocumentFile? = root
-        for (subDir in subDirs) {
-            currentDir = currentDir?.findFile(subDir)
-            if (currentDir == null || !currentDir!!.isDirectory) {
-                return null
-            }
-        }
-        return currentDir
-    }
-
-    companion object{
+                   activity?.showSnackBar(
+                       bind.root,
+                       coreRes.string.editFileMsgError,
+                       Snackbar.LENGTH_LONG
+                   )
+               }
+           }
+       }
+   }
+   companion object{
         @JvmStatic
         fun newInstance(songEntity:SongEntity)=SongInfoDialogFragment().apply {
             arguments = Bundle().apply {

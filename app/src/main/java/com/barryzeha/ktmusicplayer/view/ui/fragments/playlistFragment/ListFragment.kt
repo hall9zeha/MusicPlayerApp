@@ -20,6 +20,7 @@ import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
 import com.barryzeha.core.common.getBitmap
+import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
@@ -261,8 +262,18 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             musicPlayerService?.checkIfSongIsFavorite(mPrefs.idSong)
         }
         mainViewModel.isSongTagEdited.observe(viewLifecycleOwner) { song ->
-            song?.let {
-                musicListAdapter?.update(song)
+            song?.let {song->
+                val meta = getSongMetadata(requireContext(),song.pathLocation)
+                meta?.let {
+                    musicListAdapter?.update(song)
+                    val updateSongInfo = currentMusicState.copy(
+                        title = meta.title,
+                        album = meta.album,
+                        artist = meta.artist)
+                    mainViewModel.updateSongAfterTagEdited(song)
+                    mainViewModel.setCurrentTrack(updateSongInfo)
+                    musicPlayerService?.updateNotify(updateSongInfo)
+                }
             }
         }
         mainViewModel.playlistName.observe(viewLifecycleOwner){name->
@@ -517,7 +528,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             SongInfoDialogFragment.newInstance(
                 SongEntity(
                     id = selectedSong.id,
-                    pathLocation = selectedSong.pathLocation
+                    pathLocation = selectedSong.pathLocation,
                 )
             )
                 .show(parentFragmentManager, SongInfoDialogFragment::class.simpleName)

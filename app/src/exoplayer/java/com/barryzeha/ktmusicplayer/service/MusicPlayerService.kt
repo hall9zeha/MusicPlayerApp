@@ -23,10 +23,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.telephony.PhoneStateListener
-import android.telephony.PhoneStateListener.LISTEN_CALL_STATE
-import android.telephony.TelephonyCallback
-import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.KeyEvent
 import androidx.annotation.OptIn
@@ -67,7 +63,6 @@ import com.barryzeha.ktmusicplayer.common.NOTIFICATION_ID
 import com.barryzeha.ktmusicplayer.common.cancelPersistentNotify
 import com.barryzeha.ktmusicplayer.common.notificationMediaPlayer
 import com.barryzeha.ktmusicplayer.utils.convertToMediaItem
-import com.barryzeha.ktmusicplayer.utils.metadataToMusicState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -137,10 +132,10 @@ class MusicPlayerService : Service(){
     var runnable: Runnable? = null
 
     // En esta lista cargamos momentaneamente las las canciones del fragmento AlbumDetail
-    private var playingQueue:MutableList<SongEntity> = mutableListOf()
-    private var mediaItemsQueue:MutableList<MediaItem> = arrayListOf()
-    private var isOpenQueue:Boolean = false
-    private var indexSongOfQueue:Int =0
+    private var albumPlaylist:MutableList<SongEntity> = mutableListOf()
+    private var albumMediaItems:MutableList<MediaItem> = arrayListOf()
+    private var albumSongListIsOpen:Boolean = false
+    private var indexOfAlbumPlaylist:Int =0
     // Test current position
     private var currentTrackPosition = 0L
     private var bootsTrapMediaItem:MediaItem? =null
@@ -151,8 +146,13 @@ class MusicPlayerService : Service(){
     private var focusRequest: AudioFocusRequest?=null
     private lateinit var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
     // true ONLY if playback was paused due to audio focus loss
-    private var paudedByAudioFocusHandling:Boolean=false
+    private var pausedByAudioFocusHandling:Boolean=false
 
+    //For handle playing with charge main playlist we charging a preload list
+    private var preloadSongListIsPlaying:Boolean = false
+    private var fetchPreloadSongList:Boolean=false
+    //For checking if preload song state was executed one time, to avoid multiple calls when the song is changing and the state is loading
+    private var preloadSongStateWasExecuted:Boolean=false
 
     @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
@@ -166,7 +166,7 @@ class MusicPlayerService : Service(){
         currentMusicState = MusicState(albumArt = getSongMetadata(applicationContext,null)!!.albumArt)
         mediaSession.setCallback(mediaSessionCallback())
         setUpPlaylist()
-        initMusicStateLooper()
+        initMusicStateLoop()
         setUpHeadsetAndBluetoothReceiver()
         setupAudioFocusListener()
     }
@@ -183,8 +183,8 @@ class MusicPlayerService : Service(){
                                 _songController?.pause()
                                 _songController?.musicState(currentMusicState.copy(isPlaying = exoPlayer.isPlaying))
                             }?:run{
-                                mPrefs.nextOrPrevFromNotify = true
-                                mPrefs.controlFromNotify = true
+                                mPrefs.playOrPauseFromNotify = true
+                                mPrefs.skipFromNotify = true
                             }
 
                         }
@@ -214,8 +214,8 @@ class MusicPlayerService : Service(){
                                     _songController?.pause()
                                     _songController?.musicState(currentMusicState.copy(isPlaying = false))
                                 }?:run{
-                                    mPrefs.nextOrPrevFromNotify = true
-                                    mPrefs.controlFromNotify = true
+                                    mPrefs.playOrPauseFromNotify = true
+                                    mPrefs.skipFromNotify = true
                                 }
                             }
                         }
@@ -230,8 +230,8 @@ class MusicPlayerService : Service(){
                                             _songController?.pause()
                                             _songController?.musicState(currentMusicState.copy(isPlaying = false))
                                         }?:run{
-                                            mPrefs.nextOrPrevFromNotify = true
-                                            mPrefs.controlFromNotify = true
+                                            mPrefs.playOrPauseFromNotify = true
+                                            mPrefs.skipFromNotify = true
                                         }
 
                                     }
@@ -261,18 +261,18 @@ class MusicPlayerService : Service(){
                 AudioManager.AUDIOFOCUS_LOSS->{}
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT->{
                     if(playingState()) {
-                        paudedByAudioFocusHandling = true
+                        pausedByAudioFocusHandling = true
                         if (isUIDetachedFromService()) pausePlayer()
                         else _songController?.pause()
                     }
                 }
                 AudioManager.AUDIOFOCUS_GAIN->{
-                    if(paudedByAudioFocusHandling) {
+                    if(pausedByAudioFocusHandling) {
                         if (isUIDetachedFromService()) resumePlayer()
                         else _songController?.play()
                     }
                     // Audio focus cycle finished reset flag
-                    paudedByAudioFocusHandling = false
+                    pausedByAudioFocusHandling = false
                 }
             }
         }
@@ -331,27 +331,22 @@ class MusicPlayerService : Service(){
             override fun onSeekTo(pos: Long) {
                 super.onSeekTo(pos)
                 exoPlayer.seekTo(pos)
+                updateNotify(pos)
             }
             override fun onPause() {
                 super.onPause()
                 _songController?.pause()
                 exoPlayer.pause()
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    setPlayingState(exoPlayer.isPlaying)
-                }
+                setPlayingState(exoPlayer.isPlaying)
+                playOrPauseFromNotify()
             }
             override fun onPlay() {
                 super.onPlay()
                 _songController?.play()
                 playerListener?.let{exoPlayer.addListener(it)}
                 exoPlayer.play()
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    setPlayingState(exoPlayer.isPlaying)
-                }
+                setPlayingState(exoPlayer.isPlaying)
+                playOrPauseFromNotify()
             }
             override fun onSkipToNext() {
                 super.onSkipToNext()
@@ -415,23 +410,17 @@ class MusicPlayerService : Service(){
 
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
             SongAction.Pause -> {
-               _songController?.pause()
+                _songController?.pause()
                 exoPlayer.pause()
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    setPlayingState(exoPlayer.isPlaying)
-                }
+                playOrPauseFromNotify()
+                setPlayingState(exoPlayer.isPlaying)
             }
             SongAction.Resume -> {
                 _songController?.play()
                 playerListener?.let{exoPlayer.addListener(it)}
                 exoPlayer.play()
-                if(_songController==null){
-                    mPrefs.nextOrPrevFromNotify=true
-                    mPrefs.controlFromNotify = true
-                    setPlayingState(exoPlayer.isPlaying)
-                }
+                playOrPauseFromNotify()
+                setPlayingState(exoPlayer.isPlaying)
             }
             SongAction.Stop -> {
                 _songController?.stop()
@@ -481,21 +470,6 @@ class MusicPlayerService : Service(){
                     songsList.add(s)
                     mainMediaItemList.add(s.convertToMediaItem())
                 }
-                withContext(Main) {
-                    exoPlayer.addMediaItems(mainMediaItemList)
-                    val realIndex = mainMediaItemList.indexOfFirst { it.mediaId == mPrefs.idSong.toString() && it !== bootsTrapMediaItem}
-                    val bootstrapIndex = exoPlayer.currentMediaItemIndex
-                    // Si no existe la canción real, no mover ni eliminar nada
-                    if (realIndex == -1) return@withContext
-                    // Si bootstrap ya está donde debe, no mover
-                    if (bootstrapIndex != realIndex) {
-                        exoPlayer.moveMediaItem(bootstrapIndex, realIndex)
-                    }
-                    // Elimina el duplicado solo si existe
-                    if (realIndex + 1 < exoPlayer.mediaItemCount) {
-                        exoPlayer.removeMediaItem(realIndex +1)
-                    }
-                }
             }
             setUpExoplayerListener()
             playerListener?.let{listener->exoPlayer.addListener(listener)}
@@ -507,10 +481,8 @@ class MusicPlayerService : Service(){
             PREVIOUS->exoPlayer.seekToPreviousMediaItem()
         }
         if(_songController==null){
-            mPrefs.nextOrPrevFromNotify=true
-            mPrefs.controlFromNotify = true
+            mPrefs.skipFromNotify = true
         }
-        setPlayingState(exoPlayer.isPlaying)
     }
     private fun initNotify(){
         currentMusicState?.let { newState ->
@@ -577,85 +549,76 @@ class MusicPlayerService : Service(){
     // y ya no es necesario llamarlo cada vez desde onstartCommand, porque se estará actualizando en el bucle
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
-    private fun updateNotify(){
+    private fun updateNotify(currentPosition:Long?=null){
         currentMusicState?.let { newState ->
-            val updatePlaybackState = playBackState?.let{
+            val updatePlaybackState = playBackState?.let {
                 PlaybackState.Builder(it)
-                    .setState(if (newState.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                        newState.currentDuration,
-                        1f)
+                    .setState(
+                        if (exoPlayer.isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                        currentPosition ?: exoPlayer.currentPosition,
+                        1f
+                    )
                     .build()
             }
             mediaSession.setPlaybackState(updatePlaybackState)
-            if(idSong != newState.idSong) {// Comparamos los ids para saber si ha cambiado la canción
-                val updateMediaMetadata = MediaMetadata.Builder()
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                    .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                    .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, getBitmap(this,newState.songPath, isForNotify = true))
-                    .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                    .build()
 
-                // Para android >=12
-                mediaSession.setMetadata(updateMediaMetadata)
-                // Reemplazamos temporalmente el nuevo id para la comparación
-                idSong = newState.idSong
+            val updateMediaMetadata = MediaMetadata.Builder()
+                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                .putBitmap(
+                    MediaMetadata.METADATA_KEY_ALBUM_ART,
+                    getBitmap(this, newState.songPath, isForNotify = true)
+                )
+                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
+                .build()
+
+            // Para android >=10
+            mediaSession.setMetadata(updateMediaMetadata)
+            // Reemplazamos temporalmente el nuevo id para la comparación
+            idSong = newState.idSong
 
             // Para android <=10
-            if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
                 mediaPlayerNotify = notificationMediaPlayer(
                     this,
                     MediaStyle()
                         .setMediaSession(mediaSession.sessionToken)
                         .setShowActionsInCompactView(0, 1, 2),
-                    currentMusicState
+                    currentMusicState.copy(isPlaying = exoPlayer.isPlaying)
                 )
             }
             notificationManager.notify(
                 NOTIFICATION_ID,
                 mediaPlayerNotify
             )
-           }
-        }
-    }
-    private fun updateNotifyForLegacySdkVersions(){
-        // Para android <=10
-        currentMusicState?.let { newState ->
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                val updatePlaybackState = playBackState?.let {
-                    PlaybackState.Builder(it)
-                        .setState(
-                            if (playingState()) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                            currentMusicState.currentDuration,
-                            1f
-                        )
-                        .build()
-                }
-                // Actualizamos el progreso y estado de reproducción de la canción
-                mediaSession.setPlaybackState(updatePlaybackState)
-                mediaPlayerNotify = notificationMediaPlayer(
-                    this,
-                    MediaStyle()
-                        .setMediaSession(mediaSession.sessionToken)
-                        .setShowActionsInCompactView(0, 1, 2),
-                    currentMusicState.copy(isPlaying = playingState())
-                )
-                notificationManager.notify(
-                    NOTIFICATION_ID,
-                    mediaPlayerNotify
-                )
-            }
         }
     }
     fun loadPlaybackSavedState() {
         if(!songStateRestored) {
             serviceScope.launch{
                 songState = repository.fetchSongState()
-                if (!songState.isNullOrEmpty()) setSongStateSaved(songState[0])
+                if (!songState.isNullOrEmpty()){
+                    fetchPreloadSongList=true
+                    setSongStateSaved(songState[0])
+                }
             }
         }
     }
-    private fun initMusicStateLooper(){
+    private fun switchToPlaylistLoaded(success:()-> Unit){
+        if(preloadSongListIsPlaying){
+            val realIndex = mainMediaItemList.indexOfFirst {
+                it.mediaId == mPrefs.idSong.toString()
+            }
+            exoPlayer.setMediaItems(
+                mainMediaItemList,
+                realIndex,
+                exoPlayer.currentPosition
+            )
+            success()
+        }
+    }
+    private fun initMusicStateLoop(){
         initNotify()
         songRunnable = Runnable {
             if(exoPlayer.currentPosition>0) {
@@ -668,7 +631,7 @@ class MusicPlayerService : Service(){
             }
             //if(exoPlayer.isPlaying) {
                 _songController?.musicState(currentMusicState)
-                updateNotify()
+                //updateNotify()
             //}
             setUpExoPlayerRepeatMode()
            songHandler.postDelayed(songRunnable, 500)
@@ -676,18 +639,18 @@ class MusicPlayerService : Service(){
         songHandler.post(songRunnable)
 
     }
-    private fun stopLooper(){
+    private fun stopLoop(){
         songHandler.removeCallbacks(songRunnable)
         initNotify()
     }
-    private fun startLooper(){
+    private fun startLoop(){
         songHandler.post(songRunnable)
     }
     fun updateNotify(musicState:MusicState){
-        stopLooper()
+        stopLoop()
         currentMusicState = musicState
         initNotify()
-        startLooper()
+        startLoop()
     }
     private fun setUpExoPlayerRepeatMode(){
         when(mPrefs.songMode){
@@ -721,17 +684,26 @@ class MusicPlayerService : Service(){
     private fun initExoPlayer(song:SongEntity){
         hasSetCurrentTrack = false
         songEntity=song
-        val itemIndex=findMediaItemIndexById(
-            if(isOpenQueue())mediaItemsQueue else mainMediaItemList,
-            song.id.toString()).also {
-           if(isOpenQueue()){
-                indexSongOfQueue = it
+        var itemIndex=0
+        //
+        if(preloadSongListIsPlaying){
+            exoPlayer.setMediaItems(if (isOpenQueue()) albumMediaItems else mainMediaItemList)
+            preloadSongListIsPlaying=false
+        }
+        //
+        itemIndex = findMediaItemIndexById(
+            if (isOpenQueue()) albumMediaItems else mainMediaItemList,
+            song.id.toString()
+        ).also {
+            if (isOpenQueue()) {
+                indexOfAlbumPlaylist = it
             }
-            if(it<-1 && isOpenQueue()) {
-               songEntity = playingQueue[0]
-               indexSongOfQueue = 0
-           }}
-            .let{ if(it>-1) it else 0 }
+            if (it < -1 && isOpenQueue()) {
+                songEntity = albumPlaylist[0]
+                indexOfAlbumPlaylist = 0
+            }
+        }.let { if (it > -1) it else 0 }
+
         positionReset =  itemIndex
         if(openFromIntent){
             exoPlayer.setMediaItems(mainMediaItemList)
@@ -749,14 +721,14 @@ class MusicPlayerService : Service(){
          playerListener = object : Player.Listener {
              override fun onPlaybackStateChanged(playbackState: Int) {
                  super.onPlaybackStateChanged(playbackState)
-                 if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
+               if (playbackState == Player.STATE_READY && exoPlayer.duration != C.TIME_UNSET) {
                      if(!playlistLoaded) {
                          _songController?.onPlaylistLoaded()
                          playlistLoaded=true
                      }
                      // Set currentSongEntity info
                      setPlayingState(exoPlayer.isPlaying)
-                     exoPlayer.metadataToMusicState()?.let{
+                     fetchSongMetadata(songEntity)?.let{
                              currentMusicState=it
                              // Para encontrar la posición del item en la lista de nuestra vista
                              // por su id
@@ -768,7 +740,7 @@ class MusicPlayerService : Service(){
                  // volver a la primera pista y detener el reproductor
 
                  if(playbackState == Player.STATE_ENDED ){
-                     stopLooper()
+                     stopLoop()
                      exoPlayer.seekTo(0,0)
                      exoPlayer.stop()
                      currentMusicState = currentMusicState.copy(
@@ -779,12 +751,21 @@ class MusicPlayerService : Service(){
                          )
                      _songController?.currentTrack(currentMusicState)
                      setPlayingState(false)
-                     startLooper()
+                     startLoop()
                      setPlaylistEnded(true)
                  }
                  if(!hasSetCurrentTrack && playingState() ){
                      _songController?.currentTrack(currentMusicState)
                      hasSetCurrentTrack =true
+                 }
+
+             }
+
+             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                 super.onIsPlayingChanged(isPlaying)
+                 serviceScope.launch {
+                     delay(200)
+                     updateNotify(exoPlayer.currentPosition)
                  }
 
              }
@@ -794,16 +775,15 @@ class MusicPlayerService : Service(){
                  reason: Int
              ) {
                  super.onPositionDiscontinuity(oldPosition, newPosition, reason)
-                    if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
-
-                        indexSongOfQueue = newPosition.mediaItemIndex
+                 if(oldPosition.mediaItemIndex != newPosition.mediaItemIndex) {
+                        indexOfAlbumPlaylist = newPosition.mediaItemIndex
                         if (songsList.isNotEmpty()) {
                             val song =
-                                if (isOpenQueue()) playingQueue[newPosition.mediaItemIndex] else songsList[newPosition.mediaItemIndex]
+                                if (isOpenQueue()) albumPlaylist[newPosition.mediaItemIndex] else songsList[newPosition.mediaItemIndex]
                             songEntity = song
-                            exoPlayer.metadataToMusicState()?.let { songInfo ->
+                            fetchSongMetadata(song)?.let { songInfo ->
                                 currentMusicState = songInfo.copy(
-                                    isPlaying = exoPlayer.isPlaying,
+                                    isPlaying = playingState(),
                                     currentPosition = newPosition.mediaItemIndex.toLong(),
                                 )
                                 _songController?.currentTrack(currentMusicState)
@@ -811,12 +791,7 @@ class MusicPlayerService : Service(){
                                 // por su id
                                 mPrefs.idSong = song.id
                                 mPrefs.currentIndexSong = newPosition.mediaItemIndex.toLong()
-                                if (_songController == null) {
-                                    mPrefs.controlFromNotify = true
-                                    mPrefs.nextOrPrevFromNotify = true
-                                    setPlayingState(exoPlayer.isPlaying)
-                                    mPrefs.idSong = song.id
-                                }
+                                isUIDetachedFromService()
                             }
                             saveStateOfSong(song)
                         }
@@ -929,7 +904,7 @@ class MusicPlayerService : Service(){
                            SongStateWithDetail(
                                songState = SongState(),
                                songEntity = song
-                           )
+                           ),
                        )
                    }
                 }
@@ -952,10 +927,15 @@ class MusicPlayerService : Service(){
     fun unregisterController(){
         _songController=null
     }
+    private fun playOrPauseFromNotify():Boolean{
+        if(_songController==null){
+            mPrefs.playOrPauseFromNotify=true
+        }
+        return _songController==null
+    }
     private fun isUIDetachedFromService():Boolean{
         if(_songController==null){
-            mPrefs.nextOrPrevFromNotify=true
-            mPrefs.controlFromNotify = true
+            mPrefs.skipFromNotify = true
         }
         return _songController==null
     }
@@ -968,9 +948,9 @@ class MusicPlayerService : Service(){
     fun isTrackStateLoaded() = trackStateLoaded
     fun setTrackStateLoaded(value:Boolean){trackStateLoaded = value}
     private fun setIsOpenQueue(state:Boolean){
-        isOpenQueue = state
+        albumSongListIsOpen = state
     }
-    private fun isOpenQueue() = isOpenQueue
+    private fun isOpenQueue() = albumSongListIsOpen
 
     fun playlistEnded():Boolean = playlistEnded
     private fun setPlaylistEnded(state:Boolean){
@@ -981,7 +961,7 @@ class MusicPlayerService : Service(){
     }
     fun playListSize():Int{
         return if(isOpenQueue()){
-            playingQueue.size
+            albumPlaylist.size
            }else{
             songsList.size
            }
@@ -997,23 +977,23 @@ class MusicPlayerService : Service(){
         }
     }
     fun openQueue(songs:List<SongEntity>, startPosition:Int){
-        indexSongOfQueue =0
+        indexOfAlbumPlaylist =0
         setPlaylistEnded(false)
         mPrefs.currentIndexSong = startPosition.toLong()
         setIsOpenQueue(true)
-        playingQueue = songs.toMutableList()
-        songs.forEach { s->mediaItemsQueue.add(s.convertToMediaItem())}
+        albumPlaylist = songs.toMutableList()
+        songs.forEach { s->albumMediaItems.add(s.convertToMediaItem())}
         exoPlayer.clearMediaItems()
-        exoPlayer.addMediaItems(mediaItemsQueue)
+        exoPlayer.addMediaItems(albumMediaItems)
         startPlayer(songs[startPosition])
 
     }
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
-            paudedByAudioFocusHandling=false
+            pausedByAudioFocusHandling=false
             if(requestAudioFocus()) {
                 initExoPlayer(song)
-                startLooper()
+                startLoop()
             }
         }
 
@@ -1023,51 +1003,49 @@ class MusicPlayerService : Service(){
             exoPlayer.pause()
             setPlayingState(exoPlayer.isPlaying)
         }
-        updateNotifyForLegacySdkVersions()
     }
-
     @OptIn(UnstableApi::class)
     fun getSessionOrChannelId(): Int {
         return exoPlayer.audioSessionId
     }
-    fun getNumberOfTrack():Pair<Int,Int>{
-        if(songsList.isNotEmpty()) {
-            val indexOfSong = songsList.indexOf(songEntity)
-            return Pair((indexOfSong + 1),songsList.size)
-        }
-        return Pair(0,0)
-    }
     fun resumePlayer(){
         setPlaylistEnded(false)
-        paudedByAudioFocusHandling=false
+        pausedByAudioFocusHandling=false
         if (!exoPlayer.isPlaying && requestAudioFocus()) {
             exoPlayer.prepare()
             exoPlayer.play()
             setPlayingState(true)
         }
-        updateNotifyForLegacySdkVersions()
     }
     fun nextSong(){
-        
         setPlaylistEnded(false)
-        setPlayingState(exoPlayer.isPlaying)
-        exoPlayer.seekToNextMediaItem()
+        if(preloadSongListIsPlaying){
+            switchToPlaylistLoaded(){exoPlayer.seekToNextMediaItem()}
+            preloadSongListIsPlaying=false
+        }else {
+            exoPlayer.seekToNextMediaItem()
+        }
         clearABLoopOfPreferences()
     }
     fun prevSong(){
         setPlaylistEnded(false)
-        setPlayingState(exoPlayer.isPlaying)
-        exoPlayer.seekToPreviousMediaItem()
+        if(preloadSongListIsPlaying) {
+            switchToPlaylistLoaded(){exoPlayer.seekToPreviousMediaItem()}
+            preloadSongListIsPlaying=false
+        }else{
+            exoPlayer.seekToPreviousMediaItem()
+        }
         clearABLoopOfPreferences()
     }
     fun reloadIndexOfSong(){
         // Obtenemos la posición en la lista principal de la pista que hayamos reproducido
         // de cualquier otra lista como AlbumDetail
-        indexSongOfQueue =0
+        indexOfAlbumPlaylist =0
         setIsOpenQueue(false)
         exoPlayer.clearMediaItems()
-        mediaItemsQueue.clear()
+        albumMediaItems.clear()
         exoPlayer.addMediaItems(mainMediaItemList)
+
     }
     fun fastForward(){
         val currentPosition = exoPlayer.currentPosition
@@ -1112,11 +1090,12 @@ class MusicPlayerService : Service(){
         return songsList
     }
     fun getCurrentSongPosition():Int {
-        return if(isOpenQueue) indexSongOfQueue else mPrefs.currentIndexSong.toInt()?:0
+        return if(albumSongListIsOpen) indexOfAlbumPlaylist else mPrefs.currentIndexSong.toInt()?:0
     }
     fun setCurrentSongPosition(position:Int) {mPrefs.currentPosition=position.toLong()}
     fun setPlayerProgress(progress:Long){
         exoPlayer.seekTo(progress)
+        updateNotify(progress)
     }
     fun setMusicList(){
         songs.forEach { s ->
@@ -1140,7 +1119,9 @@ class MusicPlayerService : Service(){
             }
         }
     }
-    private fun setSongStateSaved(songState: SongStateWithDetail){
+    private fun setSongStateSaved(
+        songState: SongStateWithDetail
+    ){
         songEntity=songState.songEntity
         currentTrackPosition = songState.songState.currentPosition
         // Set info currentSongEntity
@@ -1152,16 +1133,15 @@ class MusicPlayerService : Service(){
             )
         }
         try{
-            if(!playingState()) {
+            if(!playingState() && !preloadSongStateWasExecuted) {
                 val mediaItem = songEntity.convertToMediaItem()
                 bootsTrapMediaItem = mediaItem
-                val indexOfSong =exoPlayer.currentTimeline.takeIf { !it.isEmpty }?.let {
-                    findMediaItemIndexById(mainMediaItemList.toList(), mPrefs.idSong.toString())
-                }?:0
                 exoPlayer.addMediaItem(mediaItem)
                 exoPlayer.prepare()
                 exoPlayer.seekTo(songState.songState.currentPosition)
                 exoPlayer.playWhenReady = playingState()
+                preloadSongListIsPlaying = true
+                preloadSongStateWasExecuted = true
             }
         }
         catch(ex:Exception){

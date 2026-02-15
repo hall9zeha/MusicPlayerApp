@@ -212,6 +212,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                         title = meta.title,
                         album = meta.album,
                         artist = meta.artist)
+                    mainViewModel.updateSongAfterTagEdited(song)
                     mainViewModel.setCurrentTrack(updateSongInfo)
                     musicPlayerService?.updateNotify(updateSongInfo)
                 }
@@ -537,7 +538,10 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
             }
             btnInfo.setOnClickListener{
-                SongInfoDialogFragment.newInstance(SongEntity(id = currentMusicState.idSong, pathLocation =currentMusicState.songPath))
+                SongInfoDialogFragment.newInstance(
+                    SongEntity(
+                        id = currentMusicState.idSong,
+                        pathLocation = currentMusicState.songPath))
                     .show(parentFragmentManager,SongInfoDialogFragment::class.simpleName)
             }
         }

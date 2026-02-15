@@ -3,13 +3,20 @@ package com.barryzeha.ktmusicplayer.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
 import com.un4seen.bass.BASS
+import com.un4seen.bass.BASS.BASS_ACTIVE_PAUSED
+import com.un4seen.bass.BASS.BASS_ACTIVE_PLAYING
+import com.un4seen.bass.BASS.BASS_ACTIVE_STOPPED
+import com.un4seen.bass.BASS.BASS_ChannelSetSync
 import com.un4seen.bass.BASS.BASS_INFO
+import com.un4seen.bass.BASS.BASS_SYNC_MIXTIME
+import com.un4seen.bass.BASS.BASS_SYNC_POS
 import java.io.File
 import java.util.Timer
 
@@ -27,11 +34,20 @@ private const val TAG = "BASS-MANAGER"
 
 private var updateTimer: Timer? = null
 private var idSong:Long?=null
+private var lastState = -1
+private var lastChannel = -1
 
 class BassManager {
     private var mainChannel:Int?=0
-    private val handler = Handler(Looper.getMainLooper())
-    private val aBLoopHandler = Handler(Looper.getMainLooper())
+    private var abSyncHandle: Int = 0
+    private var abLoopEnabled=false
+    // Own threads for test
+    private var playbackThread: HandlerThread? = null
+    private var playbackHandler: Handler? = null
+
+    private var abThread: HandlerThread? = null
+    private var abHandler: Handler? = null
+    //
     private var checkRunnable: Runnable? = null
     private  var playbackManager:PlaybackManager?=null
     companion object {
@@ -53,6 +69,7 @@ class BassManager {
         }
     }
     private fun initializeBass(){
+        initThreads()
         context= MyApp.context
         if (!BASS.BASS_Init(-1, SAMPLE192, BASS.BASS_DEVICE_FREQ)) {
             Log.i(TAG, "Can't initialize device")
@@ -84,6 +101,13 @@ class BassManager {
             BASS.BASS_PluginLoad(plugin,0)
         }
     }
+    private fun initThreads(){
+        playbackThread = HandlerThread("BassPlaybackThread").apply { start() }
+        playbackHandler = Handler(playbackThread!!.looper)
+
+        abThread = HandlerThread("BassABThread").apply { start() }
+        abHandler = Handler(abThread!!.looper)
+    }
     private fun configure(){
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_FLOATDSP, 1)
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10)
@@ -91,29 +115,56 @@ class BassManager {
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC_SAMPLE, 3)
     }
     fun startCheckingPlayback(){
+        if(checkRunnable != null) return
         stopRunnable()
         checkRunnable = object:Runnable{
             override fun run() {
-                if (BASS.BASS_ChannelIsActive(getActiveChannel()) == BASS.BASS_ACTIVE_STOPPED) {
-                    playbackManager?.onFinishPlayback()
+                val currentState =  BASS.BASS_ChannelIsActive(getActiveChannel())
+                val currentChannel = getActiveChannel()
+                if(currentChannel !=0) {
+                    playbackManager?.onPlaybackState()
                 }
-                handler.postDelayed(this,500)
+                if(currentState != lastState) {
+                    when (currentState) {
+                        BASS_ACTIVE_PLAYING -> {
+                            playbackManager?.onPlayingChanged()
+                        }
+                        BASS_ACTIVE_PAUSED -> {
+                            playbackManager?.onPlayingChanged()
+                        }
+                        BASS_ACTIVE_STOPPED -> {
+                            // Para que no se active con cada cambio de canción, sino solo cuando se detiene la reproducción y termina una pista
+                            // debemos remover el evento de finalización de la pista momentaneamente al cambiar de canción y volver a suscribirnos cuando la siguiente pista esté lista.
+                            // El evento solo debe iniciarse si la pista está reproduciendose, y detenerse al cambiar de canción o al pausar la reproducción.
+                            // De esta manera, evitamos que se active el evento de finalización al cambiar de canción o al pausar, y solo se activa cuando la pista realmente termina de reproducirse.
+                            if(lastState == BASS_ACTIVE_PLAYING) {
+                                playbackManager?.onPlaybackFinished()
+                            }
+                        }
+                    }
+                    lastState=currentState
+                }
+                if(currentChannel != lastChannel){
+                    playbackManager?.onPlayingChanged()
+                    lastChannel = currentChannel
+                }
+                playbackHandler?.postDelayed(this,500)
             }
         }
-        handler.post(checkRunnable!!)
+        playbackHandler?.post(checkRunnable!!)
     }
     fun stopCheckingPlayback(){
         stopRunnable()
     }
-    fun unregisterOnFinishPlayback(){
+    fun unregisterPlaybackState(){
         playbackManager=null
     }
-    fun registerOnFinishPlayback(mPlaybackManager: PlaybackManager){
+    fun registerPlaybackState(mPlaybackManager: PlaybackManager){
         playbackManager = mPlaybackManager
     }
     private fun stopRunnable(){
         checkRunnable?.let{
-            handler.removeCallbacks(it)
+            playbackHandler?.removeCallbacks(it)
             checkRunnable = null
         }
     }
@@ -142,22 +193,27 @@ class BassManager {
         BASS.BASS_ChannelStop(getActiveChannel())
     }
     fun fastForwardOrRewind(isForward:Boolean,currentProgress: (Long) -> Unit){
-        val progressOnSeconds = getCurrentPositionInSeconds(getActiveChannel())
+        val progressOnSeconds = getCurrentPositionInSeconds()
         val forwardProgress = if(isForward)progressOnSeconds + 2000 else progressOnSeconds - 2000
         setChannelProgress(forwardProgress){currentProgress(it)}
 
     }
     fun setChannelProgress(progress:Long, currentProgress:(Long)->Unit){
-        val progressBytes = BASS.BASS_ChannelSeconds2Bytes(getActiveChannel(), progress / 1000.0)
-        /*updateTimer?.cancel()
-        updateTimer = Timer()
-        updateTimer?.schedule(object : TimerTask() {
-            override fun run() {*/
-                // Ajusta la posición del canal
+
+        var finalProgress = progress
+        // Para el bucle A-B, si el progreso se sale del rango establecido, lo ajustamos al inicio del bucle
+        if(abLoopEnabled){
+            if(progress !in startAbLoopPosition..endAbLopPosition){
+                finalProgress = startAbLoopPosition
+            }
+        }
+        val progressBytes = BASS.BASS_ChannelSeconds2Bytes(getActiveChannel(), finalProgress / 1000.0)
+
         BASS.BASS_ChannelSetPosition(getActiveChannel(), progressBytes, BASS.BASS_POS_BYTE)
         currentProgress(progress)
-          /*  }
-        }, 100) */// Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
+        // Retraso en milisegundos para evitar los chirridos al desplazarse en el seekbar
+        //Enviamos el progreso al playbackManager para actualizar el seekbar en la notificación multimedia
+        playbackManager?.onPlaybackProgress(progress)
     }
     fun repeatSong(){
         BASS.BASS_ChannelPlay(getActiveChannel(), true)
@@ -169,28 +225,41 @@ class BassManager {
         mainChannel=channel
     }
     fun setAbLoopStar(){
-        startAbLoopPosition = getCurrentPositionInSeconds(getActiveChannel())
+        startAbLoopPosition = getCurrentPositionInSeconds()
     }
     fun setAbLoopEnd(){
-        endAbLopPosition = getCurrentPositionInSeconds(getActiveChannel())
+        endAbLopPosition = getCurrentPositionInSeconds()
         startAbLoop()
+        abLoopEnabled = true
     }
     private fun startAbLoop(){
-        val currentPosition = getCurrentPositionInSeconds(getActiveChannel())
-        if(currentPosition >= endAbLopPosition){
-            BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
-        }
-        aBLoopHandler.postDelayed({
-            startAbLoop()
-        },500)
+        BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
+        val endBytes = getCurrentPositionToBytes(endAbLopPosition)
+        abSyncHandle=BASS_ChannelSetSync(
+            getActiveChannel(),
+            BASS_SYNC_POS,
+            endBytes,
+            {_,_,_,_->
+                val startBytes= getCurrentPositionToBytes(startAbLoopPosition)
+                BASS.BASS_ChannelSetPosition(getActiveChannel(),startBytes,BASS.BASS_POS_BYTE)
+            },
+            BASS_SYNC_MIXTIME
+        )
     }
-    fun stopAbLoop() = aBLoopHandler.removeCallbacksAndMessages(null)
+    fun stopAbLoop(){
+        val channel = getActiveChannel()
+        if (channel != 0 && abSyncHandle != 0) {
+            BASS.BASS_ChannelRemoveSync(channel, abSyncHandle)
+            abSyncHandle = 0
+        }
+        abLoopEnabled = false
+    }
 
     fun getActiveChannel():Int{
         return mainChannel?:0
     }
-    fun getCurrentPositionInSeconds(channel: Int): Long {
-        return if(getActiveChannel() !=0)BASS.BASS_ChannelBytes2Seconds(channel, getBytesPosition(channel)).toLong() * 1000 else 0
+    fun getCurrentPositionInSeconds(): Long {
+        return if(getActiveChannel() !=0)BASS.BASS_ChannelBytes2Seconds(getActiveChannel(), getBytesPosition(getActiveChannel())).toLong() * 1000 else 0
     }
 
     fun getDuration(channel: Int): Long {
@@ -204,10 +273,21 @@ class BassManager {
         return BASS.BASS_ChannelGetLength(channel, BASS.BASS_POS_BYTE)
     }
     fun releasePlayback(){
+        stopAbLoop()
+        stopRunnable()
         BASS.BASS_ChannelStop(getActiveChannel())
+        BASS.BASS_StreamFree(getActiveChannel())
         BASS.BASS_PluginFree(0)
         BASS.BASS_Free()
-        stopRunnable()
+        unregisterPlaybackState()
+
+        playbackThread?.quitSafely()
+        abThread?.quitSafely()
+        playbackThread = null
+        abThread = null
+        playbackHandler = null
+        abHandler = null
+
         instance=null
     }
 
@@ -269,6 +349,9 @@ class BassManager {
         }
     }
     interface PlaybackManager{
-        fun onFinishPlayback()
+        fun onPlaybackState()
+        fun onPlayingChanged()
+        fun onPlaybackProgress(progress:Long)
+        fun onPlaybackFinished()
     }
 }

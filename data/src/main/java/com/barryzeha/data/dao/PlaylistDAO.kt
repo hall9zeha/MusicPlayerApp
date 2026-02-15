@@ -83,5 +83,4 @@ interface PlaylistDAO {
  @Query("select * from SongEntity,(select idPlaylist from PlaylistEntity where idPlaylist =:idPlaylist limit 1) as playlist where idPlaylistCreator = playlist.idPlaylist and favorite = 1 ")
  suspend fun fetchPlaylistByFavorites(idPlaylist: Long):List<SongEntity>
 
-
 }

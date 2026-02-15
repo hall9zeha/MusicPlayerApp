@@ -41,7 +41,6 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
             else->songDao.fetchAllSongs()
         }
     }
-
     override suspend fun fetchAllFavorites(): List<SongEntity>  = withContext(Dispatchers.IO){
         songDao.fetchAllFavorites()
     }

@@ -47,10 +47,10 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var themeChanged:Boolean
         get() = myPreferences.getBoolean(THEME_CHANGED, false)
         set(value) = myPreferences.edit().putBoolean(THEME_CHANGED,value).apply()
-    var nextOrPrevFromNotify:Boolean
+    var playOrPauseFromNotify:Boolean
         get()= myPreferences.getBoolean(PREV_OR_NEXT,false)
         set(value)=myPreferences.edit().putBoolean(PREV_OR_NEXT,value).apply()
-    var controlFromNotify:Boolean
+    var skipFromNotify:Boolean
         get()= myPreferences.getBoolean(CONTROL_FROM_NOTIFY_2,false)
         set(value)=myPreferences.edit().putBoolean(CONTROL_FROM_NOTIFY_2,value).apply()
     var isPlaying:Boolean

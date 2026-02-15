@@ -94,4 +94,27 @@ interface  SongDao {
     @Transaction
     @Query("delete from SongState")
     suspend fun deleteAllSongsState():Int
+
+    // Preload songs to play
+    @Transaction
+    @Query("select * from SongEntity where id > :idSong order by id ASC limit 10")
+    suspend fun fetchPreloadSongs(idSong:Long):List<SongEntity>
+
+    @Transaction
+    @Query("select * from SongEntity where id>:idSong order by album ASC limit 10")
+    suspend fun fetchAllSongByAlbum(idSong:Long):List<SongEntity>
+
+    @Transaction
+    @Query("select * from SongEntity where id>:idSong order by genre ASC")
+    suspend fun fetchAllSongByGenre(idSong:Long):List<SongEntity>
+
+    @Transaction
+    @Query("select * from SongEntity where id>:idSong  order by artist ASC")
+    suspend fun fetchAllSongByArtist(idSong:Long):List<SongEntity>
+
+    // boolean literal "TRUE" is "1" in room database register
+    @Transaction
+    @Query("select * from SongEntity where favorite=1 and id>:idSong order by id ASC")
+    suspend fun fetchAllFavorites(idSong:Long):List<SongEntity>
+
 }
