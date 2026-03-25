@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.barryzeha.audioeffects"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

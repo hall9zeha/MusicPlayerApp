@@ -842,7 +842,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         setOrPlaySong(indexOfSong, NEXT)
         isUIDetachedFromService()
         mPrefs.currentIndexSong = indexOfSong.toLong()
-
         stopAbLoop()
         clearABLoopOfPreferences()
     }

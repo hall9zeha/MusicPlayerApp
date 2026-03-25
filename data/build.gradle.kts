@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.barryzeha.data"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24

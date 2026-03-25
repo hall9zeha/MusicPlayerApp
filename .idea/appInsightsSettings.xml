@@ -8,8 +8,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.barryzeha.ktmusicplayer.exoplayer" />
-                  <option name="mobileSdkAppId" value="1:839125220790:android:24f18cd738a8833ad71517" />
+                  <option name="appId" value="com.barryzeha.ktmusicplayer.bass" />
+                  <option name="mobileSdkAppId" value="1:839125220790:android:2bfbc46d98076e7cd71517" />
                   <option name="projectId" value="musicplayer-9c020" />
                   <option name="projectNumber" value="839125220790" />
                 </ConnectionSetting>
