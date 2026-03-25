@@ -4,6 +4,7 @@
         <!-- Customize your light theme here. -->
          <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceVariant">@color/surface</item>
         <item name="backgroundColor">@color/surface</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -25,6 +26,7 @@
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceVariant">@color/surface</item>
         <item name="backgroundColor">@color/surface</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

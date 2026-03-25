@@ -4,11 +4,12 @@
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceVariant">@color/surface</item>
         <item name="backgroundColor">@color/surface</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:statusBarColor">@color/color_primary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
     <style name="Base.Theme.KTMusicPlayer.ActionBar" parent="Theme.Material3.DayNight">
@@ -23,9 +24,11 @@
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceVariant">@color/surface</item>
         <item name="backgroundColor">@color/surface</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
     <style name="Theme.KTMusicPlayer.ActionBar" parent="Theme.Material3.DayNight">
         <!-- Customize your light theme here. -->
@@ -98,7 +101,7 @@
         <item name="windowSplashScreenBackground">@color/surface</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/animated_icon_splash</item>
         <!--Si activamos postSplashScreenTheme siempre mantendrá el tema por defecto y no podremos forzar el cambio entre temas-->
-        <item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>
+        <!--<item name="postSplashScreenTheme">@style/Base.Theme.KTMusicPlayer</item>-->
         <item name="android:windowSplashScreenAnimationDuration" tools:ignore = "newApi">1500</item>
         <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/ktmusic_brand_text</item>
     </style>
