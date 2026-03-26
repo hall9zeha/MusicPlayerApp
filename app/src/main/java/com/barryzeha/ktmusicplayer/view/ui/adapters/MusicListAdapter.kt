@@ -3,6 +3,7 @@ package com.barryzeha.ktmusicplayer.view.ui.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.ColorFilter
 import android.view.LayoutInflater
@@ -53,7 +54,15 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     private var itemListForDelete:MutableList<SongEntity> = arrayListOf()
     private var selectedPos = -1
     private var lastSelectedPos = -1
-    private  var context:Context = MyApp.context
+    private var context:Context = MyApp.context
+    private var backgroundItemColor = if (MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal) mColorList(context).getColor(
+        COLOR_ACCENT, Color.TRANSPARENT
+    ).adjustAlpha(0.3f) else mColorList(context).getColor(
+        COLOR_PRIMARY,0
+    ).adjustAlpha(0.3f)
+    private var textHeaderColor = if (MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal) mColorList(context).getColor(
+        COLOR_ACCENT, Color.TRANSPARENT
+    ) else mColorList(context).getColor(COLOR_PRIMARY,0)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         context=parent.context
@@ -80,9 +89,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
             val typedArray = mColorList(context)
             try {
                 if (selectedPos == position) {
-                    (holder as MViewHolder).bind.root.setBackgroundColor(
-                        typedArray.getColor(COLOR_PRIMARY, 0).adjustAlpha(0.3f)
-                    )
+                    (holder as MViewHolder).bind.root.setBackgroundColor(backgroundItemColor)
                 } else {
                     (holder as MViewHolder).bind.root.setBackgroundColor(Color.TRANSPARENT)
                 }
@@ -143,7 +150,16 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
         songItem?.let {
                 val position = originalList.indexOf(songItem)
+
+                backgroundItemColor =  if (MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal) mColorList(context).getColor(
+                    COLOR_ACCENT, Color.TRANSPARENT
+                ).adjustAlpha(0.3f) else ContextCompat.getColor(
+                    context,
+                    com.barryzeha.core.R.color.primaryColor
+                ).adjustAlpha(0.3f)
+
                 selectedPos = if(!isFiltering)originalList.indexOf(songItem)else filteredList.indexOf(songItem)
+
                 if (lastSelectedPos == -1) {
                     lastSelectedPos = selectedPos
                 } else {
@@ -152,16 +168,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                 }
                 notifyItemChanged(
                     selectedPos,
-                    ItemSongChangePayload.BackgroundColor(
-                        if (MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal) mColorList(
-                            context
-                        ).getColor(
-                            COLOR_ACCENT, Color.TRANSPARENT
-                        ).adjustAlpha(0.3f) else ContextCompat.getColor(
-                            context,
-                            com.barryzeha.core.R.color.primaryColor
-                        ).adjustAlpha(0.3f)
-                    )
+                    ItemSongChangePayload.BackgroundColor(backgroundItemColor)
                 )
             }
     }
@@ -341,6 +348,7 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
                         audioTag?.let {
                             //ivThumbnailCover.loadImage(it.coverArt!!)
                             chkItemSong.visibility = if (song.isSelectShow) View.VISIBLE else View.GONE
+                            ivOptions.iconTint = ColorStateList.valueOf(textHeaderColor)
                             tvBitrate.text = String.format("%s::kbps", audioTag.bitRate)
                             tvSongDesc.text = String.format(
                                 "%s. %s - %s",
@@ -397,9 +405,10 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
         fun onBind(value:String)=with(bind){
             tvHeaderDescription.text=value
             val alpha = 148
-            val textHeaderColor = if(MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(
+            textHeaderColor = if(MyApp.mPrefs.globalTheme == SettingsKeys.MATERIAL_YOU_THEME.ordinal)mColorList(context).getColor(
                 COLOR_ACCENT,COLOR_PRIMARY)else mColorList(context).getColor(COLOR_PRIMARY,COLOR_PRIMARY)
             tvHeaderDescription.setTextColor(textHeaderColor)
+            ivArrow.iconTint= ColorStateList.valueOf(textHeaderColor)
             divider.dividerColor = textHeaderColor
         }
     }

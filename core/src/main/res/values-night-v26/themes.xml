@@ -10,7 +10,7 @@
         <item name="windowActionBarOverlay">true</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:statusBarColor">@color/color_primary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
     <style name="Base.Theme.KTMusicPlayer.ActionBar" parent="Theme.Material3.DayNight">
@@ -115,7 +115,7 @@
         <item name="windowSplashScreenBackground">?attr/colorPrimary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/animated_icon_splash</item>
         <!--Si activamos postSplashScreenTheme siempre mantendrá el tema por defecto y no podremos forzar el cambio entre temas-->
-        <item name="postSplashScreenTheme">@style/Theme.KTMusicPlayer.Material3</item>
+        <!--<item name="postSplashScreenTheme">@style/Theme.KTMusicPlayer.Material3</item>-->
         <item name="android:windowSplashScreenAnimationDuration" tools:ignore = "newApi">1500</item>
         <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/ktmusic_brand_text</item>
 
