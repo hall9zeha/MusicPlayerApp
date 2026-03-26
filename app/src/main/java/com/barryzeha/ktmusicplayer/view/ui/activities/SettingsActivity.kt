@@ -2,6 +2,7 @@ package com.barryzeha.ktmusicplayer.view.ui.activities
 
 import android.app.Activity
 import android.app.UiModeManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
@@ -42,6 +43,7 @@ class SettingsActivity : AppCompatActivity() {
                 .replace(R.id.settings, SettingsFragment())
                 .commit()
         }
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
@@ -54,6 +56,15 @@ class SettingsActivity : AppCompatActivity() {
             val uiMode = context?.getSystemService(UiModeManager::class.java)
             val themePref = findPreference<SwitchPreferenceCompat>(SettingsKeys.DEFAULT_THEME.value)
             val materialYouTheme = findPreference<SwitchPreferenceCompat>(SettingsKeys.MATERIAL_YOU_THEME.value)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val isDarkMode = (resources.configuration.uiMode and
+                        Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+                if (isDarkMode) {
+                    themePref?.isChecked = true
+                }
+            }
             themePref?.setOnPreferenceChangeListener {pref,newValue->
                 if(newValue as Boolean){
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
