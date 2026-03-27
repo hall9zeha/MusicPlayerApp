@@ -725,10 +725,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun checkIfSongIsFavorite(id:Long){
         if(id>0) {
             serviceScope.launch(Dispatchers.IO) {
+                stopLoop()
                 fetchSongMetadata(repository.fetchSongById(id))?.let{ metadata->
                     currentMusicState = metadata
                     initNotify()
                 }
+                startLoop()
             }
         }
     }

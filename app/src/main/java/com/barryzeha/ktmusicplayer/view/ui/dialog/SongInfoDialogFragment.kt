@@ -320,6 +320,7 @@ class SongInfoDialogFragment : DialogFragment() {
                         isEditing = false
                         withContext(Dispatchers.Main) {
                             showEditViews(false)
+                            enableViews(true)
                             processSongPaths(listOf(pathFile.toString()), {}, { song ->
                                 viewModel.setIsSongTagEdited(
                                     song.copy(

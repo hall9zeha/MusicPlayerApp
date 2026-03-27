@@ -67,6 +67,11 @@ android {
         viewBinding= true
         buildConfig=true
     }
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 val bassImplementation by configurations
 dependencies {
