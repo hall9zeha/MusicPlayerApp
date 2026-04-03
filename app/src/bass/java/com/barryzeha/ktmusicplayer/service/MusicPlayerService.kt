@@ -820,6 +820,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     fun nextSong(){
+        stopAbLoop()
         bassManager?.unregisterPlaybackState()
         if(isOpenQueue()){
             if(playingQueue.isNotEmpty()){
@@ -844,7 +845,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         setOrPlaySong(indexOfSong, NEXT)
         isUIDetachedFromService()
         mPrefs.currentIndexSong = indexOfSong.toLong()
-        stopAbLoop()
         clearABLoopOfPreferences()
     }
     private fun reconcileCurrentSongInQueue(){
@@ -854,6 +854,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     fun prevSong(){
+        stopAbLoop()
         bassManager?.unregisterPlaybackState()
         if(mainSongsList.isNotEmpty()){
             reconcileCurrentSongInQueue()
@@ -871,7 +872,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 mPrefs.currentIndexSong = indexOfSong.toLong()
             }
         }
-        stopAbLoop()
         clearABLoopOfPreferences()
     }
     fun reloadIndexOfSong(){

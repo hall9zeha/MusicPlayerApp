@@ -236,6 +236,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             //tryBlurBackground()
             mainViewModel.saveStatePlaying(musicPlayerService?.playingState()!!)
             updateService()
+            checkPlayerSongModePreferences()
             if(discCoverViewIsEnable()) {
                 // We stop the animation for each song change so that the image appears correctly and not rotated.
                 (bind?.ivDiscMusicCover as DiscCoverView).end()

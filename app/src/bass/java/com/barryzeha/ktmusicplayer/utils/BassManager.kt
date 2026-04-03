@@ -185,6 +185,9 @@ class BassManager {
         // Convert the current position (in milliseconds) to bytes with  bassManager?.getCurrentPositionToBytes
         BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(currentSongProgress),BASS.BASS_POS_BYTE)
         BASS.BASS_ChannelPlay(getActiveChannel()!!, false)
+        if (abLoopEnabled) {
+            restoreABLoopSyncOnly()
+        }
     }
     fun channelPause(){
         BASS.BASS_ChannelPause(getActiveChannel())
@@ -199,7 +202,6 @@ class BassManager {
 
     }
     fun setChannelProgress(progress:Long, currentProgress:(Long)->Unit){
-
         var finalProgress = progress
         // Para el bucle A-B, si el progreso se sale del rango establecido, lo ajustamos al inicio del bucle
         if(abLoopEnabled){
@@ -233,6 +235,10 @@ class BassManager {
         abLoopEnabled = true
     }
     private fun startAbLoop(){
+        if (abSyncHandle != 0) {
+            BASS.BASS_ChannelRemoveSync(getActiveChannel(), abSyncHandle)
+            abSyncHandle = 0
+        }
         BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(startAbLoopPosition),BASS.BASS_POS_BYTE)
         val endBytes = getCurrentPositionToBytes(endAbLopPosition)
         abSyncHandle=BASS_ChannelSetSync(
@@ -242,6 +248,31 @@ class BassManager {
             {_,_,_,_->
                 val startBytes= getCurrentPositionToBytes(startAbLoopPosition)
                 BASS.BASS_ChannelSetPosition(getActiveChannel(),startBytes,BASS.BASS_POS_BYTE)
+            },
+            BASS_SYNC_MIXTIME
+        )
+    }
+    // Para reactivar A-B loop después de pausar la pista, si es que A-B loop está habilitado
+    private fun restoreABLoopSyncOnly(){
+        val channel = getActiveChannel()
+        if(channel==0) return
+        if (abSyncHandle != 0) {
+            BASS.BASS_ChannelRemoveSync(getActiveChannel(), abSyncHandle)
+            abSyncHandle = 0
+        }
+        val startBytes = getCurrentPositionToBytes(startAbLoopPosition)
+        val endBytes = getCurrentPositionToBytes(endAbLopPosition)
+        val current = getBytesPosition(channel)
+        if (current < startBytes || current > endBytes) {
+            BASS.BASS_ChannelSetPosition(channel, startBytes, BASS.BASS_POS_BYTE)
+        }
+        abSyncHandle = BASS_ChannelSetSync(
+            channel,
+            BASS_SYNC_POS,
+            endBytes,
+            { _, _, _, _ ->
+
+                BASS.BASS_ChannelSetPosition(channel, startBytes, BASS.BASS_POS_BYTE)
             },
             BASS_SYNC_MIXTIME
         )
