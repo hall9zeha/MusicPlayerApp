@@ -377,8 +377,8 @@
         android:layout_marginEnd="8dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnMainPrevious"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         app:icon="@drawable/ic_back"
         android:clickable="true"
         android:focusable="true"
@@ -397,8 +397,8 @@
         android:layout_marginEnd="16dp"/>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnMainNext"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         app:icon="@drawable/ic_next"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
