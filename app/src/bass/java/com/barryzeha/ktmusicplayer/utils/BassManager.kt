@@ -50,6 +50,7 @@ class BassManager {
     //
     private var checkRunnable: Runnable? = null
     private  var playbackManager:PlaybackManager?=null
+
     companion object {
         // For A-B looper
         private var startAbLoopPosition:Long=0
@@ -71,6 +72,7 @@ class BassManager {
     private fun initializeBass(){
         initThreads()
         context= MyApp.context
+        configure()
         if (!BASS.BASS_Init(-1, SAMPLE192, BASS.BASS_DEVICE_FREQ)) {
             Log.i(TAG, "Can't initialize device")
             Log.i(TAG, "init with sample " + SAMPLE96 + "Hz")
@@ -94,7 +96,7 @@ class BassManager {
             Log.i(TAG, "speakers :" + info.speakers)
             Log.i(TAG, "freq :" + info.freq)
         }
-        configure()
+
         val nativeDir =MyApp.context.applicationInfo.nativeLibraryDir
         val pluginsList = File(nativeDir).list { dir, name -> name.matches("libbass.+\\.so|libtags\\.so".toRegex()) }
         pluginsList?.forEach { plugin->
@@ -104,13 +106,13 @@ class BassManager {
     private fun initThreads(){
         playbackThread = HandlerThread("BassPlaybackThread").apply { start() }
         playbackHandler = Handler(playbackThread!!.looper)
-
         abThread = HandlerThread("BassABThread").apply { start() }
         abHandler = Handler(abThread!!.looper)
     }
     private fun configure(){
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_FLOATDSP, 1)
-        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 10)
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_PERIOD, 10)
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_BUFFER, 80)
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC, 3)
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_SRC_SAMPLE, 3)
     }
@@ -178,6 +180,7 @@ class BassManager {
         BASS.BASS_StreamFree(getActiveChannel())
         // Creating the new channel for playing
         mainChannel = BASS.BASS_StreamCreateFile(song.pathLocation, 0, 0, BASS.BASS_SAMPLE_FLOAT)
+
     }
 
     fun channelPlay(currentSongProgress:Long){

@@ -11,12 +11,12 @@ plugins {
 
 android {
     namespace = "com.barryzeha.ktmusicplayer"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.barryzeha.ktmusicplayer"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -66,6 +66,7 @@ android {
     buildFeatures{
         viewBinding= true
         buildConfig=true
+        resValues = true
     }
     packaging {
         jniLibs {

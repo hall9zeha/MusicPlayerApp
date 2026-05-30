@@ -744,9 +744,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     fun startPlayer(song:SongEntity){
         song.pathLocation?.let {
             bassManager?.unregisterPlaybackState()
-            // executeOnceTime nos servirá para evitar que el listener de exoplayer vuelva a mandar
-            // información  de la pista en reproducción que no requiere cambios constantes
-            // como la carátula del álbum, título, artista. A diferencia del tiempo transcurrido
             executeOnceTime=false
             pausedByAudioFocusHandling=false
             if(requestAudioFocus()) {
@@ -759,6 +756,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 setPlaylistEnded(false)
                 //try {
                     song?.let {
+                        clearABLoopOfPreferences()
                         songEntity = it
                         currentSongProgress = 0
                         bassManager?.streamCreateFile(song)
@@ -820,7 +818,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     fun nextSong(){
-        stopAbLoop()
+        clearABLoopOfPreferences()
         bassManager?.unregisterPlaybackState()
         if(isOpenQueue()){
             if(playingQueue.isNotEmpty()){
@@ -845,7 +843,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         setOrPlaySong(indexOfSong, NEXT)
         isUIDetachedFromService()
         mPrefs.currentIndexSong = indexOfSong.toLong()
-        clearABLoopOfPreferences()
     }
     private fun reconcileCurrentSongInQueue(){
         if (songEntity.id>0 && !mainSongsList.contains(songEntity)) {
@@ -854,7 +851,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         }
     }
     fun prevSong(){
-        stopAbLoop()
+        clearABLoopOfPreferences()
         bassManager?.unregisterPlaybackState()
         if(mainSongsList.isNotEmpty()){
             reconcileCurrentSongInQueue()
@@ -872,7 +869,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 mPrefs.currentIndexSong = indexOfSong.toLong()
             }
         }
-        clearABLoopOfPreferences()
     }
     fun reloadIndexOfSong(){
         // Obtenemos la posición en la lista principal de la pista que hayamos reproducido

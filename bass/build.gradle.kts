@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.un4seen.bass"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

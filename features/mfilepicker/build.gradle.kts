@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.barryzeha.mfilepicker"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 24

@@ -17,3 +17,4 @@
 local.properties
 app/src/bass/google-services.json
 app/src/exoplayer/google-services.json
+app/src/main/assets/adi-registration.properties
