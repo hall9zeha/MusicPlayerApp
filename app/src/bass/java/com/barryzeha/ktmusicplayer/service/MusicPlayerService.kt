@@ -414,7 +414,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         setPlayingState(false)
                         clearABLoopOfPreferences()
                         // Remove notification of foreground service process
-                        stopForeground(STOP_FOREGROUND_REMOVE)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            stopForeground(STOP_FOREGROUND_REMOVE)
+                        } else {
+                            @Suppress("DEPRECATION")
+                            stopForeground(true)
+                        }
                         stopSelf()
                         // Close application
                         _activity?.finish()
@@ -474,7 +479,12 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                 bassManager?.channelStop()
                 clearABLoopOfPreferences()
                 // Remove notification of foreground service process
-                stopForeground(STOP_FOREGROUND_REMOVE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                } else {
+                    @Suppress("DEPRECATION")
+                    stopForeground(true)
+                }
                 _songController?.stop()
                 // Close application
                 _activity?.finish()
@@ -1053,7 +1063,13 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         _songController?.stop()
         mediaSession.release()
         bassManager?.releasePlayback()
-        stopForeground(STOP_FOREGROUND_REMOVE)
+        // Remove notification of foreground service process
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
         clearABLoopOfPreferences()
         abandonAudioFocus()
         super.onDestroy()
