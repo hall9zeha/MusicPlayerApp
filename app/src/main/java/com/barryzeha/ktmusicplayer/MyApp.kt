@@ -58,8 +58,9 @@ class MyApp:Application() ,ServiceConnection{
     override fun onServiceDisconnected(name: ComponentName?) {}
     private fun setUpGlobalPreferences(){
         setTheme(getThemeResValue())
+        // For apply theme night or day for android legacy devices when app starts
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.S){
-            if(defaultPrefs.getBoolean(SettingsKeys.DEFAULT_THEME.name,false)){
+            if(defaultPrefs.getBoolean(SettingsKeys.DEFAULT_THEME.value,false)){
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             }else{
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
