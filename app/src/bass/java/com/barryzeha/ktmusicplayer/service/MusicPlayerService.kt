@@ -315,7 +315,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         if(firstCallingToSongState) {
                 serviceScope.launch(Dispatchers.IO) {
                     songState = repository.fetchSongState()
-                    if(songState.isNotEmpty())setSongStateSaved(songState[0])
+                    if (songState.isNotEmpty()) setSongStateSaved(songState[0])
+
                 }
         }
     }
@@ -940,6 +941,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     private fun setSongStateSaved(songState: SongStateWithDetail, animDirection:Int= DEFAULT_DIRECTION){
         val song = songState.songEntity
+
         songEntity = song
         isUIDetachedFromService()
 

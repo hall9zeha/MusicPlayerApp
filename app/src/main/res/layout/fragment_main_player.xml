@@ -243,6 +243,16 @@
             app:layout_constraintTop_toTopOf="parent"
 
             />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvAudioFormat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="MP3"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="@id/btnLyric"
+            app:layout_constraintEnd_toStartOf="@id/btnLyric"
+            app:layout_constraintBottom_toBottomOf="@id/btnLyric"
+            android:layout_marginEnd="4.dp"/>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLyric"
             android:layout_width="48dp"

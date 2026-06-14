@@ -399,6 +399,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             }
             btnDelete?.setOnClickListener {
                 val listForDeleted = musicListAdapter?.getListItemsForDelete()?.toList()
+                removeSongState()
                 listForDeleted?.let {
                     mainViewModel.deleteSong(listForDeleted)
                     musicPlayerService?.removeMediaItems(listForDeleted)
@@ -557,6 +558,13 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             first=(if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0).toInt(),
             second = (musicListAdapter?.getSongItemCount()!! + itemCount))
         return numbersOfTrack
+    }
+    private fun removeSongState() {
+        if(currentMusicState.idSong == mPrefs.idSong){
+            mPrefs.clearIdSongInPrefs()
+            mPrefs.clearCurrentPosition()
+            mainViewModel.removeSongState(currentMusicState.idSong)
+        }
     }
     private fun updateService() {
         serviceConnection?.let {

@@ -94,6 +94,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             setupAnimator()
             listener?.onFragmentReady()
             bind?.tvNumberSong?.text = String.format("#%s/%s",if (mPrefs.currentIndexSong > -1) mPrefs.currentIndexSong else 0,mPrefs.totalItemSongs)
+
     }
     /*private fun tryBlurBackground(){
         bind?.colorBackground?.let {
@@ -225,6 +226,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             tvSongAlbum.text = musicState.album
             tvSongArtist.text = musicState.artist
             tvSongDescription.text = musicState.title
+            tvAudioFormat.text = musicState.songPath.substringAfterLast(".").uppercase().toString()
             (ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
             (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
 
@@ -628,7 +630,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
-        if(!coverViewClicked)checkCoverViewStyle()
         checkPlayerSongModePreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         mainViewModel.reloadSongInfo()
