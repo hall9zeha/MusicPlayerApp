@@ -327,8 +327,47 @@ fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitm
         null
     }
     // Crear el bitmap si existe
-    val bitmap = artworkBytes?.let {
-        BitmapFactory.decodeByteArray(it, 0, it.size)
+    val bitmap = artworkBytes?.let { bytes ->
+        try {
+            // Leer dimensiones sin cargar la imagen completa
+            val boundsOptions = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+
+            BitmapFactory.decodeByteArray(
+                bytes,
+                0,
+                bytes.size,
+                boundsOptions
+            )
+            val targetSize = if (isForNotify) {
+                156
+            } else {
+                500
+            }
+            val decodeOptions = BitmapFactory.Options().apply {
+                inSampleSize = calculateInSampleSize(
+                    boundsOptions,
+                    targetSize,
+                    targetSize
+                )
+                // Reduce memoria en Android antiguos
+                inPreferredConfig = Bitmap.Config.RGB_565
+            }
+            BitmapFactory.decodeByteArray(
+                bytes,
+                0,
+                bytes.size,
+                decodeOptions
+            )
+
+        } catch (ex: Exception) {
+            Log.e(
+                "BITMAP_ERROR",
+                "Error decodificando artwork: ${ex.message}"
+            )
+            null
+        }
     }
     // Fallback si no hay artwork o decode falló
     val finalBitmap = bitmap ?: BitmapFactory.decodeStream(context.assets.open(DEFAULT_COVER_ART_ASSET))
@@ -343,6 +382,24 @@ fun getBitmap(context: Context,pathFile:String?,isForNotify: Boolean=false):Bitm
     } else {
         finalBitmap
     }
+}
+private fun calculateInSampleSize(
+    options: BitmapFactory.Options,
+    reqWidth: Int,
+    reqHeight: Int
+): Int {
+    val (height: Int, width: Int) = options.run { outHeight to outWidth }
+    var inSampleSize = 1
+
+    if (height > reqHeight || width > reqWidth) {
+        val halfHeight: Int = height / 2
+        val halfWidth: Int = width / 2
+
+        while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+            inSampleSize *= 2
+        }
+    }
+    return inSampleSize
 }
 fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
     val originalWidth = bitmap.width
