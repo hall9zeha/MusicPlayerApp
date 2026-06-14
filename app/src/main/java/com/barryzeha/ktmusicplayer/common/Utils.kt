@@ -138,7 +138,7 @@ fun notificationMediaPlayer(context: Context, mediaStyle: Notification.MediaStyl
 
     return builder
         .setStyle(mediaStyle)
-        .setSmallIcon(R.drawable.ic_play)
+        .setSmallIcon(R.drawable.ktmusic_icon_original)
         .setLargeIcon(albumCoverArt)
         .setOnlyAlertOnce(true)
         .setOngoing(true)
