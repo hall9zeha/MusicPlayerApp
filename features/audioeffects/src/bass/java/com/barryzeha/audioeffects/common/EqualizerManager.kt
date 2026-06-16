@@ -3,11 +3,6 @@ package com.barryzeha.audioeffects.common
 import android.util.Log
 import com.un4seen.bass.BASS
 import com.un4seen.bass.BASS.BASS_DX8_PARAMEQ
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.math.ln
 import com.barryzeha.core.R as coreRes
 
 /**
@@ -91,7 +86,7 @@ object EqualizerManager {
             p.fReverbMix = (if (v.toInt() != 0) (Math.log(v.toInt() / 30.0) * 30).toFloat() else (-96).toFloat())
             BASS.BASS_FXSetParameters(fxArray[n], p)
         } else // volume
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, v / 15f)
+            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL,v / 15f)
 
     }
     fun setEffect(isEnable: Boolean){
@@ -99,6 +94,7 @@ object EqualizerManager {
         for (i in fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
         }
+        releaseFXStream()
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
         } else {
@@ -110,6 +106,7 @@ object EqualizerManager {
         for (i in  fxArray.indices) {
             BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
         }
+        releaseFXStream()
         if (isEnable) {
             fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
             chan=channelIntent
@@ -117,13 +114,18 @@ object EqualizerManager {
             setEnabled(true)
 
         } else {
+            mPrefs?.effectsIsEnabled = false
+            BASS.BASS_ChannelSetAttribute(channelIntent, BASS.BASS_ATTRIB_VOL, 1f)
+            setEnabled(false)
             fxChan=0
             chan=0
-            mPrefs?.effectsIsEnabled = false
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, 1f)
-            setEnabled(false)
-
         }
     }
-
+    // Release fx stream when effects are disabled to avoid memory leaks, since the fx stream is only used to apply the effects and not for audio playback
+    private fun releaseFXStream(){
+        if(fxChan !=0){
+            BASS.BASS_StreamFree(fxChan)
+            fxChan=0
+        }
+    }
 }

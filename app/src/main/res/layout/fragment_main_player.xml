@@ -122,12 +122,11 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
         android:singleLine="true"
-
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/contentCover"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginEnd="48dp"
         android:layout_marginTop="16dp"/>
     <LinearLayout
         android:id="@+id/lnTrackDescription"
@@ -261,7 +260,7 @@
             app:icon="@drawable/ic_lyric"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            android:contentDescription="Letra"
+            android:contentDescription="Lyric"
             app:iconSize="18dp"
             app:iconTint="@color/controls_colors"
             android:clickable="true"

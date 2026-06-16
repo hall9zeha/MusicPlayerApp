@@ -89,7 +89,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
     private fun setUpListeners()=with(bind){
 
-        if(mPrefs.effectsIsEnabled) output.performClick()
+        if(mPrefs.effectsIsEnabled) mainEqualizerSwitch.performClick()
         if(mPrefs.effectsIsEnabled){
             when(mPrefs.effectType){
                 CUSTOM_PRESET->{chipGroupFocused(CUSTOM_PRESET)}
@@ -106,7 +106,7 @@ class MainEqualizerActivity : AppCompatActivity() {
                 HEAD_PHONE->{chipGroupFocused(HEAD_PHONE)}
             }
         }
-        output.setOnClickListener {
+        mainEqualizerSwitch.setOnClickListener {
             enableOrDisableEffects()  }
 
         chipGroupEffects.setOnCheckedStateChangeListener { group, checkedIds ->
@@ -151,7 +151,7 @@ class MainEqualizerActivity : AppCompatActivity() {
 
    private  fun enableOrDisableEffects() {
 
-        EqualizerManager.enableOrDisableEffects(bind.output.isChecked){isEnable ->
+        EqualizerManager.enableOrDisableEffects(bind.mainEqualizerSwitch.isChecked){isEnable ->
             if(isEnable){
                 enableAndDisableViews(true)
                 chipGroupFocused(mPrefs.effectType)
@@ -177,11 +177,13 @@ class MainEqualizerActivity : AppCompatActivity() {
                 }
             }
         }
-        val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
-        EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress.toFloat())
+       val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
+       val volumeSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.volume)
+       EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress.toFloat())
+       EqualizerManager.updateFX(volumeSeek.tag.toString().toInt(),volumeSeek.progress.toFloat())
     }
     private fun setEffect(){
-        EqualizerManager.setEffect(bind.output.isChecked)
+        EqualizerManager.setEffect(bind.mainEqualizerSwitch.isChecked)
         EqualizerManager.setupFX { fxIndex->
             val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
             if(childView is SeekBar)
