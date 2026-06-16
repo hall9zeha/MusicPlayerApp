@@ -69,6 +69,7 @@
             android:drawableStart="@drawable/ic_music"
             android:drawablePadding="8dp"
             android:textSize="20sp"
+            android:textStyle="bold"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:fadingEdge="horizontal"
