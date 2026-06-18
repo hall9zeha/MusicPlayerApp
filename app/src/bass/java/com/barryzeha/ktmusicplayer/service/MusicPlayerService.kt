@@ -774,7 +774,6 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
                         executeOnceTime = true
                     } ?: run {
-                        bassManager?.channelPlay(currentSongProgress)
                         executeOnceTime = false
                     }
                     if (bassManager?.getActiveChannel() != 0) {
