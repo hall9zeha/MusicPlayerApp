@@ -19,12 +19,15 @@ object EqualizerManager {
 
     // For bass
     fun applyEqualizer(channel:Int, prefs:EffectsPreferences){
-        channelIntent=channel
         chan= channelIntent
         mPrefs=prefs
         if(prefs.effectsIsEnabled){
-            setEffect(true)
-            setUpEqValues(prefs)
+            if (channel != channelIntent) {
+                channelIntent = channel
+                setEffect(true)
+                setUpEqValues(prefs)
+            }
+
         }else{
             //enableOrDisableEffects(false){}
         }
@@ -48,7 +51,7 @@ object EqualizerManager {
 
     fun setupFX(fxIndex:(index:Int)->Unit) {
         // setup the effects
-        val chan = if(fxChan !=0) fxChan else chan
+        val chan = channelIntent
         for (i in 0 until  fxArray.size - 1) {
             fxArray[i] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_PARAMEQ, 0)
             val p = BASS_DX8_PARAMEQ()
@@ -65,7 +68,6 @@ object EqualizerManager {
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
             BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue)
         }
-
     }
 
     fun updateFX(index: Int, value: Float) {
@@ -86,46 +88,36 @@ object EqualizerManager {
             p.fReverbMix = (if (v.toInt() != 0) (Math.log(v.toInt() / 30.0) * 30).toFloat() else (-96).toFloat())
             BASS.BASS_FXSetParameters(fxArray[n], p)
         } else // volume
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL,v / 15f)
+            BASS.BASS_ChannelSetAttribute(channelIntent, BASS.BASS_ATTRIB_VOL, v / 15f)
 
     }
     fun setEffect(isEnable: Boolean){
-        val ch = if (fxChan != 0) fxChan else chan
+        val ch = channelIntent
         for (i in fxArray.indices) {
-            BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
-        }
-        releaseFXStream()
-        if (isEnable) {
-            fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
-        } else {
-            fxChan=0
+            if (fxArray[i] != 0) {
+                BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+                fxArray[i] = 0
+            }
         }
     }
     fun enableOrDisableEffects(isEnable:Boolean,setEnabled:(isEnable:Boolean)->Unit){
-        val ch = if (fxChan != 0) fxChan else chan
+        val ch = channelIntent
         for (i in  fxArray.indices) {
-            BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+            if (fxArray[i] != 0) {
+                BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+                fxArray[i] = 0
+            }
         }
-        releaseFXStream()
         if (isEnable) {
-            fxChan= BASS.BASS_StreamCreate(0, 0, 0, BASS.STREAMPROC_DEVICE, null)
-            chan=channelIntent
             mPrefs?.effectsIsEnabled = true
             setEnabled(true)
 
         } else {
             mPrefs?.effectsIsEnabled = false
-            BASS.BASS_ChannelSetAttribute(channelIntent, BASS.BASS_ATTRIB_VOL, 1f)
+            BASS.BASS_ChannelSetAttribute(ch, BASS.BASS_ATTRIB_VOL, 1f)
             setEnabled(false)
-            fxChan=0
-            chan=0
+
         }
     }
-    // Release fx stream when effects are disabled to avoid memory leaks, since the fx stream is only used to apply the effects and not for audio playback
-    private fun releaseFXStream(){
-        if(fxChan !=0){
-            BASS.BASS_StreamFree(fxChan)
-            fxChan=0
-        }
-    }
+
 }

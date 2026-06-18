@@ -774,13 +774,17 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         findItemSongIndexById(song.id)?.let { pos -> indexOfSong = pos }
                         executeOnceTime = true
                     } ?: run {
-                        bassManager?.streamCreateFile(songEntity)
+                        bassManager?.channelPlay(currentSongProgress)
                         executeOnceTime = false
                     }
                     if (bassManager?.getActiveChannel() != 0) {
+                        EqualizerManager.applyEqualizer(
+                            bassManager?.getActiveChannel()!!,
+                            effectsPrefs
+                        )
+                        bassManager?.registerPlaybackState(this)
                         bassManager?.channelPlay(currentSongProgress)
                         bassManager?.startCheckingPlayback()
-                        bassManager?.registerPlaybackState(this)
                         setPlayingState(true)
                         mPrefs.idSong = songEntity.id
                         currentMusicState = fetchSongMetadata(songEntity)?.copy(
@@ -790,10 +794,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                             latestPlayed = false,
                             nextOrPrev = nextOrPrevAnimValue
                         )!!
-                        EqualizerManager.applyEqualizer(
-                            bassManager?.getActiveChannel()!!,
-                            effectsPrefs
-                        )
+
                         mPrefs.currentIndexSong = indexOfSong.toLong()
                     } else {
                         val errorCode = BASS_ErrorGetCode()

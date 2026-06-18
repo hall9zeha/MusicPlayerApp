@@ -149,38 +149,51 @@ class MainEqualizerActivity : AppCompatActivity() {
         }
     }
 
-   private  fun enableOrDisableEffects() {
-
-        EqualizerManager.enableOrDisableEffects(bind.mainEqualizerSwitch.isChecked){isEnable ->
-            if(isEnable){
+    private  fun enableOrDisableEffects() {
+        EqualizerManager.enableOrDisableEffects(bind.mainEqualizerSwitch.isChecked) { isEnable ->
+            if (isEnable) {
                 enableAndDisableViews(true)
                 chipGroupFocused(mPrefs.effectType)
-            }else{
+                EqualizerManager.setupFX { fxIndex ->
+                    // Ya que tenemos en el mismo linear layout tanto textviews como seekbars
+                    //buscarlos por el index no nos devolverá todos los seekbar que tenemos, entonces los buscamos por su tag
+                    val childView = bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
+                    if (childView is SeekBar) {
+                        when (childView.id) {
+                            coreRes.id.volume -> {
+                                EqualizerManager.updateFX(
+                                    childView.tag.toString().toInt(),
+                                    childView.progress.toFloat()
+                                )
+                            }
+
+                            else -> {
+                                EqualizerManager.updateFX(
+                                    childView.tag.toString().toInt(),
+                                    convertBandValueToEqualizer(childView.progress.toFloat())
+                                )
+                            }
+                        }
+                    }
+                }
+                val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
+                val volumeSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.volume)
+                EqualizerManager.updateFX(
+                    reverbSeek.tag.toString().toInt(),
+                    reverbSeek.progress.toFloat()
+                )
+                EqualizerManager.updateFX(
+                    volumeSeek.tag.toString().toInt(),
+                    volumeSeek.progress.toFloat()
+                )
+            }else {
                 enableAndDisableViews(false)
-                bind.chipGroupEffects.forEach { v->
+                bind.chipGroupEffects.forEach { v ->
                     v.clearFocus()
                 }
             }
         }
-        EqualizerManager.setupFX { fxIndex->
-            // Ya que tenemos en el mismo linear layout tanto textviews como seekbars
-            //buscarlos por el index no nos devolverá todos los seekbar que tenemos, entonces los buscamos por su tag
-            val childView= bind.lnContentBands.findViewWithTag<SeekBar>(fxIndex)
-            if(childView is SeekBar) {
-                when (childView.id) {
-                    coreRes.id.volume -> {
-                        EqualizerManager.updateFX(childView.tag.toString().toInt(), childView.progress.toFloat())
-                    }
-                    else -> {
-                        EqualizerManager.updateFX(childView.tag.toString().toInt(), convertBandValueToEqualizer(childView.progress.toFloat()))
-                    }
-                }
-            }
-        }
-       val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
-       val volumeSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.volume)
-       EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress.toFloat())
-       EqualizerManager.updateFX(volumeSeek.tag.toString().toInt(),volumeSeek.progress.toFloat())
+
     }
     private fun setEffect(){
         EqualizerManager.setEffect(bind.mainEqualizerSwitch.isChecked)
@@ -197,7 +210,9 @@ class MainEqualizerActivity : AppCompatActivity() {
                 }
         }
         val reverbSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.reverb)
+        val volumeSeek: SeekBar = bind.lnContentBands.findViewById(coreRes.id.volume)
         EqualizerManager.updateFX(reverbSeek.tag.toString().toInt(),reverbSeek.progress.toFloat())
+        EqualizerManager.updateFX(volumeSeek.tag.toString().toInt(),volumeSeek.progress.toFloat())
 
     }
     private fun enableAndDisableViews(isEnable:Boolean){
