@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
+import com.barryzeha.audioeffects.common.EffectsPreferences
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.ktmusicplayer.MyApp
@@ -50,6 +51,7 @@ class BassManager {
     //
     private var checkRunnable: Runnable? = null
     private  var playbackManager:PlaybackManager?=null
+    private var _effectPrefs: EffectsPreferences?=null
 
     companion object {
         // For A-B looper
@@ -61,9 +63,10 @@ class BassManager {
         @Volatile
         private var instance: BassManager? = null
 
-        fun getInstance():BassManager{
+        fun getInstance(effectPrefs: EffectsPreferences):BassManager{
             return instance ?: synchronized(this) {
                 instance ?: BassManager().apply {
+                    _effectPrefs = effectPrefs
                     initializeBass()
                 }.also { instance = it }
             }
@@ -184,6 +187,7 @@ class BassManager {
     }
 
     fun channelPlay(currentSongProgress:Long){
+        val volumeValue = if(_effectPrefs?.effectsIsEnabled!!) _effectPrefs?.getVolumeSeekBandValue(_effectPrefs?.effectType!!, R.id.volume)?.div(15f) else 1f
         BASS.BASS_ChannelSetAttribute(getActiveChannel(),BASS.BASS_ATTRIB_VOL,1F)
         // Convert the current position (in milliseconds) to bytes with  bassManager?.getCurrentPositionToBytes
         BASS.BASS_ChannelSetPosition(getActiveChannel(),getCurrentPositionToBytes(currentSongProgress),BASS.BASS_POS_BYTE)

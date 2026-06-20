@@ -134,7 +134,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
 
     override fun onCreate() {
         super.onCreate()
-        bassManager = BassManager.getInstance()
+        bassManager = BassManager.getInstance(effectsPrefs)
         bassManager?.registerPlaybackState(this)
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         mediaSession = MediaSession(this, MUSIC_PLAYER_SESSION)
