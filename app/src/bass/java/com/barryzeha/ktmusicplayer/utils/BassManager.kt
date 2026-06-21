@@ -330,9 +330,9 @@ class BassManager {
     }
 
     fun clearBassChannel() {
-        mainChannel = null
         BASS.BASS_StreamFree(getActiveChannel())
         BASS.BASS_ChannelSetPosition( getActiveChannel(),getCurrentPositionToBytes(0),BASS.BASS_POS_BYTE)
+        mainChannel = null
     }
 
     fun getBassErrorMessage(code: Int): String {
