@@ -11,19 +11,21 @@ import com.barryzeha.core.R as coreRes
  * Copyright (c)  All rights reserved.
  **/
 private val fxArray:IntArray = IntArray(11)
-private var chan=0
+private var mainChannel=0
 private var fxChan=0
 private var mPrefs:EffectsPreferences?=null
-private var channelIntent=0
+private var channelEffects=0
 object EqualizerManager {
 
     // For bass
-    fun applyEqualizer(channel:Int, prefs:EffectsPreferences){
-        chan= channelIntent
+    fun applyEqualizer(currentChannel:Int, prefs:EffectsPreferences){
+        // mainChannel is used to store the current channel for effects
+        mainChannel= currentChannel
         mPrefs=prefs
         if(prefs.effectsIsEnabled){
-            if (channel != channelIntent) {
-                channelIntent = channel
+            // Only for comparison, if the current channel is different from the one stored, we need to set up the effects again
+            if (currentChannel != channelEffects) {
+                channelEffects = currentChannel
                 setEffect(true)
                 setUpEqValues(prefs)
             }
@@ -51,9 +53,8 @@ object EqualizerManager {
 
     fun setupFX(fxIndex:(index:Int)->Unit) {
         // setup the effects
-        val chan = channelIntent
         for (i in 0 until  fxArray.size - 1) {
-            fxArray[i] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_PARAMEQ, 0)
+            fxArray[i] = BASS.BASS_ChannelSetFX(mainChannel, BASS.BASS_FX_DX8_PARAMEQ, 0)
             val p = BASS_DX8_PARAMEQ()
             p.fGain = 0f
             p.fBandwidth = 18f
@@ -62,11 +63,11 @@ object EqualizerManager {
             // Enviamos el índice donde lo necesitemos
             fxIndex(i)
         }
-        fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(chan, BASS.BASS_FX_DX8_REVERB, 0)
+        fxArray[fxArray.size - 1] = BASS.BASS_ChannelSetFX(mainChannel, BASS.BASS_FX_DX8_REVERB, 0)
         updateFX(fxArray.size - 1, 0f)
         mPrefs?.let {prefs->
             val volumeValue = prefs.getVolumeSeekBandValue(prefs.effectType, coreRes.id.volume)
-            BASS.BASS_ChannelSetAttribute(chan, BASS.BASS_ATTRIB_VOL, volumeValue)
+            BASS.BASS_ChannelSetAttribute(mainChannel, BASS.BASS_ATTRIB_VOL, volumeValue /15f)
         }
     }
 
@@ -88,23 +89,21 @@ object EqualizerManager {
             p.fReverbMix = (if (v.toInt() != 0) (Math.log(v.toInt() / 30.0) * 30).toFloat() else (-96).toFloat())
             BASS.BASS_FXSetParameters(fxArray[n], p)
         } else // volume
-            BASS.BASS_ChannelSetAttribute(channelIntent, BASS.BASS_ATTRIB_VOL, v / 15f)
+            BASS.BASS_ChannelSetAttribute(mainChannel, BASS.BASS_ATTRIB_VOL, v / 15f)
 
     }
     fun setEffect(isEnable: Boolean){
-        val ch = channelIntent
         for (i in fxArray.indices) {
             if (fxArray[i] != 0) {
-                BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+                BASS.BASS_ChannelRemoveFX(mainChannel, fxArray[i])
                 fxArray[i] = 0
             }
         }
     }
     fun enableOrDisableEffects(isEnable:Boolean,setEnabled:(isEnable:Boolean)->Unit){
-        val ch = channelIntent
         for (i in  fxArray.indices) {
             if (fxArray[i] != 0) {
-                BASS.BASS_ChannelRemoveFX(ch, fxArray[i])
+                BASS.BASS_ChannelRemoveFX(mainChannel, fxArray[i])
                 fxArray[i] = 0
             }
         }
@@ -114,7 +113,7 @@ object EqualizerManager {
 
         } else {
             mPrefs?.effectsIsEnabled = false
-            BASS.BASS_ChannelSetAttribute(ch, BASS.BASS_ATTRIB_VOL, 1f)
+            BASS.BASS_ChannelSetAttribute(mainChannel, BASS.BASS_ATTRIB_VOL, 1f)
             setEnabled(false)
 
         }
