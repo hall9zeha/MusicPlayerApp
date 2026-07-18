@@ -22,8 +22,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
+import com.barryzeha.core.model.entities.LibraryPaths
 import com.barryzeha.core.model.entities.MusicState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
@@ -499,4 +502,17 @@ fun uriToPathFileFromMediaStore(
         }
     }
     return null
+}
+// auto track scan
+fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>){
+
+    val libraryPaths = LibraryPaths(selectedLibraryPaths)
+    val json = Json.encodeToString(libraryPaths)
+    context.openFileOutput(LIBRARY_PATH_FILE, Context.MODE_PRIVATE).use{
+        it.write(json.toByteArray())
+    }
+
+}
+fun scanSelectedPath(){
+
 }

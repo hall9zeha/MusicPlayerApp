@@ -34,6 +34,7 @@ core-version="1.18.0"
 media3-version = "1.10.1"
 preference = "1.2.1"
 splashscreen-version = "1.2.0"
+serialization-json-version="1.6.3"
 transition = "1.7.0"
 
 
@@ -71,6 +72,7 @@ room-runtime = {group = "androidx.room", name = "room-runtime", version.ref = "r
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room_version" }
 
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room_version" }
+serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization-json-version" }
 androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 androidx-transition = { group = "androidx.transition", name = "transition", version.ref = "transition" }
 androidx-navigation-safeargs-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigation_version" }
@@ -85,6 +87,7 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 parcelize = {id="org.jetbrains.kotlin.plugin.parcelize", version.ref="kotlin"}
 safeargs-plugin = {id="androidx.navigation.safeargs.kotlin", version.ref="navigation_version"}
+kotlin-serialization = {id="org.jetbrains.kotlin.plugin.serialization", version.ref="kotlin"}
 
 
 

@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.dagger.hilt.plugin)
     alias(libs.plugins.parcelize)
-
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -86,4 +86,6 @@ dependencies {
 
     // Splash screen
     implementation(libs.core.splashscreen)
+    // Json
+    implementation(libs.serialization.json)
 }

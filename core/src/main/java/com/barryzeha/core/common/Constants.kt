@@ -53,4 +53,7 @@ const val FAVORITE_STATE_EXTRA = "favoriteState"
 const val ALPHABETICAL = 0
 const val LAST_CREATED = 1
 
+// For auto scan media files
+const val LIBRARY_PATH_FILE = "library_paths.json"
+
 
