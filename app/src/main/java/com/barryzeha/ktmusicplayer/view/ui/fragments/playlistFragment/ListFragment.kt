@@ -24,6 +24,7 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.saveSelectedPaths
 import com.barryzeha.core.common.shareSong
 import com.barryzeha.core.common.showOrHideKeyboard
 import com.barryzeha.core.common.startOrUpdateService
@@ -138,6 +139,10 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                             }
                             mainViewModel.saveNewSong(song)
                         })
+                    //Guardamos la lista de direcciones selecionadas en un archivo json para realizar el auto escaneo de canciones en el futuro
+                    lifecycleScope.launch {
+                        saveSelectedPaths(requireContext(), paths)
+                    }
                 }
             }
     }

@@ -1,11 +1,8 @@
-package com.barryzeha.ktmusicplayer.common
+package com.barryzeha.core.common
 
+import android.annotation.SuppressLint
 import android.content.Context
-import com.barryzeha.core.common.fetchCompleteFileMetadata
 import com.barryzeha.core.model.entities.SongEntity
-import com.barryzeha.ktmusicplayer.MyApp
-import com.barryzeha.mfilepicker.common.util.getParentDirectories
-import com.barryzeha.mfilepicker.filetype.AudioFileType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,8 +20,13 @@ import java.util.Date
 
 private var audioFileCount:Int=0
 private var audioFilesFound: MutableList<SongEntity> = mutableListOf()
+private var audioFilesPath:MutableList<String> = mutableListOf()
+@SuppressLint("StaticFieldLeak")
+private var mPrefs: MyPreferences?=null
 // Function to process multiple directory paths sequentially
 fun processSongPaths(
+    context: Context,
+    preferences: MyPreferences,
     paths: List<String>,  // List of directories to process
     itemsCount:(itemsNum:Int)->Unit,
     fileProcessed: (song:SongEntity) -> Unit
@@ -44,28 +46,30 @@ fun processSongPaths(
                 enqueueFiles(File(path),fileProcessed)
             }*/
             // Testing the new function to scan audio files and return their paths
-            scanAudioFiles(paths,fileProcessed){}
+            scanAudioFiles(context,preferences,paths,fileProcessed){}
         } finally {
 
         }
     }
 }
-suspend fun scanAudioFiles(paths: List<String>, fileProcessed: (SongEntity) -> Unit,audioFilesScanFound:(List<SongEntity>)->Unit){
+suspend fun scanAudioFiles(context:Context, preferences:MyPreferences, paths: List<String>, fileProcessed: (SongEntity) -> Unit, scanCompleted:(Pair<List<SongEntity>,List<String>>)->Unit){
+    mPrefs=preferences
     paths.forEach { path ->
-        enqueueFiles(File(path),fileProcessed)
+        enqueueFiles(context,File(path),fileProcessed)
     }
-    audioFilesScanFound(audioFilesFound.toList())
+    scanCompleted(Pair(audioFilesFound.toList(),audioFilesPath.toList()))
     audioFilesFound.clear()
+    audioFilesPath.clear()
 }
-private suspend fun enqueueFiles(file: File,fileProcessed: (SongEntity) -> Unit) {
+private suspend fun enqueueFiles(context:Context,file: File,fileProcessed: (SongEntity) -> Unit) {
     if (file.isDirectory) {
         // Queue files in the directory recursively
         file.listFiles()?.forEach { subFile ->
-            enqueueFiles(subFile,fileProcessed)
+            enqueueFiles(context,subFile,fileProcessed)
         }
     } else {
         // Send file to process
-        processFile(file,MyApp.context, fileProcessed)
+        processFile(file,context, fileProcessed)
     }
 }
 private fun countAudioFile(file: File) {
@@ -75,7 +79,7 @@ private fun countAudioFile(file: File) {
         }
     } else {
         // We check that it is an audio file
-        if(AudioFileType().verify(file.name))audioFileCount++
+        if(verifyAudioFile(file.name))audioFileCount++
     }
 }
 private suspend fun processFile(
@@ -83,13 +87,13 @@ private suspend fun processFile(
     context: Context,
     fileProcessed: (SongEntity) -> Unit
 ){
-    if (AudioFileType().verify(file.name)) {
+    if (verifyAudioFile(file.name)) {
             val realPathFromFile = file.absolutePath
             val parentDir = getParentDirectories(file.path.toString())
             val metadata = fetchCompleteFileMetadata(context, realPathFromFile)
             metadata?.let {
                 val song = SongEntity(
-                    idPlaylistCreator = MyApp.mPrefs.playlistId.toLong(),
+                    idPlaylistCreator = mPrefs?.playlistId?.toLong()?:0,
                     pathLocation = realPathFromFile,
                     parentDirectory = parentDir,
                     description = metadata.title,
@@ -101,6 +105,7 @@ private suspend fun processFile(
                     timestamp = Date().time
                 )
                 audioFilesFound.add(song)
+                audioFilesPath.add(realPathFromFile)
                 // Output metadata of the processed file
                 withContext(Dispatchers.Main) {
                     metadata?.let {

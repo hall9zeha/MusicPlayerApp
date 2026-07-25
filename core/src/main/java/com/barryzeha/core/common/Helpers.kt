@@ -24,7 +24,12 @@ import com.barryzeha.core.R
 import com.barryzeha.core.model.entities.AudioMetadata
 import com.barryzeha.core.model.entities.LibraryPaths
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.ScanResult
+import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.model.entities.SongPaths
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jaudiotagger.audio.AudioFile
@@ -503,16 +508,124 @@ fun uriToPathFileFromMediaStore(
     }
     return null
 }
-// auto track scan
-fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>){
-
-    val libraryPaths = LibraryPaths(selectedLibraryPaths)
-    val json = Json.encodeToString(libraryPaths)
-    context.openFileOutput(LIBRARY_PATH_FILE, Context.MODE_PRIVATE).use{
-        it.write(json.toByteArray())
+fun verifyAudioFile(fileName: String): Boolean {
+    val isHasSuffix = fileName.lowercase().contains(".")
+    if (fileName.lowercase().startsWith(".")) return false
+    if (!isHasSuffix) return false
+    val suffix = fileName.lowercase().substring(fileName.lowercase().lastIndexOf(".") + 1)
+    return when (suffix) {
+        "aif", "iff", "m4a", "mid", "mp3", "mpa", "wav", "wma", "ogg", "flac", "ape", "alac","dsf","opus" -> {
+            true
+        }
+        else -> false
     }
 
 }
-fun scanSelectedPath(){
+// start auto track scan region
+suspend fun scanSong(context:Context, preferences: MyPreferences, onScanResult:(ScanResult)->Unit ) = withContext(Dispatchers.IO){
+    val libraryPaths = loadLibraryPaths(context)
+    val songPathsSaved = loadSongPaths(context)
+    val scannedSongs = mutableListOf<SongEntity>()
+    val previousSongPaths = songPathsSaved.toSet()
+    var currentSongPaths = setOf<String>()
+
+    scanAudioFiles(context,preferences,libraryPaths,{},{(songs, songPaths)->
+        scannedSongs.addAll(songs)
+        currentSongPaths=songPaths.toSet()
+    })
+    val newSongPaths = currentSongPaths - previousSongPaths
+    val deletedSongPaths = previousSongPaths - currentSongPaths
+
+    // Nuevas pistas encontradas
+    val newSongs = scannedSongs.filter{
+        it.pathLocation in newSongPaths
+    }
+    ScanResult(newSongPaths.toList(),deletedSongPaths.toList())
+    // Para las pistas eliminadas solo usaremos los paths de deleteSongPaths
+
 
 }
+suspend fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>)= withContext(Dispatchers.IO){
+        val libraryPaths = mutableListOf<String>()
+        val loadedPaths = loadLibraryPaths(context)
+        Log.e("PATHS_LOADED", "loaded paths: ${loadedPaths.size}")
+        libraryPaths.addAll(loadedPaths)
+        selectedLibraryPaths.forEach { path ->
+            Log.e("PATHS_LOADED_PATH", "foreach path: $path")
+            if (path !in libraryPaths) {
+                libraryPaths.add(path)
+            }
+        }
+        saveJsonFile(context,libraryPaths,LIBRARY_PATH_FILE)
+
+}
+suspend fun saveSongPaths(context:Context,songPathsScanned:List<String>,newSongsFound:(List<String>)->Unit) = withContext(Dispatchers.IO){
+    val songPaths = mutableListOf<String>()
+    val newSongPaths = mutableListOf<String>()
+    val loadedSongPaths = loadSongPaths(context)
+    songPaths.addAll(loadedSongPaths)
+    songPathsScanned.forEach { songPath->
+        if(songPath !in songPaths){
+            songPaths.add(songPath)
+            newSongPaths.add(songPath)
+        }
+    }
+    newSongsFound(newSongPaths)
+    saveJsonFile(context,songPaths,SONG_PATHS_FILE)
+}
+suspend fun loadLibraryPaths(context:Context):List<String> = withContext(Dispatchers.IO){
+    val json = readJsonFile(context, LIBRARY_PATH_FILE) ?: return@withContext emptyList()
+    val libraryPaths =  Json.decodeFromString<LibraryPaths>(json)
+    return@withContext libraryPaths.paths
+}
+suspend fun loadSongPaths(context:Context):List<String> = withContext(Dispatchers.IO){
+    val json = readJsonFile(context, SONG_PATHS_FILE)?:return@withContext emptyList()
+    val songPaths = Json.decodeFromString<SongPaths>(json)
+    return@withContext songPaths.paths
+}
+fun readJsonFile(context: Context, fileName: String): String? {
+    return try {
+        val file = File(context.filesDir, fileName)
+        if (!file.exists()) {
+            null
+        } else {
+            file.readText()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+
+}
+fun saveJsonFile(context: Context, pathList:List<String>,fileName:String){
+    val json = Json.encodeToString(pathList)
+    context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
+        it.write(json.toByteArray())
+    }
+}
+
+fun getParentDirectories(path: String): String {
+
+    val file = File(path)
+    val parentDir = file.parentFile?.name
+    val regex = Regex("^\\s*(cd\\s*\\d*|disc\\s*\\d*)$", RegexOption.IGNORE_CASE)
+    if(parentDir !=null) {
+        if (regex.matches(parentDir)) {
+            val absolutePath = file.absolutePath
+            val pathParts = absolutePath.split('/').filter { it.isNotEmpty() }
+            if (pathParts.size >= 2) {
+                val lastDir=pathParts[pathParts.size -2]
+                val beforeLastDir = pathParts[pathParts.size-3]
+                Log.e("PARENT-NAME->", "$beforeLastDir/$lastDir")
+                return  "$beforeLastDir/$lastDir"
+            }else{
+                Log.e("PARENT-NAME->",pathParts[pathParts.size -2] )
+                return parentDir
+            }
+        }else{
+            return parentDir
+        }
+    }
+    return ""
+}
+// End auto track scan region

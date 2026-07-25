@@ -55,5 +55,5 @@ const val LAST_CREATED = 1
 
 // For auto scan media files
 const val LIBRARY_PATH_FILE = "library_paths.json"
-
+const val SONG_PATHS_FILE = "library_song_paths.json"
 
