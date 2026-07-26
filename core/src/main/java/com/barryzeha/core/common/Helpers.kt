@@ -519,7 +519,6 @@ fun verifyAudioFile(fileName: String): Boolean {
         }
         else -> false
     }
-
 }
 // start auto track scan region
 suspend fun scanSong(context:Context, preferences: MyPreferences, onScanResult:(ScanResult)->Unit ) = withContext(Dispatchers.IO){
@@ -540,9 +539,42 @@ suspend fun scanSong(context:Context, preferences: MyPreferences, onScanResult:(
     val newSongs = scannedSongs.filter{
         it.pathLocation in newSongPaths
     }
-    ScanResult(newSongPaths.toList(),deletedSongPaths.toList())
+    ScanResult(newSongs,deletedSongPaths.toList())
     // Para las pistas eliminadas solo usaremos los paths de deleteSongPaths
+}
+suspend fun reconstructLibraryPaths(songPaths:List<String>):List<String> = withContext(Dispatchers.IO){
+    val libraryPaths = mutableSetOf<String>()
+    songPaths.forEach{songPath->
+        val file = File(songPath)
+        val parts = file.parentFile
+            ?.absolutePath
+            ?.split(File.separator)
+            ?.filter{it.isNotBlank()}
+            ?: return@forEach
+        if(parts.size >=4 && parts[0] == "storage"){
+            val libraryPath = buildString{
+                append(File.separator)
+                append(parts[0])
+                append(File.separator)
+                append(parts[1])
+                append(File.separator)
+                append(parts[2])
 
+                if(parts[1] != "emulated"){
+                    delete(length - parts[2].length - 1,length)
+                }
+                append(File.separator)
+                append(
+                    if(parts[1]=="emulated")
+                        parts[3]
+                    else
+                        parts[2]
+                )
+            }
+            libraryPaths.add(libraryPath)
+        }
+    }
+    return@withContext libraryPaths.toList()
 
 }
 suspend fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>)= withContext(Dispatchers.IO){
@@ -557,7 +589,6 @@ suspend fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>)
             }
         }
         saveJsonFile(context,libraryPaths,LIBRARY_PATH_FILE)
-
 }
 suspend fun saveSongPaths(context:Context,songPathsScanned:List<String>,newSongsFound:(List<String>)->Unit) = withContext(Dispatchers.IO){
     val songPaths = mutableListOf<String>()

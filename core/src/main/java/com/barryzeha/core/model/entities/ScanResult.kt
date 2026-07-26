@@ -7,6 +7,6 @@ package com.barryzeha.core.model.entities
  ***/
 
 data class ScanResult(
-    val newSongs:List<String>,
+    val newSongs:List<SongEntity>,
     val deletedSongPaths:List<String>
 )
