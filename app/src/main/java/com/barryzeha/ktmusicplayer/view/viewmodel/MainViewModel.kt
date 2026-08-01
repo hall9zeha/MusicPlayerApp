@@ -8,6 +8,7 @@ import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
 import com.barryzeha.core.common.getSongMetadata
+import com.barryzeha.core.common.scanSong
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
@@ -352,6 +353,15 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     fun saveNavControllerInstance(navController: NavController){
         launch{
             _navControllerInstance.value = navController
+        }
+    }
+    // Auto escaneo de pistas de audio
+    private fun autoScanSongs(){
+        launch {
+            val songList = repository.fetchAllSongs()
+            scanSong(MyApp.context,mPrefs,songList){scanResult ->
+
+            }
         }
     }
     // Recargar la información de la pista

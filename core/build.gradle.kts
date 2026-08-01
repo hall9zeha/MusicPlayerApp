@@ -83,9 +83,14 @@ dependencies {
     // Dagger hilt
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.dagger.hilt)
-
+    // Lifecycle
+    implementation(libs.lifecycle.viewmodel)
     // Splash screen
     implementation(libs.core.splashscreen)
     // Json
     implementation(libs.serialization.json)
+
+    // Testing module
+    testImplementation(projects.core.testing)
+    androidTestImplementation(projects.core.testing)
 }
