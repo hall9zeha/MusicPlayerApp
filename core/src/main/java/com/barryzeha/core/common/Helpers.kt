@@ -542,8 +542,20 @@ suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<S
     val newSongs = scannedSongs.filter{
         it.pathLocation in newSongPaths
     }
-    ScanResult(newSongs,deletedSongPaths.toList())
+    val result = ScanResult(newSongs,deletedSongPaths.toList())
+    onScanResult(result)
     // Para las pistas eliminadas solo usaremos los paths de deleteSongPaths
+}
+fun compareSongPaths(currentSongPaths:Set<String>, previousSongPaths:Set<String>, scannedSongs:List<SongEntity>):ScanResult{
+
+    val newSongPaths = currentSongPaths - previousSongPaths
+    val deletedSongPaths = previousSongPaths - currentSongPaths
+
+    // Nuevas pistas encontradas
+    val newSongs = scannedSongs.filter{
+        it.pathLocation in newSongPaths
+    }
+    return ScanResult(newSongs,deletedSongPaths.toList())
 }
 suspend fun reconstructLibraryPaths(songPaths:List<String>):List<String> = withContext(Dispatchers.IO){
     val libraryPaths = mutableSetOf<String>()
@@ -596,7 +608,7 @@ suspend fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>)
 suspend fun saveSongPaths(context:Context,songPathsScanned:List<String>,newSongsFound:(List<String>)->Unit) = withContext(Dispatchers.IO){
     val songPaths = mutableListOf<String>()
     val newSongPaths = mutableListOf<String>()
-    val loadedSongPaths = loadSongPaths(context)
+    val loadedSongPaths = loadSongPaths(context).toHashSet()
     songPaths.addAll(loadedSongPaths)
     songPathsScanned.forEach { songPath->
         if(songPath !in songPaths){
@@ -617,8 +629,8 @@ suspend fun loadSongPaths(context:Context):List<String> = withContext(Dispatcher
     val songPaths = Json.decodeFromString<SongPaths>(json)
     return@withContext songPaths.paths
 }
-fun readJsonFile(context: Context, fileName: String): String? {
-    return try {
+suspend fun readJsonFile(context: Context, fileName: String): String? = withContext(Dispatchers.IO) {
+    return@withContext try {
         val file = File(context.filesDir, fileName)
         if (!file.exists()) {
             null

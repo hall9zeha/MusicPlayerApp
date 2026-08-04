@@ -45,6 +45,11 @@ android {
             )
         }
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/{LICENSE.md,LICENSE-notice.md}"
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

@@ -46,13 +46,10 @@ class HelpersTest {
         Dispatchers.resetMain()
     }
     @Test
-    fun loadLibraryPathsSuccess() = runTest{
-
-
+    fun reconstructLibraryPathsTest() = runTest{
+        val result = reconstructLibraryPaths(fakeSongPaths)
+        assert(result.containsAll(fakeLibraryPaths))
     }
-    @Test
-    fun loadSongPathsSuccess() = runTest{
 
-    }
 
 }
