@@ -31,6 +31,7 @@ interface MainRepository {
     suspend fun updateFavoriteSong(isFavorite:Boolean, idSong:Long):Int
     suspend fun deleteSong(idSong:Long):Int
     suspend fun deleteSongByPath(songPath:Long):Int
+    suspend fun deleteSongsByPath(songPaths:List<String>):Int
     suspend fun deleteSong(songIds:List<Long>):Int
     suspend fun deleteAllSongs():Int
 

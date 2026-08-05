@@ -521,7 +521,7 @@ fun verifyAudioFile(fileName: String): Boolean {
     }
 }
 // start auto track scan region
-suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<SongEntity>, onScanResult:(ScanResult)->Unit ) = withContext(Dispatchers.IO){
+suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<SongEntity>,  onScanResult: suspend (ScanResult)->Unit ) = withContext(Dispatchers.IO){
     var libraryPaths = loadLibraryPaths(context)
     val songPathsSaved = loadSongPaths(context)
     val scannedSongs = mutableListOf<SongEntity>()

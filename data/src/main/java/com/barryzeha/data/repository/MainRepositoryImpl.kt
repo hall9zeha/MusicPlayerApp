@@ -78,6 +78,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
         songDao.deleteSongByPath(songPath)
     }
 
+    override suspend fun deleteSongsByPath(songPaths: List<String>): Int = withContext(Dispatchers.IO){
+        songDao.deleteSongsByPath(songPaths)
+    }
+
     override suspend fun deleteSong(songIds: List<Long>): Int = withContext(Dispatchers.IO){
         songDao.deleteSong(songIds)
     }

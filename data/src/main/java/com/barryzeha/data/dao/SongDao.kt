@@ -72,6 +72,9 @@ interface  SongDao {
     @Query("delete from SongEntity where pathLocation = :songPath")
     suspend fun deleteSongByPath(songPath:Long):Int
 
+    @Query("delete from SongEntity where pathLocation in (:songPaths)")
+    suspend fun deleteSongsByPath(songPaths:List<String>):Int
+
     @Transaction
     @Query("delete from SongEntity where id in (:ids)")
     suspend fun deleteSong(ids:List<Long>):Int

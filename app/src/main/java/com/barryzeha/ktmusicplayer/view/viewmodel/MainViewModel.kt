@@ -128,12 +128,12 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
 
     init{
         initScope()
-
-        CoroutineScope(Dispatchers.IO).launch {
+        launch(Dispatchers.IO) {
             awaitAll(
                 async{ getPlaylistWithSongsBy( mPrefs.playlistId,mPrefs.playListSortOption)},
                 async{ getPlayLists() }
             )
+            autoScanSongs()
         }
     }
     fun setItemsCount(itemsCount:Int){
@@ -356,72 +356,86 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
         }
     }
     // Auto escaneo de pistas de audio
-    private fun autoScanSongs(){
-        launch {
+    private fun autoScanSongs() {
+        launch(Dispatchers.IO) {
             val songList = repository.fetchAllSongs()
-            scanSong(MyApp.context,mPrefs,songList){scanResult ->
-
-            }
-        }
-    }
-    // Recargar la información de la pista
-    fun reloadSongInfo(){
-        launch {
-            if (mPrefs.skipFromNotify) {
-                try {
-                    val song = repository.fetchSongById(mPrefs.idSong)
-                    song?.let {
-                        val songMetadata = getSongMetadata(MyApp.context, song.pathLocation)
-                        val newState = MusicState(
-                            songPath = song.pathLocation.toString(),
-                            title = songMetadata!!.title,
-                            artist = songMetadata!!.artist,
-                            album = songMetadata!!.album,
-                            duration = songMetadata.duration
-                        )
-                        saveStatePlaying(mPrefs.isPlaying)
-                        setCurrentTrack(newState)
-                    }
-                } catch (ex: Exception) {
+            scanSong(MyApp.context, mPrefs, songList) { scanResult ->
+                if (scanResult.deletedSongPaths.isNotEmpty()) {
+                    repository.deleteSongsByPath(scanResult.deletedSongPaths)
+                }
+                if (scanResult.newSongs.isNotEmpty()) {
+                    repository.saveSongs(scanResult.newSongs)
+                }
+                val hasChanges = scanResult.deletedSongPaths.isNotEmpty() ||
+                        scanResult.newSongs.isNotEmpty()
+                if (hasChanges) {
+                    fetchAllSong()
                 }
             }
-            else if(mPrefs.playOrPauseFromNotify){
-                saveStatePlaying(mPrefs.isPlaying)
+        }
+    }
+        // Recargar la información de la pista
+        fun reloadSongInfo() {
+            launch {
+                if (mPrefs.skipFromNotify) {
+                    try {
+                        val song = repository.fetchSongById(mPrefs.idSong)
+                        song?.let {
+                            val songMetadata = getSongMetadata(MyApp.context, song.pathLocation)
+                            val newState = MusicState(
+                                songPath = song.pathLocation.toString(),
+                                title = songMetadata!!.title,
+                                artist = songMetadata!!.artist,
+                                album = songMetadata!!.album,
+                                duration = songMetadata.duration
+                            )
+                            saveStatePlaying(mPrefs.isPlaying)
+                            setCurrentTrack(newState)
+                        }
+                    } catch (ex: Exception) {
+                    }
+                } else if (mPrefs.playOrPauseFromNotify) {
+                    saveStatePlaying(mPrefs.isPlaying)
+                }
+                mPrefs.skipFromNotify = false
+                mPrefs.playOrPauseFromNotify = false
             }
-            mPrefs.skipFromNotify = false
-            mPrefs.playOrPauseFromNotify = false
         }
-    }
-    // Guardar el estado de la pista actual
-    fun saveCurrentStateSong(currentMusicState: MusicState){
-        if(currentMusicState.idSong>0 && mPrefs.idSong>0) {
-            saveSongState(
-                SongState(
-                    idSongState = 1,
-                    idSong = currentMusicState.idSong,
-                    songDuration = currentMusicState.duration,
-                    // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
-                    // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
-                    // por el momento
-                    currentPosition = mPrefs.currentPosition
+
+        // Guardar el estado de la pista actual
+        fun saveCurrentStateSong(currentMusicState: MusicState) {
+            if (currentMusicState.idSong > 0 && mPrefs.idSong > 0) {
+                saveSongState(
+                    SongState(
+                        idSongState = 1,
+                        idSong = currentMusicState.idSong,
+                        songDuration = currentMusicState.duration,
+                        // El constante cambio del valor currentMusicstate.currentDuration(cada 500ms), hace que a veces se guarde y aveces no
+                        // de modo que guardamos ese valor con cada actualización de mPrefs.currentDuration y lo extraemos al final, cuando cerramos la app,
+                        // por el momento
+                        currentPosition = mPrefs.currentPosition
+                    )
                 )
-            )
+            }
         }
-    }
-    fun setServiceInstance(serviceInstance: MusicPlayerService?){
-        musicService = serviceInstance
-    }
-    fun setOpenSongFromIntent(value: Boolean){
-        _openSongFromIntent = value
-    }
-    fun setSongFromIntent(songEntity: SongEntity){
-        launch {
-            _songFromIntent.value = songEntity
+
+        fun setServiceInstance(serviceInstance: MusicPlayerService?) {
+            musicService = serviceInstance
         }
-    }
-    override fun onCleared() {
-        musicService?.setTrackStateLoaded(false)
-        destroyScope()
-        super.onCleared()
-    }
+
+        fun setOpenSongFromIntent(value: Boolean) {
+            _openSongFromIntent = value
+        }
+
+        fun setSongFromIntent(songEntity: SongEntity) {
+            launch {
+                _songFromIntent.value = songEntity
+            }
+        }
+
+        override fun onCleared() {
+            musicService?.setTrackStateLoaded(false)
+            destroyScope()
+            super.onCleared()
+        }
 }
