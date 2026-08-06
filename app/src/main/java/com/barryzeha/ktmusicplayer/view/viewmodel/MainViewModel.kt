@@ -157,7 +157,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
             _allSongFromMain.value=repository.fetchAllSongs()
         }
     }
-
     // SongState
     fun fetchSongState(){
         launch{

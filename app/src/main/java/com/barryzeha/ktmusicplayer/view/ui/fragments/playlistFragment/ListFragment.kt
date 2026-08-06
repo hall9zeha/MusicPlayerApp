@@ -25,12 +25,14 @@ import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
 import com.barryzeha.core.common.saveSelectedPaths
+import com.barryzeha.core.common.saveSongPaths
 import com.barryzeha.core.common.shareSong
 import com.barryzeha.core.common.showOrHideKeyboard
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.SongEntity
+import com.barryzeha.core.common.*
 import com.barryzeha.ktmusicplayer.R
 import com.barryzeha.ktmusicplayer.common.LIST_FRAGMENT
 import com.barryzeha.ktmusicplayer.common.ON_MENU_ITEM
@@ -131,13 +133,16 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     //Mantenemos la pantalla encendida para evitar interrupciones mientras se procesa
                     keepScreenOn(requireActivity(), true)
                     //**********************************
-                    processSongPaths(paths,
+
+                    processSongPaths(requireContext(),mPrefs,paths,
                         { itemsCount -> mainViewModel.setItemsCount(itemsCount) },
                         { song ->
                             CoroutineScope(Dispatchers.Main).launch {
                                 bind?.pbLoad?.isIndeterminate = false
                             }
                             mainViewModel.saveNewSong(song)
+                        },{(songs,songsPaths)->
+                            saveSongPaths(requireContext(),songsPaths){}
                         })
                     //Guardamos la lista de direcciones selecionadas en un archivo json para realizar el auto escaneo de canciones en el futuro
                     lifecycleScope.launch {
@@ -170,7 +175,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         mPrefs.playlistId = playlistId
         musicPlayerService?.clearPlayList(false)
         mainViewModel.fetchPlaylistWithSongsBy(playlistId, mPrefs.playListSortOption)
-
     }
 
     private fun setUpObservers() {

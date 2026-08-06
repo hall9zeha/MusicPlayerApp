@@ -27,16 +27,17 @@ private var mPrefs: MyPreferences?=null
 fun processSongPaths(
     context: Context,
     preferences: MyPreferences,
-    paths: List<String>,  // List of directories to process
+    selectedPaths: List<String>,  // List of directories of the user selected to process
     itemsCount:(itemsNum:Int)->Unit,
-    fileProcessed: (song:SongEntity) -> Unit
+    fileProcessed: (song:SongEntity) -> Unit,
+    scanCompleted:suspend (Pair<List<SongEntity>,List<String>>)->Unit
 ) {
    audioFileCount=0
     // Coroutine to queue files in the channel
     CoroutineScope(Dispatchers.IO).launch {
         try {
             // We count how many audio files there are
-            paths.forEach { path ->
+            selectedPaths.forEach { path ->
                 countAudioFile(File(path))
             }
             itemsCount(audioFileCount)
@@ -46,13 +47,13 @@ fun processSongPaths(
                 enqueueFiles(File(path),fileProcessed)
             }*/
             // Testing the new function to scan audio files and return their paths
-            scanAudioFiles(context,preferences,paths,fileProcessed){}
+            scanAudioFiles(context,preferences,selectedPaths,fileProcessed,scanCompleted)
         } finally {
 
         }
     }
 }
-suspend fun scanAudioFiles(context:Context, preferences:MyPreferences, paths: List<String>, fileProcessed: (SongEntity) -> Unit, scanCompleted:(Pair<List<SongEntity>,List<String>>)->Unit){
+suspend fun scanAudioFiles(context:Context, preferences:MyPreferences, paths: List<String>, fileProcessed: (SongEntity) -> Unit, scanCompleted:suspend (Pair<List<SongEntity>,List<String>>)->Unit){
     mPrefs=preferences
     paths.forEach { path ->
         enqueueFiles(context,File(path),fileProcessed)

@@ -157,7 +157,6 @@ class MainViewModelTest {
         advanceUntilIdle()
 
         viewModel.progressRegisterSaved.removeObserver(observer)
-
         assertThat(emittedValues).contains(Pair(1,1))
     }
 

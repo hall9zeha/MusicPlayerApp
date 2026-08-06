@@ -534,15 +534,9 @@ suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<S
     scanAudioFiles(context,preferences,libraryPaths,{},{(songs, songPaths)->
         scannedSongs.addAll(songs)
         currentSongPaths=songPaths.toSet()
+        saveSongPaths(context,songPaths){}
     })
-    val newSongPaths = currentSongPaths - previousSongPaths
-    val deletedSongPaths = previousSongPaths - currentSongPaths
-
-    // Nuevas pistas encontradas
-    val newSongs = scannedSongs.filter{
-        it.pathLocation in newSongPaths
-    }
-    val result = ScanResult(newSongs,deletedSongPaths.toList())
+    val result = compareSongPaths(currentSongPaths, previousSongPaths, scannedSongs)
     onScanResult(result)
     // Para las pistas eliminadas solo usaremos los paths de deleteSongPaths
 }
@@ -550,7 +544,6 @@ fun compareSongPaths(currentSongPaths:Set<String>, previousSongPaths:Set<String>
 
     val newSongPaths = currentSongPaths - previousSongPaths
     val deletedSongPaths = previousSongPaths - currentSongPaths
-
     // Nuevas pistas encontradas
     val newSongs = scannedSongs.filter{
         it.pathLocation in newSongPaths
@@ -603,12 +596,15 @@ suspend fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>)
                 libraryPaths.add(path)
             }
         }
-        saveJsonFile(context,libraryPaths,LIBRARY_PATH_FILE)
+    val json = Json.encodeToString(LibraryPaths(libraryPaths))
+    context.openFileOutput(LIBRARY_PATH_FILE, Context.MODE_PRIVATE).use {
+        it.write(json.toByteArray())
+    }
 }
 suspend fun saveSongPaths(context:Context,songPathsScanned:List<String>,newSongsFound:(List<String>)->Unit) = withContext(Dispatchers.IO){
     val songPaths = mutableListOf<String>()
     val newSongPaths = mutableListOf<String>()
-    val loadedSongPaths = loadSongPaths(context).toHashSet()
+    val loadedSongPaths = loadSongPaths(context)
     songPaths.addAll(loadedSongPaths)
     songPathsScanned.forEach { songPath->
         if(songPath !in songPaths){
@@ -616,8 +612,11 @@ suspend fun saveSongPaths(context:Context,songPathsScanned:List<String>,newSongs
             newSongPaths.add(songPath)
         }
     }
+    val json = Json.encodeToString(SongPaths(songPaths))
+    context.openFileOutput(SONG_PATHS_FILE, Context.MODE_PRIVATE).use {
+        it.write(json.toByteArray())
+    }
     newSongsFound(newSongPaths)
-    saveJsonFile(context,songPaths,SONG_PATHS_FILE)
 }
 suspend fun loadLibraryPaths(context:Context):List<String> = withContext(Dispatchers.IO){
     val json = readJsonFile(context, LIBRARY_PATH_FILE) ?: return@withContext emptyList()
@@ -643,13 +642,6 @@ suspend fun readJsonFile(context: Context, fileName: String): String? = withCont
     }
 
 }
-fun saveJsonFile(context: Context, pathList:List<String>,fileName:String){
-    val json = Json.encodeToString(pathList)
-    context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
-        it.write(json.toByteArray())
-    }
-}
-
 fun getParentDirectories(path: String): String {
 
     val file = File(path)
