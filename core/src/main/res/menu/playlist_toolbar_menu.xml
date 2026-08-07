@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/equalizer"
+        android:icon="@drawable/ic_tune"
+        android:title="@string/equalizer"
+        app:showAsAction="always"/>
+    <item android:id="@+id/filter"
+        android:icon="@drawable/ic_filter"
+        android:title="@string/filter_playlist"
+        app:showAsAction="never"/>
+    <item android:id="@+id/reload"
+        android:icon="@drawable/ic_reload"
+        android:title="@string/reload_playlist"
+        app:showAsAction="never"/>
+</menu>

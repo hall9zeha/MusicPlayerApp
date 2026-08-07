@@ -35,8 +35,10 @@
     <string name="empty">No lyric</string>
     <string name="enable_disc_style">Enable disc style</string>
     <string name="enableEffects">Enable effects</string>
+    <string name="equalizer">Equalizer</string>
     <string name="favorite">Favorite</string>
     <string name="file_meta_info">%s Kbps</string>
+    <string name="filter_playlist">Filter playlist</string>
     <string name="finish">Finish</string>
     <string name="flat">Flat</string>
     <string name="full_bass_amp_treble"><![CDATA[Full bass & Treble]]></string>
@@ -57,6 +59,7 @@
     <string name="playlistCreatedMsg">Playlist created</string>
     <string name="pop">Pop</string>
     <string name="readMediaAudioMsg">The permission needs to be enabled so that you can add your device\'s directories and audio files to the list and play them.</string>
+    <string name="reload_playlist">Reload playlist</string>
     <string name="reset">Reset</string>
     <string name="reverb">Reverb</string>
     <string name="rock">Rock</string>

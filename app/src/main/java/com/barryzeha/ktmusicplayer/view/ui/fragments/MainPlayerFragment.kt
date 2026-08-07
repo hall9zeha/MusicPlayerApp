@@ -16,6 +16,7 @@ import android.widget.SeekBar
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.lifecycleScope
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.AB_LOOP
 import com.barryzeha.core.common.CLEAR_MODE
@@ -272,9 +273,9 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 }
     }
     fun setNumberOfTrack(songId:Long? = null){
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
         if(songId != null && songId >-1) {
-                val song = listFragmentInstance?.musicListAdapter?.getSongById(songId.toLong())
+                val song = listFragmentInstance?.musicListAdapter?.getSongById(songId)
                song?.let {
                val (itemNumOnList, _) = listFragmentInstance?.musicListAdapter?.getPositionByItem(song as SongEntity)
                     ?: Pair(0, 0)
@@ -282,7 +283,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                     bind?.tvNumberSong?.text = String.format(
                         "#%s/%s",
                         if (mPrefs.currentIndexSong > -1) itemNumOnList else 0,
-                        musicPlayerService?.getSongsList()?.count()
+                        //musicPlayerService?.getSongsList()?.count()
+                        listFragmentInstance?.musicListAdapter?.getSongItemCount()?:0
                     )
                 }
             }

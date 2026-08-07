@@ -46,6 +46,20 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             >
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/playlistToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:navigationIcon="@drawable/ic_menu"
+                app:menu="@menu/playlist_toolbar_menu"
+                app:title="Default"
+                app:titleCentered="true"
+                app:titleTextAppearance="@style/ToolbarTitleStyle"
+                />
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvPlayListName"
                 android:layout_width="0dp"
@@ -60,7 +74,7 @@
                 app:layout_constraintEnd_toStartOf="@id/btnMainEq"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-
+                android:visibility="gone"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 />
@@ -78,6 +92,7 @@
                 style="@style/Widget.Material3.Button.IconButton"
                 app:icon="@drawable/ic_menu"
                 app:iconGravity="textStart"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -92,6 +107,7 @@
                 android:insetBottom="0dp"
                 app:iconSize="24dp"
                 app:iconPadding="0dp"
+                android:visibility="gone"
                 app:iconTint="@color/controls_colors"
                 style="@style/Widget.Material3.Button.IconButton"
                 app:icon="@drawable/ic_filter"
@@ -110,6 +126,7 @@
                 android:insetBottom="0dp"
                 app:iconSize="24dp"
                 app:iconPadding="0dp"
+                android:visibility="gone"
                 app:iconTint="@color/controls_colors"
                 style="@style/Widget.Material3.Button.IconButton"
                 app:icon="@drawable/ic_tune"

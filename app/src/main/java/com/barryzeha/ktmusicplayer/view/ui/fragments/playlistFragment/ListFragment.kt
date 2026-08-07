@@ -34,6 +34,7 @@ import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.common.*
 import com.barryzeha.ktmusicplayer.R
+import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.LIST_FRAGMENT
 import com.barryzeha.ktmusicplayer.common.ON_MENU_ITEM
 import com.barryzeha.ktmusicplayer.common.ON_MINI_PLAYER_MENU
@@ -293,7 +294,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         this?.let {
             getPlayListName(mPrefs) { headerTextRes ->
                 mainViewModel.setPlaylistName(getString(headerTextRes))
-                tvPlayListName.text = getString(headerTextRes)
+                playlistToolbar?.title=getString(headerTextRes)
+                //tvPlayListName.text = getString(headerTextRes)
             }
         }
     }
@@ -330,12 +332,34 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         this?.let {
-            tvPlayListName.setOnClickListener {
+            playlistToolbar?.setOnMenuItemClickListener {menuItem->
+                when(menuItem.itemId){
+                    coreRes.id.equalizer->{
+                        launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
+                        true
+                    }
+                    coreRes.id.filter->{
+                        OrderByDialog().show(parentFragmentManager, OrderByDialog::class.simpleName)
+                        true
+                    }
+                    coreRes.id.reload->{
+                        true
+                    }
+                    else-> false
+                }
+            }
+            playlistToolbar?.setNavigationOnClickListener {
+                (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
+            }
+            playlistToolbar?.setOnTitleClickListener{
+                PlaylistDialogFragment().show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
+            }
+           /* tvPlayListName.setOnClickListener {
                 PlaylistDialogFragment().show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
             }
             btnMenu?.setOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
-            }
+            }*/
             btnAdd.setOnClickListener {
                 checkPermissions(
                     requireContext(),
@@ -403,9 +427,9 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     visibleOrGoneBottomActions(false)
                 }
             }
-            btnFilter.setOnClickListener {
+           /* btnFilter.setOnClickListener {
                 OrderByDialog().show(parentFragmentManager, OrderByDialog::class.simpleName)
-            }
+            }*/
             btnDelete?.setOnClickListener {
                 val listForDeleted = musicListAdapter?.getListItemsForDelete()?.toList()
                 removeSongState()
@@ -415,9 +439,9 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     musicListAdapter?.removeItemsForMultipleSelectedAction()
                 }
             }
-            btnMainEq.setOnClickListener {
+           /* btnMainEq.setOnClickListener {
                 launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
-            }
+            }*/
             btnMore.setOnClickListener { view ->
                 onMenuItemPopup(ON_MINI_PLAYER_MENU, requireActivity(), mPrefs,view, {
                     // Delete item callback
@@ -486,10 +510,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         this?.let {
             tilSearch?.visibility = if (isVisible) View.GONE else View.VISIBLE
             btnClose?.visibility = if (isVisible) View.GONE else View.VISIBLE
-            btnMenu?.visibility = if (isVisible) View.VISIBLE else View.GONE
-            btnFilter?.visibility = if (isVisible) View.VISIBLE else View.GONE
-            btnMainEq?.visibility = if (isVisible) View.VISIBLE else View.GONE
-            tvPlayListName?.visibility = if (isVisible) View.VISIBLE else View.GONE
+            playlistToolbar?.visibility = if (isVisible) View.VISIBLE else View.GONE
         }
     }
     private fun visibleOrGoneBottomActions(isVisible: Boolean) = with(bind) {

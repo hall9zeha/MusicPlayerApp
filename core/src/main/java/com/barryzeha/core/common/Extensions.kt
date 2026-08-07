@@ -19,6 +19,7 @@ import android.view.animation.TranslateAnimation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
@@ -32,6 +33,7 @@ import com.barryzeha.core.model.entities.MusicState
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.Resource
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
@@ -189,6 +191,16 @@ fun SeekBar.setProgressSynchronized(context:Context, isUserSeeking:Boolean, curr
         delay(frameTime)
         if(!isUserSeeking) {
             this@setProgressSynchronized.progress = currentPosition.toInt()
+        }
+    }
+}
+fun MaterialToolbar.setOnTitleClickListener(listener: (View) -> Unit) {
+    for (i in 0 until childCount) {
+        val child = getChildAt(i)
+
+        if (child is TextView && child.text == title) {
+            child.setOnClickListener(listener)
+            break
         }
     }
 }

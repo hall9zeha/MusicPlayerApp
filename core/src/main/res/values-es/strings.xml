@@ -36,8 +36,10 @@
     <string name="empty">Sin letra</string>
     <string name="enable_disc_style">Cambiar a estilo Cd</string>
     <string name="enableEffects">Activar efectos</string>
+    <string name="equalizer">Ecualizador</string>
     <string name="favorite">Fovoritos</string>
     <string name="file_meta_info">%s Kbps</string>
+    <string name="filter_playlist">Filtrar biblioteca</string>
     <string name="finish">Finalizar</string>
     <string name="flat">Flat</string>
     <string name="full_bass_amp_treble"><![CDATA[Full bass & Treble]]></string>
@@ -58,6 +60,7 @@
     <string name="playlistCreatedMsg">Lista creada</string>
     <string name="pop">Pop</string>
     <string name="readMediaAudioMsg">Se necesita habilitar el permiso  para que pueda agregar los directorios y archivos de audio de su dispositivo a la lista y poder reproducirlos</string>
+    <string name="reload_playlist">Recargar biblioteca</string>
     <string name="reset">Reiniciar</string>
     <string name="reverb">Reverberación</string>
     <string name="rock">Rock</string>
