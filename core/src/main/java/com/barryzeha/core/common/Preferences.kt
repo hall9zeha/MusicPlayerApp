@@ -32,6 +32,7 @@ private const val SCROLL_TO_POSITION = "scrollToPosition"
 private const val SAVE_CURRENT_FRAGMENT_OF_NAV = "SaveFragmentOfNav"
 private const val IS_OPEN_QUEUE = "isOpenQueue"
 private const val TOTAL_ITEM_SONGS = "totalItemSongs"
+private const val AUTO_SCAN_AUDIO = "autoScanAudio"
 
 
 class  MyPreferences @Inject constructor(private val context: Context){
@@ -59,7 +60,9 @@ class  MyPreferences @Inject constructor(private val context: Context){
     var isPopulateServicePlaylist:Boolean
         get()= myPreferences.getBoolean(FIRST_EXECUTION,false)
         set(value)=myPreferences.edit().putBoolean(FIRST_EXECUTION,value).apply()
-
+    var isAutoScanAudioEnabled:Boolean
+        get()=myPreferences.getBoolean(AUTO_SCAN_AUDIO,false)
+        set(value)=myPreferences.edit().putBoolean(AUTO_SCAN_AUDIO,value).apply()
     var currentIndexSong:Long
         get()=myPreferences.getLong(CURRENT_POSITION,-1)
         set(value)=myPreferences.edit().putLong(CURRENT_POSITION,value).apply()

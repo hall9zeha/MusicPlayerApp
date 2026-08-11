@@ -1,5 +1,6 @@
 package com.barryzeha.ktmusicplayer.view.viewmodel
 
+import android.content.Context
 import android.content.ServiceConnection
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -7,6 +8,7 @@ import androidx.navigation.NavController
 import com.barryzeha.core.common.MyPreferences
 import com.barryzeha.core.common.ScopedViewModel
 import com.barryzeha.core.common.SingleMutableLiveData
+import com.barryzeha.core.common.deleteAutoScanFiles
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.scanSong
 import com.barryzeha.core.model.entities.MusicState
@@ -20,7 +22,6 @@ import com.barryzeha.ktmusicplayer.MyApp
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
 import com.barryzeha.ktmusicplayer.view.ui.fragments.playerControls.PlaybackControlsFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -126,6 +127,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var _controlsFragmentInstance:MutableLiveData<PlaybackControlsFragment> = MutableLiveData()
     val controlsFragmentInstance:LiveData<PlaybackControlsFragment> = _controlsFragmentInstance
 
+    private var _isReloadingLibrary: SingleMutableLiveData<Boolean> = SingleMutableLiveData()
+    val reloadingLibrary:LiveData<Boolean> = _isReloadingLibrary
+    
     init{
         initScope()
         launch(Dispatchers.IO) {
@@ -184,7 +188,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 }
         }
     }
-
     fun saveSongState(songState: SongState){
         launch {
              repository.saveSongState(songState)
@@ -248,6 +251,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
         launch {
             _deleteAllRows.value = repository.deleteAllSongs()
             repository.deleteAllSongsState()
+            deleteAutoScanFiles(MyApp.context)
         }
     }
     fun getSongById(idSong:Long){
@@ -355,8 +359,11 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
         }
     }
     // Auto escaneo de pistas de audio
-    private fun autoScanSongs() {
+    fun autoScanSongs() {
         launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main){
+                _isReloadingLibrary.value = true
+            }
             val songList = repository.fetchAllSongs()
             scanSong(MyApp.context, mPrefs, songList) { scanResult ->
                 if (scanResult.deletedSongPaths.isNotEmpty()) {
@@ -368,11 +375,18 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 val hasChanges = scanResult.deletedSongPaths.isNotEmpty() ||
                         scanResult.newSongs.isNotEmpty()
                 if (hasChanges) {
+                    // Todo cambiar la preferencia y propiedad mPrefs.isPopulateServicePlaylist como verdadero
+                    // para volver a llenar la lista en el servicio
+                    mPrefs.isAutoScanAudioEnabled = true
                     fetchAllSong()
+                }
+                withContext(Dispatchers.Main) {
+                    _isReloadingLibrary.value = false
                 }
             }
         }
     }
+
         // Recargar la información de la pista
         fun reloadSongInfo() {
             launch {
@@ -400,7 +414,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 mPrefs.playOrPauseFromNotify = false
             }
         }
-
         // Guardar el estado de la pista actual
         fun saveCurrentStateSong(currentMusicState: MusicState) {
             if (currentMusicState.idSong > 0 && mPrefs.idSong > 0) {

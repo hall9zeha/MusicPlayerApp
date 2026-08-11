@@ -179,6 +179,10 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     }
 
     private fun setUpObservers() {
+        mainViewModel.reloadingLibrary.observe(viewLifecycleOwner){isReloading->
+            if(isReloading)bind?.pbLoad?.visibility = View.VISIBLE
+            else bind?.pbLoad?.visibility = View.GONE
+        }
         mainViewModel.controlsFragmentInstance.observe(viewLifecycleOwner){instance->
             playbackControlsFragment = instance
         }
@@ -204,8 +208,17 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             sortPlayList(
                 mPrefs.playListSortOption, songList
             ) { result ->
-                // We fill the list of mediaitems when we select a filter
+                // We fill the list of media items when we select a filter
                 if (mPrefs.isPopulateServicePlaylist) musicPlayerService?.populatePlayList(songList)
+
+                // Testing autoscan song start
+                if(mPrefs.isAutoScanAudioEnabled){
+                    musicPlayerService?.clearPlayList(true)
+                    musicPlayerService?.populatePlayList(songList)
+                    mPrefs.isAutoScanAudioEnabled = false
+                }
+                // Testing autoscan song end
+
                 // ************
                 musicListAdapter?.addAll(result)
                 bind?.rvSongs?.post {
@@ -287,7 +300,7 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             }
         }
         mainViewModel.playlistName.observe(viewLifecycleOwner){name->
-            bind?.tvPlayListName?.text = name
+            bind?.playlistToolbar?.title=name
         }
     }
     private fun setUpPlayListName() = with(bind) {
@@ -343,6 +356,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                         true
                     }
                     coreRes.id.reload->{
+                        mPrefs.isAutoScanAudioEnabled=true
+                        mainViewModel.autoScanSongs()
                         true
                     }
                     else-> false
@@ -354,12 +369,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             playlistToolbar?.setOnTitleClickListener{
                 PlaylistDialogFragment().show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
             }
-           /* tvPlayListName.setOnClickListener {
-                PlaylistDialogFragment().show(parentFragmentManager,PlaylistDialogFragment::class.simpleName)
-            }
-            btnMenu?.setOnClickListener {
-                (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
-            }*/
             btnAdd.setOnClickListener {
                 checkPermissions(
                     requireContext(),
@@ -427,9 +436,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     visibleOrGoneBottomActions(false)
                 }
             }
-           /* btnFilter.setOnClickListener {
-                OrderByDialog().show(parentFragmentManager, OrderByDialog::class.simpleName)
-            }*/
             btnDelete?.setOnClickListener {
                 val listForDeleted = musicListAdapter?.getListItemsForDelete()?.toList()
                 removeSongState()
@@ -439,9 +445,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     musicListAdapter?.removeItemsForMultipleSelectedAction()
                 }
             }
-           /* btnMainEq.setOnClickListener {
-                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
-            }*/
             btnMore.setOnClickListener { view ->
                 onMenuItemPopup(ON_MINI_PLAYER_MENU, requireActivity(), mPrefs,view, {
                     // Delete item callback

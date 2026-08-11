@@ -628,6 +628,16 @@ suspend fun loadSongPaths(context:Context):List<String> = withContext(Dispatcher
     val songPaths = Json.decodeFromString<SongPaths>(json)
     return@withContext songPaths.paths
 }
+suspend fun deleteAutoScanFiles(context:Context) = withContext(Dispatchers.IO){
+    val libraryFile = File(context.filesDir, LIBRARY_PATH_FILE)
+    if (libraryFile.exists()) {
+        libraryFile.delete()
+    }
+    val songPathsFile = File(context.filesDir, SONG_PATHS_FILE)
+    if (songPathsFile.exists()) {
+        songPathsFile.delete()
+    }
+}
 suspend fun readJsonFile(context: Context, fileName: String): String? = withContext(Dispatchers.IO) {
     return@withContext try {
         val file = File(context.filesDir, fileName)
