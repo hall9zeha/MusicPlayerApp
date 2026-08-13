@@ -523,6 +523,9 @@ fun verifyAudioFile(fileName: String): Boolean {
 // start auto track scan region
 suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<SongEntity>,  onScanResult: suspend (ScanResult)->Unit ) = withContext(Dispatchers.IO){
     var libraryPaths = loadLibraryPaths(context)
+    libraryPaths.forEach { lib->
+        Log.e("LIBRARY_PATHS_CURRENT", "path: $lib")
+    }
     val songPathsSaved = loadSongPaths(context)
     val scannedSongs = mutableListOf<SongEntity>()
     val previousSongPaths = songPathsSaved.toSet()
@@ -538,7 +541,9 @@ suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<S
     })
     val result = compareSongPaths(currentSongPaths, previousSongPaths, scannedSongs)
     onScanResult(result)
-    // Para las pistas eliminadas solo usaremos los paths de deleteSongPaths
+    // Testing
+    removeSongPaths(context,result.deletedSongPaths)
+
 }
 fun compareSongPaths(currentSongPaths:Set<String>, previousSongPaths:Set<String>, scannedSongs:List<SongEntity>):ScanResult{
 
@@ -549,6 +554,15 @@ fun compareSongPaths(currentSongPaths:Set<String>, previousSongPaths:Set<String>
         it.pathLocation in newSongPaths
     }
     return ScanResult(newSongs,deletedSongPaths.toList())
+}
+suspend fun removeSongPaths(context: Context, pathsToRemove:List<String>) = withContext(Dispatchers.IO){
+    val songPathsSaved = loadSongPaths(context)
+    if(songPathsSaved.isEmpty())return@withContext
+    val updatedSongPaths = songPathsSaved.filterNot { it in pathsToRemove }
+    val json = Json.encodeToString(SongPaths(updatedSongPaths))
+    context.openFileOutput(SONG_PATHS_FILE, Context.MODE_PRIVATE).use {
+        it.write(json.toByteArray())
+    }
 }
 suspend fun reconstructLibraryPaths(songPaths:List<String>):List<String> = withContext(Dispatchers.IO){
     val libraryPaths = mutableSetOf<String>()
@@ -588,10 +602,10 @@ suspend fun reconstructLibraryPaths(songPaths:List<String>):List<String> = withC
 suspend fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>)= withContext(Dispatchers.IO){
         val libraryPaths = mutableListOf<String>()
         val loadedPaths = loadLibraryPaths(context)
-        Log.e("PATHS_LOADED", "loaded paths: ${loadedPaths.size}")
+        Log.e("PATHS_LOADED_PREVIOUS", "loaded paths: ${loadedPaths.size}")
         libraryPaths.addAll(loadedPaths)
         selectedLibraryPaths.forEach { path ->
-            Log.e("PATHS_LOADED_PATH", "foreach path: $path")
+            Log.e("PATHS_LOADED_SELECTED", "foreach path: $path")
             if (path !in libraryPaths) {
                 libraryPaths.add(path)
             }

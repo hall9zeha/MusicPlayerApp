@@ -2,6 +2,7 @@ package com.barryzeha.ktmusicplayer.view.viewmodel
 
 import android.content.Context
 import android.content.ServiceConnection
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
@@ -374,6 +375,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 }
                 val hasChanges = scanResult.deletedSongPaths.isNotEmpty() ||
                         scanResult.newSongs.isNotEmpty()
+                Log.e("HAS_CHANGES_AUTO_SCAN", "hasChanges=$hasChanges")
                 if (hasChanges) {
                     // Todo cambiar la preferencia y propiedad mPrefs.isPopulateServicePlaylist como verdadero
                     // para volver a llenar la lista en el servicio
