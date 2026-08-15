@@ -541,7 +541,7 @@ suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<S
     })
     val result = compareSongPaths(currentSongPaths, previousSongPaths, scannedSongs)
     onScanResult(result)
-    // Testing
+    // remove song paths what are not in current scan result
     removeSongPaths(context,result.deletedSongPaths)
 
 }
@@ -554,15 +554,6 @@ fun compareSongPaths(currentSongPaths:Set<String>, previousSongPaths:Set<String>
         it.pathLocation in newSongPaths
     }
     return ScanResult(newSongs,deletedSongPaths.toList())
-}
-suspend fun removeSongPaths(context: Context, pathsToRemove:List<String>) = withContext(Dispatchers.IO){
-    val songPathsSaved = loadSongPaths(context)
-    if(songPathsSaved.isEmpty())return@withContext
-    val updatedSongPaths = songPathsSaved.filterNot { it in pathsToRemove }
-    val json = Json.encodeToString(SongPaths(updatedSongPaths))
-    context.openFileOutput(SONG_PATHS_FILE, Context.MODE_PRIVATE).use {
-        it.write(json.toByteArray())
-    }
 }
 suspend fun reconstructLibraryPaths(songPaths:List<String>):List<String> = withContext(Dispatchers.IO){
     val libraryPaths = mutableSetOf<String>()
@@ -632,6 +623,15 @@ suspend fun saveSongPaths(context:Context,songPathsScanned:List<String>,newSongs
     }
     newSongsFound(newSongPaths)
 }
+suspend fun removeSongPaths(context: Context, pathsToRemove:List<String>) = withContext(Dispatchers.IO){
+    val songPathsSaved = loadSongPaths(context)
+    if(songPathsSaved.isEmpty())return@withContext
+    val updatedSongPaths = songPathsSaved.filterNot { it in pathsToRemove }
+    val json = Json.encodeToString(SongPaths(updatedSongPaths))
+    context.openFileOutput(SONG_PATHS_FILE, Context.MODE_PRIVATE).use {
+        it.write(json.toByteArray())
+    }
+}
 suspend fun loadLibraryPaths(context:Context):List<String> = withContext(Dispatchers.IO){
     val json = readJsonFile(context, LIBRARY_PATH_FILE) ?: return@withContext emptyList()
     val libraryPaths =  Json.decodeFromString<LibraryPaths>(json)
@@ -664,7 +664,6 @@ suspend fun readJsonFile(context: Context, fileName: String): String? = withCont
         e.printStackTrace()
         null
     }
-
 }
 fun getParentDirectories(path: String): String {
 
@@ -678,10 +677,8 @@ fun getParentDirectories(path: String): String {
             if (pathParts.size >= 2) {
                 val lastDir=pathParts[pathParts.size -2]
                 val beforeLastDir = pathParts[pathParts.size-3]
-                Log.e("PARENT-NAME->", "$beforeLastDir/$lastDir")
                 return  "$beforeLastDir/$lastDir"
             }else{
-                Log.e("PARENT-NAME->",pathParts[pathParts.size -2] )
                 return parentDir
             }
         }else{
