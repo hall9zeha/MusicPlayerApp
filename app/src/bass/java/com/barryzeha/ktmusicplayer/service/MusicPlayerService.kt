@@ -131,6 +131,8 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     private lateinit var audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
     // true ONLY if playback was paused due to audio focus loss
     private var pausedByAudioFocusHandling:Boolean=false
+    // Main handler notification
+    private val notificationHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate() {
         super.onCreate()
@@ -333,6 +335,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
         initNotify()
         startLoop()
     }
+
     // Funciona con las últimas versiones de Android a partir de Android 10
     private fun mediaSessionCallback():MediaSession.Callback{
         return object:MediaSession.Callback(){
@@ -573,50 +576,53 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     // dentro de la función initExoplayer()
     @SuppressLint("ForegroundServiceType")
     private fun updateNotify(progress: Long? = null) {
-        currentMusicState?.let { newState ->
-            val updatePlaybackState = playBackState?.let {
-                PlaybackState.Builder(it)
-                    .setState(
-                        if (playingState()) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
-                        progress ?: bassManager?.getCurrentPositionInSeconds()!!,
-                        1f
+        val musicStateSnapshot = currentMusicState.copy()
+        notificationHandler.post {
+            musicStateSnapshot?.let { newState ->
+                val updatePlaybackState = playBackState?.let {
+                    PlaybackState.Builder(it)
+                        .setState(
+                            if (playingState()) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED,
+                            progress ?: bassManager?.getCurrentPositionInSeconds()!!,
+                            1f
+                        )
+                        .build()
+                }
+                // Actualizamos el progreso y estado de reproducción de la canción
+                mediaSession.setPlaybackState(updatePlaybackState)
+
+                // Actualizamos la información que se muestra de la canción
+                val updateMediaMetadata = MediaMetadata.Builder()
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
+                    .putBitmap(
+                        MediaMetadata.METADATA_KEY_ALBUM_ART,
+                        getBitmap(this, newState.songPath, isForNotify = true)
                     )
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
                     .build()
-            }
-            // Actualizamos el progreso y estado de reproducción de la canción
-            mediaSession.setPlaybackState(updatePlaybackState)
 
-            // Actualizamos la información que se muestra de la canción
-            val updateMediaMetadata = MediaMetadata.Builder()
-                .putString(MediaMetadata.METADATA_KEY_TITLE, newState.title)
-                .putString(MediaMetadata.METADATA_KEY_ALBUM, newState.album)
-                .putString(MediaMetadata.METADATA_KEY_ARTIST, newState.artist)
-                .putBitmap(
-                    MediaMetadata.METADATA_KEY_ALBUM_ART,
-                    getBitmap(this, newState.songPath, isForNotify = true)
-                )
-                .putLong(MediaMetadata.METADATA_KEY_DURATION, newState.duration)
-                .build()
+                // Para android >=10 y legados, actualizamos la metadata de la sesión para que se actualice el contenido de la notificación
+                mediaSession.setMetadata(updateMediaMetadata)
+                // Reemplazamos temporalmente el nuevo id para la comparación
+                idSong = newState.idSong
 
-            // Para android >=10 y legados, actualizamos la metadata de la sesión para que se actualice el contenido de la notificación
-            mediaSession.setMetadata(updateMediaMetadata)
-            // Reemplazamos temporalmente el nuevo id para la comparación
-            idSong = newState.idSong
-
-            // Para android legado actualizamos la notificación completa porque en algunos casos no se actualiza el contenido de la notificación solo con actualizar la metadata de la sesión
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                mediaPlayerNotify = notificationMediaPlayer(
-                    this,
-                    MediaStyle()
-                        .setMediaSession(mediaSession.sessionToken)
-                        .setShowActionsInCompactView(0, 1, 2),
-                    currentMusicState
+                // Para android legado actualizamos la notificación completa porque en algunos casos no se actualiza el contenido de la notificación solo con actualizar la metadata de la sesión
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                    mediaPlayerNotify = notificationMediaPlayer(
+                        this,
+                        MediaStyle()
+                            .setMediaSession(mediaSession.sessionToken)
+                            .setShowActionsInCompactView(0, 1, 2),
+                        currentMusicState
+                    )
+                }
+                notificationManager.notify(
+                    NOTIFICATION_ID,
+                    mediaPlayerNotify
                 )
             }
-            notificationManager.notify(
-                NOTIFICATION_ID,
-                mediaPlayerNotify
-            )
         }
     }
    private fun findItemSongIndexById(idSong:Long):Int?{

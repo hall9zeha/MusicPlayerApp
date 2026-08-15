@@ -42,7 +42,7 @@ class BassManager {
     private var mainChannel:Int?=0
     private var abSyncHandle: Int = 0
     private var abLoopEnabled=false
-    // Own threads for test
+    //
     private var playbackThread: HandlerThread? = null
     private var playbackHandler: Handler? = null
 
