@@ -210,15 +210,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
             ) { result ->
                 // We fill the list of media items when we select a filter
                 if (mPrefs.isPopulateServicePlaylist) musicPlayerService?.populatePlayList(songList)
-
-                // Testing autoscan song start
-                if(mPrefs.isAutoScanAudioEnabled){
-                    musicPlayerService?.clearPlayList(true)
-                    musicPlayerService?.populatePlayList(songList)
-                    mPrefs.isAutoScanAudioEnabled = false
-                }
-                // Testing autoscan song end
-
                 // ************
                 musicListAdapter?.addAll(result)
                 bind?.rvSongs?.post {
@@ -231,6 +222,15 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                 bind?.pbLoad?.visibility = View.GONE
                 bind?.pbLoad?.isIndeterminate = true
             }
+        }
+        mainViewModel.updateSongs.observe(viewLifecycleOwner){scanResult->
+            // Testing autoscan song start
+            if(mPrefs.isAutoScanAudioEnabled){
+                musicPlayerService?.updatePlaylistSongs(scanResult)
+                mPrefs.isAutoScanAudioEnabled = false
+            }
+            // Testing autoscan song end
+
         }
         mainViewModel.orderBySelection.observe(viewLifecycleOwner) { selectedSort ->
             musicListAdapter?.removeAll()

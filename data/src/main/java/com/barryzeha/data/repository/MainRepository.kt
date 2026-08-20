@@ -25,6 +25,7 @@ interface MainRepository {
     suspend fun fetchSongsByAlbum(album:String):List<SongEntity>
     suspend fun fetchAllFavorites():List<SongEntity>
     suspend fun fetchSongById(idSong:Long): SongEntity
+    suspend fun fetchSongByPaths(paths:List<String>):List<SongEntity>
     suspend fun saveNewSong(song: SongEntity):Long
     suspend fun saveSongs(songList:List<SongEntity>):LongArray
     suspend fun updateSong(song:SongEntity):Int

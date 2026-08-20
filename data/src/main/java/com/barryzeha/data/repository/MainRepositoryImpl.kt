@@ -50,6 +50,10 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
        else SongEntity()
     }
 
+    override suspend fun fetchSongByPaths(paths: List<String>): List<SongEntity> = withContext(Dispatchers.IO) {
+        songDao.fetchSongByPaths(paths)
+    }
+
     override suspend fun fetchSongsByAlbum(album: String): List<SongEntity> = withContext(Dispatchers.IO){
         songDao.fetchSongsByAlbum(album)
     }

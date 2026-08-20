@@ -50,6 +50,7 @@ import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.ScanResult
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -687,6 +688,14 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             }
         }
         mPrefs.isPopulateServicePlaylist = false
+    }
+    fun updatePlaylistSongs(scanResult: ScanResult){
+        serviceScope.launch(Dispatchers.IO) {
+            mainSongsList.removeAll{
+                it.pathLocation in scanResult.deletedSongPaths
+            }
+            mainSongsList.addAll(scanResult.newSongs)
+        }
     }
     fun clearPlayList(isSort:Boolean){
         mainSongsList.clear()

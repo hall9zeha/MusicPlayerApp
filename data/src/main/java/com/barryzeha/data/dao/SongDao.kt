@@ -45,7 +45,9 @@ interface  SongDao {
     @Transaction
     @Query("select * from SongEntity where id = :idSong")
     suspend fun fetchSongById(idSong:Long): SongEntity
-
+    @Transaction
+    @Query("select * from SongEntity where pathLocation in (:paths)")
+    suspend fun fetchSongByPaths(paths:List<String>):List<SongEntity>
     @Transaction
     @Query("select * from SongEntity where album=:albumName")
     suspend fun fetchSongsByAlbum(albumName:String):List<SongEntity>

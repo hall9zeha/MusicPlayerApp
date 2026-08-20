@@ -15,6 +15,7 @@ import com.barryzeha.core.common.scanSong
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.PlaylistWithSongsCrossRef
+import com.barryzeha.core.model.entities.ScanResult
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongState
 import com.barryzeha.core.model.entities.SongStateWithDetail
@@ -52,6 +53,9 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
 
     private var _allSongs:MutableLiveData<List<SongEntity>> = MutableLiveData()
     val allSongs:LiveData<List<SongEntity>> = _allSongs
+
+    private var _updateSongs: MutableLiveData<ScanResult> = MutableLiveData()
+    val updateSongs: LiveData<ScanResult> = _updateSongs
 
     private var _songState:MutableLiveData<List<SongStateWithDetail>> = MutableLiveData()
     val songState:LiveData<List<SongStateWithDetail>> = _songState
@@ -366,20 +370,24 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 _isReloadingLibrary.value = true
             }
             val songList = repository.fetchAllSongs()
+            var newSongWithId = emptyList<SongEntity>()
             scanSong(MyApp.context, mPrefs, songList) { scanResult ->
                 if (scanResult.deletedSongPaths.isNotEmpty()) {
                     repository.deleteSongsByPath(scanResult.deletedSongPaths)
                 }
                 if (scanResult.newSongs.isNotEmpty()) {
                     repository.saveSongs(scanResult.newSongs)
+                    newSongWithId = repository.fetchSongByPaths(scanResult.newSongs.mapNotNull { it.pathLocation })
                 }
-                val hasChanges = scanResult.deletedSongPaths.isNotEmpty() ||
-                        scanResult.newSongs.isNotEmpty()
+                val hasChanges = scanResult.deletedSongPaths.isNotEmpty() || scanResult.newSongs.isNotEmpty()
                 Log.e("HAS_CHANGES_AUTO_SCAN", "hasChanges=$hasChanges")
                 if (hasChanges) {
                     // Todo cambiar la preferencia y propiedad mPrefs.isPopulateServicePlaylist como verdadero
                     // para volver a llenar la lista en el servicio
                     mPrefs.isAutoScanAudioEnabled = true
+                    withContext(Dispatchers.Main) {
+                        _updateSongs.value = ScanResult(newSongWithId,scanResult.deletedSongPaths)
+                    }
                     fetchAllSong()
                 }
                 withContext(Dispatchers.Main) {
