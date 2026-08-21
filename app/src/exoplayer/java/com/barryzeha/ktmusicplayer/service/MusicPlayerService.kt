@@ -53,6 +53,7 @@ import com.barryzeha.core.common.showSnackBar
 import com.barryzeha.core.model.ServiceSongListener
 import com.barryzeha.core.model.SongAction
 import com.barryzeha.core.model.entities.MusicState
+import com.barryzeha.core.model.entities.ScanResult
 import com.barryzeha.core.model.entities.SongEntity
 import com.barryzeha.core.model.entities.SongMode
 import com.barryzeha.core.model.entities.SongState
@@ -911,6 +912,29 @@ class MusicPlayerService : Service(){
             }
         }
         mPrefs.isPopulateServicePlaylist=false
+    }
+    fun updatePlaylistSongs(scanResult: ScanResult){
+        serviceScope.launch(Dispatchers.IO) {
+            val songsToRemove = songsList.filter {
+                it.pathLocation in scanResult.deletedSongPaths
+            }
+            val idsToRemove = songsToRemove
+                .map { it.id.toString() }
+                .toSet()
+
+            songsList.removeAll {
+                it.pathLocation in scanResult.deletedSongPaths
+            }
+
+            mainMediaItemList.removeAll {mediaItem->
+                mediaItem.mediaId in idsToRemove
+            }
+
+            songsList.addAll(scanResult.newSongs)
+            mainMediaItemList.addAll(
+                scanResult.newSongs.map { it.convertToMediaItem() }
+            )
+        }
     }
     // Ya que el fragmento de lista no es diferente para cada versión, en bass flavor se implementa clearPlayList
     // con el parámetro (isSort), pero en la versión de exoplayer no, aún así debemos ponerlo porque el fragmento de lista
