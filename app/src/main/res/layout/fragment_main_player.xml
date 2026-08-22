@@ -18,40 +18,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnMainMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:insetTop="0dp"
-        android:insetRight="0dp"
-        android:insetLeft="0dp"
-        android:insetBottom="0dp"
-        app:iconSize="24dp"
-        app:iconPadding="0dp"
-        app:iconTint="@color/controls_colors"
-        style="@style/Widget.Material3.Button.IconButton"
-        app:icon="@drawable/ic_menu"
-        app:iconGravity="textStart"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/mainPlayerToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="8dp"/>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnMainEq"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:insetTop="0dp"
-        android:insetRight="0dp"
-        android:insetLeft="0dp"
-        android:insetBottom="0dp"
-        app:iconSize="24dp"
-        app:iconPadding="0dp"
-        app:iconTint="@color/controls_colors"
-        style="@style/Widget.Material3.Button.IconButton"
-        app:icon="@drawable/ic_tune"
-        app:iconGravity="textStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginEnd="8dp"/>
+        app:navigationIcon="@drawable/ic_menu"
+        app:menu="@menu/player_toolbar_menu"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/ToolbarTitleStyle"
+        />
 
     <LinearLayout
         android:id="@+id/contentCover"

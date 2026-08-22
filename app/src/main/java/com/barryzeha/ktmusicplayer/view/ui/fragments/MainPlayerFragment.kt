@@ -352,6 +352,19 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     private fun setUpListeners()=with(bind){
         this?.let {
             checkCoverViewStyle()
+            mainPlayerToolbar.setNavigationOnClickListener {
+                (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
+            }
+            mainPlayerToolbar.setOnMenuItemClickListener { menuItem->
+                when(menuItem.itemId){
+                    coreRes.id.equalizer->{
+                        launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
+                        true
+                    }
+                    else->false
+                }
+
+            }
             btnLyric?.setOnClickListener{
                 lrcView?.let {
                     if (!coverViewClicked) {
@@ -397,10 +410,6 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 showLyricView(false)
                 setAlbumCoverViewAnimator(if(discCoverViewIsEnable())ivDiscMusicCover else cardCoverView,lrcView)
                 coverViewClicked=false
-            }
-
-            btnMainMenu?.setOnClickListener {
-                (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }
             btnMainPlay.setOnClickListener {
                 if (musicPlayerService?.getSongsList()?.size!! > 0) {
@@ -539,9 +548,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
                 mPrefs.songMode = AB_LOOP
                 checkPlayerSongModePreferences()
             }
-            btnMainEq?.setOnClickListener{
-                launcherAudioEffectActivity.launch(musicPlayerService?.getSessionOrChannelId()!!)
-            }
+
             btnInfo.setOnClickListener{
                 SongInfoDialogFragment.newInstance(
                     SongEntity(
