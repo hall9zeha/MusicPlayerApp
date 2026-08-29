@@ -46,7 +46,7 @@ class MainRepositoryImpl @Inject constructor(db: SongDatabase,val prefs:MyPrefer
     }
 
     override suspend fun fetchSongById(idSong: Long): SongEntity = withContext(Dispatchers.IO){
-       if(idSong>0)songDao.fetchSongById(idSong)
+       if(idSong>0)songDao.fetchSongById(idSong)?: SongEntity()
        else SongEntity()
     }
 

@@ -528,10 +528,11 @@ suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<S
     }
     val songPathsSaved = loadSongPaths(context)
     val scannedSongs = mutableListOf<SongEntity>()
-    val previousSongPaths = songPathsSaved.toSet()
+    var previousSongPaths = songPathsSaved.toSet()
     var currentSongPaths = setOf<String>()
     if(libraryPaths.isEmpty() && songList.isNotEmpty()){
-        val songListPaths = songList.map { it.pathLocation!! }
+        val songListPaths = songList.mapNotNull { it.pathLocation }
+        previousSongPaths = songListPaths.toSet()
         libraryPaths = reconstructLibraryPaths(songListPaths)
     }
     scanAudioFiles(context,preferences,libraryPaths,{},{(songs, songPaths)->
