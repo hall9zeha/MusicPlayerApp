@@ -382,8 +382,6 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
                 val hasChanges = scanResult.deletedSongPaths.isNotEmpty() || scanResult.newSongs.isNotEmpty()
                 Log.e("HAS_CHANGES_AUTO_SCAN", "hasChanges=$hasChanges")
                 if (hasChanges) {
-                    // Todo cambiar la preferencia y propiedad mPrefs.isPopulateServicePlaylist como verdadero
-                    // para volver a llenar la lista en el servicio
                     mPrefs.isAutoScanAudioEnabled = true
                     withContext(Dispatchers.Main) {
                         _updateSongs.value = ScanResult(newSongWithId,scanResult.deletedSongPaths)

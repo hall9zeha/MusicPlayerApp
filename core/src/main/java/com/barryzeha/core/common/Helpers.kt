@@ -523,9 +523,6 @@ fun verifyAudioFile(fileName: String): Boolean {
 // start auto track scan region
 suspend fun scanSong(context:Context, preferences: MyPreferences,songList:List<SongEntity>,  onScanResult: suspend (ScanResult)->Unit ) = withContext(Dispatchers.IO){
     var libraryPaths = loadLibraryPaths(context)
-    libraryPaths.forEach { lib->
-        Log.e("LIBRARY_PATHS_CURRENT", "path: $lib")
-    }
     val songPathsSaved = loadSongPaths(context)
     val scannedSongs = mutableListOf<SongEntity>()
     var previousSongPaths = songPathsSaved.toSet()
