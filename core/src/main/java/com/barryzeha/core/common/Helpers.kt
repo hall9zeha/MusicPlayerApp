@@ -547,7 +547,7 @@ fun compareSongPaths(currentSongPaths:Set<String>, previousSongPaths:Set<String>
 
     val newSongPaths = currentSongPaths - previousSongPaths
     val deletedSongPaths = previousSongPaths - currentSongPaths
-    // Nuevas pistas encontradas
+    // New songs found
     val newSongs = scannedSongs.filter{
         it.pathLocation in newSongPaths
     }
@@ -591,10 +591,8 @@ suspend fun reconstructLibraryPaths(songPaths:List<String>):List<String> = withC
 suspend fun saveSelectedPaths(context:Context,selectedLibraryPaths:List<String>)= withContext(Dispatchers.IO){
         val libraryPaths = mutableListOf<String>()
         val loadedPaths = loadLibraryPaths(context)
-        Log.e("PATHS_LOADED_PREVIOUS", "loaded paths: ${loadedPaths.size}")
         libraryPaths.addAll(loadedPaths)
         selectedLibraryPaths.forEach { path ->
-            Log.e("PATHS_LOADED_SELECTED", "foreach path: $path")
             if (path !in libraryPaths) {
                 libraryPaths.add(path)
             }
