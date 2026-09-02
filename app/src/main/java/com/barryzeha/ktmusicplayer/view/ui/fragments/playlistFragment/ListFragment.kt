@@ -628,6 +628,9 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
     override fun onResume() {
         super.onResume()
         setNumberOfTrack()
+        val reloadingPlaylist = mainViewModel.reloadingLibrary.value?:false
+        bind?.pbLoad?.visibility = if(reloadingPlaylist) View.VISIBLE else View.GONE
+
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         mainViewModel.reloadSongInfo()
         mPrefs.saveFragmentOfNav = LIST_FRAGMENT

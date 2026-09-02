@@ -132,7 +132,7 @@ class MainViewModel @Inject constructor(private val repository:MainRepository, p
     private var _controlsFragmentInstance:MutableLiveData<PlaybackControlsFragment> = MutableLiveData()
     val controlsFragmentInstance:LiveData<PlaybackControlsFragment> = _controlsFragmentInstance
 
-    private var _isReloadingLibrary: SingleMutableLiveData<Boolean> = SingleMutableLiveData()
+    private var _isReloadingLibrary: MutableLiveData<Boolean> = MutableLiveData()
     val reloadingLibrary:LiveData<Boolean> = _isReloadingLibrary
     
     init{

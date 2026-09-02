@@ -15,5 +15,4 @@ plugins {
     alias(libs.plugins.dagger.hilt.plugin) apply false
     alias(libs.plugins.parcelize) apply false
     alias(libs.plugins.safeargs.plugin) apply false
-    //alias(libs.plugins.kotlin.serialization) apply false
 }
