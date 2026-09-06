@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,17 +23,17 @@ import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.getThemeResValue
 import com.barryzeha.core.common.keepScreenOn
 import com.barryzeha.core.common.loadImage
+import com.barryzeha.core.common.processSongPaths
 import com.barryzeha.core.common.saveSelectedPaths
 import com.barryzeha.core.common.saveSongPaths
+import com.barryzeha.core.common.setOnTitleClickListener
 import com.barryzeha.core.common.shareSong
 import com.barryzeha.core.common.showOrHideKeyboard
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
 import com.barryzeha.core.model.entities.PlaylistEntity
 import com.barryzeha.core.model.entities.SongEntity
-import com.barryzeha.core.common.*
 import com.barryzeha.ktmusicplayer.R
-import com.barryzeha.core.R as coreRes
 import com.barryzeha.ktmusicplayer.common.LIST_FRAGMENT
 import com.barryzeha.ktmusicplayer.common.ON_MENU_ITEM
 import com.barryzeha.ktmusicplayer.common.ON_MINI_PLAYER_MENU
@@ -43,7 +42,6 @@ import com.barryzeha.ktmusicplayer.common.createNewPlayListDialog
 import com.barryzeha.ktmusicplayer.common.getPlayListName
 import com.barryzeha.ktmusicplayer.common.onMenuActionAddPopup
 import com.barryzeha.ktmusicplayer.common.onMenuItemPopup
-import com.barryzeha.ktmusicplayer.common.processSongPaths
 import com.barryzeha.ktmusicplayer.common.sortPlayList
 import com.barryzeha.ktmusicplayer.databinding.FragmentPlaylistBinding
 import com.barryzeha.ktmusicplayer.service.MusicPlayerService
@@ -61,6 +59,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.barryzeha.core.R as coreRes
 
 
 /**
@@ -639,7 +638,6 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
         mainViewModel.saveCurrentStateSong(currentMusicState)
         super.onStop()
     }
-
     companion object {
         var instance: ListFragment? = null
         @SuppressLint("StaticFieldLeak")

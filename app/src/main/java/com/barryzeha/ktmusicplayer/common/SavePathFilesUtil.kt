@@ -38,12 +38,6 @@ fun processSongPaths(
                 countAudioFile(File(path))
             }
             itemsCount(audioFileCount)
-
-            // Enqueue files from all directories
-            /*paths.forEach { path ->
-                enqueueFiles(File(path),fileProcessed)
-            }*/
-            // Testing the new function to scan audio files and return their paths
             scanAudioFiles(paths,fileProcessed){}
         } finally {
 
