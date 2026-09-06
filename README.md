@@ -22,6 +22,7 @@ Versión con librería Bass [Descargar](https://github.com/hall9zeha/MusicPlayer
 ## :memo: Características
 
 - Selector de archivos
+- Escaneo automático de pistas para los directorios de la biblioteca seleccionados después de la selección manual inicial de los directorios.
 - Ecualizador de 10 bandas y control de volúmen (en la versión con BASS)
 - Soporte para Hi-Res DFS audio en la versión con BASS.
 - Ecualizador de 5 bandas (en la versión con MediaPlayer)

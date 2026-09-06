@@ -21,6 +21,7 @@ Version with Bass library [Descargar](https://github.com/hall9zeha/MusicPlayerAp
 ## :memo: Features
 
 - File selector
+- Automatic track scanning for selected library directories after the initial manual directory selection.
 - 10-band equalizer and volume control (in the BASS version)
 - Support for Hi-Res DFS audio in the BASS version.
 - 5-band equalizer (in the MediaPlayer version)
