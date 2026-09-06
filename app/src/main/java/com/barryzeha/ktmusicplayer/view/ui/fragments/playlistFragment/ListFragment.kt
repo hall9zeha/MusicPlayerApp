@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
@@ -28,6 +29,7 @@ import com.barryzeha.core.common.saveSelectedPaths
 import com.barryzeha.core.common.saveSongPaths
 import com.barryzeha.core.common.setOnTitleClickListener
 import com.barryzeha.core.common.shareSong
+import com.barryzeha.core.common.showMenuIcons
 import com.barryzeha.core.common.showOrHideKeyboard
 import com.barryzeha.core.common.startOrUpdateService
 import com.barryzeha.core.model.entities.MusicState
@@ -362,6 +364,8 @@ class ListFragment : BaseFragment(R.layout.fragment_playlist) {
                     else-> false
                 }
             }
+            playlistToolbar?.showMenuIcons()
+
             playlistToolbar?.setNavigationOnClickListener {
                 (activity as MainActivity).bind.mainDrawerLayout.openDrawer(GravityCompat.START)
             }

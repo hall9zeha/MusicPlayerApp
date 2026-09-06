@@ -1,5 +1,6 @@
 package com.barryzeha.core.common
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
@@ -25,6 +26,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.content.res.use
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
@@ -212,5 +214,17 @@ fun File.lastCreated():Long{
         attrs.creationTime().toMillis()
     }catch (e:Exception){
         this.lastModified()
+    }
+}
+@SuppressLint("RestrictedApi")
+fun MaterialToolbar.showMenuIcons() {
+    try {
+        menu.let {
+            if (it is MenuBuilder) {
+                it.setOptionalIconsVisible(true)
+            }
+        }
+    }catch(ex: Exception){
+        Log.e("TOOLBAR_POPUP_ICONS", ex.message.toString() )
     }
 }
