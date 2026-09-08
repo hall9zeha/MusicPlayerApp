@@ -147,6 +147,8 @@ class MusicListAdapter(private val onItemClick:(Int, SongEntity)->Unit ,
     }
     @SuppressLint("ResourceType")
     fun changeBackgroundColorSelectedItem(songId:Long,isFiltering:Boolean=false){
+        // We remove the background color of the last selected item
+        notifyItemChanged(lastSelectedPos, Color.TRANSPARENT)
         // We get the position of the item by its ID, since we have two types of views in the recyclerview we just have to change the color to SongEntity items
         val songItem = originalList.filterIsInstance<SongEntity>().find { songId == it.id }
         songItem?.let {
