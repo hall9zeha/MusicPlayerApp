@@ -252,6 +252,7 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
         val album = getTagField(FieldKey.ALBUM, "Unknown album")
         // Extract audio header data with default values
         val bitRate = try { metadata.audioHeader.bitRate } catch (ex: Exception) { "" }
+        val sampleRate = try {metadata.audioHeader.sampleRate}catch(ex:Exception){0}
         val songLength = try { (metadata.audioHeader.trackLength * 1000).toLong()} catch (ex: Exception) { 0L }
         val songLengthFormatted = try { getTimeOfSong(songLength) } catch (ex: Exception) { "0" }
 
@@ -260,6 +261,7 @@ fun fetchShortFileMetadata(context: Context,pathFile:String):AudioMetadata? {
             artist = artist,
             album = album,
             bitRate = normalizeBitrate(bitRate, format),
+            freq = normalizeSampleRate(sampleRate.toString(),format),
             songLengthFormatted = songLengthFormatted,
             songLength = songLength,
         )

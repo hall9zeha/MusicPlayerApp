@@ -25,6 +25,7 @@ import com.barryzeha.core.common.REPEAT_ALL
 import com.barryzeha.core.common.REPEAT_ONE
 import com.barryzeha.core.common.SHUFFLE
 import com.barryzeha.core.common.createTime
+import com.barryzeha.core.common.fetchShortFileMetadata
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getEmbeddedSyncedLyrics
 import com.barryzeha.core.common.getSongMetadata
@@ -230,7 +231,8 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
             tvAudioFormat.text = musicState.songPath.substringAfterLast(".").uppercase().toString()
             (ivDiscMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
             (ivMusicCover as ImageView).loadImage(albumArt!!,musicState.nextOrPrev)
-
+            val shortMetaData = fetchShortFileMetadata(requireContext(), musicState.songPath)
+            mainPlayerToolbar?.title = String.format("%s Kbps - %s Khz",shortMetaData?.bitRate.toString(),shortMetaData?.freq.toString())
             mainSeekBar.max = musicState.duration.toInt()
             tvSongTimeRest.text = createTime(musicState.currentDuration).third
             tvSongTimeCompleted.text = createTime(musicState.duration).third

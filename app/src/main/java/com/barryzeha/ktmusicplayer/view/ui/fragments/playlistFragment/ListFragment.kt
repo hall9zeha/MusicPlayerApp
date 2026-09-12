@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.barryzeha.audioeffects.ui.activities.MainEqualizerActivity
 import com.barryzeha.core.common.MAIN_FRAGMENT
 import com.barryzeha.core.common.checkPermissions
+import com.barryzeha.core.common.fetchShortFileMetadata
 import com.barryzeha.core.common.getBitmap
 import com.barryzeha.core.common.getSongMetadata
 import com.barryzeha.core.common.getThemeResValue

@@ -16,7 +16,7 @@
         app:navigationIcon="@drawable/ic_menu"
         app:menu="@menu/player_toolbar_menu"
         app:titleCentered="true"
-        app:titleTextAppearance="@style/ToolbarTitleStyle"
+        app:titleTextAppearance="@style/MainToolbarTitleStyle"
         />
     <LinearLayout
         android:id="@+id/contentCover"

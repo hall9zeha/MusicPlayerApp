@@ -94,6 +94,9 @@
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
     </style>
+    <style name="MainToolbarTitleStyle" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:textSize">12sp</item>
+    </style>
     <style name="myFullScreenDialog" parent="ShapeAppearanceOverlay.MaterialComponents.MaterialCalendar.Window.Fullscreen">
         <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
         <item name="android:theme">@style/myToolbarDrawerStyle</item>
