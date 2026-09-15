@@ -35,6 +35,7 @@ import org.jaudiotagger.audio.AudioFile
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import org.jaudiotagger.tag.id3.ID3v24Tag
+import org.jaudiotagger.tag.images.AndroidArtwork
 import org.jaudiotagger.tag.images.ArtworkFactory
 import java.io.File
 import java.io.FileInputStream
@@ -283,7 +284,7 @@ class SongInfoDialogFragment : DialogFragment() {
                     }
                     if (imagePath != null) {
                         tag.deleteArtworkField()
-                        val artwork = ArtworkFactory.createArtworkFromFile(File(imagePath!!))
+                        val artwork = AndroidArtwork.createArtworkFromFile(File(imagePath!!))
                         tag.setField(artwork)
 
                     }
