@@ -347,31 +347,7 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
                         // Para evitar el lanzamiento de los eventos dos veces cuando usamos dispositivos bluetooth
                         // usamos la condición if (event.action == KeyEvent.ACTION_UP)
                         if (event.action == KeyEvent.ACTION_UP) {
-                            when (it.keyCode) {
-                                KeyEvent.KEYCODE_MEDIA_PLAY -> {
-                                    if (_songController == null) {
-                                        play(null)
-                                        mPrefs.playOrPauseFromNotify = true
-                                    } else {
-                                        _songController?.play()
-                                    }
-                                }
-                                KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-                                    if (_songController == null) {
-                                        pausePlayer()
-                                        mPrefs.playOrPauseFromNotify = true
-                                    } else {
-                                        _songController?.pause()
-                                    }
-                                }
-                                KeyEvent.KEYCODE_MEDIA_NEXT -> {
-                                    nextOrPrevTrack(NEXT)
-                                }
-                                KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
-                                    nextOrPrevTrack(PREVIOUS)
-                                }
-                                else -> {}
-                            }
+                            handleMediaKeys(it.keyCode)
                         }
                     }
                 }
@@ -445,6 +421,13 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
     }
     // Funciona con versiones legadas de Android
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if(intent?.action == Intent.ACTION_MEDIA_BUTTON){
+            val event = intent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+            if(event?.action ==KeyEvent.ACTION_UP){
+                handleMediaKeys(event.keyCode)
+            }
+            return START_NOT_STICKY
+        }
         musicState = intent?.getParcelableExtra<MusicState>(MUSIC_STATE_EXTRA)
         if(songEntity.favorite !=musicState?.isFavorite ) initNotify()
         when (SongAction.values()[intent?.action?.toInt() ?: SongAction.Nothing.ordinal]) {
@@ -498,6 +481,33 @@ class MusicPlayerService : Service(), BassManager.PlaybackManager{
             SongAction.Nothing -> {}
         }
       return START_NOT_STICKY
+    }
+    private fun handleMediaKeys(keyCode:Int){
+        when (keyCode) {
+            KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                if (_songController == null) {
+                    play(null)
+                    mPrefs.playOrPauseFromNotify = true
+                } else {
+                    _songController?.play()
+                }
+            }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                if (_songController == null) {
+                    pausePlayer()
+                    mPrefs.playOrPauseFromNotify = true
+                } else {
+                    _songController?.pause()
+                }
+            }
+            KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                nextOrPrevTrack(NEXT)
+            }
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                nextOrPrevTrack(PREVIOUS)
+            }
+            else -> {}
+        }
     }
     private fun nextOrPrevTrack(action:Int){
             if(mainSongsList.isNotEmpty()) {
