@@ -641,6 +641,7 @@ class MainPlayerFragment : BaseFragment(R.layout.fragment_main_player),ListFragm
     override fun onResume() {
         super.onResume()
         setNumberOfTrack(mPrefs.idSong)
+        if(!coverViewClicked)checkCoverViewStyle()
         checkPlayerSongModePreferences()
         mainViewModel.checkIfIsFavorite(currentMusicState.idSong)
         mainViewModel.reloadSongInfo()
